@@ -19,6 +19,7 @@ import yfinance as yf
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs" / "data.json"
+HIST = ROOT / "docs" / "history.json"
 CONSTITUENTS_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 SECTOR_TH = {
     "Information Technology": "เทคโนโลยี", "Health Care": "สุขภาพ", "Financials": "การเงิน",
@@ -193,6 +194,39 @@ def usd_thb():
         return None
 
 
+def weekly_history(symbols):
+    """ราคาปิดรายสัปดาห์ย้อนหลัง 2 ปี ใช้วาดกราฟการเติบโตของพอร์ตในหน้าเว็บ"""
+    tick = {yahoo(s): s for s in symbols}
+    tick["SPY"] = "SPY"
+    cols = {}
+    names = list(tick)
+    for i in range(0, len(names), 100):
+        chunk = names[i:i + 100]
+        for attempt in range(3):
+            try:
+                df = yf.download(chunk, period="2y", interval="1wk", auto_adjust=False, progress=False, threads=True, group_by="column")
+                close = df["Close"] if isinstance(df.columns, pd.MultiIndex) else df[["Close"]].rename(columns={"Close": chunk[0]})
+                for t in chunk:
+                    if t in close and close[t].notna().sum() > 4:
+                        cols[t] = close[t]
+                break
+            except Exception as e:  # noqa: BLE001
+                log(f"ดึงราคารายสัปดาห์ชุด {i} ไม่สำเร็จ (ครั้งที่ {attempt + 1}):", e)
+                time.sleep(10)
+        time.sleep(2)
+    if "SPY" not in cols or len(cols) < 300:
+        log(f"ราคารายสัปดาห์ได้ {len(cols)} ตัว น้อยเกินไป ไม่เขียนทับ history.json")
+        return None
+    frame = pd.DataFrame(cols).sort_index()
+    frame = frame[~frame.index.duplicated(keep="last")]
+    fix = lambda v: None if pd.isna(v) else round(float(v), 2)  # noqa: E731
+    return {
+        "dates": [d.strftime("%Y-%m-%d") for d in frame.index],
+        "spy": [fix(v) for v in frame["SPY"]],
+        "closes": {tick[t]: [fix(v) for v in frame[t]] for t in frame.columns if t != "SPY"},
+    }
+
+
 def main():
     prev = load_previous()
     prev_rows = {r["symbol"]: r for r in prev.get("stocks", [])}
@@ -236,6 +270,11 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"เขียน {OUT} แล้ว ({len(rows)} ตัว ราคา ณ {data['asOf']})")
+
+    hist = weekly_history([r["symbol"] for r in rows])
+    if hist:
+        HIST.write_text(json.dumps(hist, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        log(f"เขียน {HIST} แล้ว ({len(hist['closes'])} ตัว {len(hist['dates'])} สัปดาห์)")
 
 
 if __name__ == "__main__":
