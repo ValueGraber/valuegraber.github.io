@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>คัดหุ้นคุณค่า S&amp;P 500</title>
+<title>ValueGrab · คัดหุ้นคุณค่า S&amp;P 500</title>
 <meta name="description" content="คัดหุ้น S&P 500 แบบเน้นคุณค่า อัปเดตทุกเช้าหลังตลาดสหรัฐปิด">
 <meta name="theme-color" content="#0f6e5a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -183,6 +183,9 @@ body.open .sheet { transform: none; }
 .btn.ghost { border: 1px solid var(--line); }
 .loading { color: var(--ink-3); padding: 40px 0; text-align: center; }
 
+/* brand */
+.brand { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 18px; }
+.brand span { color: var(--jade); }
 /* type: Anuphan for reading, Bai Jamjuree for headlines and numbers */
 .verdict, h2, .panel h3, details.method summary, .who .sym, .mos, .score, .strip .v, .sheet .sym, .facts .v, .bar b, .btn, .more { font-family: "Bai Jamjuree", "Anuphan", sans-serif; }
 .stamp { font-size: 15px; }
@@ -246,6 +249,7 @@ details.method h4 { font-size: 17px; }
 <body>
 <div class="wrap">
   <header class="hero">
+    <div class="brand">Value<span>Grab</span></div>
     <p class="stamp" id="stamp">กำลังโหลดข้อมูลล่าสุด</p>
     <h1 class="verdict" id="verdict">กำลังคัดหุ้นจาก S&amp;P 500</h1>
     <p class="verdict-sub" id="verdict-sub"></p>
