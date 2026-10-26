@@ -398,7 +398,7 @@ details.method h4 { font-size: 17px; }
       <label>จำนวนหุ้น<input class="inp" id="f-sh" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2.5" required></label>
       <label>ราคาต่อหุ้น ($)<input class="inp" id="f-px" type="number" step="any" min="0" inputmode="decimal" required></label>
       <label>วันที่<input class="inp" id="f-date" type="date" required></label>
-      <label>ค่าธรรมเนียม ($)<input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
+      <label>ค่าธรรมเนียม (บาท)<input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
     </form>
     <div class="pf-actions">
       <button class="btn-solid" id="f-save" type="button">บันทึก</button>
@@ -432,7 +432,7 @@ details.method h4 { font-size: 17px; }
   <section class="panel" style="margin-top:16px">
     <h3>ประวัติการซื้อขาย</h3>
     <p>กด ✕ เพื่อลบรายการที่บันทึกผิด</p>
-    <div class="scroll"><table class="tbl" id="pf-tx"><thead><tr><th class="l">วันที่</th><th class="l">หุ้น</th><th class="l">ประเภท</th><th>จำนวน</th><th>ราคา</th><th>ค่าธรรมเนียม</th><th>รวม</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="scroll"><table class="tbl" id="pf-tx"><thead><tr><th class="l">วันที่</th><th class="l">หุ้น</th><th class="l">ประเภท</th><th>จำนวน</th><th>ราคา</th><th>ค่าธรรมเนียม (บาท)</th><th>รวม</th><th></th></tr></thead><tbody></tbody></table></div>
     <div class="pf-actions">
       <button class="btn-line" id="pf-export" type="button">สำรองข้อมูล (ดาวน์โหลดไฟล์)</button>
       <label class="btn-line" style="cursor:pointer">นำเข้าข้อมูล<input id="pf-import" type="file" accept="application/json,.json" hidden></label>
@@ -913,7 +913,7 @@ dash.calc('sectors', {
     [...db.tx].sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id)).forEach((t) => {
       const tr = el('tr');
       [[new Date(t.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }), 'l'], [t.sym, 'l'], [t.type === 'buy' ? 'ซื้อ' : 'ขาย', 'l ' + (t.type === 'buy' ? 'pos' : 'neg')],
-        [qty(t.shares)], [usd(t.price)], [usd(t.fee || 0)], [usd(t.shares * t.price + (t.type === 'buy' ? 1 : -1) * (t.fee || 0))]]
+        [qty(t.shares)], [usd(t.price)], [t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? (t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท' : usd(t.fee || 0)], [usd(t.shares * t.price + (t.type === 'buy' ? 1 : -1) * (t.fee || 0))]]
         .forEach(([v, c]) => tr.append(el('td', c || null, v)));
       const d = el('button', 'del', '✕'); d.type = 'button'; d.setAttribute('aria-label', 'ลบรายการ');
       d.addEventListener('click', () => { if (confirm(`ลบรายการ${t.type === 'buy' ? 'ซื้อ' : 'ขาย'} ${t.sym} ${qty(t.shares)} หุ้น?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); save(); render(); } });
@@ -938,11 +938,13 @@ dash.calc('sectors', {
   $('f-sym').addEventListener('input', symInfo);
   $('f-px').addEventListener('input', () => { $('f-px').dataset.touched = '1'; });
   $('f-save').addEventListener('click', () => {
-    const sym = $('f-sym').value.trim().toUpperCase(); const sh = Number($('f-sh').value), px = Number($('f-px').value), fee = Number($('f-fee').value) || 0, date = $('f-date').value;
+    const sym = $('f-sym').value.trim().toUpperCase(); const sh = Number($('f-sh').value), px = Number($('f-px').value), feeThb = Number($('f-fee').value) || 0, date = $('f-date').value;
+    if (feeThb > 0 && !fx) { $('f-hint').textContent = 'ยังโหลดอัตราแลกเปลี่ยนไม่เสร็จ ลองใหม่อีกครั้ง'; $('f-hint').className = 'pf-err'; return; }
+    const fee = feeThb > 0 ? feeThb / fx : 0;
     const err = !sym ? 'ใส่ตัวย่อหุ้นก่อน' : !(sh > 0) ? 'ใส่จำนวนหุ้นมากกว่า 0' : !(px > 0) ? 'ใส่ราคาต่อหุ้นมากกว่า 0' : !date ? 'เลือกวันที่' : null;
     if (!err && fType === 'sell') { const have = (holdings().list.find((x) => x.sym === sym) || { shares: 0 }).shares; if (sh > have + 1e-9) { $('f-hint').textContent = `ขายได้ไม่เกิน ${qty(have)} หุ้นที่ถืออยู่`; $('f-hint').className = 'pf-err'; return; } }
     if (err) { $('f-hint').textContent = err; $('f-hint').className = 'pf-err'; return; }
-    db.tx.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sym, type: fType, shares: sh, price: px, fee, date });
+    db.tx.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sym, type: fType, shares: sh, price: px, fee, feeThb, date });
     save();
     $('f-hint').className = 'pf-hint'; $('f-hint').textContent = `บันทึก${fType === 'buy' ? 'ซื้อ' : 'ขาย'} ${sym} ${qty(sh)} หุ้นแล้ว`;
     $('f-sh').value = ''; $('f-px').value = ''; delete $('f-px').dataset.touched; $('f-sym').value = ''; $('f-fee').value = '0';
@@ -962,7 +964,7 @@ dash.calc('sectors', {
       const j = JSON.parse(await f.text());
       if (!Array.isArray(j.tx)) throw new Error('bad');
       const ok = j.tx.filter((t) => t && typeof t.sym === 'string' && (t.type === 'buy' || t.type === 'sell') && t.shares > 0 && t.price > 0 && /^\d{4}-\d{2}-\d{2}$/.test(t.date))
-        .map((t) => ({ id: String(t.id || Math.random().toString(36).slice(2)), sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), date: t.date }));
+        .map((t) => ({ id: String(t.id || Math.random().toString(36).slice(2)), sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), ...(t.feeThb != null && isFinite(+t.feeThb) ? { feeThb: +t.feeThb } : {}), date: t.date }));
       if (db.tx.length && !confirm(`แทนที่ข้อมูลในเครื่องนี้ (${db.tx.length} รายการ) ด้วยไฟล์ที่เลือก (${ok.length} รายการ)?`)) return;
       db = { tx: ok, targets: (j.targets && typeof j.targets === 'object') ? j.targets : {} }; save(); render();
       $('pf-io').textContent = `นำเข้า ${ok.length} รายการแล้ว`;
