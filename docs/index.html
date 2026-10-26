@@ -320,6 +320,17 @@ tr.editing td { background: var(--jade-soft); }
 .star { border: 0; background: none; cursor: pointer; font-size: 18px; line-height: 1; color: var(--ochre); padding: 0 4px; }
 .who .wst { color: var(--ochre); font-size: 15px; margin-left: 6px; }
 .btn.watch { border: 1px solid var(--line); background: none; cursor: pointer; font-family: inherit; }
+.acct { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px 20px; margin: 0 0 18px; }
+.acct-row { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; }
+.acct p { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
+.acct-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.acct-mail { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+.acct-mail .inp { flex: 1 1 200px; }
+.acct .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--jade); margin-right: 8px; vertical-align: middle; }
+.acct .dot.off { background: var(--ochre); }
+.linkish { border: 0; background: none; color: var(--jade); cursor: pointer; font-size: 15px; text-decoration: underline; padding: 4px; font-family: inherit; }
+#a-msg:empty { display: none; }
+#a-msg { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -406,7 +417,25 @@ tr.editing td { background: var(--jade-soft); }
   <p class="disclaimer">ใช้คัดกรองว่าหุ้นตัวไหนควรศึกษาต่อ ไม่ใช่คำแนะนำซื้อขายหรือคำทำนายราคา ก่อนตัดสินใจควรอ่านงบและข่าวของบริษัทประกอบทุกครั้ง</p>
   </div>
 <div id="view-port" hidden>
-  <p class="pf-intro">บันทึกหุ้นที่ซื้อไว้ แล้วดูว่าพอร์ตโตแค่ไหน แต่ละตัวเบี้ยวจากสัดส่วนที่ตั้งไว้หรือยัง และถ้าจะลงเงินเพิ่มควรแบ่งซื้อตัวไหน ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า <b>ข้อมูลพอร์ตเก็บไว้ในเครื่องนี้เท่านั้น</b> ถ้าจะใช้ทั้งมือถือและคอม ให้กด "สำรองข้อมูล" แล้วนำไฟล์ไปกด "นำเข้าข้อมูล" อีกเครื่อง</p>
+  <p class="pf-intro">บันทึกหุ้นที่ซื้อไว้ แล้วดูว่าพอร์ตโตแค่ไหน แต่ละตัวเบี้ยวจากสัดส่วนที่ตั้งไว้หรือยัง และถ้าจะลงเงินเพิ่มควรแบ่งซื้อตัวไหน ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า ถ้าไม่ล็อกอิน <b>ข้อมูลพอร์ตจะเก็บไว้ในเครื่องนี้เท่านั้น</b></p>
+  <section class="acct" id="acct" hidden>
+    <div id="acct-out">
+      <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์พอร์ตข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะพอร์ตของตัวเอง</p></div>
+        <div class="acct-btns"><button class="btn-solid" id="a-google" type="button">เข้าสู่ระบบด้วย Google</button><button class="btn-line" id="a-mail-open" type="button">ใช้อีเมล</button></div></div>
+      <form class="acct-mail" id="a-mail" hidden autocomplete="on">
+        <input class="inp" id="a-email" type="email" placeholder="อีเมล" autocomplete="username">
+        <input class="inp" id="a-pass" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" autocomplete="current-password">
+        <button class="btn-solid" id="a-in" type="submit">เข้าสู่ระบบ</button>
+        <button class="btn-line" id="a-up" type="button">สมัครบัญชีใหม่</button>
+        <button class="linkish" id="a-reset" type="button">ลืมรหัสผ่าน</button>
+      </form>
+    </div>
+    <div id="acct-in" class="acct-row" hidden>
+      <div><b><span class="dot"></span>ซิงค์กับบัญชี <span id="a-who"></span></b><p id="a-state">ข้อมูลจะตรงกันทุกเครื่องที่ล็อกอินบัญชีนี้</p></div>
+      <div class="acct-btns"><button class="btn-line" id="a-out" type="button">ออกจากระบบ</button></div>
+    </div>
+    <div class="pf-hint" id="a-msg" role="status"></div>
+  </section>
 
   <div class="strip" id="pf-strip">
     <div><div class="k">มูลค่าพอร์ต</div><div class="v" id="pf-val">$0.00</div><div class="h" id="pf-val-th"></div></div>
@@ -617,7 +646,9 @@ dash.calc('sectors', {
   const SIGNALS = ['ทั้งหมด', 'ที่ติดตาม ★', 'น่าซื้อสะสม', 'น่าจับตา', 'หุ้นดีแต่แพง', 'ระวังกับดักมูลค่า'];
   const WKEY = 'valuegrab-watch-v1';
   let watch = new Set(); try { watch = new Set(JSON.parse(localStorage.getItem(WKEY) || '[]')); } catch (e) { /* in memory only */ }
-  const toggleWatch = (sym) => { watch.has(sym) ? watch.delete(sym) : watch.add(sym); try { localStorage.setItem(WKEY, JSON.stringify([...watch])); } catch (e) { /* ignore */ } };
+  const keepWatch = () => { try { localStorage.setItem(WKEY, JSON.stringify([...watch])); } catch (e) { /* ignore */ } };
+  const toggleWatch = (sym) => { watch.has(sym) ? watch.delete(sym) : watch.add(sym); keepWatch(); document.dispatchEvent(new Event('vg:watch')); };
+  window.VGWatch = { get: () => [...watch], set: (a) => { watch = new Set(a); keepWatch(); if (scan.length) { drawPicks(); drawAll(); } } };
   const link = (href, text, cls) => { const a = el('a', cls, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
 
   let scan = [], market = null, sectors = [];
@@ -855,7 +886,8 @@ dash.calc('sectors', {
 
   let db = { tx: [], targets: {}, band: 5 };
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.tx)) db = { tx: s.tx, targets: s.targets || {}, band: s.band || 5 }; } catch (e) { /* storage blocked: work in memory */ }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; } };
+  const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); return true; } catch (e) { return false; } };
+  const save = () => { if (!keep() && !window.VGSync) $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; if (window.VGSync) window.VGSync.push(); };
 
   let map = {}, fx = null, ready = false, hist = null, histState = 'idle';
   let fType = 'buy', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock';
@@ -1158,9 +1190,96 @@ dash.calc('sectors', {
     render();
   });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) drawGrowth(); }, 200); });
+  window.VGPort = { get: () => db, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); } };
   if (location.hash === '#portfolio') show('port');
   render();
 })();
 </script>
+<script type="module">
+/* account sync (Firebase): each signed-in user reads/writes only portfolios/{their uid} */
+const FB = /*FBCONFIG*/null;
+const $ = (id) => document.getElementById(id);
+if (FB && window.VGPort) {
+  $('acct').hidden = false;
+  const V = '10.12.2', base = `https://www.gstatic.com/firebasejs/${V}/`;
+  const msg = (t, err) => { $('a-msg').textContent = t || ''; $('a-msg').className = err ? 'pf-err' : 'pf-hint'; };
+  const TH = {
+    'auth/invalid-credential': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'auth/wrong-password': 'รหัสผ่านไม่ถูกต้อง', 'auth/user-not-found': 'ยังไม่มีบัญชีนี้ กด "สมัครบัญชีใหม่"',
+    'auth/email-already-in-use': 'อีเมลนี้สมัครไว้แล้ว กด "เข้าสู่ระบบ" แทน', 'auth/weak-password': 'รหัสผ่านต้องมีอย่างน้อย 6 ตัว', 'auth/invalid-email': 'รูปแบบอีเมลไม่ถูกต้อง',
+    'auth/missing-password': 'ใส่รหัสผ่านก่อน', 'auth/too-many-requests': 'ลองผิดหลายครั้งเกินไป รอสักครู่แล้วลองใหม่', 'auth/network-request-failed': 'เชื่อมต่ออินเทอร์เน็ตไม่ได้',
+    'auth/popup-closed-by-user': 'ปิดหน้าต่างล็อกอินก่อนเสร็จ', 'auth/cancelled-popup-request': '', 'auth/unauthorized-domain': 'เว็บนี้ยังไม่ได้รับอนุญาตใน Firebase (Authorized domains)',
+    'auth/popup-blocked': 'เบราว์เซอร์บล็อกหน้าต่างล็อกอิน ลองใช้อีเมลแทน', 'auth/operation-not-supported-in-this-environment': 'ล็อกอิน Google จากหน้านี้ไม่ได้ ลองใช้อีเมลแทน',
+  };
+  const say = (e) => { console.warn(e); msg(TH[e.code] ?? ('เกิดข้อผิดพลาด: ' + (e.code || e.message)), true); };
+  try {
+    const [{ initializeApp }, A, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
+    const app = initializeApp(FB); const auth = A.getAuth(app); auth.languageCode = 'th'; const fs = F.getFirestore(app);
+    let ref = null, unsub = null, timer = null, firstSnap = true;
+    const clean = (o) => JSON.parse(JSON.stringify(o));
+    const payload = () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [] }); };
+    const stamp = (t) => { $('a-state').textContent = t; };
+    const push = () => {
+      if (!ref) return; clearTimeout(timer); stamp('กำลังบันทึก…');
+      timer = setTimeout(() => F.setDoc(ref, { ...payload(), updated: F.serverTimestamp() })
+        .then(() => stamp('บันทึกขึ้นบัญชีแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.'))
+        .catch((e) => { console.warn(e); stamp('บันทึกขึ้นบัญชีไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เมื่อแก้ไขครั้งถัดไป'); }), 600);
+    };
+    window.VGSync = { push };
+    document.addEventListener('vg:watch', push);
+    const apply = (c) => {
+      window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 });
+      if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch);
+    };
+    const merge = (c, l, lw) => {
+      const ids = new Set(c.tx.map((t) => t.id));
+      return { tx: [...c.tx, ...l.tx.filter((t) => !ids.has(t.id))], targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])] };
+    };
+
+    A.onAuthStateChanged(auth, async (u) => {
+      if (unsub) { unsub(); unsub = null; }
+      $('acct-out').hidden = !!u; $('acct-in').hidden = !u;
+      if (!u) { ref = null; return; }
+      $('a-who').textContent = u.email || u.displayName || 'ของคุณ'; msg(''); stamp('กำลังโหลดข้อมูลจากบัญชี…');
+      ref = F.doc(fs, 'portfolios', u.uid); firstSnap = true;
+      try {
+        const snap = await F.getDoc(ref);
+        const local = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : [];
+        if (!snap.exists()) { if (local.tx.length || lw.length) { await F.setDoc(ref, { ...payload(), updated: F.serverTimestamp() }); msg(`ย้ายข้อมูลในเครื่องนี้ (${local.tx.length} รายการ) ขึ้นบัญชีแล้ว`); } }
+        else {
+          const c = snap.data(); c.tx = c.tx || [];
+          const extra = local.tx.filter((t) => !c.tx.some((x) => x.id === t.id)).length;
+          if (extra || lw.some((s) => !(c.watch || []).includes(s))) {
+            const m = merge(c, local, lw); apply(m); await F.setDoc(ref, { ...m, updated: F.serverTimestamp() });
+            if (extra) msg(`รวมรายการในเครื่องนี้อีก ${extra} รายการเข้ากับบัญชีแล้ว ถ้ามีรายการซ้ำ ลบได้ที่ประวัติการซื้อขาย`);
+          } else apply(c);
+        }
+        stamp('ข้อมูลจะตรงกันทุกเครื่องที่ล็อกอินบัญชีนี้');
+      } catch (e) { console.warn(e); stamp('โหลดข้อมูลจากบัญชีไม่สำเร็จ ลองรีเฟรชหน้า'); return; }
+      unsub = F.onSnapshot(ref, (s) => {
+        if (firstSnap) { firstSnap = false; return; }
+        if (s.metadata.hasPendingWrites || !s.exists()) return;
+        apply(s.data()); stamp('อัปเดตจากอีกเครื่องแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.');
+      }, (e) => console.warn(e));
+    });
+
+    $('a-google').addEventListener('click', () => { msg(''); A.signInWithPopup(auth, new A.GoogleAuthProvider()).catch(say); });
+    $('a-mail-open').addEventListener('click', () => { $('a-mail').hidden = !$('a-mail').hidden; if (!$('a-mail').hidden) $('a-email').focus(); });
+    const creds = () => [$('a-email').value.trim(), $('a-pass').value];
+    $('a-mail').addEventListener('submit', (e) => { e.preventDefault(); msg(''); A.signInWithEmailAndPassword(auth, ...creds()).catch(say); });
+    $('a-up').addEventListener('click', () => { msg(''); A.createUserWithEmailAndPassword(auth, ...creds()).catch(say); });
+    $('a-reset').addEventListener('click', () => {
+      const [em] = creds(); if (!em) return msg('ใส่อีเมลก่อน แล้วกด "ลืมรหัสผ่าน" อีกครั้ง', true);
+      A.sendPasswordResetEmail(auth, em).then(() => msg('ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว (ดูในจดหมายขยะด้วย)')).catch(say);
+    });
+    $('a-out').addEventListener('click', async () => {
+      clearTimeout(timer);
+      await A.signOut(auth);
+      window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]);
+      msg('ออกจากระบบแล้ว ล้างข้อมูลพอร์ตออกจากเครื่องนี้แล้ว ข้อมูลยังอยู่ในบัญชีครบ');
+    });
+  } catch (e) { console.warn(e); msg('โหลดระบบบัญชีไม่สำเร็จ ยังใช้แบบเก็บในเครื่องได้ตามปกติ', true); }
+}
+</script>
+
 </body>
 </html>
