@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>สแกนหุ้น S&amp;P 500 แบบ VI</title>
+<meta name="description" content="คัดหุ้น S&P 500 แบบเน้นคุณค่า อัปเดตอัตโนมัติทุกวันหลังตลาดปิด">
+<style>
+:root{color-scheme:light dark;
+--font-anthropic-sans:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;--font-anthropic-serif:Georgia,"Noto Serif Thai",serif;
+--color-bg:#f7f6f2;--color-panel:#ffffff;--color-fg:#1f1e1c;--color-fg-muted:#6b6862;--color-border-line:#e3e0d8;
+--color-ok:#1e8a55;--color-warn:#b8730b;--color-bad:#c7413b;
+--cds-font-size-caption:12px;--cds-font-size-body:14px;--cds-font-size-heading:16px;--cds-font-size-title:28px;--cds-font-weight-medium:600;
+--cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:14px;--cds-gap-lg:22px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-md:12px;--cds-pad-lg:18px;--cds-radius:10px;
+--cds-surface-popover:#ffffff;--cds-border:#dcd8cf;--cds-shadow-popover:0 6px 20px rgba(0,0,0,.12);--cds-text-secondary:#6b6862;
+--cds-chart-grid:#ebe8e1;--cds-chart-muted:#b9b5ac;--cds-chart-reference:#8a867d;--cds-dur-slow:300ms}
+@media (prefers-color-scheme:dark){:root{--color-bg:#1a1918;--color-panel:#242321;--color-fg:#ecebe7;--color-fg-muted:#a3a09a;--color-border-line:#3a3835;
+--color-ok:#4cc08a;--color-warn:#e2a548;--color-bad:#ef6b64;--cds-surface-popover:#2c2b29;--cds-border:#45433f;--cds-text-secondary:#a3a09a;
+--cds-chart-grid:#33312e;--cds-chart-muted:#5e5b56;--cds-chart-reference:#8f8b84}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:14px;line-height:1.5}
+.page{max-width:1280px;margin:0 auto;padding:20px 16px 48px}
+.updated{font-size:12px;color:var(--color-fg-muted);margin:0 0 10px}
+a{color:inherit}
+.dash-skeleton{color:transparent!important;background:var(--color-border-line);border-radius:6px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+
+<script>
+window.dash = (() => {
+  const calcs = {}, cache = {}, subs = [];
+  let src = null, status = 'loading';
+  const get = (id) => {
+    if (status !== 'ok') return { status, data: [] };
+    if (src[id]) return { status: 'ok', data: src[id] };
+    if (!calcs[id]) return { status: 'missing', data: [] };
+    if (!cache[id]) {
+      try { cache[id] = { status: 'ok', data: calcs[id].fn(...calcs[id].inputs.map((i) => get(i).data)) }; }
+      catch (e) { console.error(id, e); cache[id] = { status: 'error', data: [] }; }
+    }
+    return cache[id];
+  };
+  const fire = () => subs.forEach((f) => { try { f(); } catch (e) { console.error(e); } });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(fire, 150); });
+  fetch('data.json?v=' + Date.now()).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((j) => {
+    src = { stocks: j.stocks, spy: j.spy, yield: j.yield }; status = 'ok';
+    const th = (d) => new Date(d + 'T00:00:00Z').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    const a = document.getElementById('asof'); if (a && j.asOf) a.textContent = th(j.asOf);
+    const u = document.getElementById('updated');
+    if (u && j.updated) u.textContent = 'อัปเดตอัตโนมัติล่าสุด ' + new Date(j.updated).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) + ' · ราคาปิด ณ ' + th(j.asOf);
+    fire();
+  }).catch((e) => { console.error(e); status = 'error'; fire(); });
+  return {
+    colors: ['#3b6fd8', '#d9822b', '#2e9e6a', '#9b59b6'],
+    calc: (id, o) => { calcs[id] = o; },
+    data: get,
+    onData: (fn) => { subs.push(fn); try { fn(); } catch (e) { console.error(e); } },
+  };
+})();
+</script>
+
+</head><body><div class="page">
+<p class="updated" id="updated">กำลังโหลดข้อมูล…</p>
+<style>
+  .vx { font-family: var(--font-anthropic-sans); color: var(--color-fg); display: grid; gap: var(--cds-gap-lg); }
+  .vx h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+  .vx-take { color: var(--color-fg-muted); margin: 0; max-width: 60rem; }
+  .vx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+  .vx-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0 0 var(--cds-gap-xs); }
+  .vx-note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 0 0 var(--cds-gap-md); }
+  .vx-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); }
+  .vx-lab { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .vx-big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; margin-top: var(--cds-gap-xs); }
+  .vx-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: var(--cds-gap-xs); }
+  .vx-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .vx-chart { position: relative; min-height: 220px; }
+  .vx-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; display: none; z-index: 2; }
+  .vx-tip .d { color: var(--cds-text-secondary); }
+  .vx-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--cds-gap-sm); min-height: 6rem; }
+  .vx-pick { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); cursor: pointer; background: var(--color-bg); }
+  .vx-pick:hover { border-color: var(--color-fg-muted); }
+  .vx-pick .t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .vx-pick .s { font-weight: var(--cds-font-weight-medium); }
+  .vx-pick .n { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vx-pick .m { display: flex; gap: 12px; font-size: var(--cds-font-size-caption); margin-top: 6px; font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
+  .vx-pick .m b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .vx-ctrl { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); margin-bottom: var(--cds-gap-md); align-items: center; }
+  .vx-ctrl input, .vx-ctrl select { font: inherit; font-size: var(--cds-font-size-caption); padding: 6px 10px; border-radius: var(--cds-radius); border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg); }
+  .vx-ctrl input { flex: 1 1 10rem; min-width: 8rem; }
+  .vx-count { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .vx-wrap { overflow: auto; max-height: 42rem; }
+  .vx-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-caption); }
+  .vx-table th { position: sticky; top: 0; z-index: 1; background: var(--color-panel); text-align: right; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: 6px 8px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; cursor: pointer; user-select: none; }
+  .vx-table td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .vx-table .l { text-align: left; }
+  .vx-table tbody tr { cursor: pointer; }
+  .vx-table tbody tr:hover td { background: var(--color-bg); }
+  .vx-table tr.sel td { background: var(--color-bg); }
+  .vx-sym { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-body); }
+  .vx-tv { margin-left: 6px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-decoration: none; border: 1px solid var(--color-border-line); border-radius: 999px; padding: 0 7px; }
+  .vx-tv:hover { color: var(--color-fg); border-color: var(--color-fg-muted); }
+  .vx-links { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); margin: var(--cds-gap-sm) 0; }
+  .vx-btn { display: inline-block; font-size: var(--cds-font-size-caption); padding: 6px 12px; border-radius: var(--cds-radius); border: 1px solid var(--color-border-line); color: var(--color-fg); text-decoration: none; background: var(--color-bg); }
+  .vx-btn:hover { border-color: var(--color-fg-muted); }
+  .vx-nm { display: block; color: var(--color-fg-muted); max-width: 13rem; overflow: hidden; text-overflow: ellipsis; }
+  .up { color: var(--color-ok); } .dn { color: var(--color-bad); }
+  .vx-pill { display: inline-block; padding: 1px 9px; border-radius: 999px; border: 1px solid currentColor; font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .p-buy { color: var(--color-ok); } .p-watch { color: var(--color-warn); } .p-rich { color: var(--cds-chart-muted); } .p-trap { color: var(--color-bad); } .p-skip { color: var(--color-fg-muted); }
+  .vx-sc { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-end; }
+  .vx-bar { width: 34px; height: 5px; border-radius: 3px; background: var(--cds-chart-grid); overflow: hidden; }
+  .vx-bar i { display: block; height: 100%; border-radius: 3px; }
+  .vx-detail { display: none; margin-top: var(--cds-gap-md); }
+  .vx-detail.on { display: block; }
+  .vx-dgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: var(--cds-gap-sm); margin-top: var(--cds-gap-sm); }
+  .vx-dgrid > div { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: 6px 10px; }
+  .vx-dgrid .k { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .vx-dgrid .v { font-variant-numeric: tabular-nums; font-weight: var(--cds-font-weight-medium); }
+  .vx-method { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .vx-method h3 { font-size: var(--cds-font-size-body); color: var(--color-fg); font-weight: var(--cds-font-weight-medium); margin: 0 0 var(--cds-gap-xs); }
+  .vx-method ul { margin: 0; padding-left: 1.1rem; }
+  .vx-fail { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 8rem; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .vx-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+  @media (max-width: 720px) { .hn { display: none; } }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="vx">
+  <header id="top">
+    <h1>สแกนหุ้น S&amp;P 500 แบบ VI</h1>
+    <p class="vx-take dash-skeleton" id="takeaway" data-source="scan market">—</p>
+  </header>
+
+  <section id="market">
+    <div class="vx-tiles">
+      <div class="vx-card">
+        <div class="vx-lab">ภาวะตลาดตอนนี้</div>
+        <div class="vx-big dash-skeleton" id="m-regime" data-source="market" data-field="regime" data-row="0">—</div>
+        <div class="vx-sub">S&amp;P 500 (SPY) ห่างเส้น 40 สัปดาห์ <span class="dash-skeleton" id="m-trend" data-source="market" data-field="spyVsMa40" data-row="0">—</span></div>
+      </div>
+      <div class="vx-card">
+        <div class="vx-lab">หุ้นที่ยืนเหนือเส้น 200 วัน</div>
+        <div class="vx-big dash-skeleton" id="m-breadth" data-source="market" data-field="breadth200" data-row="0">—</div>
+        <div class="vx-sub">ความกว้างของตลาด ยิ่งสูงยิ่งแข็งแรง</div>
+      </div>
+      <div class="vx-card">
+        <div class="vx-lab">ย่อจากจุดสูงสุด 52 สัปดาห์ (SPY)</div>
+        <div class="vx-big dash-skeleton" id="m-dd" data-source="market" data-field="spyDrawdown" data-row="0">—</div>
+        <div class="vx-sub">ราคาล่าสุด $<span class="dash-skeleton" id="m-spy" data-source="market" data-field="spyClose" data-row="0">—</span></div>
+      </div>
+      <div class="vx-card">
+        <div class="vx-lab">ดอกเบี้ยพันธบัตรสหรัฐ 10 ปี</div>
+        <div class="vx-big"><span class="dash-skeleton" id="m-y" data-source="market" data-field="yield10y" data-row="0">—</span>%</div>
+        <div class="vx-sub">เทียบ 3 เดือนก่อน <span class="dash-skeleton" id="m-yc" data-source="market" data-field="yieldChange3m" data-row="0">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="vx-grid2">
+    <section class="vx-card" id="spy-chart-card">
+      <h2>S&amp;P 500 (SPY) รายสัปดาห์</h2>
+      <p class="vx-note">3 ปีล่าสุด เส้นประคือค่าเฉลี่ย 40 สัปดาห์ (ราว 200 วัน) ราคาอยู่เหนือเส้น = ขาขึ้น</p>
+      <div class="vx-chart" id="spy-chart" data-source="spy"></div>
+    </section>
+    <section class="vx-card" id="sector-card">
+      <h2>คะแนน VI เฉลี่ยรายกลุ่ม</h2>
+      <p class="vx-note">ตัวเลขท้ายแท่ง = จำนวนหุ้น "น่าซื้อสะสม" ในกลุ่ม กดแท่งเพื่อกรองตาราง</p>
+      <div class="vx-chart" id="sector-chart" data-source="sectors"></div>
+    </section>
+  </div>
+
+  <section class="vx-card" id="picks-card">
+    <h2>หุ้นน่าซื้อสะสม คะแนนสูงสุด</h2>
+    <p class="vx-note">คุณภาพดี ราคาต่ำกว่ามูลค่าที่ประเมิน และราคายังไม่หลุดแนวโน้มหลัก กดการ์ดเพื่อดูรายละเอียด</p>
+    <div class="vx-picks" id="picks" data-source="scan"></div>
+  </section>
+
+  <section class="vx-card" id="scanner">
+    <h2>ตารางสแกนทั้งดัชนี</h2>
+    <p class="vx-note">กดหัวคอลัมน์เพื่อเรียง กดแถวเพื่อดูตัวเลขละเอียด กด "กราฟ ↗" เพื่อเปิดกราฟสดใน TradingView · ราคาในตารางเป็นราคาปิด ณ <span id="asof">—</span> ไม่ใช่ราคาเรียลไทม์</p>
+    <div class="vx-ctrl">
+      <input id="q" type="search" placeholder="ค้นหาชื่อหรือตัวย่อ เช่น NVDA" aria-label="ค้นหา">
+      <select id="f-sector" aria-label="กลุ่มอุตสาหกรรม"><option value="">ทุกกลุ่ม</option></select>
+      <select id="f-signal" aria-label="สัญญาณ">
+        <option value="">ทุกสัญญาณ</option>
+        <option>น่าซื้อสะสม</option><option>น่าจับตา</option><option>หุ้นดีแต่แพง</option><option>ระวังกับดักมูลค่า</option><option>ผ่านไปก่อน</option>
+      </select>
+      <span class="vx-count" id="count"></span>
+    </div>
+    <div class="vx-detail vx-card" id="detail"></div>
+    <div class="vx-wrap" id="table-box">
+      <table class="vx-table" id="scan-table" data-source="scan" data-row-key="symbol">
+        <thead><tr>
+          <th class="l" data-field="symbol" data-sort="symbol">หุ้น</th>
+          <th data-field="price" data-sort="price">ราคา</th>
+          <th data-field="fairValue" data-sort="fairValue" class="hn">มูลค่าเหมาะสม</th>
+          <th data-field="mos" data-sort="mos">MOS</th>
+          <th data-field="analystUpside" data-sort="analystUpside" class="hn">เป้านักวิเคราะห์</th>
+          <th data-field="quality" data-sort="quality" class="hn">คุณภาพ</th>
+          <th data-field="value" data-sort="value" class="hn">ความถูก</th>
+          <th data-field="growth" data-sort="growth" class="hn">เติบโต</th>
+          <th data-field="timing" data-sort="timing" class="hn">จังหวะ</th>
+          <th data-field="vi" data-sort="vi">คะแนน VI</th>
+          <th class="l" data-field="signal" data-sort="signal">สัญญาณ</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="vx-card" id="method">
+    <h2>วิธีคิดคะแนน</h2>
+    <p class="vx-note">ตัวช่วยคัดกรองว่าตัวไหนควรศึกษาต่อ ไม่ใช่คำแนะนำซื้อขายหรือคำทำนายราคา ควรอ่านงบและข่าวของบริษัทก่อนตัดสินใจทุกครั้ง</p>
+    <div class="vx-method">
+      <div>
+        <h3>มูลค่าที่เหมาะสม และ MOS</h3>
+        <ul>
+          <li>ใช้สูตร Graham ฉบับปรับดอกเบี้ย: EPS × (8.5 + 2g) × 4.4 ÷ Y โดย EPS = กำไรต่อหุ้นปีหน้า แต่ไม่เกิน 1.3 เท่าของกำไร 12 เดือนล่าสุด (กันการให้เครดิตกำไรที่ยังไม่เกิด)</li>
+          <li>g = การเติบโตของกำไรต่อหุ้นปีหน้าเทียบ 12 เดือนล่าสุด (จำกัด 0–15%) · Y = ดอกเบี้ย 10 ปี + 0.8% แทนผลตอบแทนหุ้นกู้ AAA</li>
+          <li>จำกัด P/E ที่เหมาะสมไว้ไม่เกิน 25 เท่า · หุ้นที่คาดกำไรปีหน้าเกิน 1.5 เท่าของปีนี้ ถูกติดป้าย "กำไรอาจอยู่รอบพีค" และไม่ได้สัญญาณน่าซื้อสะสม · MOS = มูลค่าที่เหมาะสม ÷ ราคา − 1 (บวก = ราคาต่ำกว่ามูลค่า)</li>
+        </ul>
+      </div>
+      <div>
+        <h3>คะแนนย่อย 0–100 (เทียบกันเองใน 500 ตัว)</h3>
+        <ul>
+          <li><b>คุณภาพ</b>: ROA, ROE, อัตรากำไรสุทธิ, FCF margin และหนี้สินต่อทุนต่ำ</li>
+          <li><b>ความถูก</b>: Forward P/E, P/B, P/FCF, PEG ต่ำ และ MOS สูง</li>
+          <li><b>เติบโต</b>: กำไรปีหน้าที่นักวิเคราะห์คาด และการเติบโตของรายได้</li>
+          <li><b>จังหวะ</b>: ราคาเทียบเส้น 50/200 วัน และ RSI ไม่ร้อนเกิน</li>
+          <li><b>คะแนน VI</b> = คุณภาพ 35% + ความถูก 35% + เติบโต 15% + จังหวะ 15%</li>
+        </ul>
+      </div>
+      <div>
+        <h3>สัญญาณ และภาวะตลาด</h3>
+        <ul>
+          <li><b>น่าซื้อสะสม</b>: VI ≥ 65, MOS > 0, คุณภาพ ≥ 50, ราคาไม่ต่ำกว่าเส้น 200 วันเกิน 10% และกำไรไม่ได้อยู่รอบพีค</li>
+          <li><b>หุ้นดีแต่แพง</b>: คุณภาพ ≥ 70 แต่ความถูก &lt; 35 · <b>ระวังกับดักมูลค่า</b>: ความถูก ≥ 70 แต่คุณภาพ &lt; 35</li>
+          <li><b>ภาวะตลาด</b>: ขาขึ้น เมื่อ SPY อยู่เหนือเส้น 40 สัปดาห์และหุ้นเกินครึ่งอยู่เหนือเส้น 200 วัน · ขาลง เมื่อทั้งสองข้อกลับด้าน · นอกนั้นคือระมัดระวัง</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+dash.calc('scan', {
+  title: 'คะแนน VI รายหุ้น',
+  description: 'มูลค่าเหมาะสมแบบ Graham, MOS และคะแนนคุณภาพ ความถูก เติบโต จังหวะ ของหุ้นแต่ละตัว',
+  inputs: ['stocks', 'yield'],
+  fn: (stocks, yieldRows) => {
+    const n = (x) => (x == null || x === '' || isNaN(Number(x)) ? null : Number(x));
+    const y10 = n(yieldRows[yieldRows.length - 1]?.yield10y) ?? 4.5;
+    const aaa = y10 + 0.8;
+    const pct = (key, higherBetter, rows) => {
+      const vals = rows.map((r) => r[key]).filter((v) => v != null).sort((a, b) => a - b);
+      return (v) => {
+        if (v == null || !vals.length) return null;
+        let lo = 0, hi = vals.length;
+        while (lo < hi) { const m = (lo + hi) >> 1; if (vals[m] < v) lo = m + 1; else hi = m; }
+        const p = (lo / Math.max(1, vals.length - 1)) * 100;
+        return higherBetter ? p : 100 - p;
+      };
+    };
+    const avg = (a) => { const b = a.filter((v) => v != null); return b.length ? b.reduce((s, v) => s + v, 0) / b.length : null; };
+    const base = stocks.map((s) => {
+      const price = n(s.price), fpe = n(s.forwardPe);
+      const g = Math.max(0, Math.min(15, n(s.epsGrowth3y) ?? 0));
+      const ttm = n(s.epsTtm);
+      const fwdEps = price && fpe && fpe > 0 ? price / fpe : null;
+      const eps = fwdEps && ttm > 0 ? Math.min(fwdEps, ttm * 1.3) : null;
+      const peak = !!(fwdEps && ttm > 0 && fwdEps > ttm * 1.5);
+      const fairPe = Math.min(25, ((8.5 + 2 * g) * 4.4) / aaa);
+      const fairValue = eps ? eps * fairPe : null;
+      const mos = fairValue ? fairValue / price - 1 : null;
+      const tgt = n(s.analystTarget);
+      const pfcf = n(s.pfcf), pb = n(s.pb), peg = n(s.peg);
+      return {
+        symbol: s.symbol, name: s.name, sector: s.sector, price, fairValue, mos, peak,
+        analystTarget: tgt, analystUpside: tgt && price ? tgt / price - 1 : null, analystRating: s.analystRating,
+        roic: n(s.roic) == null ? null : Math.min(60, n(s.roic)), roe: n(s.roe) == null ? null : Math.min(60, n(s.roe)),
+        netMargin: n(s.netMargin), fcfMargin: n(s.fcfMargin), de: n(s.debtToEquity) == null ? null : Math.min(10, n(s.debtToEquity)),
+        fpe: fpe && fpe > 0 ? fpe : null, pb: pb && pb > 0 ? Math.min(100, pb) : null, pfcf: pfcf && pfcf > 0 ? pfcf : null, peg: peg && peg > 0 ? peg : null,
+        epsG: n(s.epsGrowth3y), revG: n(s.revenueGrowth3y),
+        ma50: n(s.ma50), ma200: n(s.ma200), rsi: n(s.rsi), change52w: n(s.change52w),
+        pe: n(s.pe), dividendYield: n(s.dividendYield), marketCapB: n(s.marketCapB), beta: n(s.beta),
+      };
+    });
+    const P = {};
+    [['roic', 1], ['roe', 1], ['netMargin', 1], ['fcfMargin', 1], ['de', 0], ['fpe', 0], ['pb', 0], ['pfcf', 0], ['peg', 0], ['mos', 1], ['epsG', 1], ['revG', 1]]
+      .forEach(([k, hb]) => { P[k] = pct(k, hb, base); });
+    return base.map((r) => {
+      const quality = avg([P.roic(r.roic), P.roe(r.roe), P.netMargin(r.netMargin), P.fcfMargin(r.fcfMargin), P.de(r.de)]);
+      const value = avg([P.fpe(r.fpe), P.pb(r.pb), P.pfcf(r.pfcf), P.peg(r.peg), P.mos(r.mos)]);
+      const growth = avg([P.epsG(r.epsG), P.revG(r.revG)]);
+      let timing = null;
+      if (r.price && r.ma200 && r.ma50 && r.rsi != null) {
+        timing = (r.price > r.ma200 ? 40 : r.price > r.ma200 * 0.9 ? 20 : 0) + (r.price > r.ma50 ? 20 : 10);
+        timing += r.rsi < 30 ? 25 : r.rsi < 45 ? 40 : r.rsi <= 60 ? 30 : r.rsi <= 70 ? 15 : 0;
+      }
+      const vi = Math.round((quality ?? 50) * 0.35 + (value ?? 50) * 0.35 + (growth ?? 50) * 0.15 + (timing ?? 50) * 0.15);
+      const nearTrend = r.price && r.ma200 ? r.price >= r.ma200 * 0.9 : true;
+      const signal = vi >= 65 && r.mos != null && r.mos > 0 && (quality ?? 0) >= 50 && nearTrend && !r.peak ? 'น่าซื้อสะสม'
+        : (quality ?? 0) >= 70 && (value ?? 100) < 35 ? 'หุ้นดีแต่แพง'
+        : (value ?? 0) >= 70 && (quality ?? 100) < 35 ? 'ระวังกับดักมูลค่า'
+        : vi >= 58 ? 'น่าจับตา' : 'ผ่านไปก่อน';
+      const rd = (v) => (v == null ? null : Math.round(v));
+      return {
+        symbol: r.symbol, name: r.name, sector: r.sector, price: r.price, fairValue: r.fairValue, mos: r.mos, peakEarnings: r.peak ? 'ใช่' : 'ไม่',
+        analystTarget: r.analystTarget, analystUpside: r.analystUpside, analystRating: r.analystRating,
+        quality: rd(quality), value: rd(value), growth: rd(growth), timing: rd(timing), vi, signal,
+        pe: r.pe, forwardPe: r.fpe, pb: r.pb, peg: r.peg, roe: r.roe, roic: r.roic, netMargin: r.netMargin, fcfMargin: r.fcfMargin,
+        debtToEquity: r.de, epsGrowth3y: r.epsG, revenueGrowth3y: r.revG, dividendYield: r.dividendYield, rsi: r.rsi,
+        ma50: r.ma50, ma200: r.ma200, change52w: r.change52w, marketCapB: r.marketCapB,
+      };
+    }).sort((a, b) => b.vi - a.vi);
+  },
+});
+
+dash.calc('market', {
+  title: 'ภาวะตลาดรวม',
+  description: 'SPY เทียบเส้นค่าเฉลี่ย 40 สัปดาห์, ระยะจากจุดสูงสุด 52 สัปดาห์, สัดส่วนหุ้นเหนือเส้น 200 วัน และดอกเบี้ย 10 ปี',
+  inputs: ['spy', 'yield', 'stocks'],
+  fn: (spy, yieldRows, stocks) => {
+    const c = spy.map((r) => Number(r.close));
+    const last = c[c.length - 1];
+    const ma40 = c.slice(-40).reduce((s, v) => s + v, 0) / Math.min(40, c.length);
+    const hi52 = Math.max(...c.slice(-52));
+    const valid = stocks.filter((s) => Number(s.price) > 0 && Number(s.ma200) > 0);
+    const breadth200 = valid.filter((s) => Number(s.price) > Number(s.ma200)).length / valid.length;
+    const y = yieldRows.map((r) => Number(r.yield10y));
+    const yNow = y[y.length - 1];
+    const y3m = y[Math.max(0, y.length - 64)];
+    const up = last > ma40, broad = breadth200 > 0.5;
+    const regime = up && broad ? 'ขาขึ้น' : !up && !broad ? 'ขาลง' : 'ระมัดระวัง';
+    return [{ regime, spyClose: last, spyVsMa40: last / ma40 - 1, spyDrawdown: last / hi52 - 1, breadth200, yield10y: yNow, yieldChange3m: yNow - y3m, asOf: spy[spy.length - 1].date }];
+  },
+});
+
+dash.calc('sectors', {
+  title: 'คะแนนรายกลุ่มอุตสาหกรรม',
+  description: 'คะแนน VI เฉลี่ยและจำนวนหุ้นน่าซื้อสะสมในแต่ละกลุ่ม',
+  inputs: ['scan'],
+  fn: (scan) => {
+    const m = {};
+    scan.forEach((r) => {
+      const k = r.sector || 'อื่นๆ';
+      m[k] = m[k] || { sector: k, count: 0, sum: 0, buys: 0 };
+      m[k].count++; m[k].sum += r.vi; if (r.signal === 'น่าซื้อสะสม') m[k].buys++;
+    });
+    return Object.values(m).map((s) => ({ sector: s.sector, stocks: s.count, avgVi: Math.round(s.sum / s.count), buys: s.buys })).sort((a, b) => b.avgVi - a.avgVi);
+  },
+});
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const f2 = (v) => (v == null ? '–' : v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  const pc = (v, d = 0) => (v == null ? '–' : (v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%');
+  const pcRaw = (v) => (v == null ? '–' : v.toFixed(1) + '%');
+  const pillCls = { 'น่าซื้อสะสม': 'p-buy', 'น่าจับตา': 'p-watch', 'หุ้นดีแต่แพง': 'p-rich', 'ระวังกับดักมูลค่า': 'p-trap', 'ผ่านไปก่อน': 'p-skip' };
+  const scoreColor = (v) => (v >= 70 ? 'var(--color-ok)' : v >= 50 ? 'var(--color-warn)' : 'var(--cds-chart-muted)');
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const tvSym = (s) => s.replace('.', '.');
+  const tvChart = (s) => 'https://www.tradingview.com/chart/?symbol=' + encodeURIComponent(tvSym(s));
+  const tvInfo = (s) => 'https://www.tradingview.com/symbols/' + encodeURIComponent(s.replace('.', '.')) + '/';
+  const saUrl = (s) => 'https://stockanalysis.com/stocks/' + encodeURIComponent(s.toLowerCase()) + '/';
+  const link = (href, text, cls) => { const a = el('a', cls, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
+  const scoreCell = (td, v) => {
+    if (v == null) { td.textContent = '–'; return; }
+    const w = el('span', 'vx-sc'); const t = el('span', null, String(v)); const b = el('span', 'vx-bar'); const i = el('i');
+    i.style.width = v + '%'; i.style.background = scoreColor(v); b.append(i); w.append(t, b); td.append(w);
+  };
+
+  let sortKey = 'vi', sortDir = -1, selected = null;
+  const state = { q: '', sector: '', signal: '' };
+  $('q').addEventListener('input', (e) => { state.q = e.target.value.trim().toLowerCase(); drawTable(); });
+  $('f-sector').addEventListener('change', (e) => { state.sector = e.target.value; drawTable(); });
+  $('f-signal').addEventListener('change', (e) => { state.signal = e.target.value; drawTable(); });
+  document.querySelectorAll('#scan-table th[data-sort]').forEach((th) => th.addEventListener('click', () => {
+    const k = th.dataset.sort;
+    if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'symbol' || k === 'signal' ? 1 : -1; }
+    drawTable();
+  }));
+  $('scan-table').addEventListener('click', (e) => { if (e.target.closest('a')) return; const tr = e.target.closest('tr[data-key]'); if (tr) select(tr.dataset.key); });
+  $('picks').addEventListener('click', (e) => { if (e.target.closest('a')) return; const c = e.target.closest('[data-key]'); if (c) { select(c.dataset.key); $('scanner').scrollIntoView({ behavior: 'smooth' }); } });
+
+  const select = (sym) => { selected = selected === sym ? null : sym; drawDetail(); drawTable(); };
+
+  const drawDetail = () => {
+    const box = $('detail'); box.replaceChildren();
+    const s = dash.data('scan');
+    const r = s.status === 'ok' && selected ? s.data.find((x) => x.symbol === selected) : null;
+    box.classList.toggle('on', !!r);
+    if (!r) return;
+    const h = el('h2', null, `${r.symbol} · ${r.name}`);
+    const sub = el('p', 'vx-note', `${r.sector} · สัญญาณ: ${r.signal} · นักวิเคราะห์: ${r.analystRating || '–'}` + (r.peakEarnings === 'ใช่' ? ' · ⚠ กำไรอาจอยู่รอบพีค ระวังหุ้นวัฏจักร' : ''));
+    const g = el('div', 'vx-dgrid');
+    const items = [
+      ['ราคา', '$' + f2(r.price)], ['มูลค่าเหมาะสม', r.fairValue ? '$' + f2(r.fairValue) : '–'], ['MOS', pc(r.mos)],
+      ['เป้านักวิเคราะห์', r.analystTarget ? '$' + f2(r.analystTarget) : '–'], ['Upside เป้า', pc(r.analystUpside)],
+      ['P/E', f2(r.pe)], ['Forward P/E', f2(r.forwardPe)], ['PEG', f2(r.peg)], ['P/B', f2(r.pb)],
+      ['ROE', pcRaw(r.roe)], ['ROA', pcRaw(r.roic)], ['กำไรสุทธิ', pcRaw(r.netMargin)], ['FCF margin', pcRaw(r.fcfMargin)],
+      ['หนี้สิน/ทุน', f2(r.debtToEquity)], ['กำไรปีหน้า vs ปีนี้', pcRaw(r.epsGrowth3y)], ['รายได้โต (ปีต่อปี)', pcRaw(r.revenueGrowth3y)],
+      ['ปันผล', pcRaw(r.dividendYield)], ['RSI', r.rsi == null ? '–' : r.rsi.toFixed(0)], ['เส้น 50 วัน', '$' + f2(r.ma50)], ['เส้น 200 วัน', '$' + f2(r.ma200)],
+      ['เปลี่ยนแปลง 52 สัปดาห์', pcRaw(r.change52w)], ['มูลค่าตลาด', r.marketCapB ? '$' + f2(r.marketCapB) + 'B' : '–'],
+    ];
+    items.forEach(([k, v]) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v', v)); g.append(d); });
+    const lk = el('div', 'vx-links');
+    lk.append(link(tvChart(r.symbol), 'เปิดกราฟใน TradingView ↗', 'vx-btn'), link(tvInfo(r.symbol), 'ข้อมูลหุ้นใน TradingView ↗', 'vx-btn'), link(saUrl(r.symbol), 'งบการเงิน (stockanalysis) ↗', 'vx-btn'));
+    box.append(h, sub, lk, g);
+  };
+
+  const drawTable = () => {
+    const s = dash.data('scan');
+    const tbody = document.querySelector('#scan-table tbody');
+    $('table-box').querySelector('.vx-fail')?.remove();
+    if (s.status !== 'ok') {
+      tbody.replaceChildren(); $('count').textContent = '';
+      if (s.status === 'error') { const f = el('div', 'vx-fail', 'Failed to load'); $('table-box').append(f); }
+      return;
+    }
+    const list = s.data.filter((r) => (!state.sector || r.sector === state.sector) && (!state.signal || r.signal === state.signal)
+      && (!state.q || r.symbol.toLowerCase().includes(state.q) || (r.name || '').toLowerCase().includes(state.q)))
+      .slice().sort((a, b) => {
+        const av = a[sortKey], bv = b[sortKey];
+        if (typeof av === 'string' || typeof bv === 'string') return String(av ?? '').localeCompare(String(bv ?? '')) * sortDir;
+        return ((av ?? -Infinity) - (bv ?? -Infinity)) * sortDir;
+      });
+    $('count').textContent = `แสดง ${list.length} จาก ${s.data.length} ตัว`;
+    document.querySelectorAll('#scan-table th[data-sort]').forEach((th) => th.setAttribute('aria-sort', th.dataset.sort === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'));
+    tbody.replaceChildren(...list.map((r) => {
+      const tr = el('tr'); tr.dataset.key = r.symbol; if (r.symbol === selected) tr.className = 'sel';
+      const td = (cls) => { const c = el('td', cls); tr.append(c); return c; };
+      const a = td('l'); a.append(el('span', 'vx-sym', r.symbol), link(tvChart(r.symbol), 'กราฟ ↗', 'vx-tv'), el('span', 'vx-nm', r.name));
+      td().textContent = f2(r.price);
+      td('hn').textContent = r.fairValue ? f2(r.fairValue) : '–';
+      const m = td(r.mos == null ? '' : r.mos >= 0 ? 'up' : 'dn'); m.textContent = pc(r.mos);
+      const u = td('hn ' + (r.analystUpside == null ? '' : r.analystUpside >= 0 ? 'up' : 'dn')); u.textContent = pc(r.analystUpside);
+      scoreCell(td('hn'), r.quality); scoreCell(td('hn'), r.value); scoreCell(td('hn'), r.growth); scoreCell(td('hn'), r.timing);
+      scoreCell(td(), r.vi);
+      const sg = td('l'); sg.append(el('span', 'vx-pill ' + (pillCls[r.signal] || ''), r.signal));
+      return tr;
+    }));
+  };
+
+  const drawPicks = () => {
+    const box = $('picks'); box.replaceChildren();
+    const s = dash.data('scan');
+    if (s.status === 'error') { box.classList.remove('dash-skeleton'); box.append(el('div', 'vx-fail', 'Failed to load')); return; }
+    if (s.status !== 'ok') { box.classList.add('dash-skeleton'); return; }
+    box.classList.remove('dash-skeleton');
+    const picks = s.data.filter((r) => r.signal === 'น่าซื้อสะสม').slice(0, 12);
+    if (!picks.length) { box.append(el('p', 'vx-note', 'ตอนนี้ยังไม่มีหุ้นผ่านเกณฑ์น่าซื้อสะสม')); return; }
+    picks.forEach((r) => {
+      const c = el('div', 'vx-pick'); c.dataset.key = r.symbol;
+      const t = el('div', 't'); t.append(el('span', 's', r.symbol), el('span', null, 'VI ' + r.vi));
+      const m = el('div', 'm');
+      const b1 = el('span'); b1.append('MOS ', el('b', null, pc(r.mos)));
+      const b2 = el('span'); b2.append('เป้า ', el('b', null, pc(r.analystUpside)));
+      m.append(b1, b2);
+      c.append(t, el('div', 'n', r.name + ' · ' + r.sector), m);
+      box.append(c);
+    });
+  };
+
+  const drawSectorFilter = () => {
+    const s = dash.data('sectors'); const sel = $('f-sector');
+    if (s.status !== 'ok' || sel.options.length > 1) return;
+    s.data.map((r) => r.sector).sort().forEach((x) => sel.append(new Option(x, x)));
+  };
+
+  const drawMarket = () => {
+    const s = dash.data('market');
+    const ids = ['m-regime', 'm-trend', 'm-breadth', 'm-dd', 'm-spy', 'm-y', 'm-yc'];
+    if (s.status !== 'ok') { ids.forEach((i) => { $(i).textContent = '—'; if (s.status === 'error') $(i).classList.remove('dash-skeleton'); }); return; }
+    ids.forEach((i) => $(i).classList.remove('dash-skeleton'));
+    const r = s.data[0];
+    $('m-regime').textContent = r.regime;
+    $('m-regime').className = 'vx-big ' + (r.regime === 'ขาขึ้น' ? 'up' : r.regime === 'ขาลง' ? 'dn' : '');
+    $('m-trend').textContent = pc(r.spyVsMa40, 1);
+    $('m-breadth').textContent = (r.breadth200 * 100).toFixed(0) + '%';
+    $('m-dd').textContent = pc(r.spyDrawdown, 1);
+    $('m-spy').textContent = f2(r.spyClose);
+    $('m-y').textContent = r.yield10y.toFixed(2);
+    $('m-yc').textContent = (r.yieldChange3m > 0 ? '+' : '') + r.yieldChange3m.toFixed(2) + ' จุด';
+  };
+
+  const drawTake = () => {
+    const s = dash.data('scan'), m = dash.data('market'); const t = $('takeaway');
+    if (s.status !== 'ok' || m.status !== 'ok') { t.textContent = '—'; return; }
+    t.classList.remove('dash-skeleton');
+    const buys = s.data.filter((r) => r.signal === 'น่าซื้อสะสม');
+    const top = buys.slice(0, 3).map((r) => r.symbol).join(', ');
+    const mk = m.data[0];
+    const regimeTxt = mk.regime === 'ขาขึ้น' ? 'ตลาดรวมยังเป็นขาขึ้น' : mk.regime === 'ขาลง' ? 'ตลาดรวมเป็นขาลง ควรทยอยซื้อและเผื่อเงินสด' : 'ตลาดรวมอยู่ในช่วงระมัดระวัง ควรทยอยซื้อเป็นไม้';
+    t.textContent = `${regimeTxt} · จาก ${s.data.length} ตัวใน S&P 500 มี ${buys.length} ตัวที่ผ่านเกณฑ์น่าซื้อสะสม` + (top ? ` นำโดย ${top}` : '');
+  };
+
+  const tip = (box) => { let t = box.querySelector('.vx-tip'); if (!t) { t = el('div', 'vx-tip'); box.append(t); } return t; };
+
+  const drawSpy = () => {
+    const box = $('spy-chart'); box.querySelectorAll('svg,.vx-fail').forEach((n) => n.remove());
+    const s = dash.data('spy');
+    if (s.status === 'error') { box.append(el('div', 'vx-fail', 'Failed to load')); return; }
+    if (s.status !== 'ok') return;
+    const rows = s.data.map((r) => ({ d: new Date(r.date), c: Number(r.close) }));
+    rows.forEach((r, i) => { const w = rows.slice(Math.max(0, i - 39), i + 1); r.ma = i >= 39 ? w.reduce((a, b) => a + b.c, 0) / w.length : null; });
+    const W = box.clientWidth || 400, H = 220, M = { t: 10, r: 12, b: 24, l: 44 };
+    const x = d3.scaleUtc(d3.extent(rows, (r) => r.d), [M.l, W - M.r]);
+    const y = d3.scaleLinear([d3.min(rows, (r) => Math.min(r.c, r.ma ?? r.c)) * 0.97, d3.max(rows, (r) => r.c) * 1.02], [H - M.b, M.t]).nice();
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', M.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('fill', 'var(--color-fg-muted)').attr('font-size', 11).text((v) => d3.format(',')(v));
+    svg.append('g').selectAll('text').data(x.ticks(Math.max(2, Math.floor(W / 110)))).join('text').attr('x', x).attr('y', H - 6).attr('text-anchor', 'middle').attr('fill', 'var(--color-fg-muted)').attr('font-size', 11).text(d3.utcFormat('%b %Y'));
+    svg.append('path').attr('d', d3.line((r) => x(r.d), (r) => y(r.ma)).defined((r) => r.ma != null)(rows)).attr('fill', 'none').attr('stroke', 'var(--cds-chart-reference)').attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3');
+    svg.append('path').attr('d', d3.line((r) => x(r.d), (r) => y(r.c))(rows)).attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    const dot = svg.append('circle').attr('r', 4).attr('fill', dash.colors[0]).style('display', 'none');
+    const tp = tip(box);
+    svg.append('rect').attr('x', M.l).attr('y', M.t).attr('width', W - M.l - M.r).attr('height', H - M.t - M.b).attr('fill', 'transparent')
+      .on('mousemove', (ev) => {
+        const [mx] = d3.pointer(ev); const d0 = x.invert(mx); const i = Math.max(0, Math.min(rows.length - 1, d3.bisector((r) => r.d).center(rows, d0))); const r = rows[i];
+        dot.style('display', null).attr('cx', x(r.d)).attr('cy', y(r.c));
+        tp.replaceChildren(el('div', 'd', d3.utcFormat('%-d %b %Y')(r.d)), el('div', null, 'SPY $' + f2(r.c)), el('div', null, 'เส้น 40 สัปดาห์ ' + (r.ma ? '$' + f2(r.ma) : '–')));
+        tp.style.display = 'block'; const px = x(r.d) / W * box.clientWidth; tp.style.left = Math.min(box.clientWidth - 170, Math.max(0, px - 80)) + 'px'; tp.style.top = '0px';
+      })
+      .on('mouseleave', () => { dot.style('display', 'none'); tp.style.display = 'none'; });
+  };
+
+  const drawSectors = () => {
+    const box = $('sector-chart'); box.querySelectorAll('svg,.vx-fail').forEach((n) => n.remove());
+    const s = dash.data('sectors');
+    if (s.status === 'error') { box.append(el('div', 'vx-fail', 'Failed to load')); return; }
+    if (s.status !== 'ok') return;
+    const rows = s.data;
+    const W = box.clientWidth || 400, rowH = 22, M = { t: 4, r: 40, b: 4, l: 0 };
+    const H = rows.length * rowH + M.t + M.b;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const meas = svg.append('text').attr('font-size', 12);
+    const labW = d3.max(rows, (r) => { meas.text(r.sector); return meas.node().getComputedTextLength(); }) + 10; meas.remove();
+    const x = d3.scaleLinear([0, 100], [labW, W - M.r]);
+    const g = svg.selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${M.t + i * rowH})`).style('cursor', 'pointer')
+      .on('click', (ev, r) => { const sel = $('f-sector'); sel.value = state.sector === r.sector ? '' : r.sector; state.sector = sel.value; drawTable(); $('scanner').scrollIntoView({ behavior: 'smooth' }); });
+    g.append('text').attr('x', labW - 8).attr('y', rowH / 2 + 4).attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--color-fg)').text((r) => r.sector);
+    g.append('rect').attr('x', labW).attr('y', 4).attr('height', rowH - 8).attr('rx', 4).attr('width', (r) => Math.max(2, x(r.avgVi) - labW)).attr('fill', (r, i) => (i < 3 ? dash.colors[0] : 'var(--cds-chart-muted)'));
+    g.append('text').attr('x', (r) => x(r.avgVi) + 6).attr('y', rowH / 2 + 4).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((r) => `${r.avgVi} · ${r.buys}`);
+  };
+
+  dash.onData(() => { drawMarket(); drawTake(); drawSpy(); drawSectors(); drawSectorFilter(); drawPicks(); drawTable(); drawDetail(); });
+})();
+</script>
+
+</div></body></html>
