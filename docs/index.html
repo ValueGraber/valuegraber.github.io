@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0f6e5a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=Bai+Jamjuree:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <style>
 :root {
@@ -43,7 +43,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
-  font-family: "IBM Plex Sans Thai", system-ui, sans-serif; font-size: 16px; line-height: 1.6;
+  font-family: "Anuphan", system-ui, sans-serif; font-size: 18px; line-height: 1.65;
   font-variant-numeric: tabular-nums;
 }
 a { color: inherit; }
@@ -182,6 +182,65 @@ body.open .sheet { transform: none; }
 @media (prefers-color-scheme: dark) { .btn.primary { color: #08201a; } }
 .btn.ghost { border: 1px solid var(--line); }
 .loading { color: var(--ink-3); padding: 40px 0; text-align: center; }
+
+/* type: Anuphan for reading, Bai Jamjuree for headlines and numbers */
+.verdict, h2, .panel h3, details.method summary, .who .sym, .mos, .score, .strip .v, .sheet .sym, .facts .v, .bar b, .btn, .more { font-family: "Bai Jamjuree", "Anuphan", sans-serif; }
+.stamp { font-size: 15px; }
+.verdict { font-size: clamp(30px, 6vw, 48px); font-weight: 700; max-width: 20ch; }
+.verdict-sub { font-size: 19px; }
+.mood { font-size: 16px; padding: 6px 14px 6px 12px; }
+.strip > div { padding: 18px 20px; }
+.strip .k { font-size: 15px; }
+.strip .v { font-size: 30px; }
+.strip .h { font-size: 14px; }
+h2 { font-size: 28px; font-weight: 700; }
+.sec-note { font-size: 16px; }
+.row { padding: 18px 22px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.6fr) 100px 72px; }
+.who .sym { font-size: 21px; }
+.who .nm { font-size: 15px; }
+.tag { font-size: 14px; padding: 2px 10px; }
+.mos { font-size: 21px; }
+.mos small { font-size: 13px; font-family: "Anuphan", sans-serif; }
+.score { width: 56px; height: 56px; font-size: 19px; }
+.ladder { height: 42px; }
+.ladder .track { top: 19px; }
+.ladder .gap { top: 18px; }
+.ladder .tick { top: 12px; height: 18px; }
+.ladder .p { top: 25px; }
+.ladder .p, .ladder .f { font-size: 13px; }
+.ladder .na { font-size: 14px; }
+.search, .sel { font-size: 16px; }
+.chip { font-size: 16px; padding: 7px 16px; }
+.count { font-size: 15px; }
+.more { font-size: 16px; padding: 12px 26px; }
+.panel h3 { font-size: 19px; }
+.panel p { font-size: 15px; }
+.tip { font-size: 14px; }
+details.method summary { font-size: 20px; }
+details.method .body { font-size: 16px; }
+details.method h4 { font-size: 17px; }
+.disclaimer { font-size: 14px; }
+.sheet .sym { font-size: 34px; }
+.sheet .nm { font-size: 16px; }
+.warn { font-size: 15px; }
+.facts .k { font-size: 14px; }
+.facts .v { font-size: 21px; }
+.bar { font-size: 16px; grid-template-columns: 76px 1fr 34px; }
+.bar b { font-size: 17px; }
+.group h4 { font-size: 16px; }
+.kv { font-size: 16px; padding: 9px 0; }
+.btn { font-size: 17px; padding: 13px 16px; }
+.big-ladder .ladder { height: 50px; }
+.big-ladder .ladder .p, .big-ladder .ladder .f { font-size: 14px; }
+.big-ladder .ladder .p { top: 31px; }
+@media (max-width: 640px) {
+  body { font-size: 17px; }
+  .row { grid-template-columns: minmax(0, 1fr) 84px 54px; padding: 16px 18px; gap: 10px 12px; }
+  .score { width: 50px; height: 50px; font-size: 18px; }
+  .mos { font-size: 20px; }
+  .strip .v { font-size: 26px; }
+  h2 { font-size: 25px; }
+}
 </style>
 </head>
 <body>
