@@ -182,6 +182,17 @@ def market_series():
     return spy, yld
 
 
+def usd_thb():
+    """อัตราแลกเปลี่ยนดอลลาร์เป็นบาท ใช้แปลงมูลค่าพอร์ตเป็นเงินบาท"""
+    try:
+        t = yf.download("THB=X", period="10d", interval="1d", auto_adjust=False, progress=False)["Close"].dropna()
+        t = t.iloc[:, 0] if isinstance(t, pd.DataFrame) else t
+        return round(float(t.iloc[-1]), 4)
+    except Exception as e:  # noqa: BLE001
+        log("ดึงอัตราแลกเปลี่ยนไม่ได้:", e)
+        return None
+
+
 def main():
     prev = load_previous()
     prev_rows = {r["symbol"]: r for r in prev.get("stocks", [])}
@@ -217,6 +228,7 @@ def main():
         "stocks": rows,
         "spy": spy or prev.get("spy", []),
         "yield": yld or prev.get("yield", []),
+        "usdthb": usd_thb() or prev.get("usdthb"),
     }
     if len(prices) < 300:
         log("ราคาได้น้อยผิดปกติ ไม่เขียนทับไฟล์เดิม")

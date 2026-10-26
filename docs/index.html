@@ -189,7 +189,7 @@ body.open .sheet { transform: none; }
 .loading { color: var(--ink-3); padding: 40px 0; text-align: center; }
 
 /* brand */
-.brand { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 18px; }
+.brand { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.01em; margin: 0 4px 14px; }
 .brand span { color: var(--jade); }
 /* type: Anuphan for reading, Bai Jamjuree for headlines and numbers */
 .verdict, h2, .panel h3, details.method summary, .who .sym, .mos, .score, .strip .v, .sheet .sym, .facts .v, .bar b, .btn, .more { font-family: "Bai Jamjuree", "Anuphan", sans-serif; }
@@ -249,12 +249,59 @@ details.method h4 { font-size: 17px; }
   .strip .v { font-size: 26px; }
   h2 { font-size: 25px; }
 }
+
+/* tabs */
+.tabs { display: inline-flex; gap: 4px; background: var(--surface); padding: 5px; border-radius: 999px; box-shadow: var(--shadow); margin: 0 0 26px; }
+.tabs button { border: 0; background: none; padding: 9px 20px; border-radius: 999px; font-family: "Bai Jamjuree", sans-serif; font-weight: 600; font-size: 17px; cursor: pointer; color: var(--ink-2); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); }
+
+/* portfolio */
+.pf-intro { color: var(--ink-2); margin: 0 4px 22px; max-width: 64ch; }
+.pf-intro b { color: var(--ink); }
+.pf-form { display: grid; grid-template-columns: 1.3fr .9fr 1fr 1fr 1fr .8fr; gap: 12px 14px; align-items: end; }
+.pf-form label { display: grid; gap: 4px; font-size: 14px; color: var(--ink-2); min-width: 0; }
+.inp { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); font-size: 17px; min-width: 0; }
+.seg { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.seg button { border: 0; background: none; padding: 7px 12px; border-radius: 9px; cursor: pointer; font-size: 16px; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.pf-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.pf-hint { font-size: 14px; color: var(--ink-3); }
+.btn-solid { border: 0; background: var(--jade); color: #fff; padding: 11px 22px; border-radius: 12px; font-weight: 600; font-size: 17px; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; }
+@media (prefers-color-scheme: dark) { .btn-solid { color: #08201a; } }
+.btn-line { border: 1px solid var(--line); background: var(--surface); padding: 9px 16px; border-radius: 12px; font-size: 15px; cursor: pointer; }
+.pf-err { color: var(--brick); font-size: 15px; }
+@media (max-width: 760px) { .pf-form { grid-template-columns: 1fr 1fr; } .pf-form .wide { grid-column: 1 / -1; } }
+
+.pf-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+.donut-wrap { display: grid; grid-template-columns: 240px minmax(0, 340px); gap: 28px; align-items: center; }
+@media (max-width: 640px) { .donut-wrap { grid-template-columns: 1fr; } }
+.legend { display: grid; gap: 6px; margin-top: 10px; font-size: 15px; }
+.legend div { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; }
+.scroll { overflow-x: auto; margin: 0 -4px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 680px; }
+.tbl small.sub { display: block; font-size: 12px; opacity: .85; }
+.tbl th { text-align: right; font-weight: 500; color: var(--ink-3); font-size: 13px; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl td { text-align: right; padding: 11px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl .l { text-align: left; }
+.tbl .sym { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 17px; cursor: pointer; }
+.tbl tfoot td { font-weight: 600; border-bottom: 0; }
+.tbl input.tw { width: 64px; text-align: right; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); font-size: 15px; }
+.flag { display: block; font-size: 12px; color: var(--ochre); }
+.dca { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 4px 0 12px; }
+.dca .inp { width: 160px; }
+.del { border: 0; background: none; color: var(--ink-3); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 6px; }
+.del:hover { color: var(--brick); background: var(--brick-soft); }
+.pf-empty { padding: 28px 8px; text-align: center; color: var(--ink-2); }
+.btn.add { border: 1px dashed var(--jade); color: var(--jade); background: none; cursor: pointer; font-family: inherit; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="brand">Value<span>Grab</span></div>
+  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="scan" aria-selected="true">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ตของฉัน</button></nav>
+  <div id="view-scan">
   <header class="hero">
-    <div class="brand">Value<span>Grab</span></div>
     <p class="stamp" id="stamp">กำลังโหลดข้อมูลล่าสุด</p>
     <h1 class="verdict" id="verdict">กำลังคัดหุ้นจาก S&amp;P 500</h1>
     <p class="verdict-sub" id="verdict-sub"></p>
@@ -331,6 +378,69 @@ details.method h4 { font-size: 17px; }
     </div>
   </details>
   <p class="disclaimer">ใช้คัดกรองว่าหุ้นตัวไหนควรศึกษาต่อ ไม่ใช่คำแนะนำซื้อขายหรือคำทำนายราคา ก่อนตัดสินใจควรอ่านงบและข่าวของบริษัทประกอบทุกครั้ง</p>
+  </div>
+<div id="view-port" hidden>
+  <p class="pf-intro">บันทึกหุ้นที่ซื้อไว้ แล้วดูว่าพอร์ตกำไรหรือขาดทุนเท่าไหร่ แต่ละตัวมีสัดส่วนกี่เปอร์เซ็นต์ และถ้าจะ DCA เพิ่มควรแบ่งเงินซื้อตัวไหนเท่าไหร่ ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า <b>ข้อมูลพอร์ตเก็บไว้ในเครื่องนี้เท่านั้น</b> ไม่มีใครเห็น ถ้าจะใช้ทั้งมือถือและคอม ให้กด "สำรองข้อมูล" แล้วนำไฟล์ไปกด "นำเข้าข้อมูล" อีกเครื่อง</p>
+
+  <div class="strip" id="pf-strip">
+    <div><div class="k">มูลค่าพอร์ต</div><div class="v" id="pf-val">$0.00</div><div class="h" id="pf-val-th"></div></div>
+    <div><div class="k">ต้นทุนรวม</div><div class="v" id="pf-cost">$0.00</div><div class="h" id="pf-cost-th"></div></div>
+    <div><div class="k">กำไร/ขาดทุนตอนนี้</div><div class="v" id="pf-pl">$0.00</div><div class="h" id="pf-pl-pc"></div></div>
+    <div><div class="k">กำไรจากที่ขายไปแล้ว</div><div class="v" id="pf-real">$0.00</div><div class="h" id="pf-n"></div></div>
+  </div>
+
+  <section class="panel" id="pf-add">
+    <h3>บันทึกการซื้อขาย</h3>
+    <p>พิมพ์ตัวย่อหุ้น ระบบจะใส่ราคาปิดล่าสุดให้ แก้เป็นราคาที่ซื้อจริงได้</p>
+    <form class="pf-form" id="pf-form" autocomplete="off">
+      <label class="wide">หุ้น<input class="inp" id="f-sym" list="sym-list" placeholder="เช่น MSFT" required></label>
+      <label>ประเภท<span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อ</button><button type="button" data-v="sell" aria-pressed="false">ขาย</button></span></label>
+      <label>จำนวนหุ้น<input class="inp" id="f-sh" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2.5" required></label>
+      <label>ราคาต่อหุ้น ($)<input class="inp" id="f-px" type="number" step="any" min="0" inputmode="decimal" required></label>
+      <label>วันที่<input class="inp" id="f-date" type="date" required></label>
+      <label>ค่าธรรมเนียม ($)<input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
+    </form>
+    <div class="pf-actions">
+      <button class="btn-solid" id="f-save" type="button">บันทึก</button>
+      <span class="pf-hint" id="f-hint"></span>
+    </div>
+    <datalist id="sym-list"></datalist>
+  </section>
+
+  <div class="pf-grid">
+    <section class="panel">
+      <h3>สัดส่วนพอร์ต</h3>
+      <p>ตามมูลค่าตอนนี้</p>
+      <div class="donut-wrap"><div class="chart" id="pf-donut"></div>
+      <div class="legend" id="pf-legend"></div></div>
+    </section>
+    <section class="panel">
+      <h3>หุ้นในพอร์ต</h3>
+      <p>ใส่ "สัดส่วนเป้าหมาย" ที่อยากได้ แล้วกรอกเงินที่จะลงเพิ่ม ระบบจะแบ่งให้ว่าควรซื้อตัวไหนเท่าไหร่ ถ้าไม่ใส่จะแบ่งเท่ากันทุกตัว</p>
+      <div class="dca">
+        <input class="inp" id="dca-amt" type="number" min="0" step="any" inputmode="decimal" placeholder="เงินลงเพิ่ม">
+        <span class="seg" id="dca-cur"><button type="button" data-v="THB" aria-pressed="true">บาท</button><button type="button" data-v="USD" aria-pressed="false">ดอลลาร์</button></span>
+        <span class="pf-hint" id="dca-note"></span>
+      </div>
+      <div class="scroll"><table class="tbl" id="pf-table">
+        <thead><tr><th class="l">หุ้น</th><th>จำนวน</th><th>ต้นทุนเฉลี่ย</th><th>ราคาล่าสุด</th><th>มูลค่า</th><th>กำไร/ขาดทุน</th><th>สัดส่วน</th><th>เป้าหมาย %</th><th>ควรซื้อเพิ่ม</th><th class="l">สัญญาณ</th></tr></thead>
+        <tbody></tbody><tfoot></tfoot>
+      </table></div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:16px">
+    <h3>ประวัติการซื้อขาย</h3>
+    <p>กด ✕ เพื่อลบรายการที่บันทึกผิด</p>
+    <div class="scroll"><table class="tbl" id="pf-tx"><thead><tr><th class="l">วันที่</th><th class="l">หุ้น</th><th class="l">ประเภท</th><th>จำนวน</th><th>ราคา</th><th>ค่าธรรมเนียม</th><th>รวม</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="pf-actions">
+      <button class="btn-line" id="pf-export" type="button">สำรองข้อมูล (ดาวน์โหลดไฟล์)</button>
+      <label class="btn-line" style="cursor:pointer">นำเข้าข้อมูล<input id="pf-import" type="file" accept="application/json,.json" hidden></label>
+      <span class="pf-hint" id="pf-io"></span>
+    </div>
+  </section>
+  <p class="disclaimer">การแบ่งเงิน DCA เป็นการคำนวณตามสัดส่วนที่คุณตั้งเอง ไม่ได้คิดภาษี ค่าธรรมเนียม หรืออัตราแลกเปลี่ยนจริงของโบรกเกอร์ ตัวเลขเงินบาทใช้อัตราแลกเปลี่ยนปิดล่าสุดโดยประมาณ</p>
+</div>
 </div>
 
 <div class="scrim" id="scrim"></div>
@@ -639,11 +749,15 @@ dash.calc('sectors', {
       link('https://www.tradingview.com/symbols/' + encodeURIComponent(r.symbol) + '/', 'ข้อมูลหุ้นใน TradingView', 'btn ghost'),
       link('https://stockanalysis.com/stocks/' + encodeURIComponent(r.symbol.toLowerCase()) + '/', 'ดูงบการเงิน', 'btn ghost'),
     );
+    const addb = el('button', 'btn add', 'บันทึกว่าซื้อตัวนี้ในพอร์ต'); addb.type = 'button';
+    addb.addEventListener('click', () => { closeSheet(); document.dispatchEvent(new CustomEvent('vg:add', { detail: r.symbol })); });
+    links.append(addb);
     box.append(links);
     document.body.classList.add('open'); $('sheet').scrollTop = 0; c.focus();
   };
   const closeSheet = () => document.body.classList.remove('open');
   $('scrim').addEventListener('click', closeSheet);
+  document.addEventListener('vg:open', (e) => openSheet(e.detail));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 
   $('q').addEventListener('input', (e) => { st.q = e.target.value.trim(); st.allN = 25; drawAll(); });
@@ -659,6 +773,7 @@ dash.calc('sectors', {
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
+    window.VG = { scan, fx: j.usdthb || null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -667,6 +782,204 @@ dash.calc('sectors', {
     $('verdict').textContent = 'ยังโหลดข้อมูลหุ้นไม่ได้ ลองรีเฟรชหน้านี้อีกครั้ง';
     ['pick-list', 'all-list'].forEach((id) => { $(id).replaceChildren(el('div', 'empty', 'ไม่มีข้อมูลให้แสดง')); });
   });
+})();
+</script>
+
+<script>
+/* portfolio: kept in this browser only (localStorage); backup/restore by file */
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const KEY = 'valuegrab-portfolio-v1';
+  const usd = (v) => (v == null || isNaN(v) ? '–' : (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  const thb = (v) => (v == null || isNaN(v) ? '' : '≈ ' + Math.round(v).toLocaleString('th-TH') + ' บาท');
+  const sgn = (v) => (v > 0 ? '+' : '');
+  const pc = (v, d = 1) => (v == null || !isFinite(v) ? '–' : sgn(v) + (v * 100).toFixed(d) + '%');
+  const qty = (v) => (+v).toLocaleString('en-US', { maximumFractionDigits: 4 });
+  const TAG = { 'น่าซื้อสะสม': 'buy', 'น่าจับตา': 'watch', 'หุ้นดีแต่แพง': 'rich', 'ระวังกับดักมูลค่า': 'trap', 'ผ่านไปก่อน': 'skip' };
+  const PAL = ['#0f6e5a', '#3a9b7f', '#7cc4a9', '#b9e2d2', '#a86a12', '#d9a95b', '#5b6f8f', '#9aaac4', '#8a5a7a', '#c8a2bd'];
+
+  let db = { tx: [], targets: {} };
+  try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.tx)) db = { tx: s.tx, targets: s.targets || {} }; } catch (e) { /* storage blocked: work in memory */ }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; } };
+
+  let map = {}, fx = null, ready = false;
+  let fType = 'buy', dcaCur = 'THB';
+
+  /* tabs */
+  const show = (v) => {
+    $('view-scan').hidden = v !== 'scan'; $('view-port').hidden = v !== 'port';
+    document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === v)));
+    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : location.pathname); } catch (e) { /* ignore */ }
+    if (v === 'port') render();
+    window.scrollTo(0, 0);
+  };
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)));
+
+  /* holdings from transactions (average cost method) */
+  const holdings = () => {
+    const h = {}; let realized = 0;
+    [...db.tx].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id)).forEach((t) => {
+      const x = h[t.sym] || (h[t.sym] = { sym: t.sym, shares: 0, cost: 0 });
+      if (t.type === 'buy') { x.cost += t.shares * t.price + (t.fee || 0); x.shares += t.shares; }
+      else {
+        const avg = x.shares > 0 ? x.cost / x.shares : 0; const n = Math.min(t.shares, x.shares);
+        realized += n * t.price - (t.fee || 0) - avg * n; x.cost -= avg * n; x.shares -= n;
+      }
+    });
+    const list = Object.values(h).filter((x) => x.shares > 1e-9).map((x) => {
+      const s = map[x.sym]; const price = s ? s.price : null;
+      const value = price != null ? x.shares * price : x.cost;
+      return { ...x, avg: x.cost / x.shares, price, value, pl: price != null ? value - x.cost : null, s };
+    });
+    const total = list.reduce((a, x) => a + x.value, 0);
+    list.forEach((x) => { x.w = total ? x.value / total : 0; });
+    return { list: list.sort((a, b) => b.value - a.value), total, cost: list.reduce((a, x) => a + x.cost, 0), realized };
+  };
+
+  /* how much of the new money each holding gets so the portfolio moves toward the target weights */
+  const dcaPlan = (list, total, amountUsd) => {
+    if (!amountUsd || amountUsd <= 0 || !list.length) return {};
+    const tw = {}; let sum = 0;
+    list.forEach((x) => { const t = Number(db.targets[x.sym]); tw[x.sym] = t > 0 ? t : 0; sum += tw[x.sym]; });
+    if (sum === 0) list.forEach((x) => { tw[x.sym] = 1; sum += 1; });
+    const newTotal = total + amountUsd;
+    const need = {}; let needSum = 0;
+    list.forEach((x) => { need[x.sym] = Math.max(0, newTotal * (tw[x.sym] / sum) - x.value); needSum += need[x.sym]; });
+    const out = {};
+    list.forEach((x) => { out[x.sym] = needSum > 0 ? amountUsd * need[x.sym] / needSum : amountUsd * tw[x.sym] / sum; });
+    return out;
+  };
+
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  const drawDonut = (list) => {
+    const box = $('pf-donut'); box.replaceChildren(); const lg = $('pf-legend'); lg.replaceChildren();
+    if (!list.length || !window.d3) { box.append(el('div', 'pf-empty', 'ยังไม่มีหุ้นในพอร์ต')); return; }
+    const top = list.slice(0, 9); const rest = list.slice(9).reduce((a, x) => a + x.value, 0);
+    const parts = top.map((x) => ({ k: x.sym, v: x.value, w: x.w })); if (rest > 0) parts.push({ k: 'อื่นๆ', v: rest, w: rest / list.reduce((a, x) => a + x.value, 0) });
+    const S = 220, R = S / 2;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${S} ${S}`).style('max-width', '240px').style('display', 'block').style('margin', '0 auto');
+    const g = svg.append('g').attr('transform', `translate(${R},${R})`);
+    const arcs = d3.pie().sort(null).value((d) => d.v)(parts);
+    g.selectAll('path').data(arcs).join('path').attr('d', d3.arc().innerRadius(R * 0.62).outerRadius(R - 2).padAngle(0.012).cornerRadius(3)).attr('fill', (d, i) => PAL[i % PAL.length]);
+    g.append('text').attr('text-anchor', 'middle').attr('y', -2).attr('font-size', 22).attr('font-weight', 700).attr('font-family', 'Bai Jamjuree, sans-serif').attr('fill', css('--ink')).text(list.length + ' ตัว');
+    g.append('text').attr('text-anchor', 'middle').attr('y', 20).attr('font-size', 13).attr('fill', css('--ink-3')).text('ในพอร์ต');
+    parts.forEach((p, i) => { const d = el('div'); const sw = el('i'); sw.style.background = PAL[i % PAL.length]; d.append(sw, el('span', null, p.k), el('b', null, (p.w * 100).toFixed(1) + '%')); lg.append(d); });
+  };
+
+  const render = () => {
+    const { list, total, cost, realized } = holdings();
+    const pl = list.filter((x) => x.pl != null).reduce((a, x) => a + x.pl, 0);
+    const setPL = (id, v) => { const e = $(id); e.textContent = usd(v); e.className = 'v ' + (v > 0 ? 'pos' : v < 0 ? 'neg' : ''); };
+    $('pf-val').textContent = usd(total); $('pf-val-th').textContent = fx ? thb(total * fx) : '';
+    $('pf-cost').textContent = usd(cost); $('pf-cost-th').textContent = fx ? thb(cost * fx) : '';
+    setPL('pf-pl', pl); $('pf-pl-pc').textContent = cost ? pc(pl / cost) + ' จากต้นทุน' : '';
+    setPL('pf-real', realized); $('pf-n').textContent = `ถือหุ้น ${list.length} ตัว`;
+    drawDonut(list);
+
+    const amt = Number($('dca-amt').value) || 0;
+    const amtUsd = dcaCur === 'THB' ? (fx ? amt / fx : 0) : amt;
+    $('dca-note').textContent = dcaCur === 'THB' && amt && !fx ? 'ยังไม่มีอัตราแลกเปลี่ยน ใส่เป็นดอลลาร์ก่อน' : amt ? `≈ ${usd(amtUsd)}` + (fx ? ` (1$ = ${fx.toFixed(2)} บาท)` : '') : '';
+    const plan = dcaPlan(list, total, amtUsd);
+
+    const tb = $('pf-table').tBodies[0]; tb.replaceChildren(); const tf = $('pf-table').tFoot; tf.replaceChildren();
+    if (!list.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีหุ้นในพอร์ต เริ่มจากบันทึกการซื้อด้านบน'); td.colSpan = 10; tr.append(td); tb.append(tr); }
+    list.forEach((x) => {
+      const tr = el('tr'); const td = (c, t) => { const d = el('td', c, t); tr.append(d); return d; };
+      const a = td('l'); const s = el('span', 'sym', x.sym); s.title = 'ดูรายละเอียดหุ้น'; s.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: x.sym }))); a.append(s);
+      td(null, qty(x.shares)); td(null, usd(x.avg)); td(null, x.price != null ? usd(x.price) : 'ไม่มีราคา');
+      td(null, usd(x.value));
+      const p = td(x.pl == null ? '' : x.pl >= 0 ? 'pos' : 'neg'); if (x.pl == null) p.textContent = '–'; else p.append(usd(x.pl), el('small', 'sub', pc(x.pl / x.cost)));
+      const wc = td(null, (x.w * 100).toFixed(1) + '%'); if (x.w > 0.3) { wc.append(el('small', 'flag', 'กระจุกตัว')); wc.title = 'สัดส่วนเกิน 30% ของพอร์ต'; }
+      const tw = el('input', 'tw'); tw.type = 'number'; tw.min = 0; tw.max = 100; tw.step = 'any'; tw.inputMode = 'decimal'; tw.value = db.targets[x.sym] ?? ''; tw.placeholder = '–';
+      tw.setAttribute('aria-label', 'สัดส่วนเป้าหมายของ ' + x.sym);
+      tw.addEventListener('change', () => { const v = Number(tw.value); if (v > 0) db.targets[x.sym] = v; else delete db.targets[x.sym]; save(); render(); });
+      td().append(tw);
+      const b = plan[x.sym]; const bd = td(); if (b > 0.005) { bd.append(usd(b)); if (x.price) bd.append(el('small', 'sub', `≈ ${(b / x.price).toLocaleString('en-US', { maximumFractionDigits: 2 })} หุ้น`)); bd.className = 'pos'; } else bd.textContent = amt ? '–' : '';
+      const sg = td('l'); if (x.s) sg.append(el('span', 'tag ' + TAG[x.s.signal], x.s.signal)); else sg.textContent = 'นอก S&P 500';
+      tb.append(tr);
+    });
+    if (list.length) {
+      const sumT = list.reduce((a, x) => a + (Number(db.targets[x.sym]) || 0), 0);
+      const tr = el('tr'); const t = (x, c) => { const d = el('td', c, x); tr.append(d); return d; };
+      t('รวม', 'l'); t(''); t(''); t(''); t(usd(total)); t(`${usd(pl)} (${pc(cost ? pl / cost : null)})`, pl >= 0 ? 'pos' : 'neg'); t('100%');
+      t(sumT ? sumT.toFixed(0) + '%' : ''); t(amt && amtUsd ? usd(amtUsd) : ''); t('');
+      tf.append(tr);
+    }
+
+    const tx = $('pf-tx').tBodies[0]; tx.replaceChildren();
+    if (!db.tx.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการ'); td.colSpan = 8; tr.append(td); tx.append(tr); }
+    [...db.tx].sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id)).forEach((t) => {
+      const tr = el('tr');
+      [[new Date(t.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }), 'l'], [t.sym, 'l'], [t.type === 'buy' ? 'ซื้อ' : 'ขาย', 'l ' + (t.type === 'buy' ? 'pos' : 'neg')],
+        [qty(t.shares)], [usd(t.price)], [usd(t.fee || 0)], [usd(t.shares * t.price + (t.type === 'buy' ? 1 : -1) * (t.fee || 0))]]
+        .forEach(([v, c]) => tr.append(el('td', c || null, v)));
+      const d = el('button', 'del', '✕'); d.type = 'button'; d.setAttribute('aria-label', 'ลบรายการ');
+      d.addEventListener('click', () => { if (confirm(`ลบรายการ${t.type === 'buy' ? 'ซื้อ' : 'ขาย'} ${t.sym} ${qty(t.shares)} หุ้น?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); save(); render(); } });
+      const c = el('td'); c.append(d); tr.append(c); tx.append(tr);
+    });
+  };
+
+  /* form */
+  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  $('f-date').value = today();
+  const segs = (id, set) => document.querySelectorAll(`#${id} button`).forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll(`#${id} button`).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); set(b.dataset.v);
+  }));
+  segs('f-type', (v) => { fType = v; });
+  segs('dca-cur', (v) => { dcaCur = v; render(); });
+  $('dca-amt').addEventListener('input', render);
+  const symInfo = () => {
+    const s = $('f-sym').value.trim().toUpperCase(); const x = map[s];
+    $('f-hint').textContent = x ? `${x.name} ราคาปิดล่าสุด ${usd(x.price)}` : s && ready ? 'ไม่พบใน S&P 500 บันทึกได้ แต่จะไม่มีราคาล่าสุดให้' : '';
+    if (x && !$('f-px').dataset.touched) $('f-px').value = x.price;
+  };
+  $('f-sym').addEventListener('input', symInfo);
+  $('f-px').addEventListener('input', () => { $('f-px').dataset.touched = '1'; });
+  $('f-save').addEventListener('click', () => {
+    const sym = $('f-sym').value.trim().toUpperCase(); const sh = Number($('f-sh').value), px = Number($('f-px').value), fee = Number($('f-fee').value) || 0, date = $('f-date').value;
+    const err = !sym ? 'ใส่ตัวย่อหุ้นก่อน' : !(sh > 0) ? 'ใส่จำนวนหุ้นมากกว่า 0' : !(px > 0) ? 'ใส่ราคาต่อหุ้นมากกว่า 0' : !date ? 'เลือกวันที่' : null;
+    if (!err && fType === 'sell') { const have = (holdings().list.find((x) => x.sym === sym) || { shares: 0 }).shares; if (sh > have + 1e-9) { $('f-hint').textContent = `ขายได้ไม่เกิน ${qty(have)} หุ้นที่ถืออยู่`; $('f-hint').className = 'pf-err'; return; } }
+    if (err) { $('f-hint').textContent = err; $('f-hint').className = 'pf-err'; return; }
+    db.tx.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sym, type: fType, shares: sh, price: px, fee, date });
+    save();
+    $('f-hint').className = 'pf-hint'; $('f-hint').textContent = `บันทึก${fType === 'buy' ? 'ซื้อ' : 'ขาย'} ${sym} ${qty(sh)} หุ้นแล้ว`;
+    $('f-sh').value = ''; $('f-px').value = ''; delete $('f-px').dataset.touched; $('f-sym').value = ''; $('f-fee').value = '0';
+    render();
+  });
+
+  /* backup / restore */
+  $('pf-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ app: 'ValueGrab', saved: new Date().toISOString(), ...db }, null, 1)], { type: 'application/json' });
+    const a = el('a'); a.href = URL.createObjectURL(blob); a.download = `valuegrab-portfolio-${today()}.json`; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    $('pf-io').textContent = 'ดาวน์โหลดไฟล์สำรองแล้ว';
+  });
+  $('pf-import').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const j = JSON.parse(await f.text());
+      if (!Array.isArray(j.tx)) throw new Error('bad');
+      const ok = j.tx.filter((t) => t && typeof t.sym === 'string' && (t.type === 'buy' || t.type === 'sell') && t.shares > 0 && t.price > 0 && /^\d{4}-\d{2}-\d{2}$/.test(t.date))
+        .map((t) => ({ id: String(t.id || Math.random().toString(36).slice(2)), sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), date: t.date }));
+      if (db.tx.length && !confirm(`แทนที่ข้อมูลในเครื่องนี้ (${db.tx.length} รายการ) ด้วยไฟล์ที่เลือก (${ok.length} รายการ)?`)) return;
+      db = { tx: ok, targets: (j.targets && typeof j.targets === 'object') ? j.targets : {} }; save(); render();
+      $('pf-io').textContent = `นำเข้า ${ok.length} รายการแล้ว`;
+    } catch (err) { $('pf-io').textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองของ ValueGrab'; }
+    e.target.value = '';
+  });
+
+  /* add from the stock detail sheet */
+  document.addEventListener('vg:add', (e) => { show('port'); $('f-sym').value = e.detail; delete $('f-px').dataset.touched; symInfo(); $('f-sh').focus(); });
+
+  document.addEventListener('vg:ready', () => {
+    map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); fx = window.VG.fx || null; ready = true;
+    const dl = $('sym-list'); dl.replaceChildren(...window.VG.scan.map((r) => { const o = el('option'); o.value = r.symbol; o.label = r.name; return o; }));
+    render();
+  });
+  if (location.hash === '#portfolio') show('port');
+  render();
 })();
 </script>
 </body>
