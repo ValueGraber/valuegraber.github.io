@@ -551,15 +551,72 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
   .verdict { font-size: 24px; }
   h2 { font-size: 20px; }
 }
+.tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: none; }
+.a-list { display: grid; gap: 8px; margin-top: 8px; }
+.a-row { display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr auto auto; gap: 8px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.a-row:last-child { border-bottom: 0; }
+.a-row.auto { grid-template-columns: 2fr 2.5fr 1fr; color: var(--ink-2); }
+.a-row .a-n { font-weight: 500; color: var(--ink); }
+.a-row .a-t { font-size: 13px; }
+.a-row .a-v { text-align: right; font-weight: 600; white-space: nowrap; }
+.a-row .a-em { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.a-row .a-em input { width: 18px; height: 18px; accent-color: var(--jade); }
+.a-row .a-upd { grid-column: 1 / -1; font-size: 12px; color: var(--ink-3); margin-top: -4px; }
+.a-row.debt { grid-template-columns: 2fr 1.2fr 0.9fr 1.2fr auto; }
+.a-row.bill { grid-template-columns: 2fr 1fr auto auto auto auto; }
+.a-row .inp { padding: 8px 10px; font-size: 15px; }
+.a-row select.inp { padding: 8px 6px; }
+.btn-line.sm { padding: 5px 12px; font-size: 14px; border-radius: 10px; }
+.p-budgets { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 28px; margin-top: 6px; }
+.pb-row { display: grid; grid-template-columns: 1fr auto 90px; gap: 2px 10px; align-items: center; padding: 6px 0; }
+.pb-row .pb-k { font-size: 15px; }
+.pb-row .pb-v { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.pb-row .inp.sm { width: 90px; padding: 5px 8px; font-size: 14px; }
+.pb-row .bc-t { grid-column: 1 / -1; height: 6px; }
+.ret-in { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 6px 0 12px; }
+.ret-in .mini { display: grid; gap: 4px; font-size: 13px; }
+.ret-in .inp.sm { width: 90px; }
+.p-stock { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.iv-ed { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; background: var(--bg); margin: 10px 0 16px; }
+.iv-ed .inp { background: var(--surface); }
+.iv-items td { vertical-align: middle; }
+.iv-items td.l .inp { min-width: 180px; }
+.iv-items .iv-amt { white-space: nowrap; }
+.iv-tot { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+#iv-sum { text-align: right; display: grid; } #iv-sum b { font-size: 20px; } #iv-sum small { color: var(--ink-3); }
+.iv-rec { display: flex !important; gap: 8px; align-items: center; margin-top: 10px; font-size: 14px; }
+.iv-rec input { width: 18px; height: 18px; accent-color: var(--jade); }
+@media (max-width: 760px) {
+  .a-row { grid-template-columns: 1fr 1fr auto; }
+  .a-row .a-name { grid-column: 1 / -1; }
+  .a-row .a-v { grid-column: 1 / 2; text-align: left; }
+  .a-row.auto { grid-template-columns: 1fr auto; } .a-row.auto .a-t { display: none; }
+  .a-row.debt { grid-template-columns: 1.2fr .8fr 1.2fr auto; } .a-row.debt .a-name { grid-column: 1 / -1; }
+  .a-row.bill { grid-template-columns: 1fr 1fr auto; } .a-row.bill .a-name { grid-column: 1 / -1; }
+  .p-budgets { grid-template-columns: 1fr; }
+  .tabs button { padding: 8px 12px; font-size: 15px; }
+}
+@media print {
+  #print-area .pd-head { display: flex; justify-content: space-between; gap: 20pt; margin-bottom: 12pt; }
+  #print-area .pd-shop { font-size: 15pt; display: block; }
+  #print-area .pd-meta { text-align: right; }
+  #print-area .pd-meta h1 { text-align: right; margin: 0 0 4pt; }
+  #print-area .pd-cust { border: 0.6pt solid #000; padding: 6pt 8pt; margin-bottom: 10pt; }
+  #print-area .pd-words { text-align: right; margin: 6pt 0; }
+  #print-area table.pd td:nth-child(3) { text-align: center; } #print-area table.pd td:nth-child(4) { text-align: right; } #print-area table.pd td:nth-child(5) { text-align: right; } #print-area table.pd tr.pa-sub td:last-child, #print-area table.pd tr.pa-tot td:last-child { text-align: right; }
+  #print-area .pd-sign { display: flex; justify-content: space-around; margin-top: 40pt; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">Value<span>Grab</span></div>
-  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="home" aria-selected="true">หน้าแรก</button><button type="button" role="tab" data-v="scan" aria-selected="false">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ต</button><button type="button" role="tab" data-v="biz" aria-selected="false">ธุรกิจ</button></nav>
+  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="home" aria-selected="true">หน้าแรก</button><button type="button" role="tab" data-v="money" aria-selected="false">เงินของฉัน</button><button type="button" role="tab" data-v="scan" aria-selected="false">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ต</button><button type="button" role="tab" data-v="biz" aria-selected="false">ธุรกิจ</button></nav>
   <section class="acct" id="acct" hidden>
     <div id="acct-out">
-      <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์พอร์ตและข้อมูลธุรกิจข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง</p></div>
+      <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์ข้อมูลทั้งหมดข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง</p></div>
         <div class="acct-btns"><button class="btn-solid" id="a-google" type="button">เข้าสู่ระบบด้วย Google</button><button class="btn-line" id="a-mail-open" type="button">ใช้อีเมล</button></div></div>
       <form class="acct-mail" id="a-mail" hidden autocomplete="on">
         <input class="inp" id="a-email" type="email" placeholder="อีเมล" autocomplete="username">
@@ -578,11 +635,13 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
 <div id="view-home" hidden>
   <header class="home-head"><p class="stamp" id="h-stamp">กำลังโหลดข้อมูลล่าสุด</p><h1 class="h-title" id="h-verdict">ภาพรวมวันนี้</h1></header>
   <div class="home-grid">
-    <article class="hcard" id="hc-market"><header><h3>ตลาดวันนี้</h3><button type="button" class="hlink" data-go="scan:market">ดูตลาด →</button></header><div class="hbody" id="h-market"></div></article>
+    <article class="hcard" id="hc-nw"><header><h3>ทรัพย์สินสุทธิ</h3><button type="button" class="hlink" data-go="money:nw">ดูทั้งหมด →</button></header><div class="hbody" id="h-nw"></div></article>
     <article class="hcard tall" id="hc-picks"><header><h3>น่าซื้อสะสม</h3><button type="button" class="hlink" data-go="scan:picks">ดูทั้งหมด →</button></header><div class="hbody" id="h-picks"></div></article>
-    <article class="hcard" id="hc-port"><header><h3>พอร์ตของฉัน</h3><button type="button" class="hlink" data-go="port:sum">เปิดพอร์ต →</button></header><div class="hbody" id="h-port"></div></article>
+    <article class="hcard" id="hc-port"><header><h3>พอร์ตหุ้น</h3><button type="button" class="hlink" data-go="port:sum">เปิดพอร์ต →</button></header><div class="hbody" id="h-port"></div></article>
+    <article class="hcard" id="hc-budget"><header><h3>งบรายจ่ายเดือนนี้</h3><button type="button" class="hlink" data-go="money:budget">จดรายจ่าย →</button></header><div class="hbody" id="h-budget"></div></article>
+    <article class="hcard" id="hc-cal"><header><h3>ใกล้ถึงกำหนด</h3><button type="button" class="hlink" data-go="money:debt">บิล →</button></header><div class="hbody" id="h-cal"></div></article>
+    <article class="hcard" id="hc-market"><header><h3>ตลาดวันนี้</h3><button type="button" class="hlink" data-go="scan:market">ดูตลาด →</button></header><div class="hbody" id="h-market"></div></article>
     <article class="hcard" id="hc-today"><header><h3>อะไรเปลี่ยนวันนี้</h3><button type="button" class="hlink" data-go="scan:picks">ดูสรุป →</button></header><div class="hbody" id="h-today"></div></article>
-    <article class="hcard" id="hc-cal"><header><h3>วันสำคัญที่จะถึง</h3><button type="button" class="hlink" data-go="port:cal">ปฏิทิน →</button></header><div class="hbody" id="h-cal"></div></article>
     <article class="hcard" id="hc-goal"><header><h3>เป้าหมายการลงทุน</h3><button type="button" class="hlink" data-go="port:grow">ดูแผน →</button></header><div class="hbody" id="h-goal"></div></article>
     <article class="hcard" id="hc-biz"><header><h3>ธุรกิจเดือนนี้</h3><button type="button" class="hlink" data-go="biz:sum">เปิดธุรกิจ →</button></header><div class="hbody" id="h-biz"></div></article>
     <article class="hcard" id="hc-tax"><header><h3>ภาษีธุรกิจปีนี้</h3><button type="button" class="hlink" data-go="biz:tax">ดูรายละเอียด →</button></header><div class="hbody" id="h-tax"></div></article>
@@ -874,6 +933,37 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
     </div>
   </section>
 
+  <section class="panel" style="margin-top:16px" id="iv-panel" data-sub="inv">
+    <div class="ph"><div><h3>ใบเสร็จ ใบแจ้งหนี้ ใบเสนอราคา</h3><p>ออกเอกสารให้ลูกค้า พิมพ์หรือบันทึกเป็น PDF ได้ ใบเสร็จที่ออกจะลงเป็นรายรับในบัญชีให้เอง ชื่อร้านและที่อยู่บนหัวเอกสารใช้ข้อมูลจากหน้าภาษี</p></div>
+      <button class="btn-solid" id="iv-new" type="button">+ สร้างเอกสาร</button></div>
+    <div id="iv-ed" class="iv-ed" hidden>
+      <div class="f-types"><span class="seg" id="iv-type"><button type="button" data-v="rc" aria-pressed="true">ใบเสร็จรับเงิน</button><button type="button" data-v="inv" aria-pressed="false">ใบแจ้งหนี้</button><button type="button" data-v="qt" aria-pressed="false">ใบเสนอราคา</button></span></div>
+      <div class="pf-form f2">
+        <label>เลขที่<input class="inp" id="iv-no"></label>
+        <label>วันที่<input class="inp" id="iv-date" type="date"></label>
+        <label>ชื่อลูกค้า<input class="inp" id="iv-cust" placeholder="ชื่อลูกค้าหรือบริษัท"></label>
+        <label>เลขผู้เสียภาษีลูกค้า (ถ้ามี)<input class="inp" id="iv-ctax" inputmode="numeric" maxlength="13"></label>
+        <label class="wide2">ที่อยู่ลูกค้า<input class="inp" id="iv-addr"></label>
+      </div>
+      <div class="scroll"><table class="tbl iv-items"><thead><tr><th class="l">รายการ</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>จำนวนเงิน</th><th></th></tr></thead><tbody id="iv-rows"></tbody></table></div>
+      <datalist id="iv-prods"></datalist>
+      <button class="linkish" id="iv-addrow" type="button">+ เพิ่มรายการ</button>
+      <div class="iv-tot">
+        <label class="mini">ส่วนลด (บาท) <input class="inp sm" id="iv-disc" type="number" min="0" step="any" inputmode="decimal" placeholder="0" style="width:110px"></label>
+        <div id="iv-sum"></div>
+      </div>
+      <label class="mini" style="display:block;margin-top:8px">หมายเหตุ<input class="inp" id="iv-note" placeholder="เช่น โอนเข้าบัญชี ..."></label>
+      <label class="mini iv-rec" id="iv-rec-l"><input type="checkbox" id="iv-rec" checked> ลงเป็นรายรับในบัญชีธุรกิจ (สินค้าที่ตรงกับชื่อในหน้าต้นทุนจะตัดสต็อกให้ด้วย)</label>
+      <div class="pf-actions">
+        <button class="btn-solid" id="iv-save" type="button">บันทึก</button>
+        <button class="btn-line" id="iv-print" type="button">บันทึกและพิมพ์</button>
+        <button class="btn-line" id="iv-cancel" type="button">ยกเลิก</button>
+        <span class="pf-hint" id="iv-hint"></span>
+      </div>
+    </div>
+    <div class="scroll"><table class="tbl" id="iv-list"><thead><tr><th class="l">เลขที่</th><th class="l">วันที่</th><th class="l">ประเภท</th><th class="l">ลูกค้า</th><th>ยอดรวม</th><th class="l">สถานะ</th><th></th></tr></thead><tbody></tbody></table></div>
+  </section>
+
   <section class="panel" style="margin-top:16px" id="b-products" data-sub="prod">
     <div class="ph"><div><h3>ต้นทุนต่อชิ้นและราคาขาย</h3><p>ใส่วัตถุดิบหรือค่าใช้จ่ายที่ใช้ทำสินค้า 1 ชิ้น ระบบจะบอกต้นทุน กำไรต่อชิ้น และราคาที่ควรตั้งถ้าอยากได้กำไรตามเป้า</p></div>
       <button class="btn-line" id="p-add" type="button">+ เพิ่มสินค้า</button></div>
@@ -892,6 +982,96 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
     </div>
   </section>
   <p class="disclaimer">ตัวเลขทั้งหมดคำนวณจากรายการที่คุณบันทึกเอง ใช้ดูภาพรวมและวางแผน ส่วนประมาณภาษีใช้อัตราภาษีเงินได้บุคคลธรรมดาแบบขั้นบันไดและนับเฉพาะรายได้ธุรกิจ ยังไม่รวมเงินได้ประเภทอื่น เช่น เงินเดือน ตรวจตัวเลขจริงกับกรมสรรพากรหรือนักบัญชีก่อนยื่น</p>
+</div>
+<div id="view-money" hidden>
+  <!-- net worth -->
+  <div class="strip" id="m-strip" data-sub="nw">
+    <div><div class="k">ทรัพย์สินสุทธิ</div><div class="v" id="m-nw">0 บาท</div><div class="h" id="m-nw-h"></div></div>
+    <div><div class="k">ทรัพย์สินทั้งหมด</div><div class="v" id="m-as">0 บาท</div><div class="h" id="m-as-h"></div></div>
+    <div><div class="k">หนี้สินทั้งหมด</div><div class="v" id="m-li">0 บาท</div><div class="h" id="m-li-h"></div></div>
+    <div><div class="k">เงินฉุกเฉิน</div><div class="v" id="m-em">0 เดือน</div><div class="h" id="m-em-h"></div></div>
+  </div>
+  <section class="panel" data-sub="nw">
+    <div class="ph"><div><h3>ทรัพย์สินสุทธิรายเดือน</h3><p>ทรัพย์สินทั้งหมดลบหนี้ ระบบบันทึกยอดของแต่ละเดือนให้เองทุกครั้งที่เปิดหน้านี้</p></div></div>
+    <div class="chart" id="m-chart"></div>
+  </section>
+  <section class="panel" style="margin-top:16px" data-sub="nw">
+    <div class="ph"><div><h3>บัญชีและทรัพย์สิน</h3><p>ใส่ยอดล่าสุดของแต่ละบัญชี อัปเดตเดือนละครั้งก็พอ พอร์ตหุ้นอเมริกาดึงจากแท็บพอร์ตให้เอง ทองคำใส่เป็นน้ำหนักบาททอง ระบบคิดราคาให้</p></div>
+      <button class="btn-line" id="a-add" type="button">+ เพิ่มบัญชี/ทรัพย์สิน</button></div>
+    <div id="a-list" class="a-list"></div>
+    <p class="pf-hint" id="gold-note"></p>
+  </section>
+
+  <!-- budget -->
+  <div class="b-month" data-sub="budget"><button type="button" class="b-nav" id="p-prev" aria-label="เดือนก่อน">‹</button><h2 id="p-month"></h2><button type="button" class="b-nav" id="p-next" aria-label="เดือนถัดไป">›</button></div>
+  <div class="strip" id="p-strip" data-sub="budget">
+    <div><div class="k">รายรับ</div><div class="v pos" id="p-in">0 บาท</div><div class="h" id="p-in-h"></div></div>
+    <div><div class="k">รายจ่าย</div><div class="v" id="p-out">0 บาท</div><div class="h" id="p-out-h"></div></div>
+    <div><div class="k">เหลือเก็บ</div><div class="v" id="p-save">0 บาท</div><div class="h" id="p-save-h"></div></div>
+    <div><div class="k">งบที่ตั้งไว้</div><div class="v" id="p-bud">0 บาท</div><div class="h" id="p-bud-h"></div></div>
+  </div>
+  <section class="panel" id="p-add" data-sub="budget">
+    <h3 id="p-title">จดรายรับรายจ่ายส่วนตัว</h3>
+    <p id="p-sub">แยกจากเงินธุรกิจ เงินที่โอนจากร้านมาใช้เองให้ลงเป็นรายรับหมวด "โอนจากธุรกิจ"</p>
+    <div class="f-types"><span class="seg" id="p-kind"><button type="button" data-v="out" aria-pressed="true">รายจ่าย</button><button type="button" data-v="in" aria-pressed="false">รายรับ</button></span></div>
+    <form class="pf-form f2" id="p-form" autocomplete="off">
+      <label>จำนวนเงิน (บาท)<input class="inp" id="p-amt" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 120"></label>
+      <label>หมวด<input class="inp" id="p-cat" list="p-cats" placeholder="เช่น อาหาร"></label>
+      <label>วันที่<input class="inp" id="p-date" type="date"></label>
+      <label class="wide2">บันทึกช่วยจำ<input class="inp" id="p-note" placeholder="เช่น ข้าวกลางวัน"></label>
+    </form>
+    <div class="chips b-chips" id="p-chips"></div>
+    <datalist id="p-cats"></datalist>
+    <div class="pf-actions">
+      <button class="btn-solid" id="p-save-btn" type="button">บันทึก</button>
+      <button class="btn-line" id="p-cancel" type="button" hidden>ยกเลิกการแก้ไข</button>
+      <span class="pf-hint" id="p-hint"></span>
+    </div>
+  </section>
+  <section class="panel" style="margin-top:16px" data-sub="budget">
+    <div class="ph"><div><h3>งบรายจ่ายแต่ละหมวด</h3><p>ตั้งงบต่อเดือนในช่องขวาของแต่ละหมวด แถบจะเปลี่ยนเป็นสีส้มเมื่อใช้เกิน 80% และสีแดงเมื่อเกินงบ</p></div></div>
+    <div id="p-budgets" class="p-budgets"></div>
+  </section>
+  <section class="panel" style="margin-top:16px" data-sub="budget">
+    <div class="ph"><h3>รายการเดือนนี้</h3></div>
+    <div class="scroll"><table class="tbl" id="p-tx"><thead><tr><th class="l">วันที่</th><th class="l">หมวด</th><th class="l">รายละเอียด</th><th>รายรับ</th><th>รายจ่าย</th><th></th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <!-- emergency -->
+  <section class="panel" data-sub="emerg">
+    <h3>เงินสำรองฉุกเฉิน</h3>
+    <p>เงินที่เก็บไว้ใช้ยามจำเป็น เช่น ตกงาน ป่วย หรือร้านขายไม่ได้ ควรมีอย่างน้อย 3–6 เท่าของรายจ่ายต่อเดือน คนทำธุรกิจของตัวเองควรใช้ 6 เดือนขึ้นไป ติ๊ก "เป็นเงินฉุกเฉิน" ที่บัญชีในหน้าทรัพย์สิน เพื่อนับยอด</p>
+    <div class="goal-in">
+      <label class="mini">อยากมีกี่เดือน <input class="inp sm" id="e-months" type="number" min="1" max="24" step="1" inputmode="numeric"></label>
+      <label class="mini">รายจ่ายต่อเดือน (บาท) <input class="inp" id="e-exp" type="number" min="0" step="any" inputmode="decimal"></label>
+    </div>
+    <div id="e-out"></div>
+  </section>
+
+  <!-- debts and bills -->
+  <section class="panel" data-sub="debt">
+    <div class="ph"><div><h3>หนี้สิน</h3><p>ใส่ยอดหนี้คงเหลือ ดอกเบี้ยต่อปี และยอดผ่อนขั้นต่ำต่อเดือน ระบบจะเทียบสองวิธีปิดหนี้ว่าวิธีไหนเสียดอกเบี้ยน้อยกว่า</p></div>
+      <button class="btn-line" id="d-add" type="button">+ เพิ่มหนี้</button></div>
+    <div id="d-list" class="a-list"></div>
+    <div class="goal-in"><label class="mini">จ่ายเพิ่มจากขั้นต่ำได้เดือนละ (บาท) <input class="inp" id="d-extra" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label></div>
+    <div id="d-plan" class="tx-opts"></div>
+  </section>
+  <section class="panel" style="margin-top:16px" data-sub="debt">
+    <div class="ph"><div><h3>บิลและค่าใช้จ่ายประจำ</h3><p>ค่าเช่า ค่าไฟ ค่าโทรศัพท์ เบี้ยประกัน ระบบจะเตือนในหน้าแรกเมื่อใกล้ครบกำหนด กด "จ่ายแล้ว" เพื่อลงเป็นรายจ่ายให้เลย</p></div>
+      <button class="btn-line" id="bl-add" type="button">+ เพิ่มบิล</button></div>
+    <div id="bl-list" class="a-list"></div>
+    <h5 class="ded-g">ครบกำหนดใน 30 วัน</h5>
+    <div id="bl-due" class="cal"></div>
+  </section>
+
+  <!-- retirement -->
+  <section class="panel" data-sub="retire">
+    <h3>วางแผนเกษียณ</h3>
+    <p>คำนวณว่าต้องมีเงินก้อนเท่าไหร่ถึงจะหยุดทำงานได้ และต้องเก็บเดือนละเท่าไหร่ ใช้เงินลงทุนที่มีตอนนี้ (หุ้น กองทุน ทอง คริปโต) เป็นจุดเริ่มต้น</p>
+    <div class="ret-in" id="r-in"></div>
+    <div id="r-out"></div>
+    <div class="chart" id="r-chart"></div>
+  </section>
 </div>
 </div>
 
@@ -1265,7 +1445,7 @@ dash.calc('sectors', {
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
-    window.VG = { market, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
+    window.VG = { market, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -1296,8 +1476,8 @@ dash.calc('sectors', {
   const ymShift = (ym, k) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + k, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
   const ymTH = (ym, o = { month: 'long', year: 'numeric' }) => new Date(ym + '-01T00:00:00').toLocaleDateString('th-TH', o);
 
-  let biz = { entries: [], products: [], name: '' };
-  try { const s = JSON.parse(localStorage.getItem(BKEY) || 'null'); if (s && Array.isArray(s.entries)) biz = { entries: s.entries, products: s.products || [], name: s.name || '' }; } catch (e) { /* in memory */ }
+  let biz = { entries: [], products: [], name: '', invoices: [] };
+  try { const s = JSON.parse(localStorage.getItem(BKEY) || 'null'); if (s && Array.isArray(s.entries)) biz = { entries: s.entries, products: s.products || [], name: s.name || '', invoices: Array.isArray(s.invoices) ? s.invoices : [] }; } catch (e) { /* in memory */ }
   const keep = () => { try { localStorage.setItem(BKEY, JSON.stringify(biz)); return true; } catch (e) { return false; } };
   const save = () => { keep(); if (window.VGSync) window.VGSync.push('business'); document.dispatchEvent(new Event('vg:data')); };
   let ym = ymOf(today()), kind = 'in', editId = null, filter = 'all', shown = false;
@@ -1369,6 +1549,7 @@ dash.calc('sectors', {
       });
     });
     const best = $('b-best'); best.replaceChildren();
+    const ls = lowStock(); if (ls.length) { best.append(el('h4', 'b-h4', 'สินค้าใกล้หมด')); ls.forEach((x) => best.append(el('div', 'pf-err', `${x.p.name || 'ไม่มีชื่อ'} เหลือ ${x.n} ชิ้น`))); }
     const sold = {}; biz.entries.forEach((e) => { if (e.kind === 'in' && e.prod && ymOf(e.date) === ym) { sold[e.prod] = sold[e.prod] || { q: 0, v: 0 }; sold[e.prod].q += Number(e.qty) || 0; sold[e.prod].v += e.amount; } });
     const list = Object.entries(sold).map(([id, s]) => ({ p: biz.products.find((p) => p.id === id), ...s })).filter((x) => x.p).sort((a, b) => b.v - a.v);
     if (list.length) {
@@ -1410,8 +1591,14 @@ dash.calc('sectors', {
           numIn(x.qty, 'ใช้กี่หน่วย', 'p-num sm', (v) => { x.qty = v; su(); upd(); saveSoon(); }), sub, rm);
         su(); parts.append(r);
       });
+      const stk = el('div', 'p-stock'); const left = el('b');
+      const su2 = () => { const n = stockOf(p); left.textContent = n == null ? 'ยังไม่ได้ตั้งยอด' : `${n} ชิ้น`; left.className = n != null && n <= (Number(p.low) || 0) ? 'neg' : ''; };
+      const cnt = numIn('', 'นับได้จริงกี่ชิ้น', 'p-num sm', () => {}); cnt.style.width = '130px';
+      const setb = el('button', 'btn-line sm', 'ตั้งยอด'); setb.type = 'button'; setb.addEventListener('click', () => { if (cnt.value === '') return; p.stockBase = +cnt.value; p.stockAt = today(); cnt.value = ''; save(); su2(); drawCats(); });
+      const low = numIn(p.low, '0', 'p-num sm', (v) => { if (v === '') delete p.low; else p.low = v; su2(); saveSoon(); });
+      stk.append(el('span', 'p-ph', 'สต็อกคงเหลือ '), left, el('span', 'pf-hint', ' (หักยอดขายที่เลือกสินค้านี้ให้เอง)'), cnt, setb, el('span', 'pf-hint', 'เตือนเมื่อเหลือไม่เกิน'), low); su2();
       const addp = el('button', 'linkish', '+ เพิ่มวัตถุดิบ'); addp.type = 'button'; addp.addEventListener('click', () => { p.parts.push({ name: '', cost: '', qty: 1 }); save(); drawProducts(); const rows = card.querySelectorAll('.p-pn'); });
-      parts.append(addp);
+      parts.append(addp, stk);
       card.append(head, parts, out); upd(); box.append(card);
     });
   };
@@ -1500,8 +1687,14 @@ dash.calc('sectors', {
     const entries = (Array.isArray(d.entries) ? d.entries : []).filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out') && +e.amount > 0)
       .map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.prod ? { prod: String(e.prod) } : {}), ...(+e.qty > 0 ? { qty: +e.qty } : {}), ...(e.kind === 'out' && e.doc === false ? { doc: false } : e.kind === 'out' ? { doc: true } : {}), ...(/^\d{4}-\d{2}-\d{2}$/.test(e.at || '') ? { at: e.at } : {}) }));
     const products = (Array.isArray(d.products) ? d.products : []).filter((p) => p && typeof p === 'object').map((p) => ({ id: String(p.id || newId()), name: String(p.name || '').slice(0, 60), price: p.price === '' ? '' : +p.price || '', feePct: p.feePct === '' ? '' : +p.feePct || '',
-      parts: (Array.isArray(p.parts) ? p.parts : []).slice(0, 40).map((x) => ({ name: String(x.name || '').slice(0, 60), cost: x.cost === '' ? '' : +x.cost || '', qty: x.qty === '' ? '' : +x.qty || '' })) }));
-    return { entries, products, name: String(d.name || '').slice(0, 60) };
+      parts: (Array.isArray(p.parts) ? p.parts : []).slice(0, 40).map((x) => ({ name: String(x.name || '').slice(0, 60), cost: x.cost === '' ? '' : +x.cost || '', qty: x.qty === '' ? '' : +x.qty || '' })),
+      ...(p.stockBase !== undefined && p.stockBase !== '' && isFinite(+p.stockBase) ? { stockBase: +p.stockBase } : {}), ...(/^\d{4}-\d{2}-\d{2}$/.test(p.stockAt || '') ? { stockAt: p.stockAt } : {}), ...(+p.low >= 0 && p.low !== '' && p.low != null ? { low: +p.low } : {}) }));
+    const DTk = ['rc', 'inv', 'qt'];
+    const invoices = (Array.isArray(d.invoices) ? d.invoices : []).filter((x) => x && DTk.includes(x.type) && /^\d{4}-\d{2}-\d{2}$/.test(x.date)).map((x) => ({ id: String(x.id || newId()), type: x.type, no: String(x.no || '').slice(0, 30), date: x.date,
+      cust: String(x.cust || '').slice(0, 80), ctax: String(x.ctax || '').slice(0, 13), addr: String(x.addr || '').slice(0, 160), disc: x.disc === '' ? '' : +x.disc || '', note: String(x.note || '').slice(0, 160), status: x.status === 'paid' ? 'paid' : 'open',
+      ...(/^\d{4}-\d{2}-\d{2}$/.test(x.paidOn || '') ? { paidOn: x.paidOn } : {}), entryIds: Array.isArray(x.entryIds) ? x.entryIds.map(String).slice(0, 100) : [],
+      items: (Array.isArray(x.items) ? x.items : []).slice(0, 60).map((it) => ({ desc: String(it.desc || '').slice(0, 100), qty: +it.qty || 0, price: +it.price || 0, ...(it.prod ? { prod: String(it.prod) } : {}) })) }));
+    return { entries, products, invoices, name: String(d.name || '').slice(0, 60) };
   };
   $('b-import').addEventListener('change', async (ev) => {
     const f = ev.target.files[0]; if (!f) return;
@@ -1672,17 +1865,474 @@ dash.calc('sectors', {
   $('pr-month').addEventListener('click', () => printReport('m'));
   $('pr-year').addEventListener('click', () => printReport('y'));
 
-  const render = () => { if (!shown) return; drawStrip(); drawChart(); drawCats(); drawTx(); fillProdSelect(); drawTax(); };
+  /* ---------- stock on hand per product ---------- */
+  const soldSince = (p) => biz.entries.reduce((a, e) => a + (e.kind === 'in' && e.prod === p.id && (!p.stockAt || e.date >= p.stockAt) ? Number(e.qty) || 0 : 0), 0);
+  const stockOf = (p) => (p.stockBase === '' || p.stockBase == null ? null : Number(p.stockBase) - soldSince(p));
+  const lowStock = () => biz.products.map((p) => ({ p, n: stockOf(p) })).filter((x) => x.n != null && x.n <= (Number(x.p.low) || 0));
+
+  /* ---------- documents: receipts, invoices, quotations ---------- */
+  const DT = { rc: 'ใบเสร็จรับเงิน', inv: 'ใบแจ้งหนี้', qt: 'ใบเสนอราคา' }, DP = { rc: 'RC', inv: 'IV', qt: 'QT' };
+  const DG = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'], PL = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'];
+  const readInt = (s) => {
+    s = String(s).replace(/^0+/, ''); if (!s) return '';
+    if (s.length > 6) return readInt(s.slice(0, -6)) + 'ล้าน' + readInt(s.slice(-6));
+    let o = ''; const L = s.length;
+    for (let i = 0; i < L; i++) { const d = +s[i], p = L - i - 1; if (!d) continue;
+      if (p === 0 && d === 1 && L > 1) o += 'เอ็ด'; else if (p === 1 && d === 2) o += 'ยี่'; else if (p === 1 && d === 1) o += ''; else o += DG[d]; o += PL[p]; }
+    return o;
+  };
+  const bahtText = (x) => { const v = Math.round(Math.abs(x) * 100); const b = Math.floor(v / 100), s = v % 100; if (!b && !s) return 'ศูนย์บาทถ้วน'; return (b ? readInt(String(b)) + 'บาท' : '') + (s ? readInt(String(s)) + 'สตางค์' : 'ถ้วน'); };
+  const docTotal = (d) => { const sub = (d.items || []).reduce((a, it) => a + (Number(it.qty) || 0) * (Number(it.price) || 0), 0); return { sub, disc: Math.min(sub, Number(d.disc) || 0), total: Math.max(0, sub - (Number(d.disc) || 0)) }; };
+  const nextNo = (type, date) => { const y = +date.slice(0, 4) + 543; const pre = `${DP[type]}${y}-`; const n = (biz.invoices || []).filter((d) => d.no && d.no.startsWith(pre)).map((d) => +d.no.slice(pre.length) || 0); return pre + String((n.length ? Math.max(...n) : 0) + 1).padStart(4, '0'); };
+  let doc = null, ivType = 'rc';
+  const ivHint = (m, err) => { $('iv-hint').textContent = m || ''; $('iv-hint').className = err ? 'pf-err' : 'pf-hint'; };
+  const drawIvRows = () => {
+    const tb = $('iv-rows'); tb.replaceChildren();
+    $('iv-prods').replaceChildren(...biz.products.filter((p) => p.name).map((p) => { const o = el('option'); o.value = p.name; return o; }));
+    doc.items.forEach((it, i) => {
+      const tr = el('tr'); const amt = el('td', 'iv-amt');
+      const up = () => { amt.textContent = b2((Number(it.qty) || 0) * (Number(it.price) || 0)); drawIvSum(); };
+      const d = el('input', 'inp'); d.value = it.desc || ''; d.placeholder = 'ชื่อสินค้าหรือบริการ'; d.setAttribute('list', 'iv-prods');
+      d.addEventListener('input', () => { it.desc = d.value; const p = biz.products.find((x) => x.name && x.name === d.value); if (p) { it.prod = p.id; if (!it.price && Number(p.price)) { it.price = Number(p.price); pr.value = it.price; up(); } } else delete it.prod; });
+      const q = el('input', 'inp sm'); q.type = 'number'; q.min = 0; q.step = 'any'; q.inputMode = 'decimal'; q.value = it.qty ?? ''; q.addEventListener('input', () => { it.qty = q.value === '' ? '' : +q.value; up(); });
+      const pr = el('input', 'inp sm'); pr.type = 'number'; pr.min = 0; pr.step = 'any'; pr.inputMode = 'decimal'; pr.style.width = '110px'; pr.value = it.price ?? ''; pr.addEventListener('input', () => { it.price = pr.value === '' ? '' : +pr.value; up(); });
+      const x = el('button', 'del', '✕'); x.type = 'button'; x.setAttribute('aria-label', 'ลบรายการ'); x.addEventListener('click', () => { doc.items.splice(i, 1); if (!doc.items.length) doc.items.push({ desc: '', qty: 1, price: '' }); drawIvRows(); });
+      const c1 = el('td', 'l'); c1.append(d); const c2 = el('td'); c2.append(q); const c3 = el('td'); c3.append(pr); const c5 = el('td'); c5.append(x);
+      tr.append(c1, c2, c3, amt, c5); tb.append(tr); amt.textContent = b2((Number(it.qty) || 0) * (Number(it.price) || 0));
+    });
+    drawIvSum();
+  };
+  const drawIvSum = () => { const t = docTotal({ ...doc, disc: $('iv-disc').value }); const s = $('iv-sum'); s.replaceChildren(); s.append(el('div', null, `รวม ${b2(t.sub)}` + (t.disc ? ` · ส่วนลด ${b2(t.disc)}` : '')), el('b', null, `ยอดสุทธิ ${b2(t.total)}`), el('small', null, `(${bahtText(t.total)})`)); };
+  const openDoc = (d) => {
+    doc = d ? JSON.parse(JSON.stringify(d)) : { id: newId(), type: ivType, no: '', date: today(), cust: '', ctax: '', addr: '', items: [{ desc: '', qty: 1, price: '' }], disc: '', note: '', status: 'open', entryIds: [] };
+    ivType = doc.type; setSeg('iv-type', ivType); $('iv-no').value = doc.no || nextNo(ivType, doc.date); $('iv-date').value = doc.date; $('iv-cust').value = doc.cust; $('iv-ctax').value = doc.ctax || ''; $('iv-addr').value = doc.addr || '';
+    $('iv-disc').value = doc.disc || ''; $('iv-note').value = doc.note || ''; $('iv-rec').checked = d ? !!(d.entryIds && d.entryIds.length) || d.type !== 'rc' : true; $('iv-rec-l').hidden = ivType !== 'rc';
+    $('iv-ed').hidden = false; ivHint(''); drawIvRows(); $('iv-ed').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  document.querySelectorAll('#iv-type button').forEach((b) => b.addEventListener('click', () => { const was = ivType; ivType = b.dataset.v; setSeg('iv-type', ivType); $('iv-rec-l').hidden = ivType !== 'rc'; if (!doc || $('iv-no').value === nextNo(was, $('iv-date').value) || !$('iv-no').value) $('iv-no').value = nextNo(ivType, $('iv-date').value); }));
+  $('iv-new').addEventListener('click', () => openDoc(null));
+  $('iv-addrow').addEventListener('click', () => { doc.items.push({ desc: '', qty: 1, price: '' }); drawIvRows(); const r = $('iv-rows').querySelectorAll('input'); if (r.length) r[r.length - 3].focus(); });
+  $('iv-disc').addEventListener('input', drawIvSum);
+  $('iv-cancel').addEventListener('click', () => { doc = null; $('iv-ed').hidden = true; });
+  /* turn a paid document into income entries, one per line (discount spread by value) */
+  const bookIncome = (d) => {
+    biz.entries = biz.entries.filter((e) => !(d.entryIds || []).includes(e.id)); d.entryIds = [];
+    const t = docTotal(d); if (!t.total) return; const k = t.sub ? t.total / t.sub : 1;
+    d.items.forEach((it) => { const v = (Number(it.qty) || 0) * (Number(it.price) || 0) * k; if (v <= 0) return;
+      const e = { id: newId(), date: d.paidOn || d.date, kind: 'in', amount: Math.round(v * 100) / 100, cat: 'ยอดขาย', note: `${d.no}${d.cust ? ' ' + d.cust : ''}${it.prod ? '' : ' · ' + (it.desc || '')}`.slice(0, 120), at: today() };
+      if (it.prod) { e.prod = it.prod; if (Number(it.qty) > 0) e.qty = Number(it.qty); } biz.entries.push(e); d.entryIds.push(e.id); });
+  };
+  const saveDoc = () => {
+    doc.type = ivType; doc.no = $('iv-no').value.trim().slice(0, 30); doc.date = $('iv-date').value; doc.cust = $('iv-cust').value.trim().slice(0, 80); doc.ctax = $('iv-ctax').value.trim().slice(0, 13);
+    doc.addr = $('iv-addr').value.trim().slice(0, 160); doc.disc = $('iv-disc').value === '' ? '' : +$('iv-disc').value; doc.note = $('iv-note').value.trim().slice(0, 160);
+    doc.items = doc.items.filter((it) => (it.desc || '').trim() || Number(it.price)).map((it) => ({ desc: String(it.desc || '').slice(0, 100), qty: it.qty === '' ? '' : +it.qty || 0, price: it.price === '' ? '' : +it.price || 0, ...(it.prod ? { prod: it.prod } : {}) }));
+    const err = !doc.no ? 'ใส่เลขที่เอกสาร' : !doc.date ? 'เลือกวันที่' : !doc.items.length ? 'ใส่รายการอย่างน้อย 1 รายการ' : !docTotal(doc).total ? 'ยอดรวมต้องมากกว่า 0' : (biz.invoices || []).some((x) => x.no === doc.no && x.id !== doc.id) ? 'เลขที่นี้มีอยู่แล้ว' : null;
+    if (err) { if (!doc.items.length) doc.items.push({ desc: '', qty: 1, price: '' }); ivHint(err, true); return false; }
+    if (doc.type === 'rc') { doc.status = 'paid'; if ($('iv-rec').checked) bookIncome(doc); else { biz.entries = biz.entries.filter((e) => !(doc.entryIds || []).includes(e.id)); doc.entryIds = []; } }
+    biz.invoices = biz.invoices || []; const i = biz.invoices.findIndex((x) => x.id === doc.id); if (i >= 0) biz.invoices[i] = doc; else biz.invoices.push(doc);
+    save(); const saved = doc; doc = null; $('iv-ed').hidden = true; render(); drawProducts(); return saved;
+  };
+  $('iv-save').addEventListener('click', () => { const d = saveDoc(); if (d) ivHint(''); });
+  $('iv-print').addEventListener('click', () => { const d = saveDoc(); if (d) printDoc(d); });
+  const drawDocs = () => {
+    const tb = $('iv-list').tBodies[0]; tb.replaceChildren(); const list = [...(biz.invoices || [])].sort((a, b) => (b.date + b.no).localeCompare(a.date + a.no));
+    if (!list.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีเอกสาร กด "+ สร้างเอกสาร"'); td.colSpan = 7; tr.append(td); tb.append(tr); return; }
+    list.forEach((d) => {
+      const tr = el('tr'); const t = docTotal(d);
+      const stt = d.type === 'qt' ? ['เสนอราคา', 'skip'] : d.status === 'paid' ? ['ชำระแล้ว', 'buy'] : ['รอชำระ', 'watch'];
+      [[d.no, 'l'], [new Date(d.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }), 'l'], [DT[d.type], 'l'], [d.cust || '–', 'l'], [b2(t.total)]].forEach(([v, c]) => tr.append(el('td', c, v)));
+      const s = el('td', 'l'); s.append(el('span', 'tag ' + stt[1], stt[0])); tr.append(s);
+      const c = el('td'); c.style.whiteSpace = 'nowrap';
+      if (d.type === 'inv' && d.status !== 'paid') { const p = el('button', 'btn-line sm', 'รับเงินแล้ว'); p.type = 'button'; p.addEventListener('click', () => { d.status = 'paid'; d.paidOn = today(); bookIncome(d); save(); render(); drawProducts(); }); c.append(p); }
+      const pr = el('button', 'edit', '⎙'); pr.type = 'button'; pr.title = 'พิมพ์'; pr.setAttribute('aria-label', 'พิมพ์เอกสาร'); pr.addEventListener('click', () => printDoc(d));
+      const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.title = 'แก้ไข'; ed.setAttribute('aria-label', 'แก้ไขเอกสาร'); ed.addEventListener('click', () => openDoc(d));
+      const x = el('button', 'del', '✕'); x.type = 'button'; x.title = 'ลบ'; x.setAttribute('aria-label', 'ลบเอกสาร');
+      x.addEventListener('click', () => { if (!confirm(`ลบเอกสาร ${d.no}?${d.entryIds && d.entryIds.length ? ' รายรับที่ลงไว้จากเอกสารนี้จะถูกลบด้วย' : ''}`)) return; biz.entries = biz.entries.filter((e) => !(d.entryIds || []).includes(e.id)); biz.invoices = biz.invoices.filter((y) => y.id !== d.id); save(); render(); drawProducts(); });
+      c.append(pr, ed, x); tr.append(c); tb.append(tr);
+    });
+  };
+  const printDoc = (d) => {
+    const area = $('print-area'); area.replaceChildren(); const t = docTotal(d); const f = (v) => (Number(v) || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const head = el('div', 'pd-head'); const seller = el('div');
+    seller.append(el('b', 'pd-shop', prof.shop || prof.owner || 'ชื่อร้าน'), ...[prof.shop && prof.owner ? prof.owner : '', prof.addr || '', prof.tin ? 'เลขประจำตัวผู้เสียภาษี ' + prof.tin : ''].filter(Boolean).map((x) => el('div', null, x)));
+    const meta = el('div', 'pd-meta'); meta.append(el('h1', null, DT[d.type]), el('div', null, 'เลขที่ ' + d.no), el('div', null, 'วันที่ ' + new Date(d.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })));
+    head.append(seller, meta); area.append(head);
+    const cu = el('div', 'pd-cust'); cu.append(el('b', null, (d.type === 'qt' ? 'เสนอราคาให้: ' : 'ลูกค้า: ') + (d.cust || '-')), ...[d.addr, d.ctax ? 'เลขประจำตัวผู้เสียภาษี ' + d.ctax : ''].filter(Boolean).map((x) => el('div', null, x))); area.append(cu);
+    const tbl = el('table', 'pd'); const hr = el('tr'); ['ลำดับ', 'รายการ', 'จำนวน', 'ราคาต่อหน่วย', 'จำนวนเงิน'].forEach((x) => hr.append(el('th', null, x))); tbl.append(el('thead')); tbl.tHead.append(hr);
+    const tb = el('tbody'); d.items.forEach((it, i) => { const r = el('tr'); [String(i + 1), it.desc, String(it.qty || ''), f(it.price), f((Number(it.qty) || 0) * (Number(it.price) || 0))].forEach((x) => r.append(el('td', null, x))); tb.append(r); });
+    const sumRow = (k, v, cls) => { const r = el('tr', cls); const c = el('td', null, k); c.colSpan = 4; r.append(c, el('td', null, v)); tb.append(r); };
+    sumRow('รวมเงิน', f(t.sub), 'pa-sub'); if (t.disc) sumRow('ส่วนลด', f(t.disc), 'pa-sub'); sumRow('ยอดสุทธิ', f(t.total), 'pa-tot');
+    tbl.append(tb); area.append(tbl, el('p', 'pd-words', `(${bahtText(t.total)})`));
+    if (d.note) area.append(el('p', null, 'หมายเหตุ: ' + d.note));
+    const sg = el('div', 'pd-sign'); [d.type === 'rc' ? 'ผู้รับเงิน' : d.type === 'qt' ? 'ผู้เสนอราคา' : 'ผู้วางบิล', d.type === 'qt' ? 'ผู้อนุมัติ' : 'ผู้รับสินค้า/ลูกค้า'].forEach((x) => sg.append(el('div', null, `ลงชื่อ ................................ ${x}`))); area.append(sg);
+    window.print();
+  };
+
+  const render = () => { if (!shown) return; drawStrip(); drawChart(); drawCats(); drawTx(); fillProdSelect(); drawTax(); drawDocs(); };
   document.addEventListener('vg:view', (e) => { shown = e.detail === 'biz'; if (shown) { render(); drawProducts(); drawChips(); } });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) drawChart(); }, 200); });
   const summary = () => {
     const m = ymOf(today()), y = m.slice(0, 4); const s = monthSum(m); const Y = yearSums(y);
     const v = dedAll[y] || {}; const A = taxWith(Y.inc, Y.inc * 0.6, v), B = taxWith(Y.inc, Y.outDoc, v);
     let r12 = 0; biz.entries.forEach((e) => { if (e.kind === 'in' && ymOf(e.date) > ymShift(m, -12) && ymOf(e.date) <= m) r12 += e.amount; });
-    return { n: biz.entries.length, ...s, monthTH: ymTH(m), yi: Y.inc, yp: Y.inc - Y.out, tax: Math.min(A.tax, B.tax), method: B.tax < A.tax ? 'หักค่าใช้จ่ายตามจริง' : 'หักค่าใช้จ่ายเหมา 60%', vat: r12 / 1800000 };
+    return { n: biz.entries.length, ...s, monthTH: ymTH(m), yi: Y.inc, yp: Y.inc - Y.out, tax: Math.min(A.tax, B.tax), method: B.tax < A.tax ? 'หักค่าใช้จ่ายตามจริง' : 'หักค่าใช้จ่ายเหมา 60%', vat: r12 / 1800000, low: lowStock().map((x) => ({ name: x.p.name || 'ไม่มีชื่อ', n: x.n })), unpaid: (biz.invoices || []).filter((d) => d.type === 'inv' && d.status !== 'paid').map((d) => ({ no: d.no, cust: d.cust, total: docTotal(d).total })) };
   };
   window.VGBiz = { get: () => biz, summary, replace: (d) => { document.dispatchEvent(new Event('vg:data')); biz = clean(d); keep(); if (editId && !biz.entries.some((e) => e.id === editId)) endEdit(); if (shown) { render(); if (!document.activeElement || !document.activeElement.closest('#p-list')) drawProducts(); } } };
   setKind('in'); $('b-date').value = today();
+})();
+</script>
+<script>
+/* personal money: accounts & net worth, personal budget, emergency fund, debts & bills, retirement.
+   Kept in this browser and, when signed in, synced to money/{uid}. */
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const MKEY = 'valuegrab-money-v1';
+  const baht = (v) => (v == null || !isFinite(v) ? '–' : (v < 0 ? '-' : '') + Math.round(Math.abs(v)).toLocaleString('th-TH') + ' บาท');
+  const bahtS = (v) => (v > 0 ? '+' : '') + baht(v);
+  const pc = (v) => (v == null || !isFinite(v) ? '–' : (v * 100).toFixed(0) + '%');
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  const ymOf = (d) => d.slice(0, 7);
+  const ymShift = (ym, k) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + k, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+  const ymTH = (ym, o = { month: 'long', year: 'numeric' }) => new Date(ym + '-01T00:00:00').toLocaleDateString('th-TH', o);
+  const dTH = (d, o = { day: 'numeric', month: 'short' }) => new Date(d + 'T00:00:00').toLocaleDateString('th-TH', o);
+  const TYPES = { bank: 'บัญชีเงินฝาก', cash: 'เงินสด', gold: 'ทองคำ', fund: 'กองทุนรวม', thstock: 'หุ้นไทย', crypto: 'คริปโต', property: 'บ้าน/ที่ดิน/รถ', biz: 'เงินทุนในธุรกิจ', other: 'อื่นๆ' };
+  const INVEST = ['gold', 'fund', 'thstock', 'crypto'];
+  const DEF = { out: ['อาหารและเครื่องดื่ม', 'เดินทาง', 'ที่พัก/ค่าเช่า', 'ค่าน้ำไฟเน็ตโทรศัพท์', 'ของใช้/ช้อปปิ้ง', 'สุขภาพ', 'ครอบครัว', 'บันเทิง/ท่องเที่ยว', 'การศึกษา', 'ประกัน', 'ผ่อนชำระหนี้', 'อื่นๆ'], in: ['เงินเดือน', 'โอนจากธุรกิจ', 'รายได้เสริม', 'รายได้อื่น'] };
+  const BAHT_G = 15.244, OZ_G = 31.1035, PURITY = 0.965;
+
+  const blank = () => ({ accounts: [], entries: [], budgets: {}, debts: [], extra: '', bills: [], snaps: {}, settings: {} });
+  let M = blank();
+  const norm = (d) => {
+    const o = blank(); if (!d || typeof d !== 'object') return o;
+    const arr = (x) => (Array.isArray(x) ? x.filter((y) => y && typeof y === 'object') : []);
+    o.accounts = arr(d.accounts).map((a) => ({ id: String(a.id || newId()), name: String(a.name || '').slice(0, 60), type: TYPES[a.type] ? a.type : 'other', value: a.value === '' ? '' : +a.value || '', gold: a.gold === '' ? '' : +a.gold || '', emerg: !!a.emerg, upd: /^\d{4}-\d{2}-\d{2}$/.test(a.upd || '') ? a.upd : '' }));
+    o.entries = arr(d.entries).filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out') && +e.amount > 0).map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120) }));
+    o.budgets = {}; if (d.budgets && typeof d.budgets === 'object') Object.entries(d.budgets).forEach(([k, v]) => { if (+v > 0) o.budgets[String(k).slice(0, 40)] = +v; });
+    o.debts = arr(d.debts).map((x) => ({ id: String(x.id || newId()), name: String(x.name || '').slice(0, 60), bal: x.bal === '' ? '' : +x.bal || '', apr: x.apr === '' ? '' : +x.apr || '', min: x.min === '' ? '' : +x.min || '' }));
+    o.extra = d.extra === '' || d.extra == null ? '' : +d.extra || '';
+    o.bills = arr(d.bills).map((b) => ({ id: String(b.id || newId()), name: String(b.name || '').slice(0, 60), amount: b.amount === '' ? '' : +b.amount || '', day: Math.min(31, Math.max(1, +b.day || 1)), freq: b.freq === 'y' ? 'y' : 'm', month: Math.min(12, Math.max(1, +b.month || 1)), cat: String(b.cat || '').slice(0, 40), paid: Array.isArray(b.paid) ? b.paid.filter((x) => typeof x === 'string').slice(-24) : [] }));
+    o.snaps = {}; if (d.snaps && typeof d.snaps === 'object') Object.entries(d.snaps).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v && isFinite(+v.a) && isFinite(+v.l)) o.snaps[k] = { a: +v.a, l: +v.l }; });
+    o.settings = d.settings && typeof d.settings === 'object' ? JSON.parse(JSON.stringify(d.settings)) : {};
+    return o;
+  };
+  try { M = norm(JSON.parse(localStorage.getItem(MKEY) || 'null')); } catch (e) { /* in memory */ }
+  const keep = () => { try { localStorage.setItem(MKEY, JSON.stringify(M)); } catch (e) { /* ignore */ } };
+  let st; const save = (soon) => { keep(); clearTimeout(st); const go = () => { if (window.VGSync) window.VGSync.push('money'); document.dispatchEvent(new Event('vg:data')); }; if (soon) st = setTimeout(go, 500); else go(); };
+  let shown = false, ym = ymOf(today()), kind = 'out', editId = null;
+
+  /* ---------- derived numbers ---------- */
+  const goldPx = () => {
+    if (+M.settings.goldPx > 0) return { px: +M.settings.goldPx, manual: true };
+    const VG = window.VG || {}; if (VG.gold && VG.fx) return { px: VG.gold * VG.fx * BAHT_G * PURITY / OZ_G, manual: false };
+    return { px: null, manual: false };
+  };
+  const accValue = (a) => (a.type === 'gold' ? (goldPx().px || 0) * (Number(a.gold) || 0) : Number(a.value) || 0);
+  const usPort = () => { const P = window.VGPort && window.VGPort.summary ? window.VGPort.summary() : null; return P && P.n && P.fx ? P.all * P.fx : 0; };
+  const totals = () => {
+    const us = usPort(); let a = us, inv = us, em = 0;
+    M.accounts.forEach((x) => { const v = accValue(x); a += v; if (INVEST.includes(x.type)) inv += v; if (x.emerg) em += v; });
+    const l = M.debts.reduce((s, d) => s + (Number(d.bal) || 0), 0);
+    return { a, l, nw: a - l, inv, em, us };
+  };
+  const monthSum = (m) => { let i = 0, o = 0; M.entries.forEach((e) => { if (ymOf(e.date) === m) { if (e.kind === 'in') i += e.amount; else o += e.amount; } }); return { i, o, s: i - o }; };
+  const avgOut = () => { const ms = [1, 2, 3].map((k) => monthSum(ymShift(ymOf(today()), -k))).filter((x) => x.o > 0); return ms.length ? ms.reduce((a, x) => a + x.o, 0) / ms.length : 0; };
+  const avgSave = () => { const ms = [1, 2, 3].map((k) => monthSum(ymShift(ymOf(today()), -k))).filter((x) => x.i > 0 || x.o > 0); return ms.length ? ms.reduce((a, x) => a + x.s, 0) / ms.length : null; };
+  const budgetTotal = () => Object.values(M.budgets).reduce((a, v) => a + v, 0);
+  const emExp = () => (+M.settings.emExp > 0 ? +M.settings.emExp : avgOut() || budgetTotal());
+  const snapshot = () => {
+    const t = totals(); const k = ymOf(today()); const cur = M.snaps[k];
+    if (!(t.a || t.l) && !cur) return;
+    if (!cur || Math.abs(cur.a - t.a) >= 1 || Math.abs(cur.l - t.l) >= 1) { M.snaps[k] = { a: Math.round(t.a), l: Math.round(t.l) }; save(true); }
+  };
+
+  /* ---------- net worth ---------- */
+  const drawNW = () => {
+    const t = totals(); const prevK = Object.keys(M.snaps).filter((k) => k < ymOf(today())).sort().pop(); const prev = prevK ? M.snaps[prevK] : null;
+    const set = (id, v, cls) => { $(id).textContent = baht(v); $(id).className = 'v ' + (cls || ''); };
+    set('m-nw', t.nw, t.nw >= 0 ? 'pos' : 'neg'); $('m-nw-h').textContent = prev ? `${bahtS(t.nw - (prev.a - prev.l))} จาก${ymTH(prevK, { month: 'short', year: '2-digit' })}` : 'ทรัพย์สินลบหนี้';
+    set('m-as', t.a); $('m-as-h').textContent = t.inv ? `เป็นเงินลงทุน ${pc(t.inv / (t.a || 1))}` : '';
+    set('m-li', t.l, t.l ? 'neg' : ''); $('m-li-h').textContent = t.a ? `หนี้ต่อทรัพย์สิน ${pc(t.l / t.a)}` : '';
+    const ex = emExp(); $('m-em').textContent = ex ? (t.em / ex).toFixed(1) + ' เดือน' : '–'; $('m-em').className = 'v ' + (ex && t.em / ex >= (+M.settings.emMonths || 6) ? 'pos' : '');
+    $('m-em-h').textContent = t.em ? baht(t.em) : 'ยังไม่ได้ติ๊กบัญชีฉุกเฉิน';
+    const g = goldPx(); const gn = $('gold-note'); gn.replaceChildren();
+    if (M.accounts.some((a) => a.type === 'gold')) {
+      gn.append(g.px ? `ราคาทองที่ใช้ ${baht(g.px)} ต่อบาททอง ${g.manual ? '(ตั้งเอง)' : '(ประมาณจากราคาทองโลก ทอง 96.5%)'} ` : 'ยังไม่มีราคาทอง ', 'ตั้งราคาเองได้: ');
+      const i = el('input', 'inp sm'); i.type = 'number'; i.min = 0; i.step = 'any'; i.inputMode = 'decimal'; i.placeholder = 'ราคา/บาท'; i.style.width = '130px'; i.value = M.settings.goldPx || '';
+      i.addEventListener('change', () => { if (+i.value > 0) M.settings.goldPx = +i.value; else delete M.settings.goldPx; save(); refresh(); }); gn.append(i);
+    }
+    drawNWChart();
+  };
+  const drawNWChart = () => {
+    const box = $('m-chart'); box.replaceChildren(); if (!window.d3) return;
+    const rows = Object.keys(M.snaps).sort().map((k) => ({ d: new Date(k + '-01T00:00:00'), k, nw: M.snaps[k].a - M.snaps[k].l, a: M.snaps[k].a, l: M.snaps[k].l }));
+    if (!rows.length) { box.append(el('div', 'g-empty', 'ใส่บัญชีและทรัพย์สินด้านล่าง แล้วกราฟจะเริ่มบันทึกทุกเดือน')); return; }
+    const W = box.clientWidth || 600, H = 220, M2 = { t: 12, r: 10, b: 26, l: 60 };
+    const x = rows.length > 1 ? d3.scaleUtc(d3.extent(rows, (r) => r.d), [M2.l, W - M2.r]) : () => (M2.l + W - M2.r) / 2;
+    const lo = Math.min(0, d3.min(rows, (r) => r.nw)), hi = d3.max(rows, (r) => Math.max(r.nw, r.a));
+    const y = d3.scaleLinear([lo, hi * 1.08 || 1], [H - M2.b, M2.t]).nice();
+    const fmt = (v) => (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + ' ล้าน' : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + 'k' : v);
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', M2.l).attr('x2', W - M2.r).attr('y1', y).attr('y2', y).attr('stroke', css('--chart-grid'));
+    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', M2.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text(fmt);
+    svg.append('g').selectAll('text').data(rows.length > 6 ? rows.filter((r, i) => i % Math.ceil(rows.length / 6) === 0) : rows).join('text').attr('x', (r) => x(r.d)).attr('y', H - 6).attr('text-anchor', (r, i, n) => (rows.length > 1 && r === rows[rows.length - 1] ? 'end' : r === rows[0] && rows.length > 1 ? 'start' : 'middle')).attr('font-size', 11).attr('fill', css('--ink-3')).text((r) => ymTH(r.k, { month: 'short', year: '2-digit' }));
+    if (rows.length > 1) {
+      svg.append('path').attr('d', d3.area((r) => x(r.d), y(Math.max(0, lo)), (r) => y(r.nw))(rows)).attr('fill', css('--jade')).attr('opacity', 0.12);
+      svg.append('path').attr('d', d3.line((r) => x(r.d), (r) => y(r.nw))(rows)).attr('fill', 'none').attr('stroke', css('--jade')).attr('stroke-width', 2.4);
+    }
+    svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r.nw)).attr('r', 4).attr('fill', css('--jade'));
+    const last = rows[rows.length - 1]; svg.append('text').attr('x', Math.min(W - M2.r, x(last.d))).attr('y', y(last.nw) - 10).attr('text-anchor', 'end').attr('font-size', 12).attr('fill', css('--ink')).text(baht(last.nw));
+  };
+  const numIn = (v, ph, cls, set) => { const i = el('input', 'inp ' + (cls || '')); i.type = 'number'; i.step = 'any'; i.min = 0; i.inputMode = 'decimal'; i.value = v ?? ''; i.placeholder = ph; i.addEventListener('input', () => set(i.value === '' ? '' : Number(i.value))); return i; };
+  const txtIn = (v, ph, cls, set) => { const i = el('input', 'inp ' + (cls || '')); i.value = v || ''; i.placeholder = ph; i.addEventListener('input', () => set(i.value)); return i; };
+  const delBtn = (label, fn) => { const b = el('button', 'del', '✕'); b.type = 'button'; b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', fn); return b; };
+  const drawAccounts = () => {
+    const box = $('a-list'); box.replaceChildren();
+    const us = usPort();
+    if (us) { const r = el('div', 'a-row auto'); r.append(el('span', 'a-n', 'พอร์ตหุ้นอเมริกา'), el('span', 'a-t', 'ดึงจากแท็บพอร์ตอัตโนมัติ'), el('b', 'a-v', baht(us))); box.append(r); }
+    if (!M.accounts.length && !us) box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชี กด "+ เพิ่มบัญชี/ทรัพย์สิน" เช่น บัญชีออมทรัพย์ เงินสด ทองคำ กองทุน'));
+    M.accounts.forEach((a) => {
+      const r = el('div', 'a-row'); const val = el('b', 'a-v');
+      const upd = () => { val.textContent = baht(accValue(a)); };
+      const sel = el('select', 'inp'); Object.entries(TYPES).forEach(([k, v]) => sel.append(new Option(v, k))); sel.value = a.type;
+      sel.addEventListener('change', () => { a.type = sel.value; save(); drawAccounts(); refresh(); });
+      const valIn = a.type === 'gold' ? numIn(a.gold, 'น้ำหนัก (บาททอง)', 'a-num', (v) => { a.gold = v; a.upd = today(); upd(); refresh(); save(true); }) : numIn(a.value, 'ยอดเงิน (บาท)', 'a-num', (v) => { a.value = v; a.upd = today(); upd(); refresh(); save(true); });
+      const em = el('label', 'a-em'); const cb = el('input'); cb.type = 'checkbox'; cb.checked = a.emerg; cb.addEventListener('change', () => { a.emerg = cb.checked; save(); refresh(); }); em.append(cb, 'เงินฉุกเฉิน');
+      r.append(txtIn(a.name, 'ชื่อ เช่น ออมทรัพย์ กสิกร', 'a-name', (v) => { a.name = v; save(true); }), sel, valIn, val, em,
+        delBtn('ลบบัญชี', () => { if (confirm(`ลบ "${a.name || TYPES[a.type]}"?`)) { M.accounts = M.accounts.filter((x) => x !== a); save(); drawAccounts(); refresh(); } }));
+      if (a.upd) r.append(el('small', 'a-upd', 'อัปเดต ' + dTH(a.upd, { day: 'numeric', month: 'short', year: '2-digit' })));
+      upd(); box.append(r);
+    });
+  };
+  $('a-add').addEventListener('click', () => { M.accounts.push({ id: newId(), name: '', type: 'bank', value: '', gold: '', emerg: false, upd: today() }); save(); drawAccounts(); const n = $('a-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
+
+  /* ---------- personal budget ---------- */
+  const setSeg = (id, v) => document.querySelectorAll(`#${id} button`).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
+  const hint = (m, err) => { $('p-hint').textContent = m || ''; $('p-hint').className = err ? 'pf-err' : 'pf-hint'; };
+  const cats = (k) => { const n = {}; M.entries.forEach((e) => { if (e.kind === k && e.cat) n[e.cat] = (n[e.cat] || 0) + 1; }); return [...new Set([...Object.keys(n).sort((a, b) => n[b] - n[a]), ...DEF[k]])]; };
+  const drawChips = () => {
+    const box = $('p-chips'); box.replaceChildren(); const list = cats(kind);
+    $('p-cats').replaceChildren(...list.map((c) => { const o = el('option'); o.value = c; return o; }));
+    list.slice(0, 8).forEach((c) => { const b = el('button', 'chip', c); b.type = 'button'; b.setAttribute('aria-pressed', String($('p-cat').value === c)); b.addEventListener('click', () => { $('p-cat').value = c; drawChips(); }); box.append(b); });
+  };
+  const setKind = (k) => { kind = k; setSeg('p-kind', k); drawChips(); };
+  document.querySelectorAll('#p-kind button').forEach((b) => b.addEventListener('click', () => { setKind(b.dataset.v); if (!editId) $('p-cat').value = ''; drawChips(); }));
+  $('p-cat').addEventListener('input', drawChips);
+  const drawBudget = () => {
+    $('p-month').textContent = ymTH(ym);
+    const s = monthSum(ym), pv = monthSum(ymShift(ym, -1)); const set = (id, v, cls) => { $(id).textContent = baht(v); $(id).className = 'v ' + (cls || ''); };
+    set('p-in', s.i, 'pos'); set('p-out', s.o); set('p-save', s.s, s.s > 0 ? 'pos' : s.s < 0 ? 'neg' : ''); set('p-bud', budgetTotal());
+    $('p-in-h').textContent = pv.i ? `เดือนก่อน ${baht(pv.i)}` : ''; $('p-out-h').textContent = pv.o ? `เดือนก่อน ${baht(pv.o)}` : '';
+    $('p-save-h').textContent = s.i ? `อัตราการออม ${pc(s.s / s.i)}` : ''; const inB = M.entries.reduce((a, e) => a + (e.kind === 'out' && ymOf(e.date) === ym && M.budgets[e.cat] ? e.amount : 0), 0); $('p-bud-h').textContent = budgetTotal() ? `หมวดที่ตั้งงบใช้ไป ${pc(inB / budgetTotal())}` : 'ยังไม่ได้ตั้งงบ';
+    const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === ym) spent[e.cat || 'อื่นๆ'] = (spent[e.cat || 'อื่นๆ'] || 0) + e.amount; });
+    const list = [...new Set([...Object.keys(M.budgets), ...Object.keys(spent), ...DEF.out])];
+    list.sort((a, b) => (spent[b] || 0) - (spent[a] || 0) || (M.budgets[b] || 0) - (M.budgets[a] || 0));
+    const box = $('p-budgets'); const focus = document.activeElement && box.contains(document.activeElement) ? document.activeElement.dataset.c : null; box.replaceChildren();
+    list.forEach((c) => {
+      const sp = spent[c] || 0, bd = M.budgets[c] || 0; const r = el('div', 'pb-row');
+      const bar = el('div', 'bc-t'); const i = el('i'); const share = bd ? sp / bd : 0; i.style.width = Math.min(100, bd ? share * 100 : sp ? 100 : 0) + '%';
+      i.style.background = bd ? (share > 1 ? 'var(--brick)' : share > 0.8 ? 'var(--ochre)' : 'var(--jade)') : 'var(--ink-3)'; bar.append(i);
+      const inp = el('input', 'inp sm'); inp.type = 'number'; inp.min = 0; inp.step = 'any'; inp.inputMode = 'decimal'; inp.placeholder = 'งบ'; inp.value = bd || ''; inp.dataset.c = c; inp.setAttribute('aria-label', 'งบหมวด ' + c);
+      inp.addEventListener('change', () => { const v = Number(inp.value); if (v > 0) M.budgets[c] = v; else delete M.budgets[c]; save(); drawBudget(); });
+      r.append(el('span', 'pb-k', c), el('span', 'pb-v ' + (bd && sp > bd ? 'neg' : ''), bd ? `${baht(sp)} / ${baht(bd)}` : sp ? baht(sp) : '–'), inp, bar);
+      box.append(r); if (focus === c) inp.focus();
+    });
+    const tb = $('p-tx').tBodies[0]; tb.replaceChildren();
+    const rows = M.entries.filter((e) => ymOf(e.date) === ym).sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
+    if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการในเดือนนี้'); td.colSpan = 6; tr.append(td); tb.append(tr); }
+    rows.forEach((e) => {
+      const tr = el('tr', e.id === editId ? 'editing' : null);
+      [[dTH(e.date), 'l'], [e.cat || '–', 'l'], [e.note || '', 'l det'], [e.kind === 'in' ? baht(e.amount) : '', 'pos'], [e.kind === 'out' ? baht(e.amount) : '']].forEach(([v, c]) => tr.append(el('td', c, v)));
+      const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
+      const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(ed, delBtn('ลบรายการ', () => { if (confirm(`ลบรายการ ${baht(e.amount)} (${e.cat})?`)) { M.entries = M.entries.filter((x) => x.id !== e.id); if (editId === e.id) endEdit(); save(); refresh(); } })); tr.append(c); tb.append(tr);
+    });
+  };
+  const clearForm = () => { ['p-amt', 'p-cat', 'p-note'].forEach((id) => { $(id).value = ''; }); $('p-date').value = ym === ymOf(today()) ? today() : ym + '-01'; drawChips(); };
+  const startEdit = (e) => { editId = e.id; setKind(e.kind); $('p-amt').value = e.amount; $('p-cat').value = e.cat; $('p-date').value = e.date; $('p-note').value = e.note; $('p-title').textContent = 'แก้ไขรายการ'; $('p-save-btn').textContent = 'บันทึกการแก้ไข'; $('p-cancel').hidden = false; drawChips(); drawBudget(); $('p-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const endEdit = () => { editId = null; $('p-title').textContent = 'จดรายรับรายจ่ายส่วนตัว'; $('p-save-btn').textContent = 'บันทึก'; $('p-cancel').hidden = true; clearForm(); };
+  $('p-cancel').addEventListener('click', () => { endEdit(); hint(''); drawBudget(); });
+  $('p-save-btn').addEventListener('click', () => {
+    const amt = Number($('p-amt').value), date = $('p-date').value, cat = $('p-cat').value.trim().slice(0, 40), note = $('p-note').value.trim().slice(0, 120);
+    const err = !(amt > 0) ? 'ใส่จำนวนเงินมากกว่า 0' : !date ? 'เลือกวันที่' : !cat ? 'เลือกหรือพิมพ์หมวดก่อน' : null; if (err) return hint(err, true);
+    const rec = { id: editId || newId(), date, kind, amount: amt, cat, note }; const was = editId;
+    M.entries = was ? M.entries.map((e) => (e.id === was ? rec : e)) : [...M.entries, rec]; save(); ym = ymOf(date);
+    hint(`${was ? 'แก้ไข' : 'บันทึก'}${kind === 'in' ? 'รายรับ' : 'รายจ่าย'} ${baht(amt)} (${cat}) แล้ว`); if (was) endEdit(); else { const d = $('p-date').value; clearForm(); $('p-date').value = d; }
+    refresh();
+  });
+  $('p-prev').addEventListener('click', () => { ym = ymShift(ym, -1); drawBudget(); });
+  $('p-next').addEventListener('click', () => { ym = ymShift(ym, 1); drawBudget(); });
+
+  /* ---------- emergency fund ---------- */
+  const drawEmerg = () => {
+    if (document.activeElement !== $('e-months')) $('e-months').value = M.settings.emMonths || 6;
+    if (document.activeElement !== $('e-exp')) { $('e-exp').value = +M.settings.emExp > 0 ? M.settings.emExp : ''; const a = avgOut() || budgetTotal(); $('e-exp').placeholder = a ? Math.round(a) + ' (เฉลี่ยจากที่จด)' : 'เช่น 15000'; }
+    const box = $('e-out'); box.replaceChildren(); const t = totals(); const ex = emExp(); const mo = +M.settings.emMonths || 6;
+    if (!ex) { box.append(el('div', 'pf-hint', 'ใส่รายจ่ายต่อเดือน หรือจดรายจ่ายส่วนตัวสัก 1 เดือน ระบบจะคำนวณให้')); return; }
+    const target = ex * mo, have = t.em, sh = Math.min(1, have / target);
+    box.append(el('div', 'hbig ' + (sh >= 1 ? 'pos' : ''), `มีพอใช้ ${(have / ex).toFixed(1)} เดือน`), el('div', 'hsub', `เงินฉุกเฉิน ${baht(have)} จากเป้า ${baht(target)} (${mo} เดือน × ${baht(ex)})`));
+    const bar = el('div', 'hbar'); const i = el('i'); i.style.width = sh * 100 + '%'; if (sh < 0.5) i.style.background = 'var(--ochre)'; bar.append(i); box.append(bar);
+    if (sh >= 1) box.append(el('div', 'pf-hint', 'ครบเป้าแล้ว เงินที่เก็บเพิ่มจากนี้เอาไปลงทุนได้')); else {
+      const need = target - have; const sv = avgSave();
+      box.append(el('div', 'pf-hint', `ขาดอีก ${baht(need)} · ถ้าเก็บเดือนละ ${baht(need / 12)} จะครบใน 12 เดือน · เดือนละ ${baht(need / 6)} ครบใน 6 เดือน`));
+      if (sv != null) box.append(el('div', 'pf-hint', sv > 0 ? `ตอนนี้เหลือเก็บเฉลี่ยเดือนละ ${baht(sv)} ถ้าเก็บทั้งหมดเข้าเงินฉุกเฉินจะครบในประมาณ ${Math.ceil(need / sv)} เดือน` : 'ช่วงนี้รายจ่ายมากกว่ารายรับ ควรลดรายจ่ายก่อนเริ่มเก็บ'));
+      if (!M.accounts.some((a) => a.emerg)) box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชีที่ติ๊ก "เงินฉุกเฉิน" ไปที่หน้าทรัพย์สินสุทธิแล้วติ๊กบัญชีที่ใช้เก็บเงินก้อนนี้'));
+    }
+  };
+  $('e-months').addEventListener('input', () => { const v = +$('e-months').value; if (v > 0) { M.settings.emMonths = v; save(true); drawEmerg(); drawNW(); } });
+  $('e-exp').addEventListener('input', () => { const v = +$('e-exp').value; if (v > 0) M.settings.emExp = v; else delete M.settings.emExp; save(true); drawEmerg(); drawNW(); });
+
+  /* ---------- debts ---------- */
+  const payoff = (mode) => {
+    const ds = M.debts.filter((d) => +d.bal > 0).map((d) => ({ name: d.name || 'หนี้', bal: +d.bal, r: (+d.apr || 0) / 1200, min: +d.min || 0, done: 0 }));
+    if (!ds.length) return null; const budget = ds.reduce((a, d) => a + d.min, 0) + (+M.extra || 0);
+    let month = 0, interest = 0;
+    while (ds.some((d) => d.bal > 0.5) && month < 600) {
+      month++; let left = budget;
+      ds.forEach((d) => { if (d.bal > 0) { const i = d.bal * d.r; d.bal += i; interest += i; } });
+      ds.forEach((d) => { if (d.bal > 0) { const p = Math.min(d.min, d.bal, left); d.bal -= p; left -= p; } });
+      const order = ds.filter((d) => d.bal > 0).sort((a, b) => (mode === 'av' ? b.r - a.r || a.bal - b.bal : a.bal - b.bal || b.r - a.r));
+      for (const d of order) { if (left <= 0) break; const p = Math.min(left, d.bal); d.bal -= p; left -= p; }
+      ds.forEach((d) => { if (d.bal <= 0.5 && !d.done) { d.bal = 0; d.done = month; } });
+      if (month === 1 && ds.every((d) => d.bal > 0) && budget <= ds.reduce((a, d) => a + d.bal * d.r, 0)) return { stuck: true };
+    }
+    return { months: month, interest, never: month >= 600, order: [...ds].sort((a, b) => a.done - b.done) };
+  };
+  const drawDebts = (rebuild) => {
+    if (rebuild) {
+      const box = $('d-list'); box.replaceChildren();
+      if (!M.debts.length) box.append(el('div', 'pf-hint', 'ไม่มีหนี้ ดีมากครับ ถ้ามีบัตรเครดิต สินเชื่อ หรือผ่อนของ กด "+ เพิ่มหนี้"'));
+      M.debts.forEach((d) => {
+        const r = el('div', 'a-row debt');
+        r.append(txtIn(d.name, 'ชื่อ เช่น บัตรเครดิต A', 'a-name', (v) => { d.name = v; save(true); drawDebts(); }),
+          numIn(d.bal, 'ยอดคงเหลือ', 'a-num', (v) => { d.bal = v; save(true); drawDebts(); refreshNW(); }),
+          numIn(d.apr, 'ดอกเบี้ย %/ปี', 'a-num sm2', (v) => { d.apr = v; save(true); drawDebts(); }),
+          numIn(d.min, 'ผ่อนขั้นต่ำ/เดือน', 'a-num', (v) => { d.min = v; save(true); drawDebts(); }),
+          delBtn('ลบหนี้', () => { if (confirm(`ลบ "${d.name || 'หนี้'}"?`)) { M.debts = M.debts.filter((x) => x !== d); save(); drawDebts(true); refreshNW(); } }));
+        box.append(r);
+      });
+      if (document.activeElement !== $('d-extra')) $('d-extra').value = M.extra || '';
+    }
+    const box = $('d-plan'); box.replaceChildren();
+    const A = payoff('av'), S = payoff('sn'); if (!A) return;
+    if (A.stuck) { box.append(el('div', 'pf-err', 'ยอดผ่อนรวมต่อเดือนไม่พอจ่ายดอกเบี้ย หนี้จะไม่ลดลง ต้องเพิ่มยอดผ่อนหรือติดต่อเจ้าหนี้เพื่อปรับโครงสร้างหนี้')); return; }
+    const end = (n) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + n); return d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }); };
+    [['จ่ายก้อนดอกแพงก่อน', A, 'ประหยัดดอกเบี้ยที่สุด'], ['จ่ายก้อนเล็กก่อน', S, 'เห็นหนี้หมดไปทีละก้อนเร็ว มีกำลังใจ']].forEach(([t, p, sub], k) => {
+      const best = k === (S.interest < A.interest - 1 ? 1 : 0);
+      const card = el('div', 'tx-card' + (best ? ' best' : '')); const hd = el('div', 'tx-h'); hd.append(el('b', null, t), el('small', null, sub)); if (best) hd.append(el('span', 'tag buy', 'ดอกเบี้ยน้อยกว่า')); card.append(hd);
+      [['หมดหนี้', p.never ? 'เกิน 50 ปี' : `${end(p.months)} (${Math.floor(p.months / 12) ? Math.floor(p.months / 12) + ' ปี ' : ''}${p.months % 12} เดือน)`], ['ดอกเบี้ยรวม', baht(p.interest)], ['ลำดับการปิด', p.order.map((d) => d.name).join(' → ')]]
+        .forEach(([a, b]) => { const r = el('div', 'kv'); r.append(el('span', null, a), el('span', null, b)); card.append(r); });
+      box.append(card);
+    });
+  };
+  $('d-add').addEventListener('click', () => { M.debts.push({ id: newId(), name: '', bal: '', apr: '', min: '' }); save(); drawDebts(true); const n = $('d-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
+  $('d-extra').addEventListener('input', () => { M.extra = $('d-extra').value === '' ? '' : +$('d-extra').value; save(true); drawDebts(); });
+
+  /* ---------- bills ---------- */
+  const nextDue = (b, from) => {
+    const f = new Date(from + 'T00:00:00'); const dim = (y, m) => new Date(y, m + 1, 0).getDate();
+    for (let k = 0; k < 14; k++) {
+      const y = f.getFullYear(), m = f.getMonth() + k; const yy = y + Math.floor(m / 12), mm = ((m % 12) + 12) % 12;
+      if (b.freq === 'y' && mm !== b.month - 1) continue;
+      const d = new Date(yy, mm, Math.min(b.day, dim(yy, mm))); if (d >= f) return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    return null;
+  };
+  const dueBills = (days) => {
+    const t0 = today(); const lim = new Date(t0 + 'T00:00:00'); lim.setDate(lim.getDate() + days); const out = [];
+    M.bills.forEach((b) => { if (!(+b.amount > 0) && !b.name) return; let from = t0;
+      /* also show the current cycle if it fell in the last 7 days and is unpaid */
+      const back = new Date(t0 + 'T00:00:00'); back.setDate(back.getDate() - 7); const recent = nextDue(b, back.toISOString().slice(0, 10)); if (recent && recent < t0 && !b.paid.includes(recent)) out.push({ b, d: recent, late: true });
+      const d = nextDue(b, from); if (d && new Date(d + 'T00:00:00') <= lim) out.push({ b, d, paid: b.paid.includes(d) }); });
+    return out.sort((a, b) => a.d.localeCompare(b.d));
+  };
+  const drawBills = (rebuild) => {
+    if (rebuild) {
+      const box = $('bl-list'); box.replaceChildren();
+      if (!M.bills.length) box.append(el('div', 'pf-hint', 'ยังไม่มีบิลประจำ กด "+ เพิ่มบิล"'));
+      M.bills.forEach((b) => {
+        const r = el('div', 'a-row bill');
+        const fq = el('select', 'inp'); fq.append(new Option('ทุกเดือน', 'm'), new Option('ทุกปี', 'y')); fq.value = b.freq;
+        const mo = el('select', 'inp'); for (let i = 1; i <= 12; i++) mo.append(new Option(new Date(2026, i - 1, 1).toLocaleDateString('th-TH', { month: 'short' }), i)); mo.value = b.month; mo.hidden = b.freq !== 'y';
+        fq.addEventListener('change', () => { b.freq = fq.value; mo.hidden = b.freq !== 'y'; save(); drawBills(); });
+        mo.addEventListener('change', () => { b.month = +mo.value; save(); drawBills(); });
+        const day = el('input', 'inp sm'); day.type = 'number'; day.min = 1; day.max = 31; day.value = b.day; day.title = 'วันที่ครบกำหนด'; day.addEventListener('input', () => { if (+day.value >= 1 && +day.value <= 31) { b.day = +day.value; save(true); drawBills(); } });
+        const lab = el('label', 'mini'); lab.append('วันที่', day);
+        r.append(txtIn(b.name, 'ชื่อบิล เช่น ค่าไฟ', 'a-name', (v) => { b.name = v; save(true); drawBills(); }), numIn(b.amount, 'จำนวนเงิน', 'a-num', (v) => { b.amount = v; save(true); drawBills(); }), fq, mo, lab,
+          delBtn('ลบบิล', () => { if (confirm(`ลบบิล "${b.name || ''}"?`)) { M.bills = M.bills.filter((x) => x !== b); save(); drawBills(true); } }));
+        box.append(r);
+      });
+    }
+    const due = $('bl-due'); due.replaceChildren(); const list = dueBills(30);
+    if (!list.length) { due.append(el('div', 'pf-hint', 'ไม่มีบิลครบกำหนดใน 30 วันข้างหน้า')); return; }
+    const t0 = new Date(today() + 'T00:00:00');
+    list.forEach(({ b, d, paid, late }) => {
+      const n = Math.round((new Date(d + 'T00:00:00') - t0) / 86400000);
+      const row = el('div', 'cal-row'); const dd = el('div', 'cal-d'); dd.append(el('b', null, dTH(d)), el('small', null, late ? 'เลยกำหนด' : n === 0 ? 'วันนี้' : `อีก ${n} วัน`));
+      const w = el('div', 'cal-w'); w.append(el('span', 'sym', b.name || 'บิล'), el('span', null, baht(+b.amount || 0)));
+      if (paid) w.append(el('span', 'tag buy', 'จ่ายแล้ว'));
+      else { const p = el('button', 'btn-line sm', 'บันทึกว่าจ่าย'); p.type = 'button'; p.addEventListener('click', () => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: today(), kind: 'out', amount: +b.amount, cat: b.cat || 'ค่าน้ำไฟเน็ตโทรศัพท์', note: b.name }); save(); refresh(); }); w.append(p); if (late) w.append(el('span', 'tag trap', 'เลยกำหนด')); }
+      row.append(dd, w); due.append(row);
+    });
+  };
+  $('bl-add').addEventListener('click', () => { M.bills.push({ id: newId(), name: '', amount: '', day: 1, freq: 'm', month: 1, cat: '', paid: [] }); save(); drawBills(true); const n = $('bl-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
+
+  /* ---------- retirement ---------- */
+  const RIN = [['age', 'อายุตอนนี้', 30], ['retAge', 'อยากเกษียณตอนอายุ', 60], ['life', 'วางแผนใช้เงินถึงอายุ', 85], ['exp', 'รายจ่ายต่อเดือน (ค่าเงินวันนี้)', null], ['inf', 'เงินเฟ้อต่อปี %', 3], ['rPre', 'ผลตอบแทนก่อนเกษียณ %/ปี', 6], ['rPost', 'ผลตอบแทนหลังเกษียณ %/ปี', 4]];
+  const ret = () => { const r = { ...(M.settings.ret || {}) }; RIN.forEach(([k, , d]) => { if (r[k] == null || r[k] === '') r[k] = k === 'exp' ? Math.round(avgOut() || budgetTotal() || 20000) : d; }); return r; };
+  const buildRet = () => {
+    const box = $('r-in'); box.replaceChildren(); const r = ret(); const saved = M.settings.ret || {};
+    RIN.forEach(([k, label]) => { const l = el('label', 'mini'); const i = el('input', 'inp sm'); i.type = 'number'; i.step = 'any'; i.inputMode = 'decimal'; i.value = saved[k] ?? ''; i.placeholder = String(r[k]); if (k === 'exp') i.style.width = '120px';
+      i.addEventListener('input', () => { M.settings.ret = M.settings.ret || {}; if (i.value === '') delete M.settings.ret[k]; else M.settings.ret[k] = +i.value; save(true); drawRet(); }); l.append(label, i); box.append(l); });
+  };
+  const drawRet = () => {
+    const r = ret(); const out = $('r-out'); out.replaceChildren(); const box = $('r-chart'); box.replaceChildren();
+    const n = Math.max(0, r.retAge - r.age), T = Math.max(1, r.life - r.retAge), inf = r.inf / 100, a = r.rPre / 100, b = r.rPost / 100;
+    const E1 = r.exp * 12 * Math.pow(1 + inf, n);
+    const corpus = Math.abs(b - inf) < 1e-6 ? E1 * T / (1 + b) : E1 * (1 - Math.pow((1 + inf) / (1 + b), T)) / (b - inf);
+    const cur = totals().inv; const fv = cur * Math.pow(1 + a, n); const gap = Math.max(0, corpus - fv);
+    const rm = Math.pow(1 + a, 1 / 12) - 1, N = 12 * n; const pmt = N ? (rm > 0 ? gap * rm / (Math.pow(1 + rm, N) - 1) : gap / N) : gap;
+    const p = el('p', 'goal-main'); p.append('ตอนอายุ ', el('b', null, String(r.retAge)), ' ควรมีเงินก้อนประมาณ ', el('b', null, baht(corpus))); out.append(p);
+    const li = (t) => out.append(el('div', 'pf-hint', '• ' + t));
+    li(`รายจ่าย ${baht(r.exp)}/เดือนวันนี้ จะเป็นประมาณ ${baht(E1 / 12)}/เดือน ตอนเกษียณ เพราะเงินเฟ้อ ${r.inf}% ต่อปี และต้องใช้ไปอีก ${T} ปี`);
+    li(`เงินลงทุนที่มีตอนนี้ ${baht(cur)} ถ้าได้ผลตอบแทน ${r.rPre}% จะโตเป็นประมาณ ${baht(fv)}`);
+    li(gap > 0 ? `ต้องเก็บและลงทุนเพิ่มเดือนละประมาณ ${baht(pmt)} ไปอีก ${n} ปี` : 'เงินที่มีตอนนี้น่าจะพอแล้ว ถ้าผลตอบแทนเป็นไปตามที่ตั้ง');
+    const sv = avgSave(); if (sv != null && gap > 0) li(sv >= pmt ? `ตอนนี้เหลือเก็บเฉลี่ยเดือนละ ${baht(sv)} เพียงพอ ถ้านำไปลงทุนสม่ำเสมอ` : `ตอนนี้เหลือเก็บเฉลี่ยเดือนละ ${baht(sv)} ยังขาดอีกเดือนละประมาณ ${baht(pmt - sv)}`);
+    li('ตัวเลขเป็นการประมาณจากสมมติฐานที่ตั้ง ไม่ใช่การรับประกันผลตอบแทน ลองปรับผลตอบแทนให้ต่ำลงเพื่อดูกรณีที่แย่');
+    if (!window.d3) return;
+    const pts = []; let v = cur; const ry = Math.pow(1 + a, 1);
+    for (let y = 0; y <= n; y++) { pts.push({ age: r.age + y, v }); v = v * ry + pmt * 12 * (1 + a / 2); }
+    v = pts[pts.length - 1].v; let e = E1; for (let y = 1; y <= T; y++) { v = (v - e) * (1 + b); e *= 1 + inf; pts.push({ age: r.retAge + y, v: Math.max(v, 0) }); if (v <= 0) break; }
+    const W = box.clientWidth || 600, H = 210, Mg = { t: 10, r: 10, b: 24, l: 60 };
+    const x = d3.scaleLinear([r.age, r.age + n + T], [Mg.l, W - Mg.r]); const y = d3.scaleLinear([0, d3.max(pts, (q) => q.v) * 1.1 || 1], [H - Mg.b, Mg.t]).nice();
+    const fmt = (q) => (q >= 1e6 ? (q / 1e6).toFixed(q >= 1e7 ? 0 : 1) + ' ล้าน' : Math.round(q / 1e3) + 'k');
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', Mg.l).attr('x2', W - Mg.r).attr('y1', y).attr('y2', y).attr('stroke', css('--chart-grid'));
+    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', Mg.l - 6).attr('y', (q) => y(q) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text(fmt);
+    svg.append('g').selectAll('text').data(x.ticks(6)).join('text').attr('x', x).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', css('--ink-3')).text((q) => 'อายุ ' + q);
+    svg.append('line').attr('x1', x(r.retAge)).attr('x2', x(r.retAge)).attr('y1', Mg.t).attr('y2', H - Mg.b).attr('stroke', css('--ochre')).attr('stroke-dasharray', '5 4');
+    svg.append('path').attr('d', d3.area((q) => x(q.age), y(0), (q) => y(q.v))(pts)).attr('fill', css('--jade')).attr('opacity', 0.12);
+    svg.append('path').attr('d', d3.line((q) => x(q.age), (q) => y(q.v))(pts)).attr('fill', 'none').attr('stroke', css('--jade')).attr('stroke-width', 2.4);
+  };
+
+  /* ---------- render ---------- */
+  const refreshNW = () => { drawNW(); };
+  const refresh = () => { if (!shown) return; snapshot(); drawNW(); drawBudget(); drawEmerg(); drawDebts(); drawBills(); drawRet(); };
+  const rebuildAll = () => { drawAccounts(); drawDebts(true); drawBills(true); buildRet(); drawChips(); };
+  document.addEventListener('vg:view', (e) => { shown = e.detail === 'money'; if (shown) { rebuildAll(); refresh(); } });
+  document.addEventListener('vg:ready', () => { if (shown) { drawAccounts(); refresh(); } });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) { drawNWChart(); drawRet(); } }, 200); });
+  const summary = () => {
+    const t = totals(); const prevK = Object.keys(M.snaps).filter((k) => k < ymOf(today())).sort().pop(); const prev = prevK ? M.snaps[prevK] : null;
+    const m = ymOf(today()); const s = monthSum(m); const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === m) spent[e.cat] = (spent[e.cat] || 0) + e.amount; });
+    const over = Object.entries(M.budgets).filter(([c, b]) => (spent[c] || 0) > b * 0.8).map(([c, b]) => ({ c, sp: spent[c] || 0, b })).sort((a, b) => b.sp / b.b - a.sp / a.b);
+    const ex = emExp();
+    return { has: !!(M.accounts.length || M.debts.length || usPort()), entries: M.entries.length, ...t, change: prev ? t.nw - (prev.a - prev.l) : null, prevK,
+      month: s, budget: budgetTotal(), over, emMonths: ex ? t.em / ex : null, emTarget: +M.settings.emMonths || 6, bills: dueBills(14) };
+  };
+  window.VGMoney = { get: () => M, summary, replace: (d) => { M = norm(d); keep(); if (shown) { rebuildAll(); refresh(); } document.dispatchEvent(new Event('vg:data')); } };
+  setKind('out'); $('p-date').value = today();
 })();
 </script>
 <script>
@@ -1724,7 +2374,8 @@ dash.calc('sectors', {
   /* sub-pages: each long tab shows one group of sections at a time */
   const SUBS = { scan: [['picks', 'น่าซื้อวันนี้'], ['all', 'หุ้นทั้งหมด'], ['market', 'ภาพรวมตลาด']],
     port: [['sum', 'สรุปพอร์ต'], ['add', 'บันทึกและประวัติ'], ['hold', 'ปรับสมดุล'], ['grow', 'การเติบโตและเป้าหมาย'], ['cal', 'ปฏิทิน']],
-    biz: [['sum', 'สรุปเดือน'], ['add', 'จดรายรับรายจ่าย'], ['prod', 'ต้นทุนสินค้า'], ['tax', 'ภาษีและลดหย่อน']] };
+    biz: [['sum', 'สรุปเดือน'], ['add', 'จดรายรับรายจ่าย'], ['inv', 'ใบเสร็จ/ใบแจ้งหนี้'], ['prod', 'ต้นทุนและสต็อก'], ['tax', 'ภาษีและลดหย่อน']],
+    money: [['nw', 'ทรัพย์สินสุทธิ'], ['budget', 'งบรายจ่าย'], ['emerg', 'เงินฉุกเฉิน'], ['debt', 'หนี้และบิล'], ['retire', 'เกษียณ']] };
   const subOf = {};
   const setSub = (v, sub) => {
     const list = SUBS[v]; if (!list) return; if (!list.some(([k]) => k === sub)) { try { sub = localStorage.getItem('vg-sub-' + v); } catch (e) { sub = null; } if (!list.some(([k]) => k === sub)) sub = list[0][0]; }
@@ -1739,9 +2390,9 @@ dash.calc('sectors', {
     $('view-' + v).prepend(nav);
   });
   const show = (v, sub) => {
-    ['home', 'scan', 'port', 'biz'].forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v;
+    ['home', 'money', 'scan', 'port', 'biz'].forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v;
     document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === v)));
-    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : v === 'biz' ? '#business' : v === 'scan' ? '#scan' : location.pathname); } catch (e) { /* ignore */ }
+    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : v === 'biz' ? '#business' : v === 'scan' ? '#scan' : v === 'money' ? '#money' : location.pathname); } catch (e) { /* ignore */ }
     setSub(v, sub);
     if (v === 'port') { render(); loadHist(); }
     document.dispatchEvent(new CustomEvent('vg:view', { detail: v }));
@@ -2263,7 +2914,7 @@ dash.calc('sectors', {
   window.VGPort = { get: () => db, summary, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); document.dispatchEvent(new Event('vg:data')); } };
   setType('buy');
   document.body.dataset.view = 'home';
-  const H = location.hash; show(H === '#portfolio' ? 'port' : H === '#business' ? 'biz' : H === '#scan' ? 'scan' : 'home');
+  const H = location.hash; show(H === '#portfolio' ? 'port' : H === '#business' ? 'biz' : H === '#scan' ? 'scan' : H === '#money' ? 'money' : 'home');
   render();
 })();
 </script>
@@ -2328,13 +2979,30 @@ dash.calc('sectors', {
       if (!T.newBuy.length && !T.dropped.length && !T.mine.length) sec('ขึ้นแรงสุด', T.ups.slice(0, 5).map((x) => chip(x.s, x.c)));
     }
 
-    const ca = $('h-cal'); ca.replaceChildren();
-    if (!P || !P.events) ca.append(el('div', 'hsub', 'เพิ่มหุ้นในพอร์ตหรือกดติดตามหุ้น แล้ววันประกาศงบและวัน XD จะขึ้นที่นี่'));
-    else if (!P.events.length) ca.append(el('div', 'hsub', 'ไม่มีวันประกาศงบหรือ XD ใน 60 วันข้างหน้า'));
-    else P.events.slice(0, 5).forEach((e) => {
+    const MS = window.VGMoney ? window.VGMoney.summary() : null;
+    const ca = $('h-cal'); ca.replaceChildren(); const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    const evs = [...(MS ? MS.bills.filter((x) => !x.paid).map((x) => ({ d: x.d, s: x.b.name || 'บิล', kind: `${baht(+x.b.amount || 0)}${x.late ? ' เลยกำหนด' : ''}`, bill: true })) : []), ...((P && P.events) || []).map((e) => ({ d: e.d, s: e.s, kind: e.kind }))].sort((a, b) => a.d.localeCompare(b.d));
+    if (!evs.length) ca.append(el('div', 'hsub', 'ไม่มีบิล วันประกาศงบ หรือวัน XD ในช่วงนี้ เพิ่มบิลประจำได้ในหน้าหนี้และบิล'));
+    else evs.slice(0, 6).forEach((e) => {
+      const n = Math.round((new Date(e.d + 'T00:00:00') - t0) / 86400000);
       const r = el('div', 'hcal'); r.append(el('b', null, new Date(e.d + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })));
-      const w = el('span'); const s = el('b', null, e.s + ' '); w.append(s, e.kind + (e.n <= 1 ? (e.n ? ' (พรุ่งนี้)' : ' (วันนี้)') : ` (อีก ${e.n} วัน)`)); r.append(w); ca.append(r);
+      const w = el('span'); w.append(el('b', e.bill ? 'neg' : null, e.s + ' '), e.kind + (n < 0 ? '' : n <= 1 ? (n ? ' (พรุ่งนี้)' : ' (วันนี้)') : ` (อีก ${n} วัน)`)); r.append(w); ca.append(r);
     });
+    const nw = $('h-nw'); nw.replaceChildren();
+    if (!MS || !MS.has) empty(nw, 'ใส่ยอดบัญชีเงินฝาก เงินสด ทอง กองทุน และหนี้ เพื่อดูว่ามีทรัพย์สินสุทธิเท่าไหร่', 'เพิ่มบัญชี', 'money:nw');
+    else {
+      nw.append(el('div', 'hbig ' + (MS.nw >= 0 ? '' : 'neg'), baht(MS.nw)), el('div', 'hsub', MS.change != null ? `${MS.change >= 0 ? '+' : ''}${baht(MS.change)} จากเดือนก่อน` : 'ทรัพย์สินลบหนี้สิน'));
+      kv(nw, 'ทรัพย์สิน', baht(MS.a)); kv(nw, 'หนี้สิน', baht(MS.l), MS.l ? 'neg' : '');
+      kv(nw, 'เงินฉุกเฉิน', MS.emMonths != null ? `${MS.emMonths.toFixed(1)} / ${MS.emTarget} เดือน` : '–', MS.emMonths != null && MS.emMonths >= MS.emTarget ? 'pos' : '');
+    }
+    const bu = $('h-budget'); bu.replaceChildren();
+    if (!MS || (!MS.entries && !MS.budget)) empty(bu, 'จดรายรับรายจ่ายส่วนตัวและตั้งงบแต่ละหมวด เพื่อรู้ว่าเงินหมดไปกับอะไร', 'เริ่มจด', 'money:budget');
+    else {
+      const m = MS.month; bu.append(el('div', 'hbig ' + (m.s >= 0 ? 'pos' : 'neg'), baht(m.s)), el('div', 'hsub', 'เหลือเก็บเดือนนี้' + (m.i ? ` · ออม ${Math.round(m.s / m.i * 100)}% ของรายรับ` : '')));
+      if (MS.budget) { const sh = Math.min(1, m.o / MS.budget); const bar = el('div', 'hbar'); const i = el('i'); i.style.width = sh * 100 + '%'; if (m.o > MS.budget) i.style.background = 'var(--brick)'; else if (sh > 0.8) i.style.background = 'var(--ochre)'; bar.append(i); bu.append(bar, el('div', 'hsub', `ใช้ไป ${baht(m.o)} จากงบ ${baht(MS.budget)}`)); }
+      else kv(bu, 'รายจ่าย', baht(m.o));
+      MS.over.slice(0, 2).forEach((x) => kv(bu, x.c, `${baht(x.sp)} / ${baht(x.b)}`, x.sp > x.b ? 'neg' : ''));
+    }
 
     const g = $('h-goal'); g.replaceChildren();
     if (!P || !P.goal || P.goal.now == null) g.append(el('div', 'hsub', 'ตั้งเป้าหมายเงินลงทุนในแท็บพอร์ต'));
@@ -2350,6 +3018,8 @@ dash.calc('sectors', {
     if (!B || !B.n) empty(bz, 'ยังไม่มีรายการธุรกิจ จดรายรับรายจ่ายเพื่อดูกำไรแต่ละเดือน', 'จดรายการแรก', 'biz:add');
     else {
       bz.append(el('div', 'hbig ' + (B.p >= 0 ? 'pos' : 'neg'), baht(B.p)), el('div', 'hsub', `กำไรสุทธิ ${B.monthTH}` + (B.i ? ` · อัตรากำไร ${pc(B.p / B.i)}` : '')));
+      if (B.low && B.low.length) bz.append(el('div', 'hsub neg', 'ใกล้หมด: ' + B.low.map((x) => `${x.name} (${x.n})`).join(', ')));
+      if (B.unpaid && B.unpaid.length) bz.append(el('div', 'hsub', `ใบแจ้งหนี้รอชำระ ${B.unpaid.length} ใบ รวม ${baht(B.unpaid.reduce((a, x) => a + x.total, 0))}`));
       const mini = el('div', 'hmini'); [['รายรับ', B.i], ['รายจ่าย', B.o], ['กำไรทั้งปี', B.yp]].map(([k, x]) => [k, (x < 0 ? '-฿' : '฿') + Math.round(Math.abs(x)).toLocaleString('th-TH')]).forEach(([k, v]) => { const d = el('div'); d.append(el('small', null, k), el('b', null, v)); mini.append(d); }); bz.append(mini);
     }
     const tx = $('h-tax'); tx.replaceChildren();
@@ -2399,13 +3069,24 @@ if (FB && window.VGPort) {
     },
     business: {
       label: 'ข้อมูลธุรกิจ',
-      payload: () => { const d = window.VGBiz.get(); return clean({ entries: d.entries, products: d.products, name: d.name || '' }); },
+      payload: () => { const d = window.VGBiz.get(); return clean({ entries: d.entries, products: d.products, invoices: d.invoices || [], name: d.name || '' }); },
       apply: (c) => window.VGBiz.replace(c),
       empty: () => window.VGBiz.replace({ entries: [], products: [], name: '' }),
       local: () => { const d = window.VGBiz.get(); return { n: d.entries.length, has: d.entries.length > 0 || d.products.length > 0 }; },
-      merge: (c) => { const l = window.VGBiz.get(); const entries = byId(c.entries || [], l.entries); const products = byId(c.products || [], l.products);
-        return { extra: entries.length - (c.entries || []).length, changed: entries.length !== (c.entries || []).length || products.length !== (c.products || []).length,
-          doc: { entries, products, name: c.name || l.name || '' } }; },
+      merge: (c) => { const l = window.VGBiz.get(); const entries = byId(c.entries || [], l.entries); const products = byId(c.products || [], l.products); const invoices = byId(c.invoices || [], l.invoices || []);
+        return { extra: entries.length - (c.entries || []).length, changed: entries.length !== (c.entries || []).length || products.length !== (c.products || []).length || invoices.length !== (c.invoices || []).length,
+          doc: { entries, products, invoices, name: c.name || l.name || '' } }; },
+    },
+    money: {
+      label: 'ข้อมูลเงินส่วนตัว',
+      payload: () => clean(window.VGMoney.get()),
+      apply: (c) => window.VGMoney.replace(c),
+      empty: () => window.VGMoney.replace({}),
+      local: () => { const d = window.VGMoney.get(); const n = d.entries.length + d.accounts.length + d.debts.length + d.bills.length; return { n, has: n > 0 } ; },
+      merge: (c) => { const l = window.VGMoney.get(); const pick = (k) => byId(c[k] || [], l[k] || []);
+        const doc = { ...l, ...c, accounts: pick('accounts'), entries: pick('entries'), debts: pick('debts'), bills: pick('bills'), budgets: { ...(l.budgets || {}), ...(c.budgets || {}) }, snaps: { ...(l.snaps || {}), ...(c.snaps || {}) }, settings: { ...(l.settings || {}), ...(c.settings || {}) } };
+        delete doc.updated; const extra = doc.entries.length - (c.entries || []).length;
+        return { extra, changed: ['accounts', 'entries', 'debts', 'bills'].some((k) => doc[k].length !== (c[k] || []).length), doc }; },
     },
   };
   try {

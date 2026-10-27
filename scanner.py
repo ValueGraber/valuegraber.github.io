@@ -195,6 +195,17 @@ def market_series():
     return spy, yld
 
 
+def gold_usd():
+    """ราคาทองคำตลาดโลก (ดอลลาร์ต่อออนซ์) ใช้ประมาณราคาทองไทยในหน้าเงินของฉัน"""
+    try:
+        t = yf.download("GC=F", period="10d", interval="1d", auto_adjust=False, progress=False)["Close"].dropna()
+        t = t.iloc[:, 0] if isinstance(t, pd.DataFrame) else t
+        return round(float(t.iloc[-1]), 2)
+    except Exception as e:  # noqa: BLE001
+        log("ดึงราคาทองไม่ได้:", e)
+        return None
+
+
 def usd_thb():
     """อัตราแลกเปลี่ยนดอลลาร์เป็นบาท ใช้แปลงมูลค่าพอร์ตเป็นเงินบาท"""
     try:
@@ -275,6 +286,7 @@ def main():
         "spy": spy or prev.get("spy", []),
         "yield": yld or prev.get("yield", []),
         "usdthb": usd_thb() or prev.get("usdthb"),
+        "gold": gold_usd() or prev.get("gold"),
     }
     if len(prices) < 300:
         log("ราคาได้น้อยผิดปกติ ไม่เขียนทับไฟล์เดิม")
