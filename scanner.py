@@ -123,6 +123,14 @@ def price_stats(symbols):
     return out
 
 
+def ymd(ts):
+    """วินาที epoch จาก Yahoo → YYYY-MM-DD (UTC)"""
+    try:
+        return datetime.fromtimestamp(int(ts), timezone.utc).strftime("%Y-%m-%d") if ts else None
+    except (TypeError, ValueError, OSError):
+        return None
+
+
 def fundamentals(sym):
     """ตัวเลขพื้นฐานของหุ้นหนึ่งตัว (หน่วยเป็น % ให้ตรงกับหน้าเว็บ)"""
     info = None
@@ -163,6 +171,9 @@ def fundamentals(sym):
         "analystRating": RATING.get(info.get("recommendationKey")),
         "epsGrowth3y": rnd((feps / teps - 1) * 100) if feps and teps and teps > 0 else None,
         "revenueGrowth3y": pct("revenueGrowth"),
+        "exDivDate": ymd(info.get("exDividendDate")),
+        "earningsDate": ymd(info.get("earningsTimestampStart") or info.get("earningsTimestamp")),
+        "lastDiv": rnd(info.get("lastDividendValue"), 4),
     }
 
 

@@ -331,6 +331,36 @@ tr.editing td { background: var(--jade-soft); }
 .linkish { border: 0; background: none; color: var(--jade); cursor: pointer; font-size: 15px; text-decoration: underline; padding: 4px; font-family: inherit; }
 #a-msg:empty { display: none; }
 #a-msg { margin-top: 8px; }
+.pf-form label[hidden] { display: none; }
+.f-types { margin: 4px 0 14px; overflow-x: auto; }
+.pf-form.f2 { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.pf-form.f2 .wide2 { grid-column: span 2; }
+@media (max-width: 760px) { .pf-form.f2 { grid-template-columns: 1fr 1fr; } .pf-form.f2 .wide2 { grid-column: 1 / -1; } .f-types .seg button { padding: 7px 9px; font-size: 15px; } }
+.mini-grid, .split { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-radius: 14px; overflow: hidden; margin-top: 10px; }
+.split { grid-template-columns: repeat(3, 1fr); }
+.mini-grid > div, .split > div { background: var(--surface); padding: 14px 16px; }
+.mini-grid .k, .split .k { font-size: 14px; color: var(--ink-2); }
+.mini-grid .v, .split .v { font-family: "Bai Jamjuree", sans-serif; font-size: 22px; font-weight: 600; margin-top: 2px; }
+.mini-grid .h, .split .h { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+@media (max-width: 720px) { .mini-grid { grid-template-columns: 1fr 1fr; } .split { grid-template-columns: 1fr; } }
+.cash-empty { padding: 8px 0 2px; font-size: 15px; }
+.cal { display: grid; gap: 2px; margin-top: 6px; }
+.cal-row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+.cal-row:last-child { border-bottom: 0; }
+.cal-d b { display: block; font-family: "Bai Jamjuree", sans-serif; font-size: 17px; }
+.cal-d small { color: var(--ink-3); font-size: 13px; }
+.cal-w { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.cal-w .sym { font-weight: 700; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; }
+.cal-k { font-size: 14px; padding: 2px 10px; border-radius: 999px; }
+.cal-k.earn { background: var(--ochre-soft); color: var(--ochre); }
+.cal-k.xd { background: var(--jade-soft); color: var(--jade); }
+.cal-b { font-size: 13px; color: var(--ink-3); }
+.cal-n { flex-basis: 100%; color: var(--ink-2); font-size: 13px; }
+.goal-in { display: flex; gap: 10px 18px; flex-wrap: wrap; margin: 6px 0 10px; }
+.goal-in .inp { width: 150px; }
+.goal-in .inp.sm { width: 80px; }
+.goal-main { font-size: 18px; margin: 4px 0 2px; color: var(--ink); }
+.goal-main b { color: var(--jade); }
 </style>
 </head>
 <body>
@@ -417,7 +447,7 @@ tr.editing td { background: var(--jade-soft); }
   <p class="disclaimer">ใช้คัดกรองว่าหุ้นตัวไหนควรศึกษาต่อ ไม่ใช่คำแนะนำซื้อขายหรือคำทำนายราคา ก่อนตัดสินใจควรอ่านงบและข่าวของบริษัทประกอบทุกครั้ง</p>
   </div>
 <div id="view-port" hidden>
-  <p class="pf-intro">บันทึกหุ้นที่ซื้อไว้ แล้วดูว่าพอร์ตโตแค่ไหน แต่ละตัวเบี้ยวจากสัดส่วนที่ตั้งไว้หรือยัง และถ้าจะลงเงินเพิ่มควรแบ่งซื้อตัวไหน ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า ถ้าไม่ล็อกอิน <b>ข้อมูลพอร์ตจะเก็บไว้ในเครื่องนี้เท่านั้น</b></p>
+  <p class="pf-intro">บันทึกหุ้นที่ซื้อ เงินที่แลก และปันผลที่ได้ แล้วดูว่าพอร์ตโตแค่ไหน กำไรมาจากหุ้นหรือจากค่าเงิน ควรปรับสมดุลตัวไหน และจะถึงเป้าหมายเมื่อไหร่ ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า ถ้าไม่ล็อกอิน <b>ข้อมูลพอร์ตจะเก็บไว้ในเครื่องนี้เท่านั้น</b></p>
   <section class="acct" id="acct" hidden>
     <div id="acct-out">
       <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์พอร์ตข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะพอร์ตของตัวเอง</p></div>
@@ -440,33 +470,27 @@ tr.editing td { background: var(--jade-soft); }
   <div class="strip" id="pf-strip">
     <div><div class="k">มูลค่าพอร์ต</div><div class="v" id="pf-val">$0.00</div><div class="h" id="pf-val-th"></div></div>
     <div><div class="k">ต้นทุนหุ้นที่ถืออยู่</div><div class="v" id="pf-cost">$0.00</div><div class="h" id="pf-cost-th"></div></div>
-    <div><div class="k">กำไร/ขาดทุนตอนนี้</div><div class="v" id="pf-pl">$0.00</div><div class="h" id="pf-pl-pc"></div></div>
+    <div><div class="k">กำไร/ขาดทุนหุ้นตอนนี้</div><div class="v" id="pf-pl">$0.00</div><div class="h" id="pf-pl-pc"></div></div>
     <div><div class="k">ปันผลต่อปีโดยประมาณ</div><div class="v" id="pf-div">$0.00</div><div class="h" id="pf-div-h"></div></div>
   </div>
 
   <div class="alert" id="pf-alert" hidden></div>
 
-  <section class="panel" id="pf-growth">
-    <div class="ph"><div><h3>การเติบโตของพอร์ต</h3><p>มูลค่าพอร์ตรายสัปดาห์ เทียบกับเงินที่ลงไป และเทียบกับถ้าเอาเงินก้อนเดียวกันซื้อกองทุน S&amp;P 500 (SPY) ในวันเดียวกัน</p></div>
-      <span class="seg" id="g-range"><button type="button" data-v="13" aria-pressed="false">3 เดือน</button><button type="button" data-v="26" aria-pressed="false">6 เดือน</button><button type="button" data-v="52" aria-pressed="false">1 ปี</button><button type="button" data-v="0" aria-pressed="true">ทั้งหมด</button></span></div>
-    <div class="g-key"><span><i class="k1"></i>มูลค่าพอร์ต</span><span><i class="k2"></i>เงินที่ลงไป</span><span><i class="k3"></i>ถ้าซื้อ SPY แทน</span></div>
-    <div class="chart" id="g-chart"></div>
-    <details class="log">
-      <summary>บันทึกผลรายเดือน</summary>
-      <div class="scroll"><table class="tbl" id="g-log"><thead><tr><th class="l">สิ้นเดือน</th><th>มูลค่าพอร์ต</th><th>เงินที่ลงไป</th><th>กำไร/ขาดทุน</th><th>ผลตอบแทน</th><th>ถ้าซื้อ SPY</th><th>ชนะ/แพ้ SPY</th></tr></thead><tbody></tbody></table></div>
-    </details>
-  </section>
-
   <section class="panel" id="pf-add">
-    <h3 id="f-title">บันทึกการซื้อขาย</h3>
-    <p id="f-sub">พิมพ์ตัวย่อหุ้น ระบบจะใส่ราคาปิดล่าสุดให้ แก้เป็นราคาที่ซื้อจริงได้</p>
-    <form class="pf-form" id="pf-form" autocomplete="off">
-      <label class="wide">หุ้น<input class="inp" id="f-sym" list="sym-list" placeholder="เช่น MSFT" required></label>
-      <label>ประเภท<span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อ</button><button type="button" data-v="sell" aria-pressed="false">ขาย</button></span></label>
-      <label>จำนวนหุ้น<input class="inp" id="f-sh" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2.5" required></label>
-      <label>ราคาต่อหุ้น ($)<input class="inp" id="f-px" type="number" step="any" min="0" inputmode="decimal" required></label>
-      <label>วันที่<input class="inp" id="f-date" type="date" required></label>
-      <label>ค่าธรรมเนียม (บาท)<input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
+    <h3 id="f-title">บันทึกรายการ</h3>
+    <p id="f-sub">เลือกประเภทรายการก่อน ระบบจะใส่ราคาปิดล่าสุดหรือเรทวันนี้ให้ แก้เป็นตัวเลขจริงได้</p>
+    <div class="f-types"><span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อหุ้น</button><button type="button" data-v="sell" aria-pressed="false">ขายหุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ได้ปันผล</button></span></div>
+    <form class="pf-form f2" id="pf-form" autocomplete="off">
+      <label class="for-trade for-div">หุ้น<input class="inp" id="f-sym" list="sym-list" placeholder="เช่น MSFT"></label>
+      <label class="for-trade">จำนวนหุ้น<input class="inp" id="f-sh" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2.5"></label>
+      <label class="for-trade">ราคาต่อหุ้น ($)<input class="inp" id="f-px" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="for-trade">ค่าธรรมเนียม (บาท)<input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
+      <label class="for-fx wide2">ทิศทาง<span class="seg" id="f-dir"><button type="button" data-v="in" aria-pressed="true">บาท → ดอลลาร์</button><button type="button" data-v="out" aria-pressed="false">ดอลลาร์ → บาท</button></span></label>
+      <label class="for-fx">เงินบาท<input class="inp" id="f-thb" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 35000"></label>
+      <label class="for-fx">ได้/ใช้ดอลลาร์<input class="inp" id="f-usd" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 1040.50"></label>
+      <label class="for-div">ปันผลก่อนภาษี ($)<input class="inp" id="f-amt" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="for-div">ภาษีหัก ณ ที่จ่าย ($)<input class="inp" id="f-tax" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>วันที่<input class="inp" id="f-date" type="date"></label>
     </form>
     <div class="pf-actions">
       <button class="btn-solid" id="f-save" type="button">บันทึก</button>
@@ -476,8 +500,31 @@ tr.editing td { background: var(--jade-soft); }
     <datalist id="sym-list"></datalist>
   </section>
 
+  <section class="panel" style="margin-top:16px" id="pf-cash">
+    <div class="ph"><div><h3>เงินบาทและเงินสดดอลลาร์</h3><p>แลกเงินไปเท่าไหร่ เรทเฉลี่ยเท่าไหร่ และกำไรที่ได้มาจากหุ้นหรือจากค่าเงินบาท</p></div></div>
+    <div class="cash-empty pf-hint" id="cash-empty">ยังไม่มีรายการแลกเงิน เลือก "แลกเงิน" ในช่องบันทึกรายการด้านบนทุกครั้งที่โอนบาทไปซื้อดอลลาร์ แล้วระบบจะเริ่มนับเงินสดคงเหลือและกำไรเป็นเงินบาทให้</div>
+    <div class="mini-grid" id="cash-grid" hidden>
+      <div><div class="k">เงินสดดอลลาร์คงเหลือ</div><div class="v" id="c-cash"></div><div class="h" id="c-cash-h"></div></div>
+      <div><div class="k">เงินบาทที่ลงไปสุทธิ</div><div class="v" id="c-in"></div><div class="h" id="c-in-h"></div></div>
+      <div><div class="k">เรทเฉลี่ยที่แลก</div><div class="v" id="c-rate"></div><div class="h" id="c-rate-h"></div></div>
+      <div><div class="k">มูลค่าทั้งหมดเป็นบาท</div><div class="v" id="c-val"></div><div class="h" id="c-val-h"></div></div>
+    </div>
+    <div class="split" id="c-split" hidden></div>
+  </section>
+
+  <section class="panel" style="margin-top:16px" id="pf-growth">
+    <div class="ph"><div><h3>การเติบโตของพอร์ต</h3><p>มูลค่าหุ้นรายสัปดาห์ เทียบกับเงินที่ลงไป และเทียบกับถ้าเอาเงินก้อนเดียวกันซื้อกองทุน S&amp;P 500 (SPY) ในวันเดียวกัน</p></div>
+      <span class="seg" id="g-range"><button type="button" data-v="13" aria-pressed="false">3 เดือน</button><button type="button" data-v="26" aria-pressed="false">6 เดือน</button><button type="button" data-v="52" aria-pressed="false">1 ปี</button><button type="button" data-v="0" aria-pressed="true">ทั้งหมด</button></span></div>
+    <div class="g-key"><span><i class="k1"></i>มูลค่าพอร์ต</span><span><i class="k2"></i>เงินที่ลงไป</span><span><i class="k3"></i>ถ้าซื้อ SPY แทน</span></div>
+    <div class="chart" id="g-chart"></div>
+    <details class="log">
+      <summary>บันทึกผลรายเดือน</summary>
+      <div class="scroll"><table class="tbl" id="g-log"><thead><tr><th class="l">สิ้นเดือน</th><th>มูลค่าพอร์ต</th><th>เงินที่ลงไป</th><th>กำไร/ขาดทุน</th><th>ผลตอบแทน</th><th>ถ้าซื้อ SPY</th><th>ชนะ/แพ้ SPY</th></tr></thead><tbody></tbody></table></div>
+    </details>
+  </section>
+
   <section class="panel" style="margin-top:16px">
-    <div class="ph"><div><h3>สัดส่วนพอร์ต</h3><p>ตามมูลค่าตอนนี้</p></div>
+    <div class="ph"><div><h3>สัดส่วนพอร์ต</h3><p>ตามมูลค่าตอนนี้ รวมเงินสดที่ยังไม่ได้ลงหุ้น</p></div>
       <span class="seg" id="d-mode"><button type="button" data-v="stock" aria-pressed="true">รายตัว</button><button type="button" data-v="sector" aria-pressed="false">รายกลุ่ม</button></span></div>
     <div class="donut-wrap"><div class="chart" id="pf-donut"></div><div class="legend" id="pf-legend"></div></div>
   </section>
@@ -494,6 +541,7 @@ tr.editing td { background: var(--jade-soft); }
     <div class="dca">
       <label class="mini">มีเงินลงเพิ่ม <input class="inp" id="dca-amt" type="number" min="0" step="any" inputmode="decimal" placeholder="เช่น 10000"></label>
       <span class="seg" id="dca-cur"><button type="button" data-v="THB" aria-pressed="true">บาท</button><button type="button" data-v="USD" aria-pressed="false">ดอลลาร์</button></span>
+      <button class="btn-line" id="dca-cash" type="button" hidden>ใช้เงินสดที่มี</button>
       <span class="pf-hint" id="dca-note"></span>
     </div>
     <div class="scroll"><table class="tbl" id="pf-table">
@@ -502,17 +550,44 @@ tr.editing td { background: var(--jade-soft); }
     </table></div>
   </section>
 
+  <section class="panel" style="margin-top:16px" id="pf-cal">
+    <h3>ปฏิทินหุ้นของฉัน</h3>
+    <p>วันประกาศงบ และวันขึ้นเครื่องหมาย XD (ต้องซื้อหุ้นก่อนวันนี้ถึงจะได้ปันผลรอบนั้น) ของหุ้นในพอร์ตและหุ้นที่ติดตาม ภายใน 60 วันข้างหน้า</p>
+    <div id="cal-list" class="cal"></div>
+  </section>
+
+  <section class="panel" style="margin-top:16px" id="pf-goal">
+    <h3>เป้าหมายการลงทุน</h3>
+    <p>เริ่มจากมูลค่าพอร์ตตอนนี้ บวกเงินที่ลงเพิ่มทุกเดือน แล้วคาดว่าจะถึงเป้าเมื่อไหร่ เส้นจางคือกรณีผลตอบแทนต่ำกว่าและสูงกว่าที่ตั้ง 3 จุด</p>
+    <div class="goal-in">
+      <label class="mini">เป้าหมาย (บาท) <input class="inp" id="goal-t" type="number" min="0" step="any" inputmode="decimal"></label>
+      <label class="mini">ลงเพิ่มต่อเดือน (บาท) <input class="inp" id="goal-m" type="number" min="0" step="any" inputmode="decimal"></label>
+      <label class="mini">ผลตอบแทนต่อปี (%) <input class="inp sm" id="goal-r" type="number" min="-20" max="40" step="0.5" inputmode="decimal"></label>
+    </div>
+    <div class="goal-out" id="goal-out"></div>
+    <div class="chart" id="goal-chart"></div>
+  </section>
+
   <section class="panel" style="margin-top:16px">
-    <h3>ประวัติการซื้อขาย</h3>
-    <p>กด ✎ เพื่อแก้ไขรายการที่ลงผิด หรือ ✕ เพื่อลบ</p>
-    <div class="scroll"><table class="tbl" id="pf-tx"><thead><tr><th class="l">วันที่</th><th class="l">หุ้น</th><th class="l">ประเภท</th><th>จำนวน</th><th>ราคา</th><th>ค่าธรรมเนียม</th><th>รวม</th><th></th></tr></thead><tbody></tbody></table></div>
+    <h3>ประวัติรายการ</h3>
+    <div class="ph"><p>กด ✎ เพื่อแก้ไขรายการที่ลงผิด หรือ ✕ เพื่อลบ</p>
+      <span class="seg" id="h-filter"><button type="button" data-v="all" aria-pressed="true">ทั้งหมด</button><button type="button" data-v="trade" aria-pressed="false">หุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ปันผล</button></span></div>
+    <div class="scroll"><table class="tbl" id="pf-tx"><thead><tr><th class="l">วันที่</th><th class="l">หุ้น</th><th class="l">ประเภท</th><th>จำนวน</th><th>ราคา / เรท</th><th>ค่าธรรมเนียม / ภาษี</th><th>เงินสดเปลี่ยน</th><th></th></tr></thead><tbody></tbody></table></div>
     <div class="pf-actions">
       <button class="btn-line" id="pf-export" type="button">สำรองข้อมูล (ดาวน์โหลดไฟล์)</button>
       <label class="btn-line" style="cursor:pointer">นำเข้าข้อมูล<input id="pf-import" type="file" accept="application/json,.json" hidden></label>
       <span class="pf-hint" id="pf-io"></span>
     </div>
   </section>
-  <p class="disclaimer">การปรับสมดุลและการแบ่งเงินเป็นการคำนวณตามสัดส่วนที่คุณตั้งเอง ไม่ได้คิดภาษีหรือค่าธรรมเนียม ตัวเลขเงินบาทใช้อัตราแลกเปลี่ยนล่าสุดโดยประมาณ กราฟการเติบโตใช้ราคาปิดรายสัปดาห์ ไม่รวมเงินปันผลที่ได้รับ</p>
+
+  <section class="panel" style="margin-top:16px">
+    <details class="log" id="yr-box">
+      <summary>สรุปรายปี (ไว้เตรียมยื่นภาษี)</summary>
+      <div class="scroll"><table class="tbl" id="yr"><thead><tr><th class="l">ปี</th><th>ซื้อหุ้น</th><th>ขายหุ้น</th><th>กำไรที่ขายแล้ว</th><th>ปันผลก่อนภาษี</th><th>ภาษีหัก ณ ที่จ่าย</th><th>ปันผลสุทธิ</th><th>แลกบาทไป</th><th>แลกกลับเป็นบาท</th></tr></thead><tbody></tbody></table></div>
+      <p class="pf-hint" style="margin-top:10px">ตั้งแต่ปี 2567 เงินได้จากต่างประเทศ (เช่น กำไรจากการขายหุ้นและปันผล) ที่นำกลับเข้าไทยอาจต้องนำมาคำนวณภาษีเงินได้บุคคลธรรมดา ตารางนี้เป็นตัวเลขช่วยเตรียมข้อมูลเท่านั้น ไม่ใช่คำแนะนำภาษี ควรตรวจสอบกับกรมสรรพากรหรือผู้เชี่ยวชาญก่อนยื่น</p>
+    </details>
+  </section>
+  <p class="disclaimer">การปรับสมดุล การแบ่งเงิน และการคาดการณ์เป้าหมายเป็นการคำนวณตามตัวเลขที่คุณตั้งเอง ไม่ได้คิดภาษีหรือค่าธรรมเนียม และไม่ใช่การรับประกันผลตอบแทน ตัวเลขเงินบาทใช้อัตราแลกเปลี่ยนล่าสุดโดยประมาณ กราฟการเติบโตใช้ราคาปิดรายสัปดาห์ของหุ้นเท่านั้น</p>
 </div>
 </div>
 
@@ -856,7 +931,7 @@ dash.calc('sectors', {
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
-    window.VG = { scan, fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
+    window.VG = { scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -869,28 +944,39 @@ dash.calc('sectors', {
 </script>
 
 <script>
-/* portfolio: kept in this browser only (localStorage); backup/restore by file */
+/* portfolio: a single ledger of trades (buy/sell), currency exchanges (fx) and dividends (div).
+   Kept in this browser (localStorage) and, when signed in, synced to the account by the module below. */
 (() => {
   const $ = (id) => document.getElementById(id);
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
-  const KEY = 'valuegrab-portfolio-v1';
+  const KEY = 'valuegrab-portfolio-v1', GKEY = 'valuegrab-goal-v1';
   const usd = (v) => (v == null || isNaN(v) ? '–' : (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
   const usd0 = (v) => (v == null || isNaN(v) ? '–' : (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', { maximumFractionDigits: 0 }));
+  const usdS = (v) => (v > 0 ? '+' : '') + usd(v);
+  const baht = (v) => (v == null || isNaN(v) ? '–' : (v < 0 ? '-' : '') + Math.round(Math.abs(v)).toLocaleString('th-TH') + ' บาท');
+  const bahtS = (v) => (v > 0 ? '+' : '') + baht(v);
   const thb = (v) => (v == null || isNaN(v) ? '' : '≈ ' + Math.round(v).toLocaleString('th-TH') + ' บาท');
   const sgn = (v) => (v > 0 ? '+' : '');
   const pc = (v, d = 1) => (v == null || !isFinite(v) ? '–' : sgn(v) + (v * 100).toFixed(d) + '%');
   const qty = (v, d = 4) => (+v).toLocaleString('en-US', { maximumFractionDigits: d });
+  const dTH = (s, o = { day: 'numeric', month: 'short', year: '2-digit' }) => new Date(s + 'T00:00:00').toLocaleDateString('th-TH', o);
   const TAG = { 'น่าซื้อสะสม': 'buy', 'น่าจับตา': 'watch', 'หุ้นดีแต่แพง': 'rich', 'ระวังกับดักมูลค่า': 'trap', 'ผ่านไปก่อน': 'skip' };
   const PAL = ['#0f6e5a', '#3a9b7f', '#7cc4a9', '#b9e2d2', '#a86a12', '#d9a95b', '#5b6f8f', '#9aaac4', '#8a5a7a', '#c8a2bd'];
+  const CASH_COLOR = '#c9c2b0';
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const isTrade = (t) => t.type === 'buy' || t.type === 'sell';
+  const cashDelta = (t) => t.type === 'buy' ? -(t.shares * t.price + (t.fee || 0)) : t.type === 'sell' ? t.shares * t.price - (t.fee || 0)
+    : t.type === 'fx' ? (t.dir === 'out' ? -t.usd : t.usd) : t.type === 'div' ? t.amount - (t.tax || 0) : 0;
 
   let db = { tx: [], targets: {}, band: 5 };
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.tx)) db = { tx: s.tx, targets: s.targets || {}, band: s.band || 5 }; } catch (e) { /* storage blocked: work in memory */ }
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); return true; } catch (e) { return false; } };
   const save = () => { if (!keep() && !window.VGSync) $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; if (window.VGSync) window.VGSync.push(); };
+  let goal = { t: 1000000, m: 5000, r: 8 };
+  try { const g = JSON.parse(localStorage.getItem(GKEY) || 'null'); if (g) goal = { ...goal, ...g }; } catch (e) { /* defaults */ }
 
-  let map = {}, fx = null, ready = false, hist = null, histState = 'idle';
-  let fType = 'buy', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock';
+  let map = {}, raw = {}, fx = null, ready = false, hist = null, histState = 'idle';
+  let fType = 'buy', fDir = 'in', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock', hFilter = 'all';
 
   /* ---------- tabs ---------- */
   const show = (v) => {
@@ -902,14 +988,17 @@ dash.calc('sectors', {
   };
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)));
 
-  /* ---------- holdings (average cost) ---------- */
+  /* ---------- holdings (average cost) and the cash/fx ledger ---------- */
   const sorted = () => [...db.tx].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));
   const holdings = () => {
-    const h = {}; let realized = 0;
-    sorted().forEach((t) => {
+    const h = {}; let realized = 0; const realizedY = {};
+    sorted().filter(isTrade).forEach((t) => {
       const x = h[t.sym] || (h[t.sym] = { sym: t.sym, shares: 0, cost: 0 });
       if (t.type === 'buy') { x.cost += t.shares * t.price + (t.fee || 0); x.shares += t.shares; }
-      else { const avg = x.shares > 0 ? x.cost / x.shares : 0; const n = Math.min(t.shares, x.shares); realized += n * t.price - (t.fee || 0) - avg * n; x.cost -= avg * n; x.shares -= n; }
+      else {
+        const avg = x.shares > 0 ? x.cost / x.shares : 0; const n = Math.min(t.shares, x.shares); const g = n * t.price - (t.fee || 0) - avg * n;
+        realized += g; const y = t.date.slice(0, 4); realizedY[y] = (realizedY[y] || 0) + g; x.cost -= avg * n; x.shares -= n;
+      }
     });
     const list = Object.values(h).filter((x) => x.shares > 1e-9).map((x) => {
       const s = map[x.sym]; const price = s ? s.price : null;
@@ -918,8 +1007,20 @@ dash.calc('sectors', {
     });
     const total = list.reduce((a, x) => a + x.value, 0);
     list.forEach((x) => { x.w = total ? x.value / total : 0; });
-    return { list: list.sort((a, b) => b.value - a.value), total, cost: list.reduce((a, x) => a + x.cost, 0), realized };
+    return { list: list.sort((a, b) => b.value - a.value), total, cost: list.reduce((a, x) => a + x.cost, 0), realized, realizedY };
   };
+  const ledger = () => {
+    const L = { cashOn: false, cash: 0, thbIn: 0, thbOut: 0, usdIn: 0, usdOut: 0, divNet: 0, divYear: 0 };
+    const y = String(new Date().getFullYear());
+    db.tx.forEach((t) => {
+      L.cash += cashDelta(t);
+      if (t.type === 'fx') { L.cashOn = true; if (t.dir === 'out') { L.thbOut += t.thb; L.usdOut += t.usd; } else { L.thbIn += t.thb; L.usdIn += t.usd; } }
+      if (t.type === 'div') { const n = t.amount - (t.tax || 0); L.divNet += n; if (t.date.startsWith(y)) L.divYear += n; }
+    });
+    L.avgRate = L.usdIn ? L.thbIn / L.usdIn : null;
+    return L;
+  };
+  const sharesOn = (sym, date) => sorted().filter((t) => isTrade(t) && t.sym === sym && (!date || t.date <= date)).reduce((a, t) => a + (t.type === 'buy' ? t.shares : -t.shares), 0);
 
   /* target weights: set ones as given, the rest share what's left equally; always sums to 1 */
   const targetWeights = (list) => {
@@ -933,7 +1034,6 @@ dash.calc('sectors', {
     list.forEach((x) => { out[x.sym] = set[x.sym] / tot; });
     return { w: out, sumSet, auto: false };
   };
-
   const dcaPlan = (list, total, tw, amountUsd) => {
     if (!amountUsd || amountUsd <= 0 || !list.length) return {};
     const newTotal = total + amountUsd; const need = {}; let needSum = 0;
@@ -942,26 +1042,30 @@ dash.calc('sectors', {
     return out;
   };
 
-  /* ---------- allocation donut ---------- */
-  const drawDonut = (list) => {
+  /* ---------- allocation donut (cash shown as its own slice) ---------- */
+  const drawDonut = (list, cash) => {
     const box = $('pf-donut'); box.replaceChildren(); const lg = $('pf-legend'); lg.replaceChildren();
-    if (!list.length || !window.d3) { box.append(el('div', 'pf-empty', 'ยังไม่มีหุ้นในพอร์ต')); return; }
-    const total = list.reduce((a, x) => a + x.value, 0);
+    if ((!list.length && !(cash > 0.01)) || !window.d3) { box.append(el('div', 'pf-empty', 'ยังไม่มีหุ้นในพอร์ต')); return; }
+    const c = cash > 0.01 ? cash : 0;
+    const total = list.reduce((a, x) => a + x.value, 0) + c;
     let parts;
     if (dMode === 'sector') {
       const m = {}; list.forEach((x) => { const k = x.s ? x.s.sector : 'อื่นๆ'; m[k] = (m[k] || 0) + x.value; });
-      parts = Object.entries(m).map(([k, v]) => ({ k, v, w: v / total })).sort((a, b) => b.v - a.v);
+      parts = Object.entries(m).map(([k, v]) => ({ k, v })).sort((a, b) => b.v - a.v);
     } else {
-      parts = list.slice(0, 9).map((x) => ({ k: x.sym, v: x.value, w: x.w }));
-      const rest = list.slice(9).reduce((a, x) => a + x.value, 0); if (rest > 0) parts.push({ k: 'อื่นๆ', v: rest, w: rest / total });
+      parts = list.slice(0, 9).map((x) => ({ k: x.sym, v: x.value }));
+      const rest = list.slice(9).reduce((a, x) => a + x.value, 0); if (rest > 0) parts.push({ k: 'อื่นๆ', v: rest });
     }
+    parts.forEach((p, i) => { p.col = PAL[i % PAL.length]; });
+    if (c) parts.push({ k: 'เงินสด', v: c, col: CASH_COLOR });
+    parts.forEach((p) => { p.w = p.v / total; });
     const S = 220, R = S / 2;
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${S} ${S}`).style('max-width', '240px').style('display', 'block').style('margin', '0 auto');
     const g = svg.append('g').attr('transform', `translate(${R},${R})`);
-    g.selectAll('path').data(d3.pie().sort(null).value((d) => d.v)(parts)).join('path').attr('d', d3.arc().innerRadius(R * 0.62).outerRadius(R - 2).padAngle(0.012).cornerRadius(3)).attr('fill', (d, i) => PAL[i % PAL.length]);
-    g.append('text').attr('text-anchor', 'middle').attr('y', -2).attr('font-size', 22).attr('font-weight', 700).attr('font-family', 'Bai Jamjuree, sans-serif').attr('fill', css('--ink')).text(dMode === 'sector' ? parts.length + ' กลุ่ม' : list.length + ' ตัว');
+    g.selectAll('path').data(d3.pie().sort(null).value((d) => d.v)(parts)).join('path').attr('d', d3.arc().innerRadius(R * 0.62).outerRadius(R - 2).padAngle(0.012).cornerRadius(3)).attr('fill', (d) => d.data.col);
+    g.append('text').attr('text-anchor', 'middle').attr('y', -2).attr('font-size', 22).attr('font-weight', 700).attr('font-family', 'Bai Jamjuree, sans-serif').attr('fill', css('--ink')).text(dMode === 'sector' ? parts.filter((p) => p.k !== 'เงินสด').length + ' กลุ่ม' : list.length + ' ตัว');
     g.append('text').attr('text-anchor', 'middle').attr('y', 20).attr('font-size', 13).attr('fill', css('--ink-3')).text('ในพอร์ต');
-    parts.forEach((p, i) => { const d = el('div'); const sw = el('i'); sw.style.background = PAL[i % PAL.length]; d.append(sw, el('span', null, p.k), el('b', null, (p.w * 100).toFixed(1) + '%')); lg.append(d); });
+    parts.forEach((p) => { const d = el('div'); const sw = el('i'); sw.style.background = p.col; d.append(sw, el('span', null, p.k), el('b', null, (p.w * 100).toFixed(1) + '%')); lg.append(d); });
   };
 
   /* ---------- growth: weekly value of the holdings, money in, and the same money in SPY ---------- */
@@ -972,14 +1076,15 @@ dash.calc('sectors', {
       .catch(() => { histState = 'error'; drawGrowth(); });
   };
   const growthSeries = () => {
-    if (!hist || !db.tx.length) return [];
+    const tx = sorted().filter(isTrade);
+    if (!hist || !tx.length) return [];
     const dates = hist.dates.map((d) => new Date(d + 'T00:00:00Z'));
-    const tx = sorted(); const first = new Date(tx[0].date + 'T00:00:00Z');
+    const first = new Date(tx[0].date + 'T00:00:00Z');
     const closeAt = (sym, i) => { const a = hist.closes[sym]; if (!a) return null; for (let k = i; k >= 0; k--) if (a[k] != null) return a[k]; return null; };
     const spyAt = (i) => { for (let k = i; k >= 0; k--) if (hist.spy[k] != null) return hist.spy[k]; return null; };
     const out = []; const sh = {}; const lastPx = {}; let invested = 0, spyUnits = 0, ti = 0;
     const apply = (t, spyPx) => {
-      const amt = t.type === 'buy' ? t.shares * t.price + (t.fee || 0) : -(t.shares * t.price - (t.fee || 0));
+      const amt = -cashDelta(t);
       sh[t.sym] = (sh[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares);
       lastPx[t.sym] = t.price; invested += amt; if (spyPx) spyUnits += amt / spyPx;
     };
@@ -998,9 +1103,14 @@ dash.calc('sectors', {
     else Object.assign(out[out.length - 1], { value: total, invested });
     return out;
   };
+  const yAxis = (svg, y, M, W, fmt) => {
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', y).attr('y2', y).attr('stroke', css('--chart-grid'));
+    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', M.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text(fmt);
+  };
+  const xAxis = (svg, x, H, W) => svg.append('g').selectAll('text').data(x.ticks(Math.max(3, Math.floor(W / 120)))).join('text').attr('x', x).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', css('--ink-3')).text((d) => d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' }));
   const drawGrowth = () => {
     const box = $('g-chart'); box.replaceChildren(); const tb = $('g-log').tBodies[0]; tb.replaceChildren();
-    if (!db.tx.length) { box.append(el('div', 'g-empty', 'บันทึกการซื้อหุ้นก่อน แล้วกราฟการเติบโตจะขึ้นที่นี่')); return; }
+    if (!db.tx.some(isTrade)) { box.append(el('div', 'g-empty', 'บันทึกการซื้อหุ้นก่อน แล้วกราฟการเติบโตจะขึ้นที่นี่')); return; }
     if (histState === 'loading' || histState === 'idle') { box.append(el('div', 'g-empty', 'กำลังโหลดราคาย้อนหลัง…')); return; }
     if (histState === 'error') { box.append(el('div', 'g-empty', 'ยังไม่มีราคาย้อนหลัง จะพร้อมหลังระบบอัปเดตข้อมูลรอบถัดไป')); return; }
     let rows = growthSeries(); if (!rows.length || !window.d3) return;
@@ -1010,9 +1120,7 @@ dash.calc('sectors', {
     const ys = rows.flatMap((r) => [r.value, r.invested, r.spy].filter((v) => v != null));
     const y = d3.scaleLinear([Math.min(...ys) * 0.95, Math.max(...ys) * 1.03], [H - M.b, M.t]).nice();
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
-    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', y).attr('y2', y).attr('stroke', css('--chart-grid'));
-    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', M.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text((v) => '$' + d3.format(',')(v));
-    svg.append('g').selectAll('text').data(x.ticks(Math.max(3, Math.floor(W / 120)))).join('text').attr('x', x).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', css('--ink-3')).text((d) => d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' }));
+    yAxis(svg, y, M, W, (v) => '$' + d3.format(',')(v)); xAxis(svg, x, H, W);
     const line = (k) => d3.line((r) => x(r.d), (r) => y(r[k])).defined((r) => r[k] != null);
     svg.append('path').attr('d', d3.line((r) => x(r.d), (r) => y(r.invested)).curve(d3.curveStepAfter)(rows)).attr('fill', 'none').attr('stroke', css('--ink-3')).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 4');
     svg.append('path').attr('d', line('spy')(rows)).attr('fill', 'none').attr('stroke', '#5b6f8f').attr('stroke-width', 1.8);
@@ -1025,7 +1133,6 @@ dash.calc('sectors', {
         tp.replaceChildren(el('div', null, r.d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })), el('div', null, 'พอร์ต ' + usd0(r.value) + ' (' + pc(r.invested ? (r.value - r.invested) / r.invested : null) + ')'), el('div', null, 'ลงไป ' + usd0(r.invested)), el('div', null, 'ถ้าซื้อ SPY ' + usd0(r.spy)));
         tp.style.display = 'block'; const px = (x(r.d) / W) * box.clientWidth; tp.style.left = Math.min(box.clientWidth - 190, Math.max(0, px - 90)) + 'px'; tp.style.top = '-8px';
       }).on('pointerleave', () => { dot.style('display', 'none'); tp.style.display = 'none'; });
-    /* month-end log, newest first */
     const months = []; all.forEach((r, i) => { const n = all[i + 1]; if (!n || n.d.getUTCMonth() !== r.d.getUTCMonth()) months.push(r); });
     months.reverse().forEach((r) => {
       const gain = r.value - r.invested; const ret = r.invested ? gain / r.invested : null; const sret = r.invested && r.spy != null ? (r.spy - r.invested) / r.invested : null;
@@ -1037,24 +1144,172 @@ dash.calc('sectors', {
     });
   };
 
+  /* ---------- cash & fx panel ---------- */
+  const drawCash = (L, stocks) => {
+    $('cash-empty').hidden = L.cashOn; $('cash-grid').hidden = !L.cashOn; $('c-split').hidden = !L.cashOn || !fx;
+    if (!L.cashOn) return;
+    $('c-cash').textContent = usd(L.cash); $('c-cash').className = 'v ' + (L.cash < -0.01 ? 'neg' : '');
+    $('c-cash-h').textContent = L.cash < -0.01 ? 'ติดลบ: อาจยังไม่ได้บันทึกการแลกเงินบางครั้ง' : fx ? thb(L.cash * fx) : '';
+    const net = L.thbIn - L.thbOut;
+    $('c-in').textContent = baht(net); $('c-in-h').textContent = L.thbOut ? `แลกไป ${baht(L.thbIn)} แลกกลับ ${baht(L.thbOut)}` : `แลกไป ${L.usdIn ? usd(L.usdIn) : ''}`;
+    $('c-rate').textContent = L.avgRate ? L.avgRate.toFixed(2) + ' บาท/$' : '–';
+    $('c-rate-h').textContent = fx ? `วันนี้ ${fx.toFixed(2)} บาท/$` + (L.avgRate ? (fx > L.avgRate ? ' (บาทอ่อนลง ดีกับเรา)' : fx < L.avgRate ? ' (บาทแข็งขึ้น)' : '') : '') : '';
+    const valTHB = fx ? (stocks + L.cash) * fx : null;
+    $('c-val').textContent = valTHB != null ? baht(valTHB) : '–';
+    $('c-val-h').textContent = `หุ้น ${usd0(stocks)} + เงินสด ${usd0(L.cash)}`;
+    const sp = $('c-split'); sp.replaceChildren(); if (!fx || valTHB == null) return;
+    const pl = valTHB - net; const fxEff = L.avgRate ? (fx - L.avgRate) * (L.usdIn - L.usdOut) : 0; const stockEff = pl - fxEff;
+    const it = (k, v, h) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v ' + (v >= 0 ? 'pos' : 'neg'), bahtS(v))); if (h) d.append(el('div', 'h', h)); sp.append(d); };
+    it('กำไร/ขาดทุนรวมเป็นเงินบาท', pl, net > 0 ? pc(pl / net) + ' จากเงินบาทที่ลงไป' : '');
+    it('มาจากหุ้นและปันผล', stockEff, L.divNet ? `ปันผลสุทธิที่ได้แล้ว ${usd(L.divNet)} (ปีนี้ ${usd(L.divYear)})` : '');
+    it('มาจากค่าเงินบาท', fxEff, L.avgRate ? `เรทวันนี้ ${fx.toFixed(2)} เทียบเรทเฉลี่ย ${L.avgRate.toFixed(2)}` : '');
+  };
+
+  /* ---------- calendar: earnings and ex-dividend dates ---------- */
+  const drawCal = (list) => {
+    const box = $('cal-list'); box.replaceChildren();
+    const watch = window.VGWatch ? window.VGWatch.get() : [];
+    const own = new Set(list.map((x) => x.sym)); const syms = [...new Set([...own, ...watch])];
+    if (!syms.length) { box.append(el('div', 'pf-hint', 'เพิ่มหุ้นในพอร์ต หรือกดติดตามหุ้นในหน้าคัดหุ้นก่อน แล้ววันสำคัญจะขึ้นที่นี่')); return; }
+    if (!Object.values(raw).some((s) => s.earningsDate || s.exDivDate)) { box.append(el('div', 'pf-hint', 'ข้อมูลปฏิทินจะมาหลังระบบอัปเดตข้อมูลรอบถัดไป')); return; }
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0); const day = 86400000; const ev = [];
+    syms.forEach((s) => {
+      const r = raw[s]; if (!r) return;
+      const add = (d, kind, note) => { if (!d) return; const n = Math.round((new Date(d + 'T00:00:00') - t0) / day); if (n >= 0 && n <= 60) ev.push({ d, n, s, kind, note }); };
+      add(r.earningsDate, 'ประกาศงบ', '');
+      const sh = own.has(s) ? sharesOn(s) : 0;
+      add(r.exDivDate, 'ขึ้น XD', r.lastDiv ? `ปันผลล่าสุด $${r.lastDiv}/หุ้น` + (sh ? ` ถือ ${qty(sh, 2)} หุ้น ≈ ${usd(sh * r.lastDiv)} ก่อนภาษี` : '') : '');
+    });
+    if (!ev.length) { box.append(el('div', 'pf-hint', 'ไม่มีวันประกาศงบหรือ XD ของหุ้นเหล่านี้ใน 60 วันข้างหน้า')); return; }
+    ev.sort((a, b) => a.d.localeCompare(b.d)).forEach((e) => {
+      const row = el('div', 'cal-row');
+      const dd = el('div', 'cal-d'); dd.append(el('b', null, dTH(e.d, { day: 'numeric', month: 'short' })), el('small', null, e.n === 0 ? 'วันนี้' : e.n === 1 ? 'พรุ่งนี้' : `อีก ${e.n} วัน`));
+      const what = el('div', 'cal-w'); const sym = el('span', 'sym', e.s); sym.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: e.s })));
+      what.append(sym, el('span', 'cal-k ' + (e.kind === 'ประกาศงบ' ? 'earn' : 'xd'), e.kind), el('span', 'cal-b', own.has(e.s) ? 'ในพอร์ต' : 'ติดตาม'));
+      if (e.note) what.append(el('small', 'cal-n', e.note));
+      row.append(dd, what); box.append(row);
+    });
+  };
+
+  /* ---------- goal projection ---------- */
+  const fmtB = (v) => (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(Math.abs(v) >= 1e7 ? 0 : 1) + ' ล้าน' : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + ' พัน' : String(Math.round(v)));
+  const project = (start, m, r, n) => { const k = Math.pow(1 + r / 100, 1 / 12) - 1; const out = [start]; let v = start; for (let i = 1; i <= n; i++) { v = v * (1 + k) + m; out.push(v); } return out; };
+  const monthLabel = (i) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + i); return d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }); };
+  const span = (i) => { const y = Math.floor(i / 12), m = i % 12; return (y ? `${y} ปี ` : '') + (m ? `${m} เดือน` : '') || 'ไม่ถึงเดือน'; };
+  const drawGoal = (startUsd) => {
+    ['goal-t', 'goal-m', 'goal-r'].forEach((id, i) => { const k = 'tmr'[i]; if (document.activeElement !== $(id)) $(id).value = goal[k]; });
+    const out = $('goal-out'); out.replaceChildren(); const box = $('goal-chart'); box.replaceChildren();
+    if (!fx) { out.append(el('span', 'pf-hint', 'ยังไม่มีอัตราแลกเปลี่ยน รอโหลดข้อมูลสักครู่')); return; }
+    const start = Math.max(0, startUsd * fx); const T = +goal.t, m = +goal.m, r = +goal.r;
+    if (!(T > 0)) { out.append(el('span', 'pf-hint', 'ใส่เป้าหมายเป็นจำนวนเงินบาทก่อน')); return; }
+    const N = 600; const hit = (a) => a.findIndex((v) => v >= T);
+    const base = project(start, m, r, N), lo = project(start, m, r - 3, N), hi = project(start, m, r + 3, N);
+    const ib = hit(base), il = hit(lo), ih = hit(hi);
+    const p = el('p', 'goal-main');
+    if (ib === 0) p.append('ตอนนี้พอร์ตมีมูลค่า ', el('b', null, baht(start)), ' ถึงเป้าแล้ว ลองตั้งเป้าใหม่ที่สูงขึ้น');
+    else if (ib < 0) p.append(`ภายใน 50 ปียังไม่ถึง ${baht(T)} ด้วยเงื่อนไขนี้ ลองเพิ่มเงินลงต่อเดือน`);
+    else p.append('ถึง ', el('b', null, baht(T)), ' ประมาณ ', el('b', null, monthLabel(ib)), ` (อีก ${span(ib)}) ถ้าได้ผลตอบแทน ${r}% ต่อปี`);
+    out.append(p);
+    if (ib > 0) {
+      const put = start + m * ib; const s = el('p', 'pf-hint');
+      s.textContent = `ถึงวันนั้นจะใส่เงินเองรวม ${baht(put)} ที่เหลือ ${baht(base[ib] - put)} มาจากผลตอบแทนทบต้น · ถ้าได้ ${r - 3}% ${il > 0 ? 'จะถึง ' + monthLabel(il) : 'จะไม่ถึงใน 50 ปี'} · ถ้าได้ ${r + 3}% ${ih > 0 ? 'จะถึง ' + monthLabel(ih) : ''}`;
+      out.append(s);
+    }
+    if (!window.d3) return;
+    const n = Math.min(N, Math.max(60, (ib > 0 ? ib : il > 0 ? il : 240) + 24));
+    const W = box.clientWidth || 600, H = 230, M = { t: 10, r: 10, b: 26, l: 56 };
+    const d0 = new Date(); d0.setDate(1); const at = (i) => { const d = new Date(d0); d.setMonth(d.getMonth() + i); return d; };
+    const x = d3.scaleUtc([at(0), at(n)], [M.l, W - M.r]);
+    const y = d3.scaleLinear([0, Math.max(T * 1.1, hi[n] > T * 2.5 ? T * 2.5 : hi[n])], [H - M.b, M.t]).nice().clamp(true);
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    yAxis(svg, y, M, W, fmtB); xAxis(svg, x, H, W);
+    const idx = d3.range(n + 1); const ln = (a) => d3.line((i) => x(at(i)), (i) => y(a[i]))(idx);
+    svg.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', y(T)).attr('y2', y(T)).attr('stroke', css('--ochre')).attr('stroke-width', 1.5).attr('stroke-dasharray', '6 4');
+    svg.append('text').attr('x', W - M.r).attr('y', y(T) - 6).attr('text-anchor', 'end').attr('font-size', 12).attr('fill', css('--ochre')).text('เป้าหมาย ' + fmtB(T));
+    const contrib = idx.map((i) => start + m * i);
+    svg.append('path').attr('d', ln(contrib)).attr('fill', 'none').attr('stroke', css('--ink-3')).attr('stroke-width', 1.4).attr('stroke-dasharray', '4 4');
+    [lo, hi].forEach((a) => svg.append('path').attr('d', ln(a)).attr('fill', 'none').attr('stroke', css('--jade')).attr('stroke-opacity', 0.35).attr('stroke-width', 1.6));
+    svg.append('path').attr('d', ln(base)).attr('fill', 'none').attr('stroke', css('--jade')).attr('stroke-width', 2.6);
+    if (ib > 0 && ib <= n) svg.append('circle').attr('cx', x(at(ib))).attr('cy', y(T)).attr('r', 5).attr('fill', css('--jade'));
+    const tp = el('div', 'tip'); box.append(tp);
+    svg.append('rect').attr('x', M.l).attr('y', 0).attr('width', W - M.l - M.r).attr('height', H - M.b).attr('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [mx] = d3.pointer(ev); const i = Math.max(0, Math.min(n, Math.round(d3.timeMonth.count(at(0), x.invert(mx)))));
+        tp.replaceChildren(el('div', null, monthLabel(i)), el('div', null, `${r}%: ${baht(base[i])}`), el('div', null, `ใส่เงินเองรวม ${baht(contrib[i])}`));
+        tp.style.display = 'block'; const px = (x(at(i)) / W) * box.clientWidth; tp.style.left = Math.min(box.clientWidth - 190, Math.max(0, px - 90)) + 'px'; tp.style.top = '-8px';
+      }).on('pointerleave', () => { tp.style.display = 'none'; });
+  };
+  ['goal-t', 'goal-m', 'goal-r'].forEach((id, i) => $(id).addEventListener('input', () => {
+    const v = Number($(id).value); if ($(id).value === '' || !isFinite(v)) return; goal['tmr'[i]] = v;
+    try { localStorage.setItem(GKEY, JSON.stringify(goal)); } catch (e) { /* ignore */ }
+    const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0));
+  }));
+
+  /* ---------- yearly summary ---------- */
+  const drawYears = (realizedY) => {
+    const Y = {}; const g = (y) => Y[y] || (Y[y] = { buy: 0, sell: 0, gross: 0, tax: 0, thbIn: 0, thbOut: 0 });
+    db.tx.forEach((t) => {
+      const r = g(t.date.slice(0, 4));
+      if (t.type === 'buy') r.buy += t.shares * t.price + (t.fee || 0);
+      else if (t.type === 'sell') r.sell += t.shares * t.price - (t.fee || 0);
+      else if (t.type === 'div') { r.gross += t.amount; r.tax += t.tax || 0; }
+      else if (t.type === 'fx') { if (t.dir === 'out') r.thbOut += t.thb; else r.thbIn += t.thb; }
+    });
+    const tb = $('yr').tBodies[0]; tb.replaceChildren();
+    const ys = Object.keys(Y).sort().reverse();
+    if (!ys.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการ'); td.colSpan = 9; tr.append(td); tb.append(tr); return; }
+    ys.forEach((y) => {
+      const r = Y[y]; const rz = realizedY[y] || 0; const tr = el('tr');
+      [[`${+y + 543}`, 'l'], [usd(r.buy)], [usd(r.sell)], [usd(rz), rz > 0 ? 'pos' : rz < 0 ? 'neg' : ''], [usd(r.gross)], [usd(r.tax)], [usd(r.gross - r.tax)], [r.thbIn ? baht(r.thbIn) : '–'], [r.thbOut ? baht(r.thbOut) : '–']]
+        .forEach(([v, c]) => tr.append(el('td', c || null, v)));
+      tb.append(tr);
+    });
+  };
+
+  /* ---------- history ---------- */
+  const TYPE_TH = (t) => t.type === 'buy' ? ['ซื้อ', 'pos'] : t.type === 'sell' ? ['ขาย', 'neg'] : t.type === 'div' ? ['ปันผล', 'pos'] : t.dir === 'out' ? ['แลกกลับเป็นบาท', 'neg'] : ['แลกเงิน', 'pos'];
+  const drawTx = () => {
+    const tx = $('pf-tx').tBodies[0]; tx.replaceChildren();
+    const keepT = (t) => hFilter === 'all' || (hFilter === 'trade' ? isTrade(t) : t.type === hFilter);
+    const rows = [...db.tx].filter(keepT).sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
+    if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการ'); td.colSpan = 8; tr.append(td); tx.append(tr); return; }
+    rows.forEach((t) => {
+      const tr = el('tr', t.id === editId ? 'editing' : null); const [tn, tc] = TYPE_TH(t); const cd = cashDelta(t);
+      let cells;
+      if (isTrade(t)) {
+        const feeTxt = t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
+        cells = [t.sym, qty(t.shares) + ' หุ้น', usd(t.price), feeTxt];
+      } else if (t.type === 'fx') cells = ['–', baht(t.thb), 'เรท ' + (t.thb / t.usd).toFixed(2), ''];
+      else cells = [t.sym, '', '', t.tax ? 'ภาษี ' + usd(t.tax) : ''];
+      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], [usdS(cd), cd >= 0 ? 'pos' : '']].forEach(([v, c]) => tr.append(el('td', c || null, v)));
+      const e = el('button', 'edit', '✎'); e.type = 'button'; e.title = 'แก้ไข'; e.setAttribute('aria-label', 'แก้ไขรายการ'); e.addEventListener('click', () => startEdit(t));
+      const d = el('button', 'del', '✕'); d.type = 'button'; d.title = 'ลบ'; d.setAttribute('aria-label', 'ลบรายการ');
+      d.addEventListener('click', () => { if (confirm(`ลบรายการ${tn} ${t.sym || baht(t.thb)} วันที่ ${dTH(t.date)}?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); if (editId === t.id) endEdit(); save(); render(); } });
+      const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(e, d); tr.append(c); tx.append(tr);
+    });
+  };
+
   /* ---------- main render ---------- */
   const render = () => {
-    const { list, total, cost, realized } = holdings();
+    const { list, total, cost, realized, realizedY } = holdings(); const L = ledger();
+    const cashV = L.cashOn ? L.cash : 0; const all = total + cashV;
     const pl = list.filter((x) => x.pl != null).reduce((a, x) => a + x.pl, 0);
     const setV = (id, v) => { const e = $(id); e.textContent = usd(v); e.className = 'v ' + (v > 0 ? 'pos' : v < 0 ? 'neg' : ''); };
-    $('pf-val').textContent = usd(total); $('pf-val-th').textContent = fx ? thb(total * fx) : '';
+    $('pf-val').textContent = usd(all); $('pf-val-th').textContent = (fx ? thb(all * fx) : '') + (L.cashOn ? ` รวมเงินสด ${usd0(cashV)}` : '');
     $('pf-cost').textContent = usd(cost); $('pf-cost-th').textContent = (fx ? thb(cost * fx) + ' ' : '') + `ถือ ${list.length} ตัว`;
     setV('pf-pl', pl); $('pf-pl-pc').textContent = (cost ? pc(pl / cost) + ' จากต้นทุน' : '') + (realized ? ` ขายไปแล้วได้ ${usd(realized)}` : '');
     const div = list.reduce((a, x) => a + (x.s && x.s.dividendYield ? x.value * x.s.dividendYield / 100 : 0), 0);
     $('pf-div').textContent = usd(div); $('pf-div-h').textContent = (fx ? thb(div * fx) + ' ' : '') + (total ? `ผลตอบแทนปันผล ${(div / total * 100).toFixed(2)}%` : '');
-    drawDonut(list);
+    drawCash(L, total);
+    drawDonut(list, cashV);
 
     const { w: tw, sumSet, auto } = targetWeights(list);
-    $('band').value = db.band;
+    if (document.activeElement !== $('band')) $('band').value = db.band;
     $('t-sum').textContent = !list.length ? '' : auto ? 'ยังไม่ได้ตั้งเป้า ใช้สัดส่วนเท่ากันทุกตัว' : sumSet > 100.01 ? `เป้าที่ตั้งรวมกันเกิน 100% (${sumSet.toFixed(1)}%) ระบบจะย่อตามส่วน` : `ตั้งเป้าไว้รวม ${sumSet.toFixed(1)}%` + (sumSet < 99.99 ? ' ตัวที่ไม่ได้ตั้งแบ่งส่วนที่เหลือ' : '');
+    $('dca-cash').hidden = !(L.cashOn && L.cash > 1);
     const amt = Number($('dca-amt').value) || 0;
     const amtUsd = dcaCur === 'THB' ? (fx ? amt / fx : 0) : amt;
-    $('dca-note').textContent = dcaCur === 'THB' && amt && !fx ? 'ยังไม่มีอัตราแลกเปลี่ยน ใส่เป็นดอลลาร์ก่อน' : amt ? `≈ ${usd(amtUsd)}` + (fx ? ` (1$ = ${fx.toFixed(2)} บาท)` : '') : '';
+    $('dca-note').textContent = dcaCur === 'THB' && amt && !fx ? 'ยังไม่มีอัตราแลกเปลี่ยน ใส่เป็นดอลลาร์ก่อน' : amt ? `≈ ${usd(amtUsd)}` + (fx && dcaCur === 'THB' ? ` (1$ = ${fx.toFixed(2)} บาท)` : '') : '';
     const plan = dcaPlan(list, total, tw, amtUsd);
     const band = db.band / 100; const outs = [];
 
@@ -1066,7 +1321,7 @@ dash.calc('sectors', {
       td(null, qty(x.shares)); td(null, usd(x.avg)); td(null, x.price != null ? usd(x.price) : 'ไม่มีราคา'); td(null, usd(x.value));
       const p = td(x.pl == null ? '' : x.pl >= 0 ? 'pos' : 'neg'); if (x.pl == null) p.textContent = '–'; else p.append(usd(x.pl), el('small', 'sub', pc(x.pl / x.cost)));
       const drift = x.w - tw[x.sym];
-      const wc = td(null, (x.w * 100).toFixed(1) + '%'); const dr = el('small', 'drift ' + (Math.abs(drift) > band ? (drift > 0 ? 'neg' : 'pos') : ''), (drift >= 0 ? '+' : '') + (drift * 100).toFixed(1) + ' จากเป้า'); wc.append(dr);
+      const wc = td(null, (x.w * 100).toFixed(1) + '%'); wc.append(el('small', 'drift ' + (Math.abs(drift) > band ? (drift > 0 ? 'neg' : 'pos') : ''), (drift >= 0 ? '+' : '') + (drift * 100).toFixed(1) + ' จากเป้า'));
       const twIn = el('input', 'tw'); twIn.type = 'number'; twIn.min = 0; twIn.max = 100; twIn.step = 'any'; twIn.inputMode = 'decimal';
       twIn.value = db.targets[x.sym] ?? ''; twIn.placeholder = (tw[x.sym] * 100).toFixed(1); twIn.setAttribute('aria-label', 'สัดส่วนเป้าหมายของ ' + x.sym);
       twIn.addEventListener('change', () => { const v = Number(twIn.value); if (v > 0) db.targets[x.sym] = v; else delete db.targets[x.sym]; save(); render(); });
@@ -1091,106 +1346,148 @@ dash.calc('sectors', {
       al.append(el('b', null, `พอร์ตเบี้ยวจากเป้าหมายเกิน ${db.band} จุด ${outs.length} ตัว ควรปรับสมดุล`));
       const ul = el('ul'); outs.forEach((o) => ul.append(el('li', null, `${o.sym} ตอนนี้ ${(o.now * 100).toFixed(1)}% เป้า ${(o.tgt * 100).toFixed(1)}%: ${o.act}`))); al.append(ul);
     }
-
-    const tx = $('pf-tx').tBodies[0]; tx.replaceChildren();
-    if (!db.tx.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการ'); td.colSpan = 8; tr.append(td); tx.append(tr); }
-    [...db.tx].sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id)).forEach((t) => {
-      const tr = el('tr', t.id === editId ? 'editing' : null);
-      const feeTxt = t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
-      [[new Date(t.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }), 'l'], [t.sym, 'l'], [t.type === 'buy' ? 'ซื้อ' : 'ขาย', 'l ' + (t.type === 'buy' ? 'pos' : 'neg')],
-        [qty(t.shares)], [usd(t.price)], [feeTxt], [usd(t.shares * t.price + (t.type === 'buy' ? 1 : -1) * (t.fee || 0))]].forEach(([v, c]) => tr.append(el('td', c || null, v)));
-      const e = el('button', 'edit', '✎'); e.type = 'button'; e.title = 'แก้ไข'; e.setAttribute('aria-label', 'แก้ไขรายการ'); e.addEventListener('click', () => startEdit(t));
-      const d = el('button', 'del', '✕'); d.type = 'button'; d.title = 'ลบ'; d.setAttribute('aria-label', 'ลบรายการ');
-      d.addEventListener('click', () => { if (confirm(`ลบรายการ${t.type === 'buy' ? 'ซื้อ' : 'ขาย'} ${t.sym} ${qty(t.shares)} หุ้น?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); if (editId === t.id) endEdit(); save(); render(); } });
-      const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(e, d); tr.append(c); tx.append(tr);
-    });
-    drawGrowth();
+    drawTx(); drawCal(list); drawGoal(all); drawYears(realizedY); drawGrowth();
   };
 
-  /* ---------- form: add and edit ---------- */
+  /* ---------- form: add and edit any entry type ---------- */
   const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
   $('f-date').value = today();
   const setSeg = (id, v) => document.querySelectorAll(`#${id} button`).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
   const segs = (id, set) => document.querySelectorAll(`#${id} button`).forEach((b) => b.addEventListener('click', () => { setSeg(id, b.dataset.v); set(b.dataset.v); }));
-  segs('f-type', (v) => { fType = v; });
+  const hint = (m, err) => { $('f-hint').textContent = m || ''; $('f-hint').className = err ? 'pf-err' : 'pf-hint'; };
+  const setType = (v) => {
+    fType = v; setSeg('f-type', v); const grp = isTrade({ type: v }) ? 'trade' : v;
+    document.querySelectorAll('#pf-form label').forEach((l) => { const fors = [...l.classList].filter((c) => c.startsWith('for-')); l.hidden = fors.length > 0 && !fors.includes('for-' + grp); });
+    hint(''); if (v === 'div') divSuggest(); if (v === 'fx') fxInfo(); else symInfo();
+  };
+  segs('f-type', (v) => setType(v));
+  segs('f-dir', (v) => { fDir = v; fxInfo(); });
   segs('dca-cur', (v) => { dcaCur = v; render(); });
   segs('d-mode', (v) => { dMode = v; render(); });
   segs('g-range', (v) => { gRange = Number(v); drawGrowth(); });
+  segs('h-filter', (v) => { hFilter = v; drawTx(); });
   $('dca-amt').addEventListener('input', render);
+  $('dca-cash').addEventListener('click', () => { const L = ledger(); dcaCur = 'USD'; setSeg('dca-cur', 'USD'); $('dca-amt').value = Math.floor(L.cash * 100) / 100; render(); });
   $('band').addEventListener('change', () => { const v = Number($('band').value); if (v > 0) { db.band = v; save(); } render(); });
   $('t-equal').addEventListener('click', () => { const { list } = holdings(); if (!list.length) return; db.targets = {}; list.forEach((x) => { db.targets[x.sym] = +(100 / list.length).toFixed(2); }); save(); render(); });
   $('t-now').addEventListener('click', () => { const { list } = holdings(); if (!list.length) return; db.targets = {}; list.forEach((x) => { db.targets[x.sym] = +(x.w * 100).toFixed(2); }); save(); render(); });
 
+  const touch = (id) => $(id).addEventListener('input', () => { $(id).dataset.touched = '1'; });
+  ['f-px', 'f-thb', 'f-usd', 'f-amt', 'f-tax'].forEach(touch);
   const symInfo = () => {
+    if (fType === 'fx') return;
     const s = $('f-sym').value.trim().toUpperCase(); const x = map[s];
-    $('f-hint').className = 'pf-hint';
-    $('f-hint').textContent = x ? `${x.name} ราคาปิดล่าสุด ${usd(x.price)}` : s && ready ? 'ไม่พบใน S&P 500 บันทึกได้ แต่จะไม่มีราคาล่าสุดให้' : '';
+    if (fType === 'div') { divSuggest(); return; }
+    hint(x ? `${x.name} ราคาปิดล่าสุด ${usd(x.price)}` : s && ready ? 'ไม่พบใน S&P 500 บันทึกได้ แต่จะไม่มีราคาล่าสุดให้' : '');
     if (x && !$('f-px').dataset.touched && !editId) $('f-px').value = x.price;
   };
+  const divSuggest = () => {
+    const s = $('f-sym').value.trim().toUpperCase(); if (!s) { hint('ใส่ตัวย่อหุ้นที่ได้ปันผล ระบบจะคำนวณให้จากจำนวนหุ้นที่ถือ'); return; }
+    const sh = sharesOn(s, $('f-date').value || undefined); const r = raw[s];
+    if (r && r.lastDiv && sh > 0 && !$('f-amt').dataset.touched && !editId) { $('f-amt').value = +(sh * r.lastDiv).toFixed(2); taxAuto(); }
+    hint(sh > 0 ? `ถือ ${s} ${qty(sh, 2)} หุ้น` + (r && r.lastDiv ? ` ปันผลล่าสุด $${r.lastDiv}/หุ้น` : '') + ' ภาษีหัก ณ ที่จ่ายของอเมริกาสำหรับคนไทยคือ 15%' : `ยังไม่มี ${s} ในพอร์ต ณ วันที่เลือก`);
+  };
+  const taxAuto = () => { if (!$('f-tax').dataset.touched) { const a = Number($('f-amt').value); $('f-tax').value = a > 0 ? +(a * 0.15).toFixed(2) : ''; } };
+  const fxInfo = () => {
+    if (fType !== 'fx') return;
+    const t = Number($('f-thb').value), u = Number($('f-usd').value);
+    if (t > 0 && u > 0) hint(`เรทที่ได้ ${(t / u).toFixed(2)} บาทต่อดอลลาร์` + (fx ? ` (วันนี้ประมาณ ${fx.toFixed(2)})` : ''));
+    else hint(fDir === 'in' ? 'ใส่เงินบาทที่โอนไป กับดอลลาร์ที่ได้จริงจากแอปโบรกเกอร์ ถ้าใส่ช่องเดียว ระบบจะประมาณอีกช่องจากเรทวันนี้' : 'ใส่ดอลลาร์ที่แลกออก กับเงินบาทที่ได้กลับมา');
+  };
+  $('f-thb').addEventListener('input', () => { if (fx && !$('f-usd').dataset.touched) $('f-usd').value = $('f-thb').value ? +(Number($('f-thb').value) / fx).toFixed(2) : ''; fxInfo(); });
+  $('f-usd').addEventListener('input', () => { if (fx && !$('f-thb').dataset.touched) $('f-thb').value = $('f-usd').value ? +(Number($('f-usd').value) * fx).toFixed(2) : ''; fxInfo(); });
+  $('f-amt').addEventListener('input', taxAuto);
   $('f-sym').addEventListener('input', symInfo);
-  $('f-px').addEventListener('input', () => { $('f-px').dataset.touched = '1'; });
-  const clearForm = () => { $('f-sh').value = ''; $('f-px').value = ''; delete $('f-px').dataset.touched; $('f-sym').value = ''; $('f-fee').value = '0'; $('f-date').value = today(); };
+  $('f-date').addEventListener('change', () => { if (fType === 'div') divSuggest(); });
+  const clearForm = () => {
+    ['f-sh', 'f-px', 'f-sym', 'f-thb', 'f-usd', 'f-amt', 'f-tax'].forEach((id) => { $(id).value = ''; delete $(id).dataset.touched; });
+    $('f-fee').value = '0'; $('f-date').value = today();
+  };
   const startEdit = (t) => {
-    editId = t.id; fType = t.type; setSeg('f-type', t.type);
-    $('f-sym').value = t.sym; $('f-sh').value = t.shares; $('f-px').value = t.price; $('f-px').dataset.touched = '1'; $('f-date').value = t.date;
-    $('f-fee').value = t.feeThb != null ? t.feeThb : fx ? +((t.fee || 0) * fx).toFixed(2) : 0;
-    $('f-title').textContent = `แก้ไขรายการ ${t.sym}`; $('f-sub').textContent = 'แก้ตัวเลขที่ลงผิด แล้วกด "บันทึกการแก้ไข"';
-    $('f-save').textContent = 'บันทึกการแก้ไข'; $('f-cancel').hidden = false; $('f-hint').textContent = '';
-    render(); $('pf-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('f-sh').focus({ preventScroll: true });
+    editId = t.id; clearForm(); setType(t.type); $('f-date').value = t.date;
+    ['f-px', 'f-thb', 'f-usd', 'f-amt', 'f-tax'].forEach((id) => { $(id).dataset.touched = '1'; });
+    if (isTrade(t)) { $('f-sym').value = t.sym; $('f-sh').value = t.shares; $('f-px').value = t.price; $('f-fee').value = t.feeThb != null ? t.feeThb : fx ? +((t.fee || 0) * fx).toFixed(2) : 0; }
+    else if (t.type === 'fx') { fDir = t.dir || 'in'; setSeg('f-dir', fDir); $('f-thb').value = t.thb; $('f-usd').value = t.usd; }
+    else { $('f-sym').value = t.sym; $('f-amt').value = t.amount; $('f-tax').value = t.tax || 0; }
+    $('f-title').textContent = 'แก้ไขรายการ' + (t.sym ? ' ' + t.sym : ''); $('f-sub').textContent = 'แก้ตัวเลขที่ลงผิด แล้วกด "บันทึกการแก้ไข"';
+    $('f-save').textContent = 'บันทึกการแก้ไข'; $('f-cancel').hidden = false; hint('');
+    render(); $('pf-add').scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const endEdit = () => {
-    editId = null; $('f-title').textContent = 'บันทึกการซื้อขาย'; $('f-sub').textContent = 'พิมพ์ตัวย่อหุ้น ระบบจะใส่ราคาปิดล่าสุดให้ แก้เป็นราคาที่ซื้อจริงได้';
+    editId = null; $('f-title').textContent = 'บันทึกรายการ'; $('f-sub').textContent = 'เลือกประเภทรายการก่อน ระบบจะใส่ราคาปิดล่าสุดหรือเรทวันนี้ให้ แก้เป็นตัวเลขจริงได้';
     $('f-save').textContent = 'บันทึก'; $('f-cancel').hidden = true; clearForm();
   };
-  $('f-cancel').addEventListener('click', () => { endEdit(); $('f-hint').textContent = ''; render(); });
+  $('f-cancel').addEventListener('click', () => { endEdit(); hint(''); render(); });
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   $('f-save').addEventListener('click', () => {
-    const hint = (m, err) => { $('f-hint').textContent = m; $('f-hint').className = err ? 'pf-err' : 'pf-hint'; };
-    const sym = $('f-sym').value.trim().toUpperCase(); const sh = Number($('f-sh').value), px = Number($('f-px').value), feeThb = Number($('f-fee').value) || 0, date = $('f-date').value;
-    const err = !sym ? 'ใส่ตัวย่อหุ้นก่อน' : !(sh > 0) ? 'ใส่จำนวนหุ้นมากกว่า 0' : !(px > 0) ? 'ใส่ราคาต่อหุ้นมากกว่า 0' : !date ? 'เลือกวันที่' : null;
+    const date = $('f-date').value; const sym = $('f-sym').value.trim().toUpperCase();
+    const old = editId ? db.tx.find((t) => t.id === editId) : null; const id = old ? old.id : newId();
+    let rec, err = null, done;
+    if (isTrade({ type: fType })) {
+      const sh = Number($('f-sh').value), px = Number($('f-px').value), feeThb = Number($('f-fee').value) || 0;
+      err = !sym ? 'ใส่ตัวย่อหุ้นก่อน' : !(sh > 0) ? 'ใส่จำนวนหุ้นมากกว่า 0' : !(px > 0) ? 'ใส่ราคาต่อหุ้นมากกว่า 0' : !date ? 'เลือกวันที่' : feeThb > 0 && !fx ? 'ยังโหลดอัตราแลกเปลี่ยนไม่เสร็จ ลองใหม่อีกครั้ง' : null;
+      rec = { id, sym, type: fType, shares: sh, price: px, fee: feeThb > 0 && fx ? feeThb / fx : 0, feeThb, date };
+      if (old && isTrade(old) && old.feeThb == null && Math.abs(feeThb - (old.fee || 0) * (fx || 0)) < 0.01) rec.fee = old.fee || 0;
+      done = `${old ? 'แก้ไข' : 'บันทึก'}${fType === 'buy' ? 'ซื้อ' : 'ขาย'} ${sym} ${qty(sh)} หุ้นแล้ว`;
+    } else if (fType === 'fx') {
+      const t = Number($('f-thb').value), u = Number($('f-usd').value);
+      err = !(t > 0) ? 'ใส่จำนวนเงินบาท' : !(u > 0) ? 'ใส่จำนวนดอลลาร์' : !date ? 'เลือกวันที่' : (t / u < 10 || t / u > 100) ? `เรทที่ได้คือ ${(t / u).toFixed(2)} บาทต่อดอลลาร์ ดูผิดปกติ ตรวจตัวเลขอีกครั้ง` : null;
+      rec = { id, type: 'fx', dir: fDir, thb: t, usd: u, date };
+      done = `${old ? 'แก้ไข' : 'บันทึก'}การแลกเงิน ${baht(t)} ↔ ${usd(u)} แล้ว`;
+    } else {
+      const a = Number($('f-amt').value), x = Number($('f-tax').value) || 0;
+      err = !sym ? 'ใส่ตัวย่อหุ้นที่ได้ปันผล' : !(a > 0) ? 'ใส่จำนวนปันผลก่อนภาษี' : x < 0 || x > a ? 'ภาษีต้องไม่เกินปันผล' : !date ? 'เลือกวันที่' : null;
+      rec = { id, type: 'div', sym, amount: a, tax: x, date };
+      done = `${old ? 'แก้ไข' : 'บันทึก'}ปันผล ${sym} สุทธิ ${usd(a - x)} แล้ว`;
+    }
     if (err) return hint(err, true);
-    if (feeThb > 0 && !fx) return hint('ยังโหลดอัตราแลกเปลี่ยนไม่เสร็จ ลองใหม่อีกครั้ง', true);
-    const old = editId ? db.tx.find((t) => t.id === editId) : null;
-    const rec = { id: old ? old.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sym, type: fType, shares: sh, price: px, fee: feeThb > 0 ? feeThb / fx : 0, feeThb, date };
-    if (old && old.feeThb == null && Math.abs(feeThb - (old.fee || 0) * (fx || 0)) < 0.01) { rec.fee = old.fee || 0; }
-    const trial = (old ? db.tx.map((t) => (t.id === old.id ? rec : t)) : [...db.tx, rec]);
-    /* never let a sell exceed the shares held at that time */
+    const trial = old ? db.tx.map((t) => (t.id === old.id ? rec : t)) : [...db.tx, rec];
     const held = {}; let bad = null;
-    [...trial].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id)).forEach((t) => { held[t.sym] = (held[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares); if (held[t.sym] < -1e-9 && !bad) bad = t; });
+    [...trial].filter(isTrade).sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id)).forEach((t) => { held[t.sym] = (held[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares); if (held[t.sym] < -1e-9 && !bad) bad = t; });
     if (bad) return hint(`ขาย ${bad.sym} เกินจำนวนที่ถืออยู่ ณ วันที่ ${bad.date} ตรวจจำนวนหรือวันที่อีกครั้ง`, true);
-    db.tx = trial; save();
-    hint(old ? `แก้ไขรายการ ${sym} แล้ว` : `บันทึก${fType === 'buy' ? 'ซื้อ' : 'ขาย'} ${sym} ${qty(sh)} หุ้นแล้ว`);
-    if (old) endEdit(); else clearForm();
-    render();
+    db.tx = trial; save(); if (old) endEdit(); else clearForm(); hint(done); render();
   });
 
   /* ---------- backup / restore ---------- */
   $('pf-export').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify({ app: 'ValueGrab', saved: new Date().toISOString(), ...db }, null, 1)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ app: 'ValueGrab', saved: new Date().toISOString(), ...db, watch: window.VGWatch ? window.VGWatch.get() : [] }, null, 1)], { type: 'application/json' });
     const a = el('a'); a.href = URL.createObjectURL(blob); a.download = `valuegrab-portfolio-${today()}.json`; document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000); $('pf-io').textContent = 'ดาวน์โหลดไฟล์สำรองแล้ว';
   });
+  const validTx = (t) => {
+    if (!t || !/^\d{4}-\d{2}-\d{2}$/.test(t.date)) return null;
+    const base = { id: String(t.id || newId()), date: t.date };
+    if ((t.type === 'buy' || t.type === 'sell') && typeof t.sym === 'string' && t.shares > 0 && t.price > 0)
+      return { ...base, sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), ...(t.feeThb != null && isFinite(+t.feeThb) ? { feeThb: +t.feeThb } : {}) };
+    if (t.type === 'fx' && +t.thb > 0 && +t.usd > 0) return { ...base, type: 'fx', dir: t.dir === 'out' ? 'out' : 'in', thb: +t.thb, usd: +t.usd };
+    if (t.type === 'div' && typeof t.sym === 'string' && +t.amount > 0) return { ...base, type: 'div', sym: t.sym.toUpperCase().slice(0, 12), amount: +t.amount, tax: Math.max(0, +(t.tax || 0)) };
+    return null;
+  };
   $('pf-import').addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
     try {
       const j = JSON.parse(await f.text()); if (!Array.isArray(j.tx)) throw new Error('bad');
-      const ok = j.tx.filter((t) => t && typeof t.sym === 'string' && (t.type === 'buy' || t.type === 'sell') && t.shares > 0 && t.price > 0 && /^\d{4}-\d{2}-\d{2}$/.test(t.date))
-        .map((t) => ({ id: String(t.id || Math.random().toString(36).slice(2)), sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), ...(t.feeThb != null && isFinite(+t.feeThb) ? { feeThb: +t.feeThb } : {}), date: t.date }));
-      if (db.tx.length && !confirm(`แทนที่ข้อมูลในเครื่องนี้ (${db.tx.length} รายการ) ด้วยไฟล์ที่เลือก (${ok.length} รายการ)?`)) return;
+      const ok = j.tx.map(validTx).filter(Boolean);
+      if (db.tx.length && !confirm(`แทนที่ข้อมูลปัจจุบัน (${db.tx.length} รายการ) ด้วยไฟล์ที่เลือก (${ok.length} รายการ)?`)) return;
       const tg = {}; if (j.targets && typeof j.targets === 'object') Object.entries(j.targets).forEach(([k, v]) => { if (+v > 0) tg[String(k).toUpperCase().slice(0, 12)] = +v; });
-      db = { tx: ok, targets: tg, band: +j.band > 0 ? +j.band : 5 }; save(); endEdit(); render();
+      db = { tx: ok, targets: tg, band: +j.band > 0 ? +j.band : 5 };
+      if (Array.isArray(j.watch) && window.VGWatch) window.VGWatch.set(j.watch.filter((s) => typeof s === 'string').map((s) => s.toUpperCase().slice(0, 12)));
+      save(); endEdit(); render();
       $('pf-io').textContent = `นำเข้า ${ok.length} รายการแล้ว`;
     } catch (err) { $('pf-io').textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองของ ValueGrab'; }
     e.target.value = '';
   });
 
-  document.addEventListener('vg:add', (e) => { show('port'); endEdit(); $('f-sym').value = e.detail; symInfo(); $('pf-add').scrollIntoView({ block: 'start' }); $('f-sh').focus({ preventScroll: true }); });
+  document.addEventListener('vg:add', (e) => { show('port'); endEdit(); setType('buy'); $('f-sym').value = e.detail; symInfo(); $('pf-add').scrollIntoView({ block: 'start' }); $('f-sh').focus({ preventScroll: true }); });
+  document.addEventListener('vg:watch', () => { if (!$('view-port').hidden) render(); });
   document.addEventListener('vg:ready', () => {
-    map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); fx = window.VG.fx || null; ready = true;
+    map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); raw = window.VG.raw || {}; fx = window.VG.fx || null; ready = true;
     $('sym-list').replaceChildren(...window.VG.scan.map((r) => { const o = el('option'); o.value = r.symbol; o.label = r.name; return o; }));
     render();
   });
-  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) drawGrowth(); }, 200); });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) { drawGrowth(); const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0)); } }, 200); });
   window.VGPort = { get: () => db, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); } };
+  setType('buy');
   if (location.hash === '#portfolio') show('port');
   render();
 })();
