@@ -13,12 +13,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=Bai+Jamjuree:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <style>
 :root {
   color-scheme: light;
-  --bg: #eef2f0;
+  --bg: #f3f5f4;
   --surface: #ffffff;
   --ink: #16201c;
   --ink-2: #4f5c56;
@@ -32,7 +32,8 @@
   --brick-soft: #f7e1de;
   --slate-soft: #e7ebe9;
   --chart-grid: #e6ebe8;
-  --radius-lg: 18px;
+  --radius-lg: 16px;
+  --font: "IBM Plex Sans Thai", system-ui, sans-serif;
   --radius-sm: 10px;
   --shadow: 0 1px 2px rgba(22, 32, 28, .06), 0 8px 24px rgba(22, 32, 28, .05);
 }
@@ -48,7 +49,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
-  font-family: "Anuphan", system-ui, sans-serif; font-size: 18px; line-height: 1.65;
+  font-family: var(--font); font-size: 18px; line-height: 1.65;
   font-variant-numeric: tabular-nums;
 }
 a { color: inherit; }
@@ -86,12 +87,12 @@ h2 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.005em; }
 .row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.6fr) 84px 64px; align-items: center; gap: 18px; padding: 14px 20px; border-top: 1px solid var(--line); cursor: pointer; background: none; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; }
 .row:first-child { border-top: 0; }
 .row:hover { background: var(--slate-soft); }
-.who .sym { font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+.who .sym { font-weight: 600; font-size: 17px; letter-spacing: .01em; }
 .who .nm { display: block; color: var(--ink-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mos { text-align: right; font-weight: 600; font-size: 17px; }
 .mos small { display: block; font-weight: 400; font-size: 11px; color: var(--ink-3); }
 .pos { color: var(--jade); } .neg { color: var(--brick); }
-.score { justify-self: end; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.score { justify-self: end; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 15px; }
 .score.hi { background: var(--jade-soft); color: var(--jade); }
 .score.md { background: var(--ochre-soft); color: var(--ochre); }
 .score.lo { background: var(--slate-soft); color: var(--ink-2); }
@@ -158,7 +159,7 @@ body.open .sheet { transform: none; }
 @media (prefers-reduced-motion: reduce) { .sheet, .scrim { transition: none; } }
 .sheet-in { padding: 22px 22px 40px; }
 .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.sheet .sym { font-size: 28px; font-weight: 700; line-height: 1.1; }
+.sheet .sym { font-size: 28px; font-weight: 600; line-height: 1.1; }
 .sheet .nm { color: var(--ink-2); font-size: 14px; }
 .close { border: 0; background: var(--slate-soft); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; }
 .warn { margin-top: 12px; font-size: 13px; background: var(--ochre-soft); color: var(--ochre); padding: 8px 12px; border-radius: var(--radius-sm); }
@@ -189,26 +190,26 @@ body.open .sheet { transform: none; }
 .loading { color: var(--ink-3); padding: 40px 0; text-align: center; }
 
 /* brand */
-.brand { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.01em; margin: 0 4px 14px; }
+.brand { font-family: var(--font); font-weight: 600; font-size: 24px; letter-spacing: -0.01em; margin: 0 4px 14px; }
 .brand span { color: var(--jade); }
-/* type: Anuphan for reading, Bai Jamjuree for headlines and numbers */
-.verdict, h2, .panel h3, details.method summary, .who .sym, .mos, .score, .strip .v, .sheet .sym, .facts .v, .bar b, .btn, .more { font-family: "Bai Jamjuree", "Anuphan", sans-serif; }
+/* type: one family throughout */
+.verdict, h2, .panel h3, details.method summary, .who .sym, .mos, .score, .strip .v, .sheet .sym, .facts .v, .bar b, .btn, .more { font-family: var(--font); }
 .stamp { font-size: 15px; }
-.verdict { font-size: clamp(30px, 6vw, 48px); font-weight: 700; max-width: 20ch; }
+.verdict { font-size: clamp(30px, 6vw, 48px); font-weight: 600; max-width: 20ch; }
 .verdict-sub { font-size: 19px; }
 .mood { font-size: 16px; padding: 6px 14px 6px 12px; }
 .strip > div { padding: 18px 20px; }
 .strip .k { font-size: 15px; }
 .strip .v { font-size: 30px; }
 .strip .h { font-size: 14px; }
-h2 { font-size: 28px; font-weight: 700; }
+h2 { font-size: 28px; font-weight: 600; }
 .sec-note { font-size: 16px; }
 .row { padding: 18px 22px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.6fr) 100px 72px; }
 .who .sym { font-size: 21px; }
 .who .nm { font-size: 15px; }
 .tag { font-size: 14px; padding: 2px 10px; }
 .mos { font-size: 21px; }
-.mos small { font-size: 13px; font-family: "Anuphan", sans-serif; }
+.mos small { font-size: 13px; font-family: var(--font); }
 .score { width: 56px; height: 56px; font-size: 19px; }
 .ladder { height: 42px; }
 .ladder .track { top: 19px; }
@@ -252,7 +253,7 @@ details.method h4 { font-size: 17px; }
 
 /* tabs */
 .tabs { display: inline-flex; gap: 4px; background: var(--surface); padding: 5px; border-radius: 999px; box-shadow: var(--shadow); margin: 0 0 26px; }
-.tabs button { border: 0; background: none; padding: 9px 20px; border-radius: 999px; font-family: "Bai Jamjuree", sans-serif; font-weight: 600; font-size: 17px; cursor: pointer; color: var(--ink-2); }
+.tabs button { border: 0; background: none; padding: 9px 20px; border-radius: 999px; font-family: var(--font); font-weight: 600; font-size: 17px; cursor: pointer; color: var(--ink-2); }
 .tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); }
 
 /* portfolio */
@@ -266,7 +267,7 @@ details.method h4 { font-size: 17px; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 .pf-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 .pf-hint { font-size: 14px; color: var(--ink-3); }
-.btn-solid { border: 0; background: var(--jade); color: #fff; padding: 11px 22px; border-radius: 12px; font-weight: 600; font-size: 17px; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; }
+.btn-solid { border: 0; background: var(--jade); color: #fff; padding: 11px 22px; border-radius: 12px; font-weight: 600; font-size: 17px; cursor: pointer; font-family: var(--font); }
 @media (prefers-color-scheme: dark) { .btn-solid { color: #08201a; } }
 .btn-line { border: 1px solid var(--line); background: var(--surface); padding: 9px 16px; border-radius: 12px; font-size: 15px; cursor: pointer; }
 .pf-err { color: var(--brick); font-size: 15px; }
@@ -284,7 +285,7 @@ details.method h4 { font-size: 17px; }
 .tbl th { text-align: right; font-weight: 500; color: var(--ink-3); font-size: 13px; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .tbl td { text-align: right; padding: 11px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .tbl .l { text-align: left; }
-.tbl .sym { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 17px; cursor: pointer; }
+.tbl .sym { font-family: var(--font); font-weight: 600; font-size: 17px; cursor: pointer; }
 .tbl tfoot td { font-weight: 600; border-bottom: 0; }
 .tbl input.tw { width: 64px; text-align: right; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); font-size: 15px; }
 .flag { display: block; font-size: 12px; color: var(--ochre); }
@@ -293,7 +294,7 @@ details.method h4 { font-size: 17px; }
 .del { border: 0; background: none; color: var(--ink-3); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 6px; }
 .del:hover { color: var(--brick); background: var(--brick-soft); }
 .pf-empty { padding: 28px 8px; text-align: center; color: var(--ink-2); }
-.btn.add { border: 1px dashed var(--jade); color: var(--jade); background: none; cursor: pointer; font-family: inherit; }
+.btn.add { border: 1px solid var(--jade); color: var(--jade); background: none; cursor: pointer; font-family: inherit; }
 
 .ph { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .alert { background: var(--ochre-soft); color: var(--ochre); border-radius: var(--radius-lg); padding: 14px 18px; margin: 0 0 16px; font-size: 16px; }
@@ -340,17 +341,17 @@ tr.editing td { background: var(--jade-soft); }
 .split { grid-template-columns: repeat(3, 1fr); }
 .mini-grid > div, .split > div { background: var(--surface); padding: 14px 16px; }
 .mini-grid .k, .split .k { font-size: 14px; color: var(--ink-2); }
-.mini-grid .v, .split .v { font-family: "Bai Jamjuree", sans-serif; font-size: 22px; font-weight: 600; margin-top: 2px; }
+.mini-grid .v, .split .v { font-family: var(--font); font-size: 22px; font-weight: 600; margin-top: 2px; }
 .mini-grid .h, .split .h { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
 @media (max-width: 720px) { .mini-grid { grid-template-columns: 1fr 1fr; } .split { grid-template-columns: 1fr; } }
 .cash-empty { padding: 8px 0 2px; font-size: 15px; }
 .cal { display: grid; gap: 2px; margin-top: 6px; }
 .cal-row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--line); }
 .cal-row:last-child { border-bottom: 0; }
-.cal-d b { display: block; font-family: "Bai Jamjuree", sans-serif; font-size: 17px; }
+.cal-d b { display: block; font-family: var(--font); font-size: 17px; }
 .cal-d small { color: var(--ink-3); font-size: 13px; }
 .cal-w { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
-.cal-w .sym { font-weight: 700; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; }
+.cal-w .sym { font-weight: 600; cursor: pointer; font-family: var(--font); }
 .cal-k { font-size: 14px; padding: 2px 10px; border-radius: 999px; }
 .cal-k.earn { background: var(--ochre-soft); color: var(--ochre); }
 .cal-k.xd { background: var(--jade-soft); color: var(--jade); }
@@ -372,7 +373,7 @@ body[data-view="scan"] #acct, body[data-view="home"] #acct { display: none; }
 @media (max-width: 760px) { .b-two { grid-template-columns: 1fr; } }
 .bc { display: grid; grid-template-columns: 1fr auto 52px; gap: 2px 10px; align-items: baseline; padding: 8px 0; }
 .bc-k { font-size: 15px; }
-.bc b { font-family: "Bai Jamjuree", sans-serif; font-size: 15px; }
+.bc b { font-family: var(--font); font-size: 15px; }
 .bc small { color: var(--ink-3); text-align: right; font-size: 13px; }
 .bc-t { grid-column: 1 / -1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
 .bc-t i { display: block; height: 100%; border-radius: 4px; }
@@ -390,22 +391,22 @@ body[data-view="scan"] #acct, body[data-view="home"] #acct { display: none; }
 .p-out { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; margin-top: 14px; }
 .p-out > div { background: var(--surface); padding: 10px 12px; }
 .p-out .k { font-size: 13px; color: var(--ink-2); }
-.p-out .v { font-family: "Bai Jamjuree", sans-serif; font-size: 19px; font-weight: 600; }
+.p-out .v { font-family: var(--font); font-size: 19px; font-weight: 600; }
 .p-out .p-sug { grid-column: 1 / -1; font-size: 14px; color: var(--ink-2); }
 @media (max-width: 760px) {
   .p-card { position: relative; padding: 14px; }
   .p-head { grid-template-columns: 1fr 1fr; } .p-head .mini:first-child { grid-column: 1 / -1; padding-right: 34px; } .p-head .del { position: absolute; top: 8px; right: 8px; }
-  .p-row { grid-template-columns: 1fr auto 1fr auto; padding-bottom: 8px; border-bottom: 1px dashed var(--line); } .p-row .p-pn { grid-column: 1 / -1; } .p-row .p-sub { grid-column: 1 / -1; order: 9; text-align: right; }
+  .p-row { grid-template-columns: 1fr auto 1fr auto; padding-bottom: 8px; border-bottom: 1px solid var(--line); } .p-row .p-pn { grid-column: 1 / -1; } .p-row .p-sub { grid-column: 1 / -1; order: 9; text-align: right; }
   .p-out { grid-template-columns: 1fr 1fr; }
 }
 #b-tx td.det { color: var(--ink-2); max-width: 28ch; }
 #today .panel { display: grid; gap: 12px; }
 .td-row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
 .td-row > b { font-size: 15px; min-width: 11ch; color: var(--ink-2); font-weight: 600; }
-.td-sym { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 3px 12px; font-size: 15px; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; color: var(--ink); }
+.td-sym { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 3px 12px; font-size: 15px; cursor: pointer; font-family: var(--font); color: var(--ink); }
 .td-sym small { margin-left: 6px; font-family: inherit; }
 .b-month.sm { margin: 0; gap: 8px; }
-.b-month.sm b { font-family: "Bai Jamjuree", sans-serif; font-size: 17px; min-width: 9ch; text-align: center; }
+.b-month.sm b { font-family: var(--font); font-size: 17px; min-width: 9ch; text-align: center; }
 .b-month.sm .b-nav { width: 34px; height: 34px; font-size: 20px; }
 .tx-vat { margin: 14px 0 4px; display: grid; gap: 6px; }
 .tx-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
@@ -414,10 +415,10 @@ body[data-view="scan"] #acct, body[data-view="home"] #acct { display: none; }
 .tx-card.best { border-color: var(--jade); box-shadow: 0 0 0 1px var(--jade) inset; }
 .tx-h { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin-bottom: 6px; }
 .tx-h b { font-size: 17px; } .tx-h small { color: var(--ink-3); font-size: 13px; }
-.tx-card .kv { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 15px; border-bottom: 1px dashed var(--line); }
+.tx-card .kv { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 15px; border-bottom: 1px solid var(--line); }
 .tx-card .kv span:last-child { text-align: right; }
 .tx-card .kv.tot { border-bottom: 0; padding-top: 10px; font-size: 16px; }
-.tx-card .kv.tot b { font-family: "Bai Jamjuree", sans-serif; font-size: 20px; color: var(--jade); }
+.tx-card .kv.tot b { font-family: var(--font); font-size: 20px; color: var(--jade); }
 .tx-notes { display: grid; gap: 4px; margin-top: 12px; }
 #tx-ded { max-width: 180px; display: block; margin-top: 4px; }
 .b-doc span { display: flex; align-items: center; gap: 8px; min-height: 46px; font-size: 16px; color: var(--ink); }
@@ -428,7 +429,7 @@ body[data-view="scan"] #acct, body[data-view="home"] #acct { display: none; }
   @page { size: A4; margin: 14mm; }
   body { background: #fff !important; }
   body > *:not(#print-area) { display: none !important; }
-  #print-area { display: block !important; color: #000; font-family: "Anuphan", sans-serif; font-size: 11pt; }
+  #print-area { display: block !important; color: #000; font-family: var(--font); font-size: 11pt; }
   #print-area h1 { text-align: center; font-size: 17pt; margin: 0 0 2pt; }
   #print-area .pa-c { text-align: center; margin: 0 0 10pt; }
   #print-area .pa-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 3pt 16pt; margin-bottom: 10pt; }
@@ -437,7 +438,7 @@ body[data-view="scan"] #acct, body[data-view="home"] #acct { display: none; }
   #print-area th { background: #eee; }
   #print-area td:nth-child(1) { text-align: center; width: 7%; }
   #print-area td:nth-child(4), #print-area td:nth-child(5) { text-align: right; white-space: nowrap; }
-  #print-area tr.pa-sub td, #print-area tr.pa-tot td { font-weight: 700; background: #f4f4f4; }
+  #print-area tr.pa-sub td, #print-area tr.pa-tot td { font-weight: 600; background: #f4f4f4; }
   #print-area tr.pa-sub td:first-child, #print-area tr.pa-tot td:first-child { text-align: right; }
   #print-area thead { display: table-header-group; } #print-area tr { page-break-inside: avoid; }
   #print-area .pa-sign { margin-top: 28pt; text-align: right; }
@@ -471,18 +472,18 @@ details.ded summary { color: var(--jade); }
 .hcard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 .hcard h3 { margin: 0; font-size: 16px; }
 .hlink { border: 0; background: none; color: var(--jade); font-size: 14px; cursor: pointer; padding: 2px 0; font-family: inherit; white-space: nowrap; }
-.hbig { font-family: "Bai Jamjuree", sans-serif; font-size: 26px; font-weight: 700; line-height: 1.2; }
+.hbig { font-family: var(--font); font-size: 26px; font-weight: 600; line-height: 1.2; }
 .hsub { font-size: 13px; color: var(--ink-3); }
-.hkv { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.hkv { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; padding: 4px 0; border-bottom: 1px solid var(--line); }
 .hkv:last-child { border-bottom: 0; }
 .hkv span:first-child { color: var(--ink-2); }
-.hkv b { font-family: "Bai Jamjuree", sans-serif; font-weight: 600; }
+.hkv b { font-family: var(--font); font-weight: 600; }
 .hrow { display: grid; grid-template-columns: 1fr auto 40px; gap: 8px; align-items: center; width: 100%; padding: 7px 0; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; font-family: inherit; color: var(--ink); }
 .hrow:last-child { border-bottom: 0; }
-.hrow .s { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 16px; }
+.hrow .s { font-family: var(--font); font-weight: 600; font-size: 16px; }
 .hrow .n { display: block; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hrow .m { font-family: "Bai Jamjuree", sans-serif; font-weight: 600; font-size: 15px; }
-.hrow .vi { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 14px; text-align: center; border-radius: 8px; padding: 3px 0; background: var(--jade-soft); color: var(--jade); }
+.hrow .m { font-family: var(--font); font-weight: 600; font-size: 15px; }
+.hrow .vi { font-family: var(--font); font-weight: 600; font-size: 14px; text-align: center; border-radius: 8px; padding: 3px 0; background: var(--jade-soft); color: var(--jade); }
 .hchips { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 8px; }
 .hchips .td-sym { font-size: 14px; padding: 2px 10px; }
 .hbar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin: 8px 0 4px; }
@@ -490,14 +491,66 @@ details.ded summary { color: var(--jade); }
 .hmini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
 .hmini div { background: var(--bg); border-radius: 10px; padding: 6px 8px; }
 .hmini small { display: block; font-size: 12px; color: var(--ink-3); }
-.hmini b { font-family: "Bai Jamjuree", sans-serif; font-size: 14px; white-space: nowrap; }
+.hmini b { font-family: var(--font); font-size: 14px; white-space: nowrap; }
 .hempty { font-size: 14px; color: var(--ink-2); }
 .hempty button { margin-top: 8px; }
-.hcal { display: grid; grid-template-columns: 64px 1fr; gap: 6px; font-size: 14px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+.hcal { display: grid; grid-template-columns: 64px 1fr; gap: 6px; font-size: 14px; padding: 5px 0; border-bottom: 1px solid var(--line); }
 .hcal:last-child { border-bottom: 0; }
-.hcal b { font-family: "Bai Jamjuree", sans-serif; }
+.hcal b { font-family: var(--font); }
 @media (max-width: 980px) { .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .home-grid { grid-template-columns: 1fr; gap: 10px; } .hcard.tall { grid-row: auto; } .h-title { font-size: 22px; } .tabs button { padding: 8px 13px; font-size: 16px; } }
+
+/* calm pass: one typeface, fewer weights, hairlines instead of shadows */
+body { font-size: 17px; line-height: 1.65; letter-spacing: 0; }
+.verdict { font-size: clamp(24px, 4.2vw, 34px); font-weight: 600; letter-spacing: 0; line-height: 1.35; }
+.verdict-sub { font-size: 17px; }
+h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
+.panel h3, .hcard h3 { font-size: 18px; font-weight: 600; }
+.panel p { font-size: 14px; line-height: 1.6; }
+.sec-note { font-size: 15px; }
+.brand { font-weight: 600; font-size: 22px; }
+.panel, .list, .strip, .hcard, .acct, .alert { box-shadow: none; border: 1px solid var(--line); }
+.strip { gap: 0; background: var(--surface); }
+.strip > div { border-right: 1px solid var(--line); }
+.strip > div:last-child { border-right: 0; }
+.strip .k { font-size: 14px; }
+.strip .v { font-size: 26px; font-weight: 600; }
+.strip .h { font-size: 13px; }
+.who .sym { font-size: 18px; font-weight: 600; }
+.who .nm { font-size: 14px; }
+.mos { font-size: 18px; } .mos small { font-size: 12px; }
+.score { width: 48px; height: 48px; font-size: 16px; font-weight: 600; }
+.tag { font-size: 13px; font-weight: 500; }
+.tabs { box-shadow: none; border: 1px solid var(--line); }
+.tabs button { font-weight: 500; font-size: 16px; }
+.tabs button[aria-selected="true"] { font-weight: 600; }
+.subnav button { border-color: transparent; background: transparent; font-size: 15px; }
+.subnav button[aria-pressed="true"] { background: var(--jade-soft); border-color: transparent; color: var(--jade); }
+@media (prefers-color-scheme: dark) { .subnav button[aria-pressed="true"] { color: var(--jade); } }
+.hbig { font-size: 24px; font-weight: 600; }
+.mini-grid .v, .split .v { font-size: 20px; }
+.p-out .v { font-size: 17px; }
+.tx-card .kv.tot b { font-size: 18px; }
+.b-month h2 { font-size: 22px; }
+.alert { font-size: 15px; }
+.tbl { font-size: 15px; }
+.tbl th { font-weight: 500; }
+.hrow .s, .cal-w .sym, .cal-d b, .td-sym { font-weight: 600; }
+.btn-solid { font-weight: 600; font-size: 16px; }
+.mood { font-size: 14px; }
+.facts .v { font-size: 20px; }
+.sheet .sym { font-size: 30px; }
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .strip > div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .strip > div:nth-child(odd) { border-right: 1px solid var(--line); }
+  .strip > div:nth-last-child(-n+2) { border-bottom: 0; }
+  .strip .v { font-size: 21px; }
+  .who .sym { font-size: 17px; } .mos { font-size: 17px; }
+  .mini-grid .v, .split .v { font-size: 18px; }
+  .verdict { font-size: 24px; }
+  h2 { font-size: 20px; }
+}
 </style>
 </head>
 <body>
@@ -1772,7 +1825,7 @@ dash.calc('sectors', {
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${S} ${S}`).style('max-width', '240px').style('display', 'block').style('margin', '0 auto');
     const g = svg.append('g').attr('transform', `translate(${R},${R})`);
     g.selectAll('path').data(d3.pie().sort(null).value((d) => d.v)(parts)).join('path').attr('d', d3.arc().innerRadius(R * 0.62).outerRadius(R - 2).padAngle(0.012).cornerRadius(3)).attr('fill', (d) => d.data.col);
-    g.append('text').attr('text-anchor', 'middle').attr('y', -2).attr('font-size', 22).attr('font-weight', 700).attr('font-family', 'Bai Jamjuree, sans-serif').attr('fill', css('--ink')).text(dMode === 'sector' ? parts.filter((p) => p.k !== 'เงินสด').length + ' กลุ่ม' : list.length + ' ตัว');
+    g.append('text').attr('text-anchor', 'middle').attr('y', -2).attr('font-size', 22).attr('font-weight', 600).attr('font-family', 'IBM Plex Sans Thai, sans-serif').attr('fill', css('--ink')).text(dMode === 'sector' ? parts.filter((p) => p.k !== 'เงินสด').length + ' กลุ่ม' : list.length + ' ตัว');
     g.append('text').attr('text-anchor', 'middle').attr('y', 20).attr('font-size', 13).attr('fill', css('--ink-3')).text('ในพอร์ต');
     parts.forEach((p) => { const d = el('div'); const sw = el('i'); sw.style.background = p.col; d.append(sw, el('span', null, p.k), el('b', null, (p.w * 100).toFixed(1) + '%')); lg.append(d); });
   };
