@@ -404,6 +404,44 @@ body[data-view="scan"] #acct { display: none; }
 .td-row > b { font-size: 15px; min-width: 11ch; color: var(--ink-2); font-weight: 600; }
 .td-sym { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 3px 12px; font-size: 15px; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; color: var(--ink); }
 .td-sym small { margin-left: 6px; font-family: inherit; }
+.b-month.sm { margin: 0; gap: 8px; }
+.b-month.sm b { font-family: "Bai Jamjuree", sans-serif; font-size: 17px; min-width: 9ch; text-align: center; }
+.b-month.sm .b-nav { width: 34px; height: 34px; font-size: 20px; }
+.tx-vat { margin: 14px 0 4px; display: grid; gap: 6px; }
+.tx-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+@media (max-width: 760px) { .tx-opts { grid-template-columns: 1fr; } }
+.tx-card { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; background: var(--bg); }
+.tx-card.best { border-color: var(--jade); box-shadow: 0 0 0 1px var(--jade) inset; }
+.tx-h { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin-bottom: 6px; }
+.tx-h b { font-size: 17px; } .tx-h small { color: var(--ink-3); font-size: 13px; }
+.tx-card .kv { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 15px; border-bottom: 1px dashed var(--line); }
+.tx-card .kv span:last-child { text-align: right; }
+.tx-card .kv.tot { border-bottom: 0; padding-top: 10px; font-size: 16px; }
+.tx-card .kv.tot b { font-family: "Bai Jamjuree", sans-serif; font-size: 20px; color: var(--jade); }
+.tx-notes { display: grid; gap: 4px; margin-top: 12px; }
+#tx-ded { max-width: 180px; display: block; margin-top: 4px; }
+.b-doc span { display: flex; align-items: center; gap: 8px; min-height: 46px; font-size: 16px; color: var(--ink); }
+.b-doc input { width: 20px; height: 20px; accent-color: var(--jade); }
+#print-area { display: none; }
+@media (max-width: 720px) { .mini-grid .v, .split .v { font-size: 19px; } }
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: #fff !important; }
+  body > *:not(#print-area) { display: none !important; }
+  #print-area { display: block !important; color: #000; font-family: "Anuphan", sans-serif; font-size: 11pt; }
+  #print-area h1 { text-align: center; font-size: 17pt; margin: 0 0 2pt; }
+  #print-area .pa-c { text-align: center; margin: 0 0 10pt; }
+  #print-area .pa-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 3pt 16pt; margin-bottom: 10pt; }
+  #print-area table { width: 100%; border-collapse: collapse; }
+  #print-area th, #print-area td { border: 0.6pt solid #000; padding: 3pt 5pt; vertical-align: top; }
+  #print-area th { background: #eee; }
+  #print-area td:nth-child(1) { text-align: center; width: 7%; }
+  #print-area td:nth-child(4), #print-area td:nth-child(5) { text-align: right; white-space: nowrap; }
+  #print-area tr.pa-sub td, #print-area tr.pa-tot td { font-weight: 700; background: #f4f4f4; }
+  #print-area tr.pa-sub td:first-child, #print-area tr.pa-tot td:first-child { text-align: right; }
+  #print-area thead { display: table-header-group; } #print-area tr { page-break-inside: avoid; }
+  #print-area .pa-sign { margin-top: 28pt; text-align: right; }
+}
 </style>
 </head>
 <body>
@@ -659,6 +697,7 @@ body[data-view="scan"] #acct { display: none; }
       <label>วันที่<input class="inp" id="b-date" type="date"></label>
       <label class="b-for-in">สินค้าที่ขาย (ถ้ามี)<select class="inp" id="b-prod"><option value="">ไม่ระบุ</option></select></label>
       <label class="b-for-in">จำนวนชิ้น<input class="inp" id="b-qty" type="number" step="1" min="0" inputmode="numeric" placeholder="เช่น 3"></label>
+      <label class="b-for-out b-doc"><span><input type="checkbox" id="b-doc" checked> มีใบเสร็จ/หลักฐาน</span></label>
       <label class="wide2">บันทึกช่วยจำ<input class="inp" id="b-note" placeholder="เช่น ขายหน้าร้าน, ซื้อของจากร้าน A"></label>
     </form>
     <div class="chips b-chips" id="b-chips"></div>
@@ -688,6 +727,30 @@ body[data-view="scan"] #acct { display: none; }
     </section>
   </div>
 
+  <section class="panel" style="margin-top:16px" id="b-taxp">
+    <div class="ph"><div><h3>ภาษีและรายงานสำหรับยื่น</h3><p>สำหรับคนทำธุรกิจในนามตัวเอง (บุคคลธรรมดา เงินได้ประเภท 40(8) เช่น ขายของ) ใช้ตัวเลขจากรายการที่บันทึกไว้</p></div>
+      <div class="b-month sm"><button type="button" class="b-nav" id="tx-prev" aria-label="ปีก่อน">‹</button><b id="tx-year"></b><button type="button" class="b-nav" id="tx-next" aria-label="ปีถัดไป">›</button></div></div>
+    <div class="mini-grid" id="tx-grid"></div>
+    <div class="tx-vat" id="tx-vat"></div>
+    <h4 class="b-h4">ประมาณภาษีทั้งปี (ภ.ง.ด.90) เลือกวิธีหักค่าใช้จ่ายที่จ่ายน้อยกว่า</h4>
+    <label class="mini">ค่าลดหย่อนอื่นนอกจากส่วนตัว 60,000 บาท (เช่น ประกันสังคม ประกันชีวิต กองทุน) <input class="inp" id="tx-ded" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label>
+    <div class="tx-opts" id="tx-opts"></div>
+    <div class="tx-notes" id="tx-notes"></div>
+    <h4 class="b-h4">พิมพ์รายงานเงินสดรับ-จ่าย</h4>
+    <p class="pf-hint">คนที่มีเงินได้ 40(8) และไม่ได้จด VAT ต้องทำรายงานเงินสดรับ-จ่าย เป็นภาษาไทย และลงรายการภายใน 3 วันทำการ ใส่ข้อมูลหัวรายงานด้านล่าง (เก็บไว้ในเครื่องนี้เท่านั้น ไม่ขึ้นบัญชี) แล้วกดพิมพ์ เลือก "บันทึกเป็น PDF" ในหน้าพิมพ์ได้</p>
+    <div class="pf-form f2" id="tx-prof">
+      <label>ชื่อผู้ประกอบการ<input class="inp" id="pr-owner" placeholder="ชื่อ-นามสกุล"></label>
+      <label>ชื่อร้าน/สถานประกอบการ<input class="inp" id="pr-shop"></label>
+      <label>เลขประจำตัวผู้เสียภาษี<input class="inp" id="pr-tin" inputmode="numeric" maxlength="13"></label>
+      <label class="wide2">ที่อยู่<input class="inp" id="pr-addr"></label>
+    </div>
+    <div class="pf-actions">
+      <button class="btn-solid" id="pr-month" type="button">พิมพ์เดือนที่เลือก</button>
+      <button class="btn-line" id="pr-year" type="button">พิมพ์ทั้งปี</button>
+      <span class="pf-hint" id="pr-hint"></span>
+    </div>
+  </section>
+
   <section class="panel" style="margin-top:16px" id="b-products">
     <div class="ph"><div><h3>ต้นทุนต่อชิ้นและราคาขาย</h3><p>ใส่วัตถุดิบหรือค่าใช้จ่ายที่ใช้ทำสินค้า 1 ชิ้น ระบบจะบอกต้นทุน กำไรต่อชิ้น และราคาที่ควรตั้งถ้าอยากได้กำไรตามเป้า</p></div>
       <button class="btn-line" id="p-add" type="button">+ เพิ่มสินค้า</button></div>
@@ -705,7 +768,7 @@ body[data-view="scan"] #acct { display: none; }
       <span class="pf-hint" id="b-io"></span>
     </div>
   </section>
-  <p class="disclaimer">ตัวเลขทั้งหมดคำนวณจากรายการที่คุณบันทึกเอง ใช้ดูภาพรวมและวางแผน ไม่ใช่งบการเงินที่ใช้ยื่นภาษีแทนบัญชีจริงได้</p>
+  <p class="disclaimer">ตัวเลขทั้งหมดคำนวณจากรายการที่คุณบันทึกเอง ใช้ดูภาพรวมและวางแผน ส่วนประมาณภาษีใช้อัตราภาษีเงินได้บุคคลธรรมดาแบบขั้นบันไดและนับเฉพาะรายได้ธุรกิจ ยังไม่รวมเงินได้ประเภทอื่น เช่น เงินเดือน ตรวจตัวเลขจริงกับกรมสรรพากรหรือนักบัญชีก่อนยื่น</p>
 </div>
 </div>
 
@@ -1239,7 +1302,7 @@ dash.calc('sectors', {
     if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการในเดือนนี้'); td.colSpan = 6; tr.append(td); tb.append(tr); return; }
     rows.forEach((e) => {
       const tr = el('tr', e.id === editId ? 'editing' : null); const p = e.prod ? biz.products.find((x) => x.id === e.prod) : null;
-      const det = [p ? `${p.name || 'สินค้า'}${e.qty ? ' × ' + e.qty : ''}` : '', e.note || ''].filter(Boolean).join(' · ');
+      const det = [p ? `${p.name || 'สินค้า'}${e.qty ? ' × ' + e.qty : ''}` : '', e.note || '', e.kind === 'out' && e.doc === false ? 'ไม่มีใบเสร็จ' : ''].filter(Boolean).join(' · ');
       [[new Date(e.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }), 'l'], [e.cat || '–', 'l'], [det, 'l det'], [e.kind === 'in' ? b2(e.amount) : '', 'pos'], [e.kind === 'out' ? b2(e.amount) : '']].forEach(([v, c]) => tr.append(el('td', c, v)));
       const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
       const d = el('button', 'del', '✕'); d.type = 'button'; d.setAttribute('aria-label', 'ลบรายการ');
@@ -1261,7 +1324,7 @@ dash.calc('sectors', {
     list.slice(0, 8).forEach((c) => { const b = el('button', 'chip', c); b.type = 'button'; b.setAttribute('aria-pressed', String($('b-cat').value === c)); b.addEventListener('click', () => { $('b-cat').value = c; drawChips(); }); box.append(b); });
     $('b-cat').placeholder = kind === 'in' ? 'เช่น ยอดขาย' : 'เช่น วัตถุดิบ';
   };
-  const setKind = (k) => { kind = k; setSeg('b-kind', k); document.querySelectorAll('#b-form .b-for-in').forEach((l) => { l.hidden = k !== 'in'; }); drawChips(); };
+  const setKind = (k) => { kind = k; setSeg('b-kind', k); document.querySelectorAll('#b-form .b-for-in').forEach((l) => { l.hidden = k !== 'in'; }); document.querySelectorAll('#b-form .b-for-out').forEach((l) => { l.hidden = k !== 'out'; }); drawChips(); };
   document.querySelectorAll('#b-kind button').forEach((b) => b.addEventListener('click', () => { setKind(b.dataset.v); if (!editId) $('b-cat').value = ''; drawChips(); }));
   document.querySelectorAll('#b-filter button').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.v; setSeg('b-filter', filter); drawTx(); }));
   $('b-cat').addEventListener('input', drawChips);
@@ -1272,9 +1335,9 @@ dash.calc('sectors', {
     if (p && !$('b-cat').value) { $('b-cat').value = 'ยอดขาย'; drawChips(); }
   };
   $('b-prod').addEventListener('change', autoAmt); $('b-qty').addEventListener('input', autoAmt);
-  const clearForm = () => { ['b-amt', 'b-cat', 'b-note', 'b-qty'].forEach((id) => { $(id).value = ''; }); delete $('b-amt').dataset.touched; $('b-prod').value = ''; $('b-date').value = ym === ymOf(today()) ? today() : ym + '-01'; drawChips(); };
+  const clearForm = () => { ['b-amt', 'b-cat', 'b-note', 'b-qty'].forEach((id) => { $(id).value = ''; }); delete $('b-amt').dataset.touched; $('b-prod').value = ''; $('b-doc').checked = true; $('b-date').value = ym === ymOf(today()) ? today() : ym + '-01'; drawChips(); };
   const startEdit = (e) => {
-    editId = e.id; setKind(e.kind); $('b-amt').value = e.amount; $('b-amt').dataset.touched = '1'; $('b-cat').value = e.cat || ''; $('b-date').value = e.date; $('b-note').value = e.note || '';
+    editId = e.id; setKind(e.kind); $('b-amt').value = e.amount; $('b-amt').dataset.touched = '1'; $('b-cat').value = e.cat || ''; $('b-date').value = e.date; $('b-note').value = e.note || ''; $('b-doc').checked = e.doc !== false;
     fillProdSelect(); $('b-prod').value = e.prod || ''; $('b-qty').value = e.qty || '';
     $('b-title').textContent = 'แก้ไขรายการ'; $('b-sub').textContent = 'แก้ตัวเลขที่ลงผิด แล้วกด "บันทึกการแก้ไข"'; $('b-save').textContent = 'บันทึกการแก้ไข'; $('b-cancel').hidden = false; hint('');
     drawChips(); drawTx(); $('b-add').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1285,7 +1348,9 @@ dash.calc('sectors', {
     const amt = Number($('b-amt').value), date = $('b-date').value, cat = $('b-cat').value.trim().slice(0, 40), note = $('b-note').value.trim().slice(0, 120);
     const err = !(amt > 0) ? 'ใส่จำนวนเงินมากกว่า 0' : !date ? 'เลือกวันที่' : !cat ? 'เลือกหรือพิมพ์หมวดก่อน' : null;
     if (err) return hint(err, true);
-    const rec = { id: editId || newId(), date, kind, amount: amt, cat, note };
+    const prevRec = editId ? biz.entries.find((e) => e.id === editId) : null;
+    const rec = { id: editId || newId(), date, kind, amount: amt, cat, note, at: (prevRec && prevRec.at) || today() };
+    if (kind === 'out') rec.doc = $('b-doc').checked;
     if (kind === 'in' && $('b-prod').value) { rec.prod = $('b-prod').value; const q = Number($('b-qty').value); if (q > 0) rec.qty = q; }
     const was = editId; biz.entries = was ? biz.entries.map((e) => (e.id === was ? rec : e)) : [...biz.entries, rec];
     save(); if (ymOf(date) !== ym) ym = ymOf(date);
@@ -1300,14 +1365,14 @@ dash.calc('sectors', {
   const dl = (name, text, type) => { const a = el('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
   $('b-csv').addEventListener('click', () => {
     const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-    const rows = [['วันที่', 'ประเภท', 'หมวด', 'รายละเอียด', 'สินค้า', 'จำนวนชิ้น', 'รายรับ (บาท)', 'รายจ่าย (บาท)']];
-    [...biz.entries].sort((a, b) => a.date.localeCompare(b.date)).forEach((e) => { const p = biz.products.find((x) => x.id === e.prod); rows.push([e.date, e.kind === 'in' ? 'รายรับ' : 'รายจ่าย', e.cat, e.note, p ? p.name : '', e.qty || '', e.kind === 'in' ? e.amount : '', e.kind === 'out' ? e.amount : '']); });
+    const rows = [['วันที่', 'ประเภท', 'หมวด', 'รายละเอียด', 'สินค้า', 'จำนวนชิ้น', 'รายรับ (บาท)', 'รายจ่าย (บาท)', 'หลักฐาน']];
+    [...biz.entries].sort((a, b) => a.date.localeCompare(b.date)).forEach((e) => { const p = biz.products.find((x) => x.id === e.prod); rows.push([e.date, e.kind === 'in' ? 'รายรับ' : 'รายจ่าย', e.cat, e.note, p ? p.name : '', e.qty || '', e.kind === 'in' ? e.amount : '', e.kind === 'out' ? e.amount : '', e.kind === 'out' ? (e.doc === false ? 'ไม่มี' : 'มี') : '']); });
     dl(`valuegrab-business-${today()}.csv`, '﻿' + rows.map((r) => r.map(q).join(',')).join('\r\n'), 'text/csv;charset=utf-8'); $('b-io').textContent = 'ดาวน์โหลดไฟล์ CSV แล้ว เปิดด้วย Excel หรือ Google Sheets ได้';
   });
   $('b-export').addEventListener('click', () => { dl(`valuegrab-business-${today()}.json`, JSON.stringify({ app: 'ValueGrab-business', saved: new Date().toISOString(), ...biz }, null, 1), 'application/json'); $('b-io').textContent = 'ดาวน์โหลดไฟล์สำรองแล้ว'; });
   const clean = (d) => {
     const entries = (Array.isArray(d.entries) ? d.entries : []).filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out') && +e.amount > 0)
-      .map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.prod ? { prod: String(e.prod) } : {}), ...(+e.qty > 0 ? { qty: +e.qty } : {}) }));
+      .map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.prod ? { prod: String(e.prod) } : {}), ...(+e.qty > 0 ? { qty: +e.qty } : {}), ...(e.kind === 'out' && e.doc === false ? { doc: false } : e.kind === 'out' ? { doc: true } : {}), ...(/^\d{4}-\d{2}-\d{2}$/.test(e.at || '') ? { at: e.at } : {}) }));
     const products = (Array.isArray(d.products) ? d.products : []).filter((p) => p && typeof p === 'object').map((p) => ({ id: String(p.id || newId()), name: String(p.name || '').slice(0, 60), price: p.price === '' ? '' : +p.price || '', feePct: p.feePct === '' ? '' : +p.feePct || '',
       parts: (Array.isArray(p.parts) ? p.parts : []).slice(0, 40).map((x) => ({ name: String(x.name || '').slice(0, 60), cost: x.cost === '' ? '' : +x.cost || '', qty: x.qty === '' ? '' : +x.qty || '' })) }));
     return { entries, products, name: String(d.name || '').slice(0, 60) };
@@ -1319,7 +1384,99 @@ dash.calc('sectors', {
     ev.target.value = '';
   });
 
-  const render = () => { if (!shown) return; drawStrip(); drawChart(); drawCats(); drawTx(); fillProdSelect(); };
+
+  /* ---------- tax estimate & cash report (individual, income type 40(8)) ---------- */
+  const PKEY = 'valuegrab-bizprofile-v1', DKEY = 'valuegrab-bizded-v1';
+  let ty = String(new Date().getFullYear());
+  let prof = {}; try { prof = JSON.parse(localStorage.getItem(PKEY) || '{}') || {}; } catch (e) { /* none */ }
+  const BR = [[150000, 0], [300000, 0.05], [500000, 0.10], [750000, 0.15], [1000000, 0.20], [2000000, 0.25], [5000000, 0.30], [Infinity, 0.35]];
+  const prog = (net) => { let t = 0, lo = 0; for (const [hi, r] of BR) { if (net > lo) t += (Math.min(net, hi) - lo) * r; lo = hi; } return t; };
+  const workdays = (a, b) => { let n = 0; const d = new Date(a + 'T00:00:00'), e = new Date(b + 'T00:00:00'); while (d < e) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w && w !== 6) n++; } return n; };
+  const yearSums = (y, months) => {
+    const r = { inc: 0, out: 0, outDoc: 0, noDoc: 0, late: 0, n: 0 };
+    biz.entries.forEach((e) => { if (!e.date.startsWith(y)) return; const m = +e.date.slice(5, 7); if (months && !months.includes(m)) return;
+      r.n++; if (e.kind === 'in') r.inc += e.amount; else { r.out += e.amount; if (e.doc !== false) r.outDoc += e.amount; else r.noDoc++; }
+      if (e.at && workdays(e.date, e.at) > 3) r.late++; });
+    return r;
+  };
+  const drawTax = () => {
+    $('tx-year').textContent = 'ปีภาษี ' + (+ty + 543);
+    if (document.activeElement !== $('tx-ded')) { try { $('tx-ded').value = localStorage.getItem(DKEY) || ''; } catch (e) { /* ignore */ } }
+    const Y = yearSums(ty), H = yearSums(ty, [1, 2, 3, 4, 5, 6]);
+    const g = $('tx-grid'); g.replaceChildren();
+    const it = (k, v, h, cls) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v ' + (cls || ''), v)); if (h) d.append(el('div', 'h', h)); g.append(d); };
+    it('รายได้ทั้งปี (เงินได้ 40(8))', baht(Y.inc), 'ยอดก่อนหักค่าใช้จ่าย ใช้กรอก ภ.ง.ด.90', 'pos');
+    it('รายจ่ายจริงที่มีหลักฐาน', baht(Y.outDoc), Y.noDoc ? `ไม่มีหลักฐานอีก ${Y.noDoc} รายการ (${baht(Y.out - Y.outDoc)})` : `รายจ่ายทั้งหมด ${baht(Y.out)}`);
+    it('ครึ่งปีแรก ม.ค.–มิ.ย.', baht(H.inc), `ใช้กรอก ภ.ง.ด.94 · รายจ่ายมีหลักฐาน ${baht(H.outDoc)}`);
+    it('กำไรทั้งปีตามบัญชี', baht(Y.inc - Y.out), Y.inc ? `อัตรากำไร ${pc((Y.inc - Y.out) / Y.inc)}` : '', Y.inc - Y.out >= 0 ? 'pos' : 'neg');
+    /* VAT threshold: income over the last 12 months up to today */
+    const now = ymOf(today()); let r12 = 0; biz.entries.forEach((e) => { if (e.kind === 'in' && ymOf(e.date) > ymShift(now, -12) && ymOf(e.date) <= now) r12 += e.amount; });
+    const v = $('tx-vat'); v.replaceChildren(); const share = Math.min(1, r12 / 1800000);
+    const bar = el('div', 'bc-t'); const i = el('i'); i.style.width = (share * 100) + '%'; i.style.background = share >= 0.8 ? 'var(--brick)' : 'var(--jade)'; bar.append(i);
+    v.append(el('div', 'pf-hint', `รายได้ 12 เดือนล่าสุด ${baht(r12)} จากเพดาน 1,800,000 บาทที่ต้องจดทะเบียนภาษีมูลค่าเพิ่ม (VAT) ${share >= 1 ? '· เกินแล้ว ต้องจด VAT ภายใน 30 วันนับจากวันที่เกิน' : share >= 0.8 ? '· ใกล้เพดานแล้ว เตรียมจด VAT' : ''}`), bar);
+    /* two ways to deduct expenses */
+    const ded = Math.max(0, Number($('tx-ded').value) || 0);
+    const calc = (exp) => {
+      const net = Math.max(0, Y.inc - exp - 60000 - ded); const m1 = prog(net); const m2raw = Y.inc >= 120000 ? Y.inc * 0.005 : 0; const m2 = m2raw > 5000 ? m2raw : 0;
+      return { exp, net, m1, m2, m2raw, tax: Math.max(m1, m2) };
+    };
+    const A = calc(Y.inc * 0.6), B = calc(Y.outDoc);
+    const o = $('tx-opts'); o.replaceChildren();
+    [['หักเหมา 60%', A, 'ไม่ต้องใช้ใบเสร็จ'], ['หักตามจริง', B, 'ต้องมีใบเสร็จ/หลักฐานทุกรายการ']].forEach(([t, c, sub], k) => {
+      const best = Y.inc > 0 && k === (B.tax < A.tax ? 1 : 0);
+      const card = el('div', 'tx-card' + (best ? ' best' : '')); const hd = el('div', 'tx-h'); hd.append(el('b', null, t), el('small', null, sub)); if (best) hd.append(el('span', 'tag buy', 'จ่ายน้อยกว่า'));
+      card.append(hd);
+      [['เงินได้', baht(Y.inc)], ['หักค่าใช้จ่าย', '−' + baht(c.exp)], ['ลดหย่อนส่วนตัว', '−60,000 บาท'], ...(ded ? [['ลดหย่อนอื่น', '−' + baht(ded)]] : []), ['เงินได้สุทธิ', baht(c.net)], ['ภาษีแบบขั้นบันได', baht(c.m1)],
+        ['ภาษีวิธีที่ 2 (0.5% ของเงินได้)', c.m2raw ? (c.m2 ? baht(c.m2) : `${baht(c.m2raw)} ไม่เกิน 5,000 จึงยกเว้น`) : 'ไม่ถึง 120,000 บาท ไม่ต้องคิด']]
+        .forEach(([a, b]) => { const r = el('div', 'kv'); r.append(el('span', null, a), el('span', null, b)); card.append(r); });
+      const tot = el('div', 'kv tot'); tot.append(el('span', null, 'ภาษีที่ต้องจ่ายโดยประมาณ'), el('b', null, baht(c.tax))); card.append(tot);
+      o.append(card);
+    });
+    const n = $('tx-notes'); n.replaceChildren();
+    const li = (t) => n.append(el('div', 'pf-hint', '• ' + t));
+    li(`ภ.ง.ด.94 (ครึ่งปี ม.ค.–มิ.ย. ${+ty + 543}) ยื่นภายใน 30 ก.ย. ${+ty + 543} ถ้ารายได้ครึ่งปีเกิน 60,000 บาท (คนโสด) ภาษีที่จ่ายตอนนี้นำไปหักตอนยื่น ภ.ง.ด.90 ได้`);
+    li(`ภ.ง.ด.90 (ทั้งปี ${+ty + 543}) ยื่นภายใน 31 มี.ค. ${+ty + 544} ยื่นออนไลน์มักได้ขยายเวลาเพิ่ม ตรวจวันที่จริงของแต่ละปีที่ rd.go.th`);
+    if (Y.late) li(`มี ${Y.late} รายการที่บันทึกช้ากว่า 3 วันทำการหลังวันที่เกิดรายการ กฎกำหนดให้ลงภายใน 3 วันทำการ`);
+    if (Y.noDoc) li(`รายจ่ายที่ไม่มีหลักฐาน ${Y.noDoc} รายการไม่ได้นับในวิธีหักตามจริง ขอใบเสร็จทุกครั้งที่ซื้อของเข้าร้าน`);
+  };
+  $('tx-prev').addEventListener('click', () => { ty = String(+ty - 1); drawTax(); });
+  $('tx-next').addEventListener('click', () => { ty = String(+ty + 1); drawTax(); });
+  $('tx-ded').addEventListener('input', () => { try { localStorage.setItem(DKEY, $('tx-ded').value); } catch (e) { /* ignore */ } drawTax(); });
+  [['pr-owner', 'owner'], ['pr-shop', 'shop'], ['pr-tin', 'tin'], ['pr-addr', 'addr']].forEach(([id, k]) => {
+    $(id).value = prof[k] || '';
+    $(id).addEventListener('input', () => { prof[k] = $(id).value.trim(); try { localStorage.setItem(PKEY, JSON.stringify(prof)); } catch (e) { /* ignore */ } });
+  });
+  const printReport = (mode) => {
+    const rows = biz.entries.filter((e) => (mode === 'm' ? ymOf(e.date) === ym : e.date.startsWith(ty))).sort((a, b) => (a.date + (a.at || '') + a.id).localeCompare(b.date + (b.at || '') + b.id));
+    if (!rows.length) { $('pr-hint').textContent = mode === 'm' ? 'เดือนที่เลือกยังไม่มีรายการ' : 'ปีนี้ยังไม่มีรายการ'; return; }
+    $('pr-hint').textContent = '';
+    const area = $('print-area'); area.replaceChildren();
+    const per = mode === 'm' ? 'ประจำเดือน ' + ymTH(ym) : 'ประจำปี พ.ศ. ' + (+ty + 543);
+    area.append(el('h1', null, 'รายงานเงินสดรับ-จ่าย'), el('p', 'pa-c', per));
+    const meta = el('div', 'pa-meta');
+    [['ชื่อผู้ประกอบการ', prof.owner], ['ชื่อสถานประกอบการ', prof.shop], ['เลขประจำตัวผู้เสียภาษีอากร', prof.tin], ['ที่อยู่', prof.addr]].forEach(([k, v]) => meta.append(el('div', null, `${k}: ${v || '....................................................'}`)));
+    area.append(meta);
+    const t = el('table'); const th = el('tr'); ['ลำดับ', 'วัน เดือน ปี', 'รายการ', 'รายรับ (บาท)', 'รายจ่าย (บาท)', 'หมายเหตุ'].forEach((x) => th.append(el('th', null, x))); t.append(el('thead')); t.tHead.append(th);
+    const tb = el('tbody'); t.append(tb); const f = (v) => (v ? v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '');
+    let i = 0, ti = 0, to = 0, mi = 0, mo = 0, cur = null;
+    const sub = (m) => { const r = el('tr', 'pa-sub'); const c = el('td', null, 'รวม' + ymTH(m)); c.colSpan = 3; r.append(c, el('td', null, f(mi) || '0.00'), el('td', null, f(mo) || '0.00'), el('td')); tb.append(r); mi = 0; mo = 0; };
+    rows.forEach((e) => {
+      const m = ymOf(e.date); if (mode === 'y' && cur && m !== cur) sub(cur); cur = m;
+      const p = e.prod ? biz.products.find((x) => x.id === e.prod) : null;
+      const desc = [e.cat, p ? `${p.name}${e.qty ? ' ' + e.qty + ' ชิ้น' : ''}` : '', e.note].filter(Boolean).join(' · ');
+      const r = el('tr'); [String(++i), new Date(e.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }), desc, e.kind === 'in' ? f(e.amount) : '', e.kind === 'out' ? f(e.amount) : '', e.kind === 'out' && e.doc === false ? 'ไม่มีใบเสร็จ' : '']
+        .forEach((x) => r.append(el('td', null, x)));
+      tb.append(r); if (e.kind === 'in') { ti += e.amount; mi += e.amount; } else { to += e.amount; mo += e.amount; }
+    });
+    if (mode === 'y' && cur) sub(cur);
+    const tot = el('tr', 'pa-tot'); const c = el('td', null, 'รวมทั้งสิ้น'); c.colSpan = 3; tot.append(c, el('td', null, f(ti) || '0.00'), el('td', null, f(to) || '0.00'), el('td', null, 'คงเหลือ ' + (f(ti - to) || '0.00'))); tb.append(tot);
+    area.append(t, el('p', 'pa-sign', 'ลงชื่อ ........................................ ผู้จัดทำ        วันที่ ....................'));
+    window.print();
+  };
+  $('pr-month').addEventListener('click', () => printReport('m'));
+  $('pr-year').addEventListener('click', () => printReport('y'));
+
+  const render = () => { if (!shown) return; drawStrip(); drawChart(); drawCats(); drawTx(); fillProdSelect(); drawTax(); };
   document.addEventListener('vg:view', (e) => { shown = e.detail === 'biz'; if (shown) { render(); drawProducts(); drawChips(); } });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) drawChart(); }, 200); });
   window.VGBiz = { get: () => biz, replace: (d) => { biz = clean(d); keep(); if (editId && !biz.entries.some((e) => e.id === editId)) endEdit(); if (shown) { render(); if (!document.activeElement || !document.activeElement.closest('#p-list')) drawProducts(); } } };
@@ -1983,5 +2140,6 @@ if (FB && window.VGPort) {
 }
 </script>
 
+<div id="print-area"></div>
 </body>
 </html>
