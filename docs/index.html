@@ -361,12 +361,73 @@ tr.editing td { background: var(--jade-soft); }
 .goal-in .inp.sm { width: 80px; }
 .goal-main { font-size: 18px; margin: 4px 0 2px; color: var(--ink); }
 .goal-main b { color: var(--jade); }
+body[data-view="scan"] #acct { display: none; }
+.b-month { display: flex; align-items: center; gap: 12px; margin: 0 4px 14px; }
+.b-month h2 { margin: 0; font-size: 26px; min-width: 9ch; text-align: center; }
+.b-nav { border: 1px solid var(--line); background: var(--surface); width: 40px; height: 40px; border-radius: 50%; font-size: 24px; line-height: 1; cursor: pointer; color: var(--ink); }
+#b-form label[hidden] { display: none; }
+.b-chips { margin-top: 12px; }
+.g-key .kx { background: #d08a3c; }
+.b-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 760px) { .b-two { grid-template-columns: 1fr; } }
+.bc { display: grid; grid-template-columns: 1fr auto 52px; gap: 2px 10px; align-items: baseline; padding: 8px 0; }
+.bc-k { font-size: 15px; }
+.bc b { font-family: "Bai Jamjuree", sans-serif; font-size: 15px; }
+.bc small { color: var(--ink-3); text-align: right; font-size: 13px; }
+.bc-t { grid-column: 1 / -1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.bc-t i { display: block; height: 100%; border-radius: 4px; }
+.b-h4 { margin: 16px 0 6px; font-size: 15px; }
+.p-list { display: grid; gap: 14px; margin-top: 10px; }
+.p-card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: var(--bg); }
+.p-head { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end; }
+.p-head .mini { display: grid; gap: 4px; font-size: 14px; }
+.p-head .inp, .p-row .inp { background: var(--surface); }
+.p-parts { margin-top: 12px; display: grid; gap: 8px; }
+.p-ph { font-size: 14px; color: var(--ink-2); }
+.p-row { display: grid; grid-template-columns: 2fr 1fr auto 0.8fr 110px auto; gap: 8px; align-items: center; }
+.p-x { color: var(--ink-3); }
+.p-sub { font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+.p-out { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; margin-top: 14px; }
+.p-out > div { background: var(--surface); padding: 10px 12px; }
+.p-out .k { font-size: 13px; color: var(--ink-2); }
+.p-out .v { font-family: "Bai Jamjuree", sans-serif; font-size: 19px; font-weight: 600; }
+.p-out .p-sug { grid-column: 1 / -1; font-size: 14px; color: var(--ink-2); }
+@media (max-width: 760px) {
+  .p-card { position: relative; padding: 14px; }
+  .p-head { grid-template-columns: 1fr 1fr; } .p-head .mini:first-child { grid-column: 1 / -1; padding-right: 34px; } .p-head .del { position: absolute; top: 8px; right: 8px; }
+  .p-row { grid-template-columns: 1fr auto 1fr auto; padding-bottom: 8px; border-bottom: 1px dashed var(--line); } .p-row .p-pn { grid-column: 1 / -1; } .p-row .p-sub { grid-column: 1 / -1; order: 9; text-align: right; }
+  .p-out { grid-template-columns: 1fr 1fr; }
+}
+#b-tx td.det { color: var(--ink-2); max-width: 28ch; }
+#today .panel { display: grid; gap: 12px; }
+.td-row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.td-row > b { font-size: 15px; min-width: 11ch; color: var(--ink-2); font-weight: 600; }
+.td-sym { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 3px 12px; font-size: 15px; cursor: pointer; font-family: "Bai Jamjuree", sans-serif; color: var(--ink); }
+.td-sym small { margin-left: 6px; font-family: inherit; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">Value<span>Grab</span></div>
-  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="scan" aria-selected="true">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ตของฉัน</button></nav>
+  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="scan" aria-selected="true">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ตของฉัน</button><button type="button" role="tab" data-v="biz" aria-selected="false">ธุรกิจ</button></nav>
+  <section class="acct" id="acct" hidden>
+    <div id="acct-out">
+      <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์พอร์ตและข้อมูลธุรกิจข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง</p></div>
+        <div class="acct-btns"><button class="btn-solid" id="a-google" type="button">เข้าสู่ระบบด้วย Google</button><button class="btn-line" id="a-mail-open" type="button">ใช้อีเมล</button></div></div>
+      <form class="acct-mail" id="a-mail" hidden autocomplete="on">
+        <input class="inp" id="a-email" type="email" placeholder="อีเมล" autocomplete="username">
+        <input class="inp" id="a-pass" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" autocomplete="current-password">
+        <button class="btn-solid" id="a-in" type="submit">เข้าสู่ระบบ</button>
+        <button class="btn-line" id="a-up" type="button">สมัครบัญชีใหม่</button>
+        <button class="linkish" id="a-reset" type="button">ลืมรหัสผ่าน</button>
+      </form>
+    </div>
+    <div id="acct-in" class="acct-row" hidden>
+      <div><b><span class="dot"></span>ซิงค์กับบัญชี <span id="a-who"></span></b><p id="a-state">ข้อมูลจะตรงกันทุกเครื่องที่ล็อกอินบัญชีนี้</p></div>
+      <div class="acct-btns"><button class="btn-line" id="a-out" type="button">ออกจากระบบ</button></div>
+    </div>
+    <div class="pf-hint" id="a-msg" role="status"></div>
+  </section>
   <div id="view-scan">
   <header class="hero">
     <p class="stamp" id="stamp">กำลังโหลดข้อมูลล่าสุด</p>
@@ -381,6 +442,12 @@ tr.editing td { background: var(--jade-soft); }
     <div><div class="k">ย่อจากจุดสูงสุดรอบปี</div><div class="v" id="s-dd">–</div><div class="h">ของ SPY</div></div>
     <div><div class="k">ดอกเบี้ยพันธบัตร 10 ปี</div><div class="v" id="s-y">–</div><div class="h" id="s-y-h"></div></div>
   </div>
+
+  <section id="today" hidden>
+    <div class="sec-head"><h2>สรุปวันนี้</h2></div>
+    <p class="sec-note" id="today-note"></p>
+    <div class="panel" id="today-body"></div>
+  </section>
 
   <section id="picks">
     <div class="sec-head"><h2>น่าซื้อสะสมวันนี้</h2></div>
@@ -448,24 +515,6 @@ tr.editing td { background: var(--jade-soft); }
   </div>
 <div id="view-port" hidden>
   <p class="pf-intro">บันทึกหุ้นที่ซื้อ เงินที่แลก และปันผลที่ได้ แล้วดูว่าพอร์ตโตแค่ไหน กำไรมาจากหุ้นหรือจากค่าเงิน ควรปรับสมดุลตัวไหน และจะถึงเป้าหมายเมื่อไหร่ ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า ถ้าไม่ล็อกอิน <b>ข้อมูลพอร์ตจะเก็บไว้ในเครื่องนี้เท่านั้น</b></p>
-  <section class="acct" id="acct" hidden>
-    <div id="acct-out">
-      <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์พอร์ตข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะพอร์ตของตัวเอง</p></div>
-        <div class="acct-btns"><button class="btn-solid" id="a-google" type="button">เข้าสู่ระบบด้วย Google</button><button class="btn-line" id="a-mail-open" type="button">ใช้อีเมล</button></div></div>
-      <form class="acct-mail" id="a-mail" hidden autocomplete="on">
-        <input class="inp" id="a-email" type="email" placeholder="อีเมล" autocomplete="username">
-        <input class="inp" id="a-pass" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" autocomplete="current-password">
-        <button class="btn-solid" id="a-in" type="submit">เข้าสู่ระบบ</button>
-        <button class="btn-line" id="a-up" type="button">สมัครบัญชีใหม่</button>
-        <button class="linkish" id="a-reset" type="button">ลืมรหัสผ่าน</button>
-      </form>
-    </div>
-    <div id="acct-in" class="acct-row" hidden>
-      <div><b><span class="dot"></span>ซิงค์กับบัญชี <span id="a-who"></span></b><p id="a-state">ข้อมูลจะตรงกันทุกเครื่องที่ล็อกอินบัญชีนี้</p></div>
-      <div class="acct-btns"><button class="btn-line" id="a-out" type="button">ออกจากระบบ</button></div>
-    </div>
-    <div class="pf-hint" id="a-msg" role="status"></div>
-  </section>
 
   <div class="strip" id="pf-strip">
     <div><div class="k">มูลค่าพอร์ต</div><div class="v" id="pf-val">$0.00</div><div class="h" id="pf-val-th"></div></div>
@@ -588,6 +637,75 @@ tr.editing td { background: var(--jade-soft); }
     </details>
   </section>
   <p class="disclaimer">การปรับสมดุล การแบ่งเงิน และการคาดการณ์เป้าหมายเป็นการคำนวณตามตัวเลขที่คุณตั้งเอง ไม่ได้คิดภาษีหรือค่าธรรมเนียม และไม่ใช่การรับประกันผลตอบแทน ตัวเลขเงินบาทใช้อัตราแลกเปลี่ยนล่าสุดโดยประมาณ กราฟการเติบโตใช้ราคาปิดรายสัปดาห์ของหุ้นเท่านั้น</p>
+</div>
+<div id="view-biz" hidden>
+  <p class="pf-intro">จดรายรับรายจ่ายของธุรกิจ ดูกำไรแต่ละเดือน เงินหมดไปกับอะไร และคิดต้นทุนต่อชิ้นเพื่อตั้งราคาขายให้มีกำไร ใช้ได้กับธุรกิจทุกแบบ ตั้งหมวดเองได้ ล็อกอินบัญชีเดียวกับพอร์ตแล้วข้อมูลจะซิงค์ทุกเครื่อง</p>
+
+  <div class="b-month"><button type="button" class="b-nav" id="b-prev" aria-label="เดือนก่อน">‹</button><h2 id="b-month"></h2><button type="button" class="b-nav" id="b-next" aria-label="เดือนถัดไป">›</button></div>
+  <div class="strip" id="b-strip">
+    <div><div class="k">รายรับ</div><div class="v pos" id="b-in">0 บาท</div><div class="h" id="b-in-h"></div></div>
+    <div><div class="k">รายจ่าย</div><div class="v" id="b-out">0 บาท</div><div class="h" id="b-out-h"></div></div>
+    <div><div class="k">กำไรสุทธิ</div><div class="v" id="b-pl">0 บาท</div><div class="h" id="b-pl-h"></div></div>
+    <div><div class="k">กำไรสะสมทั้งปี</div><div class="v" id="b-yr">0 บาท</div><div class="h" id="b-yr-h"></div></div>
+  </div>
+
+  <section class="panel" id="b-add">
+    <h3 id="b-title">บันทึกรายรับรายจ่าย</h3>
+    <p id="b-sub">เลือกรับหรือจ่าย ใส่จำนวนเงิน แล้วเลือกหมวด (พิมพ์หมวดใหม่เองได้)</p>
+    <div class="f-types"><span class="seg" id="b-kind"><button type="button" data-v="in" aria-pressed="true">รายรับ</button><button type="button" data-v="out" aria-pressed="false">รายจ่าย</button></span></div>
+    <form class="pf-form f2" id="b-form" autocomplete="off">
+      <label>จำนวนเงิน (บาท)<input class="inp" id="b-amt" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 1500"></label>
+      <label>หมวด<input class="inp" id="b-cat" list="b-cats" placeholder="เช่น ยอดขาย"></label>
+      <label>วันที่<input class="inp" id="b-date" type="date"></label>
+      <label class="b-for-in">สินค้าที่ขาย (ถ้ามี)<select class="inp" id="b-prod"><option value="">ไม่ระบุ</option></select></label>
+      <label class="b-for-in">จำนวนชิ้น<input class="inp" id="b-qty" type="number" step="1" min="0" inputmode="numeric" placeholder="เช่น 3"></label>
+      <label class="wide2">บันทึกช่วยจำ<input class="inp" id="b-note" placeholder="เช่น ขายหน้าร้าน, ซื้อของจากร้าน A"></label>
+    </form>
+    <div class="chips b-chips" id="b-chips"></div>
+    <datalist id="b-cats"></datalist>
+    <div class="pf-actions">
+      <button class="btn-solid" id="b-save" type="button">บันทึก</button>
+      <button class="btn-line" id="b-cancel" type="button" hidden>ยกเลิกการแก้ไข</button>
+      <span class="pf-hint" id="b-hint"></span>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:16px">
+    <div class="ph"><div><h3>รายรับรายจ่าย 12 เดือน</h3><p>แท่งเขียวคือรายรับ แท่งส้มคือรายจ่าย เส้นคือกำไรสุทธิ กดที่เดือนเพื่อดูรายละเอียด</p></div></div>
+    <div class="g-key"><span><i class="k1"></i>รายรับ</span><span><i class="kx"></i>รายจ่าย</span><span><i class="k2"></i>กำไรสุทธิ</span></div>
+    <div class="chart" id="b-chart"></div>
+  </section>
+
+  <div class="b-two">
+    <section class="panel">
+      <h3>รายจ่ายเดือนนี้ไปไหน</h3>
+      <div id="b-outcat" class="b-cats"></div>
+    </section>
+    <section class="panel">
+      <h3>รายรับเดือนนี้มาจากไหน</h3>
+      <div id="b-incat" class="b-cats"></div>
+      <div id="b-best"></div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:16px" id="b-products">
+    <div class="ph"><div><h3>ต้นทุนต่อชิ้นและราคาขาย</h3><p>ใส่วัตถุดิบหรือค่าใช้จ่ายที่ใช้ทำสินค้า 1 ชิ้น ระบบจะบอกต้นทุน กำไรต่อชิ้น และราคาที่ควรตั้งถ้าอยากได้กำไรตามเป้า</p></div>
+      <button class="btn-line" id="p-add" type="button">+ เพิ่มสินค้า</button></div>
+    <div id="p-list" class="p-list"></div>
+  </section>
+
+  <section class="panel" style="margin-top:16px">
+    <div class="ph"><h3>รายการเดือนนี้</h3>
+      <span class="seg" id="b-filter"><button type="button" data-v="all" aria-pressed="true">ทั้งหมด</button><button type="button" data-v="in" aria-pressed="false">รายรับ</button><button type="button" data-v="out" aria-pressed="false">รายจ่าย</button></span></div>
+    <div class="scroll"><table class="tbl" id="b-tx"><thead><tr><th class="l">วันที่</th><th class="l">หมวด</th><th class="l">รายละเอียด</th><th>รายรับ</th><th>รายจ่าย</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="pf-actions">
+      <button class="btn-line" id="b-csv" type="button">ดาวน์โหลดเป็น Excel (CSV)</button>
+      <button class="btn-line" id="b-export" type="button">สำรองข้อมูลธุรกิจ</button>
+      <label class="btn-line" style="cursor:pointer">นำเข้าข้อมูลธุรกิจ<input id="b-import" type="file" accept="application/json,.json" hidden></label>
+      <span class="pf-hint" id="b-io"></span>
+    </div>
+  </section>
+  <p class="disclaimer">ตัวเลขทั้งหมดคำนวณจากรายการที่คุณบันทึกเอง ใช้ดูภาพรวมและวางแผน ไม่ใช่งบการเงินที่ใช้ยื่นภาษีแทนบัญชีจริงได้</p>
 </div>
 </div>
 
@@ -924,6 +1042,33 @@ dash.calc('sectors', {
   $('all-more').addEventListener('click', () => { st.allN += 25; drawAll(); });
   $('pick-more').addEventListener('click', () => { st.pickN += 10; drawPicks(); });
 
+  /* what changed since the previous close: signal moves, my stocks, biggest movers */
+  const drawToday = (j) => {
+    fetch('prev.json?v=' + j.updated).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pj) => {
+      if (!pj.stocks || pj.asOf === j.asOf) return;
+      const prev = CALC.scan.fn(pj.stocks, pj.yield); const pm = {}; prev.forEach((r) => { pm[r.symbol] = r; });
+      const B = 'น่าซื้อสะสม';
+      const chg = (r) => (pm[r.symbol] && pm[r.symbol].price && r.price ? r.price / pm[r.symbol].price - 1 : null);
+      const newBuy = scan.filter((r) => r.signal === B && pm[r.symbol] && pm[r.symbol].signal !== B);
+      const dropped = prev.filter((r) => r.signal === B).map((r) => scan.find((x) => x.symbol === r.symbol)).filter((r) => r && r.signal !== B);
+      const mine = new Set([...(window.VGPort ? window.VGPort.get().tx.filter((t) => t.sym && (t.type === 'buy' || t.type === 'sell')).map((t) => t.sym) : []), ...watch]);
+      const moves = scan.map((r) => ({ r, c: chg(r) })).filter((x) => x.c != null);
+      const mineM = moves.filter((x) => mine.has(x.r.symbol)).sort((a, b) => Math.abs(b.c) - Math.abs(a.c)).slice(0, 10);
+      const byC = [...moves].sort((a, b) => b.c - a.c); const ups = moves.filter((x) => x.c > 0).length;
+      const body = $('today-body'); body.replaceChildren();
+      const chip = (r, c, extra) => { const b = el('button', 'td-sym', r.symbol); b.type = 'button'; if (c != null) b.append(el('small', c >= 0 ? 'pos' : 'neg', pc(c, 1))); if (extra) b.append(el('small', null, extra)); b.addEventListener('click', () => openSheet(r.symbol)); return b; };
+      const line = (label, items) => { if (!items.length) return; const d = el('div', 'td-row'); d.append(el('b', null, label), ...items); body.append(d); };
+      line('เข้ากลุ่มน่าซื้อสะสม', newBuy.map((r) => chip(r, chg(r))));
+      line('หลุดจากน่าซื้อสะสม', dropped.map((r) => chip(r, chg(r), '→ ' + r.signal)));
+      line('หุ้นของฉัน', mineM.map((x) => chip(x.r, x.c)));
+      line('ขึ้นแรงสุด', byC.slice(0, 5).map((x) => chip(x.r, x.c)));
+      line('ลงแรงสุด', byC.slice(-5).reverse().map((x) => chip(x.r, x.c)));
+      if (!newBuy.length && !dropped.length) body.prepend(el('div', 'pf-hint', 'รายชื่อหุ้นน่าซื้อสะสมไม่เปลี่ยนจากรอบก่อน'));
+      $('today-note').textContent = `เทียบราคาปิดวันที่ ${thDate(pj.asOf)} กับ ${thDate(j.asOf)}: หุ้นขึ้น ${ups} ตัว ลง ${moves.length - ups} ตัว จาก ${moves.length} ตัว`;
+      $('today').hidden = false;
+    }).catch(() => { /* no previous snapshot yet */ });
+  };
+
   fetch('data.json?v=' + Date.now()).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((j) => {
     scan = CALC.scan.fn(j.stocks, j.yield);
     market = CALC.market.fn(j.spy, j.yield, j.stocks)[0];
@@ -932,7 +1077,7 @@ dash.calc('sectors', {
     $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
     window.VG = { scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
-    drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy);
+    drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
     console.error(e);
@@ -943,6 +1088,244 @@ dash.calc('sectors', {
 })();
 </script>
 
+<script>
+/* business ledger: income/expense entries by category, plus per-product cost sheets.
+   Kept in this browser and, when signed in, synced to business/{uid} by the account module. */
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const BKEY = 'valuegrab-biz-v1';
+  const baht = (v, d = 0) => (v == null || !isFinite(v) ? '–' : (v < 0 ? '-' : '') + Math.abs(v).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d === 0 ? 0 : 2 }) + ' บาท');
+  const b2 = (v) => baht(v, Math.abs(v) < 1000 && v % 1 ? 2 : 0);
+  const pc = (v) => (v == null || !isFinite(v) ? '–' : (v * 100).toFixed(1) + '%');
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const DEF = { in: ['ยอดขาย', 'ค่าบริการ', 'รายได้อื่น'], out: ['วัตถุดิบ/ต้นทุนสินค้า', 'ค่าแพ็กและค่าส่ง', 'ค่าธรรมเนียมแพลตฟอร์ม', 'ค่าโฆษณา', 'ค่าเช่า/น้ำไฟ/เน็ต', 'ค่าแรง', 'อุปกรณ์', 'อื่นๆ'] };
+  const OUTC = '#d08a3c';
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  const ymOf = (d) => d.slice(0, 7);
+  const ymShift = (ym, k) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + k, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+  const ymTH = (ym, o = { month: 'long', year: 'numeric' }) => new Date(ym + '-01T00:00:00').toLocaleDateString('th-TH', o);
+
+  let biz = { entries: [], products: [], name: '' };
+  try { const s = JSON.parse(localStorage.getItem(BKEY) || 'null'); if (s && Array.isArray(s.entries)) biz = { entries: s.entries, products: s.products || [], name: s.name || '' }; } catch (e) { /* in memory */ }
+  const keep = () => { try { localStorage.setItem(BKEY, JSON.stringify(biz)); return true; } catch (e) { return false; } };
+  const save = () => { keep(); if (window.VGSync) window.VGSync.push('business'); };
+  let ym = ymOf(today()), kind = 'in', editId = null, filter = 'all', shown = false;
+
+  /* ---------- sums ---------- */
+  const monthSum = (m) => { let i = 0, o = 0; biz.entries.forEach((e) => { if (ymOf(e.date) === m) { if (e.kind === 'in') i += e.amount; else o += e.amount; } }); return { i, o, p: i - o }; };
+  const byCat = (m, k) => { const r = {}; biz.entries.forEach((e) => { if (ymOf(e.date) === m && e.kind === k) r[e.cat || 'ไม่ระบุหมวด'] = (r[e.cat || 'ไม่ระบุหมวด'] || 0) + e.amount; }); return Object.entries(r).sort((a, b) => b[1] - a[1]); };
+  const prodCalc = (p) => {
+    const cost = (p.parts || []).reduce((a, x) => a + (Number(x.cost) || 0) * (Number(x.qty) || 0), 0);
+    const price = Number(p.price) || 0; const feeP = (Number(p.feePct) || 0) / 100; const fee = price * feeP;
+    const profit = price - cost - fee; const sug = (m) => (1 - feeP - m > 0 ? cost / (1 - feeP - m) : null);
+    return { cost, fee, profit, margin: price ? profit / price : null, sug30: sug(0.3), sug50: sug(0.5) };
+  };
+
+  /* ---------- header + strip ---------- */
+  const drawStrip = () => {
+    $('b-month').textContent = ymTH(ym);
+    const s = monthSum(ym), prev = monthSum(ymShift(ym, -1));
+    const set = (id, v, cls) => { $(id).textContent = baht(v); $(id).className = 'v ' + (cls || ''); };
+    set('b-in', s.i, 'pos'); set('b-out', s.o); set('b-pl', s.p, s.p > 0 ? 'pos' : s.p < 0 ? 'neg' : '');
+    const vs = (a, b) => (b ? `${a >= b ? '+' : ''}${((a - b) / Math.abs(b) * 100).toFixed(0)}% จากเดือนก่อน` : '');
+    $('b-in-h').textContent = vs(s.i, prev.i); $('b-out-h').textContent = vs(s.o, prev.o);
+    $('b-pl-h').textContent = s.i ? `อัตรากำไร ${pc(s.p / s.i)}` : '';
+    const y = ym.slice(0, 4); let yi = 0, yo = 0; biz.entries.forEach((e) => { if (e.date.startsWith(y)) { if (e.kind === 'in') yi += e.amount; else yo += e.amount; } });
+    set('b-yr', yi - yo, yi - yo > 0 ? 'pos' : yi - yo < 0 ? 'neg' : '');
+    $('b-yr-h').textContent = `ปี ${+y + 543} รับ ${baht(yi)} จ่าย ${baht(yo)}`;
+  };
+
+  /* ---------- 12-month chart ---------- */
+  const drawChart = () => {
+    const box = $('b-chart'); box.replaceChildren(); if (!window.d3) return;
+    const months = d3.range(11, -1, -1).map((k) => ymShift(ym, -k)).map((m) => ({ m, ...monthSum(m) }));
+    if (!biz.entries.length) { box.append(el('div', 'g-empty', 'ยังไม่มีรายการ เริ่มบันทึกรายรับรายจ่ายด้านบน แล้วกราฟจะขึ้นที่นี่')); return; }
+    const W = box.clientWidth || 600, H = 250, M = { t: 12, r: 8, b: 26, l: 56 };
+    const x = d3.scaleBand(months.map((d) => d.m), [M.l, W - M.r]).padding(0.22);
+    const x2 = d3.scaleBand(['i', 'o'], [0, x.bandwidth()]).padding(0.08);
+    const lo = Math.min(0, d3.min(months, (d) => d.p)), hi = Math.max(1, d3.max(months, (d) => Math.max(d.i, d.o)));
+    const y = d3.scaleLinear([lo, hi * 1.08], [H - M.b, M.t]).nice();
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const fmt = (v) => (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + ' ล้าน' : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + 'k' : v);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', y).attr('y2', y).attr('stroke', (v) => (v === 0 ? css('--ink-3') : css('--chart-grid')));
+    svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', M.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text(fmt);
+    const step = W < 520 ? 2 : 1;
+    svg.append('g').selectAll('text').data(months).join('text').attr('x', (d) => x(d.m) + x.bandwidth() / 2).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 11)
+      .attr('font-weight', (d) => (d.m === ym ? 700 : 400)).attr('fill', (d) => (d.m === ym ? css('--ink') : css('--ink-3'))).text((d, i) => ((11 - i) % step === 0 ? ymTH(d.m, { month: 'short' }) : ''));
+    const g = svg.append('g').selectAll('g').data(months).join('g').attr('transform', (d) => `translate(${x(d.m)},0)`);
+    g.append('rect').attr('x', x2('i')).attr('width', x2.bandwidth()).attr('y', (d) => y(d.i)).attr('height', (d) => y(0) - y(d.i)).attr('rx', 3).attr('fill', css('--jade')).attr('opacity', (d) => (d.m === ym ? 1 : 0.55));
+    g.append('rect').attr('x', x2('o')).attr('width', x2.bandwidth()).attr('y', (d) => y(d.o)).attr('height', (d) => y(0) - y(d.o)).attr('rx', 3).attr('fill', OUTC).attr('opacity', (d) => (d.m === ym ? 1 : 0.55));
+    svg.append('path').attr('d', d3.line((d) => x(d.m) + x.bandwidth() / 2, (d) => y(d.p))(months)).attr('fill', 'none').attr('stroke', css('--ink-2')).attr('stroke-width', 2);
+    svg.append('g').selectAll('circle').data(months).join('circle').attr('cx', (d) => x(d.m) + x.bandwidth() / 2).attr('cy', (d) => y(d.p)).attr('r', 3.5).attr('fill', css('--ink-2'));
+    const tp = el('div', 'tip'); box.append(tp);
+    svg.append('g').selectAll('rect').data(months).join('rect').attr('x', (d) => x(d.m) - x.step() * x.paddingInner() / 2).attr('width', x.step()).attr('y', 0).attr('height', H - M.b).attr('fill', 'transparent').style('cursor', 'pointer')
+      .on('pointerenter', (ev, d) => {
+        tp.replaceChildren(el('div', null, ymTH(d.m)), el('div', null, 'รับ ' + baht(d.i)), el('div', null, 'จ่าย ' + baht(d.o)), el('div', null, 'กำไร ' + baht(d.p)));
+        tp.style.display = 'block'; const px = ((x(d.m) + x.bandwidth() / 2) / W) * box.clientWidth; tp.style.left = Math.min(box.clientWidth - 170, Math.max(0, px - 80)) + 'px'; tp.style.top = '-8px';
+      })
+      .on('pointerleave', () => { tp.style.display = 'none'; })
+      .on('click', (ev, d) => { ym = d.m; render(); });
+  };
+
+  /* ---------- category breakdowns ---------- */
+  const drawCats = () => {
+    [['b-outcat', 'out', OUTC], ['b-incat', 'in', css('--jade')]].forEach(([id, k, col]) => {
+      const box = $(id); box.replaceChildren(); const rows = byCat(ym, k); const tot = rows.reduce((a, r) => a + r[1], 0);
+      if (!rows.length) { box.append(el('div', 'pf-hint', k === 'out' ? 'ยังไม่มีรายจ่ายเดือนนี้' : 'ยังไม่มีรายรับเดือนนี้')); return; }
+      rows.forEach(([c, v]) => {
+        const r = el('div', 'bc'); const t = el('div', 'bc-t'); const i = el('i'); i.style.width = (v / rows[0][1] * 100) + '%'; i.style.background = col; t.append(i);
+        r.append(el('span', 'bc-k', c), el('b', null, baht(v)), el('small', null, pc(v / tot)), t); box.append(r);
+      });
+    });
+    const best = $('b-best'); best.replaceChildren();
+    const sold = {}; biz.entries.forEach((e) => { if (e.kind === 'in' && e.prod && ymOf(e.date) === ym) { sold[e.prod] = sold[e.prod] || { q: 0, v: 0 }; sold[e.prod].q += Number(e.qty) || 0; sold[e.prod].v += e.amount; } });
+    const list = Object.entries(sold).map(([id, s]) => ({ p: biz.products.find((p) => p.id === id), ...s })).filter((x) => x.p).sort((a, b) => b.v - a.v);
+    if (list.length) {
+      best.append(el('h4', 'b-h4', 'สินค้าที่ขายเดือนนี้'));
+      list.forEach((x) => { const c = prodCalc(x.p); best.append(el('div', 'pf-hint', `${x.p.name || 'ไม่มีชื่อ'}: ${x.q} ชิ้น ยอด ${baht(x.v)} กำไรโดยประมาณ ${baht(x.q * c.profit)}`)); });
+    }
+  };
+
+  /* ---------- product cost sheets ---------- */
+  let pt; const saveSoon = () => { clearTimeout(pt); pt = setTimeout(() => { save(); drawCats(); fillProdSelect(); }, 500); };
+  const numIn = (v, ph, cls, set) => { const i = el('input', 'inp ' + (cls || '')); i.type = 'number'; i.step = 'any'; i.min = 0; i.inputMode = 'decimal'; i.value = v ?? ''; i.placeholder = ph; i.addEventListener('input', () => set(i.value === '' ? '' : Number(i.value))); return i; };
+  const txtIn = (v, ph, cls, set) => { const i = el('input', 'inp ' + (cls || '')); i.value = v || ''; i.placeholder = ph; i.addEventListener('input', () => set(i.value)); return i; };
+  const drawProducts = () => {
+    const box = $('p-list'); box.replaceChildren();
+    if (!biz.products.length) { box.append(el('div', 'pf-hint', 'ยังไม่มีสินค้า กด "+ เพิ่มสินค้า" แล้วใส่ราคาขายกับวัตถุดิบที่ใช้ต่อชิ้น')); return; }
+    biz.products.forEach((p) => {
+      const card = el('div', 'p-card'); const out = el('div', 'p-out');
+      const upd = () => {
+        const c = prodCalc(p); out.replaceChildren();
+        const it = (k, v, cls) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v ' + (cls || ''), v)); out.append(d); };
+        it('ต้นทุนต่อชิ้น', b2(c.cost)); it('ค่าธรรมเนียม', b2(c.fee)); it('กำไรต่อชิ้น', b2(c.profit), c.profit > 0 ? 'pos' : c.profit < 0 ? 'neg' : ''); it('อัตรากำไร', pc(c.margin), c.margin > 0 ? 'pos' : c.margin < 0 ? 'neg' : '');
+        const s = el('div', 'p-sug'); s.textContent = c.cost > 0 ? `ถ้าอยากได้กำไร 30% ควรตั้งราคา ${c.sug30 ? b2(Math.ceil(c.sug30)) : '–'} · กำไร 50% ควรตั้ง ${c.sug50 ? b2(Math.ceil(c.sug50)) : '–'}` : 'ใส่วัตถุดิบด้านล่างเพื่อคำนวณต้นทุน'; out.append(s);
+      };
+      const head = el('div', 'p-head');
+      const L = (t, i) => { const l = el('label', 'mini'); l.append(t, i); return l; };
+      head.append(L('ชื่อสินค้า', txtIn(p.name, 'เช่น สร้อยข้อมือ', 'p-name', (v) => { p.name = v; saveSoon(); })),
+        L('ราคาขาย (บาท)', numIn(p.price, '0', 'p-num', (v) => { p.price = v; upd(); saveSoon(); })),
+        L('ค่าธรรมเนียมแพลตฟอร์ม %', numIn(p.feePct, '0', 'p-num sm', (v) => { p.feePct = v; upd(); saveSoon(); })));
+      const del = el('button', 'del', '✕'); del.type = 'button'; del.title = 'ลบสินค้า'; del.setAttribute('aria-label', 'ลบสินค้า');
+      del.addEventListener('click', () => { if (confirm(`ลบสินค้า "${p.name || 'ไม่มีชื่อ'}"?`)) { biz.products = biz.products.filter((x) => x !== p); save(); drawProducts(); fillProdSelect(); drawCats(); } });
+      head.append(del);
+      const parts = el('div', 'p-parts'); parts.append(el('div', 'p-ph', 'วัตถุดิบ/ค่าใช้จ่ายต่อชิ้น'));
+      (p.parts || (p.parts = [])).forEach((x, i) => {
+        const r = el('div', 'p-row'); const sub = el('span', 'p-sub');
+        const su = () => { sub.textContent = '= ' + b2((Number(x.cost) || 0) * (Number(x.qty) || 0)); };
+        const rm = el('button', 'del', '✕'); rm.type = 'button'; rm.setAttribute('aria-label', 'ลบแถว'); rm.addEventListener('click', () => { p.parts.splice(i, 1); save(); drawProducts(); });
+        r.append(txtIn(x.name, 'เช่น ลูกปัด, ถุงแพ็ก, ค่าส่ง', 'p-pn', (v) => { x.name = v; saveSoon(); }),
+          numIn(x.cost, 'ราคา/หน่วย', 'p-num', (v) => { x.cost = v; su(); upd(); saveSoon(); }), el('span', 'p-x', '×'),
+          numIn(x.qty, 'ใช้กี่หน่วย', 'p-num sm', (v) => { x.qty = v; su(); upd(); saveSoon(); }), sub, rm);
+        su(); parts.append(r);
+      });
+      const addp = el('button', 'linkish', '+ เพิ่มวัตถุดิบ'); addp.type = 'button'; addp.addEventListener('click', () => { p.parts.push({ name: '', cost: '', qty: 1 }); save(); drawProducts(); const rows = card.querySelectorAll('.p-pn'); });
+      parts.append(addp);
+      card.append(head, parts, out); upd(); box.append(card);
+    });
+  };
+  $('p-add').addEventListener('click', () => { biz.products.push({ id: newId(), name: '', price: '', feePct: '', parts: [{ name: '', cost: '', qty: 1 }] }); save(); drawProducts(); fillProdSelect(); const n = $('p-list').querySelectorAll('.p-name'); if (n.length) n[n.length - 1].focus(); });
+  const fillProdSelect = () => {
+    const s = $('b-prod'); const v = s.value; s.replaceChildren(new Option('ไม่ระบุ', ''));
+    biz.products.forEach((p) => s.append(new Option(`${p.name || 'ไม่มีชื่อ'}${p.price ? ' (' + baht(+p.price) + ')' : ''}`, p.id))); s.value = v;
+  };
+
+  /* ---------- entries table ---------- */
+  const drawTx = () => {
+    const tb = $('b-tx').tBodies[0]; tb.replaceChildren();
+    const rows = biz.entries.filter((e) => ymOf(e.date) === ym && (filter === 'all' || e.kind === filter)).sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
+    if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการในเดือนนี้'); td.colSpan = 6; tr.append(td); tb.append(tr); return; }
+    rows.forEach((e) => {
+      const tr = el('tr', e.id === editId ? 'editing' : null); const p = e.prod ? biz.products.find((x) => x.id === e.prod) : null;
+      const det = [p ? `${p.name || 'สินค้า'}${e.qty ? ' × ' + e.qty : ''}` : '', e.note || ''].filter(Boolean).join(' · ');
+      [[new Date(e.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }), 'l'], [e.cat || '–', 'l'], [det, 'l det'], [e.kind === 'in' ? b2(e.amount) : '', 'pos'], [e.kind === 'out' ? b2(e.amount) : '']].forEach(([v, c]) => tr.append(el('td', c, v)));
+      const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
+      const d = el('button', 'del', '✕'); d.type = 'button'; d.setAttribute('aria-label', 'ลบรายการ');
+      d.addEventListener('click', () => { if (confirm(`ลบรายการ${e.kind === 'in' ? 'รายรับ' : 'รายจ่าย'} ${b2(e.amount)} (${e.cat || 'ไม่ระบุหมวด'})?`)) { biz.entries = biz.entries.filter((x) => x.id !== e.id); if (editId === e.id) endEdit(); save(); render(); } });
+      const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(ed, d); tr.append(c); tb.append(tr);
+    });
+  };
+
+  /* ---------- form ---------- */
+  const setSeg = (id, v) => document.querySelectorAll(`#${id} button`).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
+  const hint = (m, err) => { $('b-hint').textContent = m || ''; $('b-hint').className = err ? 'pf-err' : 'pf-hint'; };
+  const cats = (k) => {
+    const n = {}; biz.entries.forEach((e) => { if (e.kind === k && e.cat) n[e.cat] = (n[e.cat] || 0) + 1; });
+    return [...new Set([...Object.keys(n).sort((a, b) => n[b] - n[a]), ...DEF[k]])];
+  };
+  const drawChips = () => {
+    const box = $('b-chips'); box.replaceChildren(); const list = cats(kind);
+    $('b-cats').replaceChildren(...list.map((c) => { const o = el('option'); o.value = c; return o; }));
+    list.slice(0, 8).forEach((c) => { const b = el('button', 'chip', c); b.type = 'button'; b.setAttribute('aria-pressed', String($('b-cat').value === c)); b.addEventListener('click', () => { $('b-cat').value = c; drawChips(); }); box.append(b); });
+    $('b-cat').placeholder = kind === 'in' ? 'เช่น ยอดขาย' : 'เช่น วัตถุดิบ';
+  };
+  const setKind = (k) => { kind = k; setSeg('b-kind', k); document.querySelectorAll('#b-form .b-for-in').forEach((l) => { l.hidden = k !== 'in'; }); drawChips(); };
+  document.querySelectorAll('#b-kind button').forEach((b) => b.addEventListener('click', () => { setKind(b.dataset.v); if (!editId) $('b-cat').value = ''; drawChips(); }));
+  document.querySelectorAll('#b-filter button').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.v; setSeg('b-filter', filter); drawTx(); }));
+  $('b-cat').addEventListener('input', drawChips);
+  $('b-amt').addEventListener('input', () => { $('b-amt').dataset.touched = '1'; });
+  const autoAmt = () => {
+    const p = biz.products.find((x) => x.id === $('b-prod').value); const q = Number($('b-qty').value) || 0;
+    if (p && q && Number(p.price) && !$('b-amt').dataset.touched) $('b-amt').value = +(q * Number(p.price)).toFixed(2);
+    if (p && !$('b-cat').value) { $('b-cat').value = 'ยอดขาย'; drawChips(); }
+  };
+  $('b-prod').addEventListener('change', autoAmt); $('b-qty').addEventListener('input', autoAmt);
+  const clearForm = () => { ['b-amt', 'b-cat', 'b-note', 'b-qty'].forEach((id) => { $(id).value = ''; }); delete $('b-amt').dataset.touched; $('b-prod').value = ''; $('b-date').value = ym === ymOf(today()) ? today() : ym + '-01'; drawChips(); };
+  const startEdit = (e) => {
+    editId = e.id; setKind(e.kind); $('b-amt').value = e.amount; $('b-amt').dataset.touched = '1'; $('b-cat').value = e.cat || ''; $('b-date').value = e.date; $('b-note').value = e.note || '';
+    fillProdSelect(); $('b-prod').value = e.prod || ''; $('b-qty').value = e.qty || '';
+    $('b-title').textContent = 'แก้ไขรายการ'; $('b-sub').textContent = 'แก้ตัวเลขที่ลงผิด แล้วกด "บันทึกการแก้ไข"'; $('b-save').textContent = 'บันทึกการแก้ไข'; $('b-cancel').hidden = false; hint('');
+    drawChips(); drawTx(); $('b-add').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const endEdit = () => { editId = null; $('b-title').textContent = 'บันทึกรายรับรายจ่าย'; $('b-sub').textContent = 'เลือกรับหรือจ่าย ใส่จำนวนเงิน แล้วเลือกหมวด (พิมพ์หมวดใหม่เองได้)'; $('b-save').textContent = 'บันทึก'; $('b-cancel').hidden = true; clearForm(); };
+  $('b-cancel').addEventListener('click', () => { endEdit(); hint(''); drawTx(); });
+  $('b-save').addEventListener('click', () => {
+    const amt = Number($('b-amt').value), date = $('b-date').value, cat = $('b-cat').value.trim().slice(0, 40), note = $('b-note').value.trim().slice(0, 120);
+    const err = !(amt > 0) ? 'ใส่จำนวนเงินมากกว่า 0' : !date ? 'เลือกวันที่' : !cat ? 'เลือกหรือพิมพ์หมวดก่อน' : null;
+    if (err) return hint(err, true);
+    const rec = { id: editId || newId(), date, kind, amount: amt, cat, note };
+    if (kind === 'in' && $('b-prod').value) { rec.prod = $('b-prod').value; const q = Number($('b-qty').value); if (q > 0) rec.qty = q; }
+    const was = editId; biz.entries = was ? biz.entries.map((e) => (e.id === was ? rec : e)) : [...biz.entries, rec];
+    save(); if (ymOf(date) !== ym) ym = ymOf(date);
+    hint(`${was ? 'แก้ไข' : 'บันทึก'}${kind === 'in' ? 'รายรับ' : 'รายจ่าย'} ${b2(amt)} (${cat}) แล้ว`);
+    if (was) endEdit(); else { const keepDate = $('b-date').value; clearForm(); $('b-date').value = keepDate; }
+    render();
+  });
+  $('b-prev').addEventListener('click', () => { ym = ymShift(ym, -1); render(); });
+  $('b-next').addEventListener('click', () => { ym = ymShift(ym, 1); render(); });
+
+  /* ---------- export / backup ---------- */
+  const dl = (name, text, type) => { const a = el('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+  $('b-csv').addEventListener('click', () => {
+    const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const rows = [['วันที่', 'ประเภท', 'หมวด', 'รายละเอียด', 'สินค้า', 'จำนวนชิ้น', 'รายรับ (บาท)', 'รายจ่าย (บาท)']];
+    [...biz.entries].sort((a, b) => a.date.localeCompare(b.date)).forEach((e) => { const p = biz.products.find((x) => x.id === e.prod); rows.push([e.date, e.kind === 'in' ? 'รายรับ' : 'รายจ่าย', e.cat, e.note, p ? p.name : '', e.qty || '', e.kind === 'in' ? e.amount : '', e.kind === 'out' ? e.amount : '']); });
+    dl(`valuegrab-business-${today()}.csv`, '﻿' + rows.map((r) => r.map(q).join(',')).join('\r\n'), 'text/csv;charset=utf-8'); $('b-io').textContent = 'ดาวน์โหลดไฟล์ CSV แล้ว เปิดด้วย Excel หรือ Google Sheets ได้';
+  });
+  $('b-export').addEventListener('click', () => { dl(`valuegrab-business-${today()}.json`, JSON.stringify({ app: 'ValueGrab-business', saved: new Date().toISOString(), ...biz }, null, 1), 'application/json'); $('b-io').textContent = 'ดาวน์โหลดไฟล์สำรองแล้ว'; });
+  const clean = (d) => {
+    const entries = (Array.isArray(d.entries) ? d.entries : []).filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out') && +e.amount > 0)
+      .map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.prod ? { prod: String(e.prod) } : {}), ...(+e.qty > 0 ? { qty: +e.qty } : {}) }));
+    const products = (Array.isArray(d.products) ? d.products : []).filter((p) => p && typeof p === 'object').map((p) => ({ id: String(p.id || newId()), name: String(p.name || '').slice(0, 60), price: p.price === '' ? '' : +p.price || '', feePct: p.feePct === '' ? '' : +p.feePct || '',
+      parts: (Array.isArray(p.parts) ? p.parts : []).slice(0, 40).map((x) => ({ name: String(x.name || '').slice(0, 60), cost: x.cost === '' ? '' : +x.cost || '', qty: x.qty === '' ? '' : +x.qty || '' })) }));
+    return { entries, products, name: String(d.name || '').slice(0, 60) };
+  };
+  $('b-import').addEventListener('change', async (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    try { const j = clean(JSON.parse(await f.text())); if (biz.entries.length && !confirm(`แทนที่ข้อมูลธุรกิจปัจจุบัน (${biz.entries.length} รายการ) ด้วยไฟล์ที่เลือก (${j.entries.length} รายการ)?`)) return; biz = j; save(); endEdit(); render(); drawProducts(); $('b-io').textContent = `นำเข้า ${j.entries.length} รายการแล้ว`; }
+    catch (e) { $('b-io').textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองข้อมูลธุรกิจของ ValueGrab'; }
+    ev.target.value = '';
+  });
+
+  const render = () => { if (!shown) return; drawStrip(); drawChart(); drawCats(); drawTx(); fillProdSelect(); };
+  document.addEventListener('vg:view', (e) => { shown = e.detail === 'biz'; if (shown) { render(); drawProducts(); drawChips(); } });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) drawChart(); }, 200); });
+  window.VGBiz = { get: () => biz, replace: (d) => { biz = clean(d); keep(); if (editId && !biz.entries.some((e) => e.id === editId)) endEdit(); if (shown) { render(); if (!document.activeElement || !document.activeElement.closest('#p-list')) drawProducts(); } } };
+  setKind('in'); $('b-date').value = today();
+})();
+</script>
 <script>
 /* portfolio: a single ledger of trades (buy/sell), currency exchanges (fx) and dividends (div).
    Kept in this browser (localStorage) and, when signed in, synced to the account by the module below. */
@@ -980,10 +1363,11 @@ dash.calc('sectors', {
 
   /* ---------- tabs ---------- */
   const show = (v) => {
-    $('view-scan').hidden = v !== 'scan'; $('view-port').hidden = v !== 'port';
+    ['scan', 'port', 'biz'].forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v;
     document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === v)));
-    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : location.pathname); } catch (e) { /* ignore */ }
+    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : v === 'biz' ? '#business' : location.pathname); } catch (e) { /* ignore */ }
     if (v === 'port') { render(); loadHist(); }
+    document.dispatchEvent(new CustomEvent('vg:view', { detail: v }));
     window.scrollTo(0, 0);
   };
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)));
@@ -1488,12 +1872,13 @@ dash.calc('sectors', {
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) { drawGrowth(); const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0)); } }, 200); });
   window.VGPort = { get: () => db, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); } };
   setType('buy');
-  if (location.hash === '#portfolio') show('port');
+  document.body.dataset.view = 'scan';
+  if (location.hash === '#portfolio') show('port'); else if (location.hash === '#business') show('biz');
   render();
 })();
 </script>
 <script type="module">
-/* account sync (Firebase): each signed-in user reads/writes only portfolios/{their uid} */
+/* account sync (Firebase): each signed-in user reads/writes only portfolios/{uid} and business/{uid} */
 const FB = { apiKey: "AIzaSyAAIM8jxxdXR1zlODShqoYez1Ysa2zkxo0", authDomain: "valuegrab.firebaseapp.com", projectId: "valuegrab", storageBucket: "valuegrab.firebasestorage.app", messagingSenderId: "81941341766", appId: "1:81941341766:web:64b6b774343deb958b8c47" };
 const $ = (id) => document.getElementById(id);
 if (FB && window.VGPort) {
@@ -1508,55 +1893,75 @@ if (FB && window.VGPort) {
     'auth/popup-blocked': 'เบราว์เซอร์บล็อกหน้าต่างล็อกอิน ลองใช้อีเมลแทน', 'auth/operation-not-supported-in-this-environment': 'ล็อกอิน Google จากหน้านี้ไม่ได้ ลองใช้อีเมลแทน',
   };
   const say = (e) => { console.warn(e); msg(TH[e.code] ?? ('เกิดข้อผิดพลาด: ' + (e.code || e.message)), true); };
+  const clean = (o) => JSON.parse(JSON.stringify(o));
+  const hhmm = () => new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+  const byId = (a, b) => { const ids = new Set(a.map((x) => x.id)); return [...a, ...b.filter((x) => !ids.has(x.id))]; };
+  /* what each synced document holds, how to read it from the page, and how to merge a device's local copy into the account the first time */
+  const STORES = {
+    portfolios: {
+      label: 'พอร์ต',
+      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [] }); },
+      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); },
+      empty: () => { window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]); },
+      local: () => { const d = window.VGPort.get(); return { n: d.tx.length, has: d.tx.length > 0 || (window.VGWatch && window.VGWatch.get().length > 0) }; },
+      merge: (c) => { const l = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : []; const tx = byId(c.tx || [], l.tx);
+        return { extra: tx.length - (c.tx || []).length, changed: tx.length !== (c.tx || []).length || lw.some((s) => !(c.watch || []).includes(s)),
+          doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])] } }; },
+    },
+    business: {
+      label: 'ข้อมูลธุรกิจ',
+      payload: () => { const d = window.VGBiz.get(); return clean({ entries: d.entries, products: d.products, name: d.name || '' }); },
+      apply: (c) => window.VGBiz.replace(c),
+      empty: () => window.VGBiz.replace({ entries: [], products: [], name: '' }),
+      local: () => { const d = window.VGBiz.get(); return { n: d.entries.length, has: d.entries.length > 0 || d.products.length > 0 }; },
+      merge: (c) => { const l = window.VGBiz.get(); const entries = byId(c.entries || [], l.entries); const products = byId(c.products || [], l.products);
+        return { extra: entries.length - (c.entries || []).length, changed: entries.length !== (c.entries || []).length || products.length !== (c.products || []).length,
+          doc: { entries, products, name: c.name || l.name || '' } }; },
+    },
+  };
   try {
     const [{ initializeApp }, A, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
     const app = initializeApp(FB); const auth = A.getAuth(app); auth.languageCode = 'th'; const fs = F.getFirestore(app);
-    let ref = null, unsub = null, timer = null, firstSnap = true;
-    const clean = (o) => JSON.parse(JSON.stringify(o));
-    const payload = () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [] }); };
-    const stamp = (t) => { $('a-state').textContent = t; };
-    const push = () => {
-      if (!ref) return; clearTimeout(timer); stamp('กำลังบันทึก…');
-      timer = setTimeout(() => F.setDoc(ref, { ...payload(), updated: F.serverTimestamp() })
-        .then(() => stamp('บันทึกขึ้นบัญชีแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.'))
-        .catch((e) => { console.warn(e); stamp('บันทึกขึ้นบัญชีไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เมื่อแก้ไขครั้งถัดไป'); }), 600);
+    const st = {}; Object.keys(STORES).forEach((k) => { st[k] = { ref: null, unsub: null, timer: null, ok: false, err: null }; });
+    const status = (t) => { const bad = Object.entries(st).filter(([, s]) => s.err).map(([k, s]) => s.err); $('a-state').textContent = bad.length ? bad.join(' · ') : t; };
+    const denied = (k) => `${STORES[k].label}ยังซิงค์ไม่ได้ ต้องอัปเดตกฎใน Firebase (ข้อมูลยังอยู่ในเครื่องนี้)`;
+    const push = (k = 'portfolios') => {
+      const s = st[k]; if (!s || !s.ref || !s.ok) return; clearTimeout(s.timer); status('กำลังบันทึก…');
+      s.timer = setTimeout(() => F.setDoc(s.ref, { ...STORES[k].payload(), updated: F.serverTimestamp() })
+        .then(() => { s.err = null; status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
+        .catch((e) => { console.warn(e); s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้`; status(''); }), 600);
     };
     window.VGSync = { push };
-    document.addEventListener('vg:watch', push);
-    const apply = (c) => {
-      window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 });
-      if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch);
-    };
-    const merge = (c, l, lw) => {
-      const ids = new Set(c.tx.map((t) => t.id));
-      return { tx: [...c.tx, ...l.tx.filter((t) => !ids.has(t.id))], targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])] };
+    document.addEventListener('vg:watch', () => push('portfolios'));
+
+    const attach = async (k, uid) => {
+      const S = STORES[k], s = st[k]; s.ref = F.doc(fs, k, uid); s.ok = false; s.err = null;
+      try {
+        const snap = await F.getDoc(s.ref); const loc = S.local(); let note = '';
+        if (!snap.exists()) { if (loc.has) { await F.setDoc(s.ref, { ...S.payload(), updated: F.serverTimestamp() }); note = `ย้าย${S.label}ในเครื่องนี้ (${loc.n} รายการ) ขึ้นบัญชีแล้ว`; } }
+        else {
+          const m = S.merge(snap.data());
+          if (m.changed) { S.apply(m.doc); await F.setDoc(s.ref, { ...m.doc, updated: F.serverTimestamp() }); if (m.extra) note = `รวม${S.label}ในเครื่องนี้อีก ${m.extra} รายการเข้ากับบัญชีแล้ว`; }
+          else S.apply(snap.data());
+        }
+        s.ok = true; let first = true;
+        s.unsub = F.onSnapshot(s.ref, (x) => {
+          if (first) { first = false; return; }
+          if (x.metadata.hasPendingWrites || !x.exists()) return;
+          S.apply(x.data()); status('อัปเดตจากอีกเครื่องแล้ว ' + hhmm());
+        }, (e) => console.warn(e));
+        return note;
+      } catch (e) { console.warn(e); s.err = e.code === 'permission-denied' ? denied(k) : `โหลด${S.label}จากบัญชีไม่สำเร็จ ลองรีเฟรชหน้า`; return ''; }
     };
 
     A.onAuthStateChanged(auth, async (u) => {
-      if (unsub) { unsub(); unsub = null; }
+      Object.values(st).forEach((s) => { if (s.unsub) s.unsub(); s.unsub = null; s.ref = null; s.ok = false; s.err = null; });
       $('acct-out').hidden = !!u; $('acct-in').hidden = !u;
-      if (!u) { ref = null; return; }
-      $('a-who').textContent = u.email || u.displayName || 'ของคุณ'; msg(''); stamp('กำลังโหลดข้อมูลจากบัญชี…');
-      ref = F.doc(fs, 'portfolios', u.uid); firstSnap = true;
-      try {
-        const snap = await F.getDoc(ref);
-        const local = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : [];
-        if (!snap.exists()) { if (local.tx.length || lw.length) { await F.setDoc(ref, { ...payload(), updated: F.serverTimestamp() }); msg(`ย้ายข้อมูลในเครื่องนี้ (${local.tx.length} รายการ) ขึ้นบัญชีแล้ว`); } }
-        else {
-          const c = snap.data(); c.tx = c.tx || [];
-          const extra = local.tx.filter((t) => !c.tx.some((x) => x.id === t.id)).length;
-          if (extra || lw.some((s) => !(c.watch || []).includes(s))) {
-            const m = merge(c, local, lw); apply(m); await F.setDoc(ref, { ...m, updated: F.serverTimestamp() });
-            if (extra) msg(`รวมรายการในเครื่องนี้อีก ${extra} รายการเข้ากับบัญชีแล้ว ถ้ามีรายการซ้ำ ลบได้ที่ประวัติการซื้อขาย`);
-          } else apply(c);
-        }
-        stamp('ข้อมูลจะตรงกันทุกเครื่องที่ล็อกอินบัญชีนี้');
-      } catch (e) { console.warn(e); stamp('โหลดข้อมูลจากบัญชีไม่สำเร็จ ลองรีเฟรชหน้า'); return; }
-      unsub = F.onSnapshot(ref, (s) => {
-        if (firstSnap) { firstSnap = false; return; }
-        if (s.metadata.hasPendingWrites || !s.exists()) return;
-        apply(s.data()); stamp('อัปเดตจากอีกเครื่องแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.');
-      }, (e) => console.warn(e));
+      if (!u) return;
+      $('a-who').textContent = u.email || u.displayName || 'ของคุณ'; msg(''); status('กำลังโหลดข้อมูลจากบัญชี…');
+      const notes = []; for (const k of Object.keys(STORES)) { const n = await attach(k, u.uid); if (n) notes.push(n); }
+      if (notes.length) msg(notes.join(' · '));
+      status('ข้อมูลจะตรงกันทุกเครื่องที่ล็อกอินบัญชีนี้');
     });
 
     $('a-google').addEventListener('click', () => { msg(''); A.signInWithPopup(auth, new A.GoogleAuthProvider()).catch(say); });
@@ -1569,10 +1974,10 @@ if (FB && window.VGPort) {
       A.sendPasswordResetEmail(auth, em).then(() => msg('ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว (ดูในจดหมายขยะด้วย)')).catch(say);
     });
     $('a-out').addEventListener('click', async () => {
-      clearTimeout(timer);
+      Object.values(st).forEach((s) => clearTimeout(s.timer));
       await A.signOut(auth);
-      window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]);
-      msg('ออกจากระบบแล้ว ล้างข้อมูลพอร์ตออกจากเครื่องนี้แล้ว ข้อมูลยังอยู่ในบัญชีครบ');
+      Object.values(STORES).forEach((S) => S.empty());
+      msg('ออกจากระบบแล้ว ล้างข้อมูลออกจากเครื่องนี้แล้ว ข้อมูลยังอยู่ในบัญชีครบ');
     });
   } catch (e) { console.warn(e); msg('โหลดระบบบัญชีไม่สำเร็จ ยังใช้แบบเก็บในเครื่องได้ตามปกติ', true); }
 }

@@ -20,6 +20,7 @@ import yfinance as yf
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs" / "data.json"
 HIST = ROOT / "docs" / "history.json"
+PREV = ROOT / "docs" / "prev.json"
 CONSTITUENTS_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 SECTOR_TH = {
     "Information Technology": "เทคโนโลยี", "Health Care": "สุขภาพ", "Financials": "การเงิน",
@@ -279,6 +280,12 @@ def main():
         log("ราคาได้น้อยผิดปกติ ไม่เขียนทับไฟล์เดิม")
         sys.exit(1)
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    try:  # เก็บข้อมูลวันก่อนไว้ให้หน้าเว็บสรุปว่าวันนี้อะไรเปลี่ยน
+        old = OUT.read_text(encoding="utf-8")
+        if json.loads(old).get("asOf") != data["asOf"]:
+            PREV.write_text(old, encoding="utf-8")
+    except (OSError, ValueError):
+        pass
     OUT.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"เขียน {OUT} แล้ว ({len(rows)} ตัว ราคา ณ {data['asOf']})")
 
