@@ -40,5 +40,5 @@ jobs:
             echo "ข้อมูลไม่เปลี่ยน"
           else
             git commit -m "อัปเดตข้อมูลหุ้น $(date -u +%Y-%m-%d)"
-            git push
+            git pull --rebase -q && git push
           fi
