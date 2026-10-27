@@ -629,6 +629,27 @@ body.slip-open { overflow: hidden; }
 .slip-grid .inp { background: var(--surface); padding: 8px 10px; font-size: 15px; }
 .btn-scan { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 640px) { .slip-it { grid-template-columns: 72px 1fr; gap: 10px; } .slip-it img { width: 72px; } .slip-grid { grid-template-columns: 1fr; } .slip-box { padding: 14px; } }
+.tag.bought { background: var(--jade-soft); color: var(--jade); margin-left: 6px; }
+.hrow .tag.bought { display: inline-block; margin: 2px 0 0; font-size: 11px; }
+.dca-list { display: grid; gap: 2px; }
+.dca-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.dca-row:last-child { border-bottom: 0; }
+.dca-row .sym, .chk-h .sym { font-weight: 600; cursor: pointer; font-size: 17px; }
+.dca-st { display: flex; gap: 6px 10px; align-items: center; flex-wrap: wrap; }
+.dca-st .tag { margin: 0; } .dca-st small { color: var(--ink-2); font-size: 14px; }
+.dca-skip { display: inline-flex !important; gap: 6px; align-items: center; }
+.dca-skip input { width: 18px; height: 18px; accent-color: var(--jade); }
+.chk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 8px; }
+.chk-card { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: var(--bg); }
+.chk-card.sell { border-color: var(--brick); box-shadow: 0 0 0 1px var(--brick) inset; }
+.chk-card.watch { border-color: var(--ochre); }
+.chk-h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.chk-h .tag { margin: 0; } .chk-h small { margin-left: auto; font-size: 13px; }
+.chk-card ul { margin: 8px 0 0; padding-left: 1.1rem; font-size: 14px; }
+.chk-card li.bad { color: var(--ink); } .chk-card li.good { color: var(--jade); } .chk-card li.na { color: var(--ink-3); }
+.chk-act { margin-top: 8px; font-size: 14px; font-weight: 500; color: var(--ink-2); }
+.alert.sellnote { background: var(--brick-soft); color: var(--brick); }
+.hlink.neg { color: var(--brick); display: block; margin-top: 6px; text-align: left; }
 </style>
 </head>
 <body>
@@ -764,6 +785,7 @@ body.slip-open { overflow: hidden; }
   </div>
 
   <div class="alert" id="pf-alert" hidden data-sub="sum hold"></div>
+  <div class="alert sellnote" id="pf-sellnote" data-sub="sum" hidden></div>
 
   <section class="panel" id="pf-add" data-sub="add">
     <h3 id="f-title">บันทึกรายการ</h3>
@@ -818,6 +840,19 @@ body.slip-open { overflow: hidden; }
     <div class="donut-wrap"><div class="chart" id="pf-donut"></div><div class="legend" id="pf-legend"></div></div>
   </section>
 
+  <section class="panel" id="pf-dca" data-sub="hold">
+    <div class="ph"><div><h3>แผน DCA งวดนี้</h3><p id="dca-range">ตั้งเงิน DCA ต่องวดในตารางด้านล่าง</p></div></div>
+    <div id="dca-list" class="dca-list"></div>
+    <div id="dca-new" class="dca-new"></div>
+  </section>
+
+  <section class="panel" id="pf-check" data-sub="check">
+    <h3>เช็คหุ้นที่ถือ: ถึงเวลาขายหรือยัง</h3>
+    <p>ดูจากแนวโน้มราคา (เส้นค่าเฉลี่ย 50 และ 200 วัน) ราคาเทียบมูลค่าที่ประเมิน คะแนนพื้นฐาน ความร้อนแรงของราคา (RSI) กำไรขาดทุนของเรา และสัดส่วนในพอร์ต อัปเดตทุกเช้าพร้อมราคาปิด</p>
+    <div id="chk-list" class="chk-list"></div>
+    <p class="pf-hint" style="margin-top:10px">เป็นสัญญาณช่วยตัดสินใจจากตัวเลข ไม่ใช่คำแนะนำให้ซื้อขาย ก่อนขายควรอ่านข่าวและงบล่าสุดของบริษัทประกอบ และคิดภาษีกับค่าธรรมเนียมด้วย</p>
+  </section>
+
   <section class="panel" style="margin-top:16px" id="pf-hold" data-sub="hold">
     <h3>หุ้นในพอร์ตและการปรับสมดุล</h3>
     <p>ตั้ง "เป้าหมาย %" ของแต่ละตัว ตัวที่ไม่ได้ตั้งจะแบ่งส่วนที่เหลือเท่าๆ กัน ถ้าราคาขึ้นลงจนสัดส่วนห่างเป้าเกินที่กำหนด ระบบจะบอกว่าควรขายหรือซื้อกี่หุ้นเพื่อกลับไปที่เป้า</p>
@@ -828,8 +863,10 @@ body.slip-open { overflow: hidden; }
       <span class="pf-hint" id="t-sum"></span>
     </div>
     <div class="dca">
-      <label class="mini">มีเงินลงเพิ่ม <input class="inp" id="dca-amt" type="number" min="0" step="any" inputmode="decimal" placeholder="เช่น 10000"></label>
+      <label class="mini">เงิน DCA ต่องวด <input class="inp" id="dca-amt" type="number" min="0" step="any" inputmode="decimal" placeholder="เช่น 10000"></label>
       <span class="seg" id="dca-cur"><button type="button" data-v="THB" aria-pressed="true">บาท</button><button type="button" data-v="USD" aria-pressed="false">ดอลลาร์</button></span>
+      <span class="seg" id="dca-per"><button type="button" data-v="w" aria-pressed="false">ทุกสัปดาห์</button><button type="button" data-v="m" aria-pressed="true">ทุกเดือน</button></span>
+      <label class="mini dca-skip"><input type="checkbox" id="dca-skip" checked> ข้ามตัวที่ซื้อแล้วในงวดนี้</label>
       <button class="btn-line" id="dca-cash" type="button" hidden>ใช้เงินสดที่มี</button>
       <span class="pf-hint" id="dca-note"></span>
     </div>
@@ -1276,6 +1313,8 @@ dash.calc('sectors', {
     const who = el('div', 'who');
     who.append(el('span', 'sym', r.symbol)); if (watch.has(r.symbol)) { const w = el('span', 'wst', '★'); w.title = 'หุ้นที่ติดตาม'; who.append(w); } who.append(el('span', 'nm', r.name));
     if (r.signal !== 'น่าซื้อสะสม') who.append(el('span', 'tag ' + TAG[r.signal], r.signal));
+    const bo = window.VGPort && window.VGPort.bought ? window.VGPort.bought() : null; const bt = bo && bo.map[r.symbol];
+    if (bt) who.append(el('span', 'tag bought', `✓ ซื้อแล้ว${bo.label} ${new Date(bt.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}`));
     const m = el('div', 'mos ' + (r.mos == null ? '' : r.mos >= 0 ? 'pos' : 'neg'), pc(r.mos));
     m.append(el('small', null, r.mos == null ? '' : r.mos >= 0 ? 'ต่ำกว่ามูลค่า' : 'แพงกว่ามูลค่า'));
     const s = el('div', 'score ' + (r.vi >= 65 ? 'hi' : r.vi >= 50 ? 'md' : 'lo'), String(r.vi));
@@ -1439,6 +1478,7 @@ dash.calc('sectors', {
   const closeSheet = () => document.body.classList.remove('open');
   $('scrim').addEventListener('click', closeSheet);
   document.addEventListener('vg:open', (e) => openSheet(e.detail));
+  let dt; document.addEventListener('vg:data', () => { clearTimeout(dt); dt = setTimeout(() => { if (scan.length) { drawPicks(); drawAll(); } }, 50); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 
   $('q').addEventListener('input', (e) => { st.q = e.target.value.trim(); st.allN = 25; drawAll(); });
@@ -2418,7 +2458,7 @@ dash.calc('sectors', {
   /* ---------- tabs ---------- */
   /* sub-pages: each long tab shows one group of sections at a time */
   const SUBS = { scan: [['picks', 'น่าซื้อวันนี้'], ['all', 'หุ้นทั้งหมด'], ['market', 'ภาพรวมตลาด']],
-    port: [['sum', 'สรุปพอร์ต'], ['add', 'บันทึกและประวัติ'], ['hold', 'ปรับสมดุล'], ['grow', 'การเติบโตและเป้าหมาย'], ['cal', 'ปฏิทิน']],
+    port: [['sum', 'สรุปพอร์ต'], ['add', 'บันทึกและประวัติ'], ['hold', 'DCA และปรับสมดุล'], ['check', 'สัญญาณขาย'], ['grow', 'การเติบโตและเป้าหมาย'], ['cal', 'ปฏิทิน']],
     biz: [['sum', 'สรุปเดือน'], ['add', 'จดรายรับรายจ่าย'], ['inv', 'ใบเสร็จ/ใบแจ้งหนี้'], ['prod', 'ต้นทุนและสต็อก'], ['tax', 'ภาษีและลดหย่อน']],
     money: [['nw', 'ทรัพย์สินสุทธิ'], ['budget', 'งบรายจ่าย'], ['emerg', 'เงินฉุกเฉิน'], ['debt', 'หนี้และบิล'], ['retire', 'เกษียณ']] };
   const subOf = {};
@@ -2492,6 +2532,36 @@ dash.calc('sectors', {
     list.forEach((x) => { out[x.sym] = set[x.sym] / tot; });
     return { w: out, sumSet, auto: false };
   };
+  /* DCA: period, budget, and which holdings were already bought in this period */
+  const DCAK = 'valuegrab-dca-v1';
+  let dcaS = { per: 'm', amt: '', cur: 'THB', skip: true };
+  try { dcaS = { ...dcaS, ...(JSON.parse(localStorage.getItem(DCAK) || '{}') || {}) }; } catch (e) { /* defaults */ }
+  const keepDca = () => { try { localStorage.setItem(DCAK, JSON.stringify(dcaS)); } catch (e) { /* ignore */ } };
+  const iso = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const period = () => { const n = new Date(); n.setHours(0, 0, 0, 0); let a, b;
+    if (dcaS.per === 'w') { a = new Date(n); a.setDate(n.getDate() - ((n.getDay() + 6) % 7)); b = new Date(a); b.setDate(a.getDate() + 6); }
+    else { a = new Date(n.getFullYear(), n.getMonth(), 1); b = new Date(n.getFullYear(), n.getMonth() + 1, 0); }
+    return { start: iso(a), end: iso(b), label: dcaS.per === 'w' ? 'สัปดาห์นี้' : 'เดือนนี้' }; };
+  const boughtMap = () => { const P = period(); const m = {}; db.tx.forEach((t) => { if (t.type === 'buy' && t.date >= P.start && t.date <= P.end) { const x = m[t.sym] || (m[t.sym] = { date: t.date, usd: 0, shares: 0 }); if (t.date > x.date) x.date = t.date; x.usd += t.shares * t.price; x.shares += t.shares; } }); return m; };
+  /* holding check: trend, valuation, fundamentals, heat, own loss, weight */
+  const checkHolding = (x, tw, band) => {
+    const s = x.s; const R = []; let sc = 0; const bad = (t, k = 1) => { sc += k; R.push({ t, k: 'bad' }); }; const good = (t, k = 0) => { sc -= k; R.push({ t, k: 'good' }); };
+    if (!s) return { level: 'na', sc: 0, R: [{ t: 'ไม่มีข้อมูลหุ้นตัวนี้ในระบบ (อยู่นอก S&P 500)', k: 'na' }] };
+    if (s.ma50 && s.ma200 && s.price) {
+      if (s.price < s.ma50 && s.ma50 < s.ma200) bad('ขาลงชัด ราคาต่ำกว่าเส้น 50 วัน และเส้น 50 วันอยู่ใต้เส้น 200 วัน', 2);
+      else if (s.price < s.ma200) bad(`หลุดเส้นค่าเฉลี่ย 200 วัน (${pc(s.price / s.ma200 - 1)}) แนวโน้มเริ่มอ่อน`);
+      else if (s.ma50 > s.ma200) good('แนวโน้มขาขึ้น ราคายืนเหนือเส้น 50 และ 200 วัน');
+    }
+    if (s.mos != null) { if (s.mos < -0.3) bad(`ราคาแพงกว่ามูลค่าที่ประเมิน ${(-s.mos * 100).toFixed(0)}%`, 2); else if (s.mos < -0.1) bad(`ราคาเริ่มแพงกว่ามูลค่า ${(-s.mos * 100).toFixed(0)}%`); else if (s.mos > 0.2) good(`ราคายังต่ำกว่ามูลค่า ${(s.mos * 100).toFixed(0)}%`); }
+    if (s.signal === 'ระวังกับดักมูลค่า') bad('คะแนนพื้นฐานอ่อนลง (ระวังกับดักมูลค่า)', 2); else if (s.signal === 'ผ่านไปก่อน') bad('คะแนนรวมต่ำ (ผ่านไปก่อน)'); else if (s.signal === 'น่าซื้อสะสม') good('ยังอยู่ในกลุ่มน่าซื้อสะสม', 1);
+    if (s.rsi >= 75) bad(`ราคาวิ่งแรงเกินไป (RSI ${Math.round(s.rsi)}) มีโอกาสย่อตัว`);
+    const r = x.pl != null && x.cost ? x.pl / x.cost : null;
+    if (r != null && r <= -0.3) bad(`ขาดทุน ${Math.abs(r * 100).toFixed(0)}% ทบทวนว่าเหตุผลที่ซื้อยังจริงอยู่ไหม`, 2); else if (r != null && r <= -0.2) bad(`ขาดทุน ${Math.abs(r * 100).toFixed(0)}%`);
+    if (r != null && r >= 0.5 && s.mos != null && s.mos < -0.1) bad(`กำไร ${(r * 100).toFixed(0)}% แล้วและราคาเกินมูลค่า พิจารณาขายทำกำไรบางส่วน`);
+    if (tw && x.w - tw[x.sym] > band) bad(`สัดส่วนเกินเป้า ${((x.w - tw[x.sym]) * 100).toFixed(1)} จุด`);
+    return { level: sc >= 3 ? 'sell' : sc >= 1 ? 'watch' : 'hold', sc, R };
+  };
+  const LV = { sell: ['พิจารณาขาย', 'trap'], watch: ['จับตา', 'watch'], hold: ['ถือต่อ', 'buy'], na: ['ไม่มีข้อมูล', 'skip'] };
   const dcaPlan = (list, total, tw, amountUsd) => {
     if (!amountUsd || amountUsd <= 0 || !list.length) return {};
     const newTotal = total + amountUsd; const need = {}; let needSum = 0;
@@ -2770,10 +2840,13 @@ dash.calc('sectors', {
     if (document.activeElement !== $('band')) $('band').value = db.band;
     $('t-sum').textContent = !list.length ? '' : auto ? 'ยังไม่ได้ตั้งเป้า ใช้สัดส่วนเท่ากันทุกตัว' : sumSet > 100.01 ? `เป้าที่ตั้งรวมกันเกิน 100% (${sumSet.toFixed(1)}%) ระบบจะย่อตามส่วน` : `ตั้งเป้าไว้รวม ${sumSet.toFixed(1)}%` + (sumSet < 99.99 ? ' ตัวที่ไม่ได้ตั้งแบ่งส่วนที่เหลือ' : '');
     $('dca-cash').hidden = !(L.cashOn && L.cash > 1);
+    const bought = boughtMap(); const chk = {}; list.forEach((x) => { chk[x.sym] = checkHolding(x, tw, db.band / 100); });
     const amt = Number($('dca-amt').value) || 0;
     const amtUsd = dcaCur === 'THB' ? (fx ? amt / fx : 0) : amt;
     $('dca-note').textContent = dcaCur === 'THB' && amt && !fx ? 'ยังไม่มีอัตราแลกเปลี่ยน ใส่เป็นดอลลาร์ก่อน' : amt ? `≈ ${usd(amtUsd)}` + (fx && dcaCur === 'THB' ? ` (1$ = ${fx.toFixed(2)} บาท)` : '') : '';
-    const plan = dcaPlan(list, total, tw, amtUsd);
+    const elig = list.filter((x) => !(dcaS.skip && bought[x.sym]) && chk[x.sym].level !== 'sell');
+    const twE = {}; const sumE = elig.reduce((a, x) => a + tw[x.sym], 0) || 1; elig.forEach((x) => { twE[x.sym] = tw[x.sym] / sumE; });
+    const plan = elig.length ? dcaPlan(elig, elig.reduce((a, x) => a + x.value, 0), twE, amtUsd) : {};
     const band = db.band / 100; const outs = [];
 
     const tb = $('pf-table').tBodies[0]; tb.replaceChildren(); const tf = $('pf-table').tFoot; tf.replaceChildren();
@@ -2790,12 +2863,16 @@ dash.calc('sectors', {
       twIn.addEventListener('change', () => { const v = Number(twIn.value); if (v > 0) db.targets[x.sym] = v; else delete db.targets[x.sym]; save(); render(); });
       td().append(twIn);
       const rb = td(); const diff = total * tw[x.sym] - x.value;
-      if (Math.abs(drift) > band && x.price) {
+      if (Math.abs(drift) > band && x.price && diff > 0 && chk[x.sym].level === 'sell') { rb.className = 'rb neg'; rb.append('ไม่ซื้อเพิ่ม', el('small', 'sub', 'มีสัญญาณขาย')); }
+      else if (Math.abs(drift) > band && x.price) {
         const n = Math.abs(diff) / x.price; rb.className = 'rb out ' + (diff > 0 ? 'pos' : 'neg');
         rb.append((diff > 0 ? 'ซื้อ ' : 'ขาย ') + qty(n, 2) + ' หุ้น', el('small', 'sub', usd(Math.abs(diff))));
         outs.push({ sym: x.sym, now: x.w, tgt: tw[x.sym], act: (diff > 0 ? 'ซื้อเพิ่ม ' : 'ขาย ') + qty(n, 2) + ' หุ้น (' + usd(Math.abs(diff)) + ')' });
       } else { rb.className = 'rb ok'; rb.textContent = 'อยู่ในเกณฑ์'; }
-      const b = plan[x.sym]; const bd = td(); if (b > 0.005) { bd.append(usd(b)); if (x.price) bd.append(el('small', 'sub', `≈ ${qty(b / x.price, 2)} หุ้น`)); bd.className = 'pos'; } else bd.textContent = amt ? '–' : '';
+      const b = plan[x.sym]; const bd = td(); const bo = bought[x.sym];
+      if (bo && dcaS.skip) { bd.className = 'rb ok'; bd.append('ซื้อแล้ว', el('small', 'sub', dTH(bo.date, { day: 'numeric', month: 'short' }))); }
+      else if (chk[x.sym].level === 'sell') { bd.className = 'neg'; bd.append('พัก DCA', el('small', 'sub', 'ดูสัญญาณขาย')); }
+      else if (b > 0.005) { bd.append(usd(b)); if (x.price) bd.append(el('small', 'sub', `≈ ${qty(b / x.price, 2)} หุ้น`)); bd.className = 'pos'; } else bd.textContent = amt ? '–' : '';
       const sg = td('l'); if (x.s) sg.append(el('span', 'tag ' + TAG[x.s.signal], x.s.signal)); else sg.textContent = 'นอก S&P 500';
       tb.append(tr);
     });
@@ -2809,8 +2886,47 @@ dash.calc('sectors', {
       al.append(el('b', null, `พอร์ตเบี้ยวจากเป้าหมายเกิน ${db.band} จุด ${outs.length} ตัว ควรปรับสมดุล`));
       const ul = el('ul'); outs.forEach((o) => ul.append(el('li', null, `${o.sym} ตอนนี้ ${(o.now * 100).toFixed(1)}% เป้า ${(o.tgt * 100).toFixed(1)}%: ${o.act}`))); al.append(ul);
     }
+    drawDca(list, plan, bought, chk, amt, amtUsd); drawCheck(list, chk);
     drawTx(); drawCal(list); drawGoal(all); drawYears(realizedY); drawGrowth();
   };
+  const drawDca = (list, plan, bought, chk, amt, amtUsd) => {
+    const P = period(); const box = $('dca-list'); box.replaceChildren(); const nb = $('dca-new'); nb.replaceChildren();
+    const spent = Object.values(bought).reduce((a, x) => a + x.usd, 0);
+    $('dca-range').textContent = `งวด${P.label}: ${dTH(P.start, { day: 'numeric', month: 'short' })} – ${dTH(P.end, { day: 'numeric', month: 'short', year: '2-digit' })} · ซื้อแล้ว ${Object.keys(bought).length} ตัว` + (spent ? ` รวม ${usd(spent)}` : '') + (amtUsd ? ` · งบ DCA ต่องวด ${usd(amtUsd)}` : '');
+    if (!list.length) box.append(el('div', 'pf-hint', 'ยังไม่มีหุ้นในพอร์ต'));
+    list.forEach((x) => {
+      const r = el('div', 'dca-row'); const st = el('div', 'dca-st'); const bo = bought[x.sym]; const c = chk[x.sym];
+      const sym = el('span', 'sym', x.sym); sym.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: x.sym })));
+      if (bo) st.append(el('span', 'tag buy', '✓ ซื้อแล้ว'), el('small', null, `${dTH(bo.date, { day: 'numeric', month: 'short' })} · ${qty(bo.shares, 2)} หุ้น ${usd(bo.usd)}`));
+      else if (c.level === 'sell') st.append(el('span', 'tag trap', 'พัก DCA'), el('small', null, 'มีสัญญาณขาย ดูหน้าสัญญาณขาย'));
+      else if (plan[x.sym] > 0.005) st.append(el('span', 'tag watch', 'ยังไม่ได้ซื้อ'), el('small', null, `ควรซื้อ ${usd(plan[x.sym])}` + (x.price ? ` ≈ ${qty(plan[x.sym] / x.price, 2)} หุ้น` : '')));
+      else st.append(el('span', 'tag skip', amt ? 'รอบนี้ไม่ต้องซื้อ' : 'ยังไม่ได้ซื้อ'), el('small', null, amt ? 'สัดส่วนเกินเป้าแล้ว' : 'ใส่เงิน DCA ต่องวดด้านล่างเพื่อคำนวณ'));
+      r.append(sym, st); box.append(r);
+    });
+    const held = new Set(list.map((x) => x.sym)); const ideas = Object.values(map).filter((r) => r.signal === 'น่าซื้อสะสม' && !held.has(r.symbol) && !bought[r.symbol]).sort((a, b) => b.vi - a.vi).slice(0, 5);
+    if (ideas.length) {
+      nb.append(el('h5', 'ded-g', 'หุ้นน่าสะสมที่ยังไม่มีในพอร์ต'));
+      const c = el('div', 'hchips'); ideas.forEach((r) => { const b = el('button', 'td-sym', r.symbol); b.type = 'button'; b.append(el('small', 'pos', `ต่ำกว่ามูลค่า ${(r.mos * 100).toFixed(0)}%`)); b.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: r.symbol }))); c.append(b); }); nb.append(c);
+    }
+  };
+  const drawCheck = (list, chk) => {
+    const box = $('chk-list'); box.replaceChildren(); const sn = $('pf-sellnote'); sn.replaceChildren();
+    if (!list.length) { box.append(el('div', 'pf-hint', 'ยังไม่มีหุ้นในพอร์ต')); sn.hidden = true; return; }
+    const order = { sell: 0, watch: 1, hold: 2, na: 3 };
+    [...list].sort((a, b) => order[chk[a.sym].level] - order[chk[b.sym].level] || chk[b.sym].sc - chk[a.sym].sc).forEach((x) => {
+      const c = chk[x.sym]; const card = el('div', 'chk-card ' + c.level); const hd = el('div', 'chk-h');
+      const sym = el('span', 'sym', x.sym); sym.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: x.sym })));
+      hd.append(sym, el('span', 'tag ' + LV[c.level][1], LV[c.level][0]));
+      if (x.pl != null) hd.append(el('small', x.pl >= 0 ? 'pos' : 'neg', `${pc(x.pl / x.cost)} จากต้นทุน`));
+      const ul = el('ul'); c.R.forEach((r) => ul.append(el('li', r.k, r.t))); card.append(hd, ul);
+      if (c.level === 'sell') card.append(el('div', 'chk-act', 'พิจารณาขายบางส่วนหรือทั้งหมด และพักการ DCA ตัวนี้ไว้ก่อนจนกว่าสัญญาณจะดีขึ้น'));
+      else if (c.level === 'watch') card.append(el('div', 'chk-act', 'ถือต่อได้ แต่เฝ้าดูใกล้ชิด ถ้าสัญญาณแย่ลงอีกค่อยตัดสินใจ'));
+      box.append(card);
+    });
+    const sells = list.filter((x) => chk[x.sym].level === 'sell'); sn.hidden = !sells.length;
+    if (sells.length) { sn.append(el('b', null, `มี ${sells.length} ตัวที่มีสัญญาณควรพิจารณาขาย: ${sells.map((x) => x.sym).join(', ')} `)); const g = el('button', 'linkish', 'ดูเหตุผล →'); g.type = 'button'; g.addEventListener('click', () => window.VGNav && window.VGNav.go('port', 'check')); sn.append(g); }
+  };
+
 
   /* ---------- form: add and edit any entry type ---------- */
   const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
@@ -2825,11 +2941,14 @@ dash.calc('sectors', {
   };
   segs('f-type', (v) => setType(v));
   segs('f-dir', (v) => { fDir = v; fxInfo(); });
-  segs('dca-cur', (v) => { dcaCur = v; render(); });
+  segs('dca-cur', (v) => { dcaCur = v; dcaS.cur = v; keepDca(); render(); });
+  segs('dca-per', (v) => { dcaS.per = v; keepDca(); render(); document.dispatchEvent(new Event('vg:data')); });
+  $('dca-skip').addEventListener('change', () => { dcaS.skip = $('dca-skip').checked; keepDca(); render(); });
+  dcaCur = dcaS.cur === 'USD' ? 'USD' : 'THB'; setSeg('dca-cur', dcaCur); setSeg('dca-per', dcaS.per); $('dca-skip').checked = dcaS.skip !== false; if (dcaS.amt) $('dca-amt').value = dcaS.amt;
   segs('d-mode', (v) => { dMode = v; render(); });
   segs('g-range', (v) => { gRange = Number(v); drawGrowth(); });
   segs('h-filter', (v) => { hFilter = v; drawTx(); });
-  $('dca-amt').addEventListener('input', render);
+  $('dca-amt').addEventListener('input', () => { dcaS.amt = $('dca-amt').value; keepDca(); render(); });
   $('dca-cash').addEventListener('click', () => { const L = ledger(); dcaCur = 'USD'; setSeg('dca-cur', 'USD'); $('dca-amt').value = Math.floor(L.cash * 100) / 100; render(); });
   $('band').addEventListener('change', () => { const v = Number($('band').value); if (v > 0) { db.band = v; save(); } render(); });
   $('t-equal').addEventListener('click', () => { const { list } = holdings(); if (!list.length) return; db.targets = {}; list.forEach((x) => { db.targets[x.sym] = +(100 / list.length).toFixed(2); }); save(); render(); });
@@ -2954,9 +3073,12 @@ dash.calc('sectors', {
     const pl = list.filter((x) => x.pl != null).reduce((a, x) => a + x.pl, 0); const { w: tw } = targetWeights(list);
     const outs = list.filter((x) => Math.abs(x.w - tw[x.sym]) > db.band / 100).length; const C = calEvents(list);
     let G = null; if (fx) { const now = Math.max(0, all * fx); const a = project(now, +goal.m, +goal.r, 600); const i = a.findIndex((x) => x >= +goal.t); G = { t: +goal.t, m: +goal.m, r: +goal.r, now, eta: i > 0 ? monthLabel(i) : null }; }
-    return { n: list.length, all, total, cost, pl, cash: L.cash, cashOn: L.cashOn, fx, outs, top: list.slice(0, 3), events: C.state === 'ok' ? C.ev : null, goal: G };
+    const chk = list.map((x) => ({ sym: x.sym, ...checkHolding(x, tw, db.band / 100) })); const bm = boughtMap(); const Pd = period();
+    return { n: list.length, all, total, cost, pl, cash: L.cash, cashOn: L.cashOn, fx, outs, top: list.slice(0, 3), events: C.state === 'ok' ? C.ev : null, goal: G,
+      sells: chk.filter((c) => c.level === 'sell').map((c) => c.sym), watch: chk.filter((c) => c.level === 'watch').map((c) => c.sym), bought: Object.keys(bm), perLabel: Pd.label,
+      notBought: list.filter((x) => !bm[x.sym] && (chk.find((c) => c.sym === x.sym) || {}).level !== 'sell' && x.w <= tw[x.sym] + db.band / 100).map((x) => x.sym) };
   };
-  window.VGPort = { get: () => db, summary, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); document.dispatchEvent(new Event('vg:data')); } };
+  window.VGPort = { get: () => db, summary, bought: () => ({ map: boughtMap(), ...period() }), replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); document.dispatchEvent(new Event('vg:data')); } };
   setType('buy');
   document.body.dataset.view = 'home';
   const H = location.hash; show(H === '#portfolio' ? 'port' : H === '#business' ? 'biz' : H === '#scan' ? 'scan' : H === '#money' ? 'money' : 'home');
@@ -2998,6 +3120,7 @@ dash.calc('sectors', {
     else if (!buys.length) empty(p, 'วันนี้ยังไม่มีหุ้นผ่านเกณฑ์ ลองดูกลุ่ม "น่าจับตา"', 'ดูหุ้นทั้งหมด', 'scan:all');
     else buys.slice(0, window.innerWidth < 640 ? 5 : 8).forEach((r) => {
       const b = el('button', 'hrow'); b.type = 'button'; const a = el('span'); a.append(el('span', 's', r.symbol), el('span', 'n', r.name));
+      const bo = window.VGPort && window.VGPort.bought ? window.VGPort.bought() : null; if (bo && bo.map[r.symbol]) a.append(el('span', 'tag bought', '✓ ซื้อแล้ว' + bo.label));
       b.append(a, el('span', 'm ' + (r.mos >= 0 ? 'pos' : 'neg'), pc(r.mos, 0)), el('span', 'vi', String(r.vi)));
       b.title = 'ส่วนลดจากมูลค่า และคะแนน VI'; b.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: r.symbol }))); p.append(b);
     });
@@ -3011,6 +3134,9 @@ dash.calc('sectors', {
       if (P.cashOn) kv(po, 'เงินสดดอลลาร์', usd0(P.cash));
       kv(po, 'ตัวที่ใหญ่สุด', P.top.map((x) => `${x.sym} ${(x.w * 100).toFixed(0)}%`).join(' · '));
       kv(po, 'ปรับสมดุล', P.outs ? `เบี้ยวจากเป้า ${P.outs} ตัว` : 'อยู่ในเกณฑ์', P.outs ? 'neg' : 'pos');
+      kv(po, `DCA ${P.perLabel}`, P.notBought.length ? `ซื้อแล้ว ${P.bought.length} · ยังไม่ซื้อ ${P.notBought.join(', ')}` : 'ซื้อครบแล้ว', P.notBought.length ? '' : 'pos');
+      if (P.sells.length) { const d = el('button', 'hlink neg', `⚠ สัญญาณขาย: ${P.sells.join(', ')} →`); d.type = 'button'; d.addEventListener('click', () => go('port:check')); po.append(d); }
+      else if (P.watch.length) po.append(el('div', 'hsub', `จับตา: ${P.watch.join(', ')}`));
     }
 
     const t = $('h-today'); t.replaceChildren(); const T = VG.today;
