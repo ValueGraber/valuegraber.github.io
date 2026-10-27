@@ -361,7 +361,7 @@ tr.editing td { background: var(--jade-soft); }
 .goal-in .inp.sm { width: 80px; }
 .goal-main { font-size: 18px; margin: 4px 0 2px; color: var(--ink); }
 .goal-main b { color: var(--jade); }
-body[data-view="scan"] #acct { display: none; }
+body[data-view="scan"] #acct, body[data-view="home"] #acct { display: none; }
 .b-month { display: flex; align-items: center; gap: 12px; margin: 0 4px 14px; }
 .b-month h2 { margin: 0; font-size: 26px; min-width: 9ch; text-align: center; }
 .b-nav { border: 1px solid var(--line); background: var(--surface); width: 40px; height: 40px; border-radius: 50%; font-size: 24px; line-height: 1; cursor: pointer; color: var(--ink); }
@@ -455,12 +455,55 @@ details.ded summary { color: var(--jade); }
 .ded-got { color: var(--jade); font-size: 13px; font-weight: 600; }
 .ded-got:empty { display: none; }
 .tx-room { display: grid; gap: 4px; margin-top: 10px; }
+.sub-off { display: none !important; }
+#acct [hidden] { display: none !important; }
+#acct { padding: 12px 16px; margin-bottom: 14px; }
+.subnav { display: flex; gap: 6px; overflow-x: auto; margin: -10px 0 20px; padding: 6px 2px; position: sticky; top: 0; z-index: 5; background: var(--bg); scrollbar-width: none; }
+.subnav::-webkit-scrollbar { display: none; }
+.subnav button { flex: none; border: 1px solid var(--line); background: var(--surface); padding: 7px 16px; border-radius: 999px; font-size: 15px; cursor: pointer; color: var(--ink-2); font-family: inherit; }
+.subnav button[aria-pressed="true"] { background: var(--jade); border-color: var(--jade); color: #fff; font-weight: 600; }
+@media (prefers-color-scheme: dark) { .subnav button[aria-pressed="true"] { color: #08201a; } }
+.home-head { padding: 0 4px 16px; }
+.h-title { font-size: 26px; margin: 4px 0 0; line-height: 1.35; }
+.home-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+.hcard { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+.hcard.tall { grid-row: span 2; }
+.hcard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.hcard h3 { margin: 0; font-size: 16px; }
+.hlink { border: 0; background: none; color: var(--jade); font-size: 14px; cursor: pointer; padding: 2px 0; font-family: inherit; white-space: nowrap; }
+.hbig { font-family: "Bai Jamjuree", sans-serif; font-size: 26px; font-weight: 700; line-height: 1.2; }
+.hsub { font-size: 13px; color: var(--ink-3); }
+.hkv { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.hkv:last-child { border-bottom: 0; }
+.hkv span:first-child { color: var(--ink-2); }
+.hkv b { font-family: "Bai Jamjuree", sans-serif; font-weight: 600; }
+.hrow { display: grid; grid-template-columns: 1fr auto 40px; gap: 8px; align-items: center; width: 100%; padding: 7px 0; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; font-family: inherit; color: var(--ink); }
+.hrow:last-child { border-bottom: 0; }
+.hrow .s { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 16px; }
+.hrow .n { display: block; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hrow .m { font-family: "Bai Jamjuree", sans-serif; font-weight: 600; font-size: 15px; }
+.hrow .vi { font-family: "Bai Jamjuree", sans-serif; font-weight: 700; font-size: 14px; text-align: center; border-radius: 8px; padding: 3px 0; background: var(--jade-soft); color: var(--jade); }
+.hchips { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 8px; }
+.hchips .td-sym { font-size: 14px; padding: 2px 10px; }
+.hbar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin: 8px 0 4px; }
+.hbar i { display: block; height: 100%; background: var(--jade); border-radius: 4px; }
+.hmini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+.hmini div { background: var(--bg); border-radius: 10px; padding: 6px 8px; }
+.hmini small { display: block; font-size: 12px; color: var(--ink-3); }
+.hmini b { font-family: "Bai Jamjuree", sans-serif; font-size: 14px; white-space: nowrap; }
+.hempty { font-size: 14px; color: var(--ink-2); }
+.hempty button { margin-top: 8px; }
+.hcal { display: grid; grid-template-columns: 64px 1fr; gap: 6px; font-size: 14px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+.hcal:last-child { border-bottom: 0; }
+.hcal b { font-family: "Bai Jamjuree", sans-serif; }
+@media (max-width: 980px) { .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .home-grid { grid-template-columns: 1fr; gap: 10px; } .hcard.tall { grid-row: auto; } .h-title { font-size: 22px; } .tabs button { padding: 8px 13px; font-size: 16px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">Value<span>Grab</span></div>
-  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="scan" aria-selected="true">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ตของฉัน</button><button type="button" role="tab" data-v="biz" aria-selected="false">ธุรกิจ</button></nav>
+  <nav class="tabs" role="tablist" aria-label="เมนู"><button type="button" role="tab" data-v="home" aria-selected="true">หน้าแรก</button><button type="button" role="tab" data-v="scan" aria-selected="false">คัดหุ้น</button><button type="button" role="tab" data-v="port" aria-selected="false">พอร์ต</button><button type="button" role="tab" data-v="biz" aria-selected="false">ธุรกิจ</button></nav>
   <section class="acct" id="acct" hidden>
     <div id="acct-out">
       <div class="acct-row"><div><b>ล็อกอินเพื่อซิงค์พอร์ตและข้อมูลธุรกิจข้ามมือถือและคอม</b><p>ไม่ล็อกอินก็ใช้ได้ แต่ข้อมูลจะอยู่แค่ในเครื่องนี้ แต่ละบัญชีเห็นเฉพาะข้อมูลของตัวเอง</p></div>
@@ -479,35 +522,48 @@ details.ded summary { color: var(--jade); }
     </div>
     <div class="pf-hint" id="a-msg" role="status"></div>
   </section>
+<div id="view-home" hidden>
+  <header class="home-head"><p class="stamp" id="h-stamp">กำลังโหลดข้อมูลล่าสุด</p><h1 class="h-title" id="h-verdict">ภาพรวมวันนี้</h1></header>
+  <div class="home-grid">
+    <article class="hcard" id="hc-market"><header><h3>ตลาดวันนี้</h3><button type="button" class="hlink" data-go="scan:market">ดูตลาด →</button></header><div class="hbody" id="h-market"></div></article>
+    <article class="hcard tall" id="hc-picks"><header><h3>น่าซื้อสะสม</h3><button type="button" class="hlink" data-go="scan:picks">ดูทั้งหมด →</button></header><div class="hbody" id="h-picks"></div></article>
+    <article class="hcard" id="hc-port"><header><h3>พอร์ตของฉัน</h3><button type="button" class="hlink" data-go="port:sum">เปิดพอร์ต →</button></header><div class="hbody" id="h-port"></div></article>
+    <article class="hcard" id="hc-today"><header><h3>อะไรเปลี่ยนวันนี้</h3><button type="button" class="hlink" data-go="scan:picks">ดูสรุป →</button></header><div class="hbody" id="h-today"></div></article>
+    <article class="hcard" id="hc-cal"><header><h3>วันสำคัญที่จะถึง</h3><button type="button" class="hlink" data-go="port:cal">ปฏิทิน →</button></header><div class="hbody" id="h-cal"></div></article>
+    <article class="hcard" id="hc-goal"><header><h3>เป้าหมายการลงทุน</h3><button type="button" class="hlink" data-go="port:grow">ดูแผน →</button></header><div class="hbody" id="h-goal"></div></article>
+    <article class="hcard" id="hc-biz"><header><h3>ธุรกิจเดือนนี้</h3><button type="button" class="hlink" data-go="biz:sum">เปิดธุรกิจ →</button></header><div class="hbody" id="h-biz"></div></article>
+    <article class="hcard" id="hc-tax"><header><h3>ภาษีธุรกิจปีนี้</h3><button type="button" class="hlink" data-go="biz:tax">ดูรายละเอียด →</button></header><div class="hbody" id="h-tax"></div></article>
+  </div>
+</div>
   <div id="view-scan">
-  <header class="hero">
+  <header class="hero" data-sub="picks">
     <p class="stamp" id="stamp">กำลังโหลดข้อมูลล่าสุด</p>
     <h1 class="verdict" id="verdict">กำลังคัดหุ้นจาก S&amp;P 500</h1>
     <p class="verdict-sub" id="verdict-sub"></p>
     <span class="mood" id="mood" hidden></span>
   </header>
 
-  <div class="strip" id="strip">
+  <div class="strip" id="strip" data-sub="market">
     <div><div class="k">S&amp;P 500 (SPY)</div><div class="v" id="s-spy">–</div><div class="h" id="s-spy-h"></div></div>
     <div><div class="k">หุ้นที่ยืนเหนือเส้น 200 วัน</div><div class="v" id="s-br">–</div><div class="h">เกินครึ่ง = ตลาดแข็งแรง</div></div>
     <div><div class="k">ย่อจากจุดสูงสุดรอบปี</div><div class="v" id="s-dd">–</div><div class="h">ของ SPY</div></div>
     <div><div class="k">ดอกเบี้ยพันธบัตร 10 ปี</div><div class="v" id="s-y">–</div><div class="h" id="s-y-h"></div></div>
   </div>
 
-  <section id="today" hidden>
+  <section id="today" hidden data-sub="picks">
     <div class="sec-head"><h2>สรุปวันนี้</h2></div>
     <p class="sec-note" id="today-note"></p>
     <div class="panel" id="today-body"></div>
   </section>
 
-  <section id="picks">
+  <section id="picks" data-sub="picks">
     <div class="sec-head"><h2>น่าซื้อสะสมวันนี้</h2></div>
     <p class="sec-note">หุ้นคุณภาพดีที่ราคายังต่ำกว่ามูลค่าที่ประเมิน ขีดดำคือราคาตอนนี้ ขีดเทาคือมูลค่าที่ประเมิน แถบเขียวยิ่งยาวยิ่งมีส่วนเผื่อความปลอดภัยมาก (แถบแดงคือราคาแพงกว่ามูลค่า) กดที่หุ้นเพื่อดูรายละเอียดและเปิดกราฟ</p>
     <div class="list" id="pick-list"><div class="loading">กำลังโหลด…</div></div>
     <button class="more" id="pick-more" hidden>ดูเพิ่ม</button>
   </section>
 
-  <section id="all">
+  <section id="all" data-sub="all">
     <div class="sec-head"><h2>หุ้นทั้งหมดใน S&amp;P 500</h2></div>
     <div class="controls">
       <input class="search" id="q" type="search" placeholder="ค้นหาชื่อหรือตัวย่อ เช่น NVDA" aria-label="ค้นหาหุ้น">
@@ -527,7 +583,7 @@ details.ded summary { color: var(--jade); }
     <button class="more" id="all-more" hidden>ดูเพิ่ม</button>
   </section>
 
-  <section id="market">
+  <section id="market" data-sub="market">
     <div class="sec-head"><h2>ภาพรวมตลาด</h2></div>
     <div class="charts">
       <div class="panel"><h3>S&amp;P 500 ย้อนหลัง 3 ปี</h3><p>เส้นประคือค่าเฉลี่ย 40 สัปดาห์ ราคาอยู่เหนือเส้นแปลว่ายังเป็นขาขึ้น</p><div class="chart" id="spy-chart"></div></div>
@@ -535,7 +591,7 @@ details.ded summary { color: var(--jade); }
     </div>
   </section>
 
-  <details class="method">
+  <details class="method" data-sub="market">
     <summary>คะแนนคิดยังไง</summary>
     <div class="body">
       <h4>มูลค่าที่เหมาะสม</h4>
@@ -565,18 +621,18 @@ details.ded summary { color: var(--jade); }
   <p class="disclaimer">ใช้คัดกรองว่าหุ้นตัวไหนควรศึกษาต่อ ไม่ใช่คำแนะนำซื้อขายหรือคำทำนายราคา ก่อนตัดสินใจควรอ่านงบและข่าวของบริษัทประกอบทุกครั้ง</p>
   </div>
 <div id="view-port" hidden>
-  <p class="pf-intro">บันทึกหุ้นที่ซื้อ เงินที่แลก และปันผลที่ได้ แล้วดูว่าพอร์ตโตแค่ไหน กำไรมาจากหุ้นหรือจากค่าเงิน ควรปรับสมดุลตัวไหน และจะถึงเป้าหมายเมื่อไหร่ ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า ถ้าไม่ล็อกอิน <b>ข้อมูลพอร์ตจะเก็บไว้ในเครื่องนี้เท่านั้น</b></p>
+  <p class="pf-intro" data-sub="sum">บันทึกหุ้นที่ซื้อ เงินที่แลก และปันผลที่ได้ แล้วดูว่าพอร์ตโตแค่ไหน กำไรมาจากหุ้นหรือจากค่าเงิน ควรปรับสมดุลตัวไหน และจะถึงเป้าหมายเมื่อไหร่ ราคาที่ใช้คือราคาปิดล่าสุดที่อัปเดตทุกเช้า ถ้าไม่ล็อกอิน <b>ข้อมูลพอร์ตจะเก็บไว้ในเครื่องนี้เท่านั้น</b></p>
 
-  <div class="strip" id="pf-strip">
+  <div class="strip" id="pf-strip" data-sub="sum hold">
     <div><div class="k">มูลค่าพอร์ต</div><div class="v" id="pf-val">$0.00</div><div class="h" id="pf-val-th"></div></div>
     <div><div class="k">ต้นทุนหุ้นที่ถืออยู่</div><div class="v" id="pf-cost">$0.00</div><div class="h" id="pf-cost-th"></div></div>
     <div><div class="k">กำไร/ขาดทุนหุ้นตอนนี้</div><div class="v" id="pf-pl">$0.00</div><div class="h" id="pf-pl-pc"></div></div>
     <div><div class="k">ปันผลต่อปีโดยประมาณ</div><div class="v" id="pf-div">$0.00</div><div class="h" id="pf-div-h"></div></div>
   </div>
 
-  <div class="alert" id="pf-alert" hidden></div>
+  <div class="alert" id="pf-alert" hidden data-sub="sum hold"></div>
 
-  <section class="panel" id="pf-add">
+  <section class="panel" id="pf-add" data-sub="add">
     <h3 id="f-title">บันทึกรายการ</h3>
     <p id="f-sub">เลือกประเภทรายการก่อน ระบบจะใส่ราคาปิดล่าสุดหรือเรทวันนี้ให้ แก้เป็นตัวเลขจริงได้</p>
     <div class="f-types"><span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อหุ้น</button><button type="button" data-v="sell" aria-pressed="false">ขายหุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ได้ปันผล</button></span></div>
@@ -600,7 +656,7 @@ details.ded summary { color: var(--jade); }
     <datalist id="sym-list"></datalist>
   </section>
 
-  <section class="panel" style="margin-top:16px" id="pf-cash">
+  <section class="panel" style="margin-top:16px" id="pf-cash" data-sub="sum">
     <div class="ph"><div><h3>เงินบาทและเงินสดดอลลาร์</h3><p>แลกเงินไปเท่าไหร่ เรทเฉลี่ยเท่าไหร่ และกำไรที่ได้มาจากหุ้นหรือจากค่าเงินบาท</p></div></div>
     <div class="cash-empty pf-hint" id="cash-empty">ยังไม่มีรายการแลกเงิน เลือก "แลกเงิน" ในช่องบันทึกรายการด้านบนทุกครั้งที่โอนบาทไปซื้อดอลลาร์ แล้วระบบจะเริ่มนับเงินสดคงเหลือและกำไรเป็นเงินบาทให้</div>
     <div class="mini-grid" id="cash-grid" hidden>
@@ -612,7 +668,7 @@ details.ded summary { color: var(--jade); }
     <div class="split" id="c-split" hidden></div>
   </section>
 
-  <section class="panel" style="margin-top:16px" id="pf-growth">
+  <section class="panel" style="margin-top:16px" id="pf-growth" data-sub="grow">
     <div class="ph"><div><h3>การเติบโตของพอร์ต</h3><p>มูลค่าหุ้นรายสัปดาห์ เทียบกับเงินที่ลงไป และเทียบกับถ้าเอาเงินก้อนเดียวกันซื้อกองทุน S&amp;P 500 (SPY) ในวันเดียวกัน</p></div>
       <span class="seg" id="g-range"><button type="button" data-v="13" aria-pressed="false">3 เดือน</button><button type="button" data-v="26" aria-pressed="false">6 เดือน</button><button type="button" data-v="52" aria-pressed="false">1 ปี</button><button type="button" data-v="0" aria-pressed="true">ทั้งหมด</button></span></div>
     <div class="g-key"><span><i class="k1"></i>มูลค่าพอร์ต</span><span><i class="k2"></i>เงินที่ลงไป</span><span><i class="k3"></i>ถ้าซื้อ SPY แทน</span></div>
@@ -623,13 +679,13 @@ details.ded summary { color: var(--jade); }
     </details>
   </section>
 
-  <section class="panel" style="margin-top:16px">
+  <section class="panel" style="margin-top:16px" data-sub="sum">
     <div class="ph"><div><h3>สัดส่วนพอร์ต</h3><p>ตามมูลค่าตอนนี้ รวมเงินสดที่ยังไม่ได้ลงหุ้น</p></div>
       <span class="seg" id="d-mode"><button type="button" data-v="stock" aria-pressed="true">รายตัว</button><button type="button" data-v="sector" aria-pressed="false">รายกลุ่ม</button></span></div>
     <div class="donut-wrap"><div class="chart" id="pf-donut"></div><div class="legend" id="pf-legend"></div></div>
   </section>
 
-  <section class="panel" style="margin-top:16px" id="pf-hold">
+  <section class="panel" style="margin-top:16px" id="pf-hold" data-sub="hold">
     <h3>หุ้นในพอร์ตและการปรับสมดุล</h3>
     <p>ตั้ง "เป้าหมาย %" ของแต่ละตัว ตัวที่ไม่ได้ตั้งจะแบ่งส่วนที่เหลือเท่าๆ กัน ถ้าราคาขึ้นลงจนสัดส่วนห่างเป้าเกินที่กำหนด ระบบจะบอกว่าควรขายหรือซื้อกี่หุ้นเพื่อกลับไปที่เป้า</p>
     <div class="dca">
@@ -650,13 +706,13 @@ details.ded summary { color: var(--jade); }
     </table></div>
   </section>
 
-  <section class="panel" style="margin-top:16px" id="pf-cal">
+  <section class="panel" style="margin-top:16px" id="pf-cal" data-sub="cal">
     <h3>ปฏิทินหุ้นของฉัน</h3>
     <p>วันประกาศงบ และวันขึ้นเครื่องหมาย XD (ต้องซื้อหุ้นก่อนวันนี้ถึงจะได้ปันผลรอบนั้น) ของหุ้นในพอร์ตและหุ้นที่ติดตาม ภายใน 60 วันข้างหน้า</p>
     <div id="cal-list" class="cal"></div>
   </section>
 
-  <section class="panel" style="margin-top:16px" id="pf-goal">
+  <section class="panel" style="margin-top:16px" id="pf-goal" data-sub="grow">
     <h3>เป้าหมายการลงทุน</h3>
     <p>เริ่มจากมูลค่าพอร์ตตอนนี้ บวกเงินที่ลงเพิ่มทุกเดือน แล้วคาดว่าจะถึงเป้าเมื่อไหร่ เส้นจางคือกรณีผลตอบแทนต่ำกว่าและสูงกว่าที่ตั้ง 3 จุด</p>
     <div class="goal-in">
@@ -668,7 +724,7 @@ details.ded summary { color: var(--jade); }
     <div class="chart" id="goal-chart"></div>
   </section>
 
-  <section class="panel" style="margin-top:16px">
+  <section class="panel" style="margin-top:16px" data-sub="add">
     <h3>ประวัติรายการ</h3>
     <div class="ph"><p>กด ✎ เพื่อแก้ไขรายการที่ลงผิด หรือ ✕ เพื่อลบ</p>
       <span class="seg" id="h-filter"><button type="button" data-v="all" aria-pressed="true">ทั้งหมด</button><button type="button" data-v="trade" aria-pressed="false">หุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ปันผล</button></span></div>
@@ -680,7 +736,7 @@ details.ded summary { color: var(--jade); }
     </div>
   </section>
 
-  <section class="panel" style="margin-top:16px">
+  <section class="panel" style="margin-top:16px" data-sub="add">
     <details class="log" id="yr-box">
       <summary>สรุปรายปี (ไว้เตรียมยื่นภาษี)</summary>
       <div class="scroll"><table class="tbl" id="yr"><thead><tr><th class="l">ปี</th><th>ซื้อหุ้น</th><th>ขายหุ้น</th><th>กำไรที่ขายแล้ว</th><th>ปันผลก่อนภาษี</th><th>ภาษีหัก ณ ที่จ่าย</th><th>ปันผลสุทธิ</th><th>แลกบาทไป</th><th>แลกกลับเป็นบาท</th></tr></thead><tbody></tbody></table></div>
@@ -690,17 +746,17 @@ details.ded summary { color: var(--jade); }
   <p class="disclaimer">การปรับสมดุล การแบ่งเงิน และการคาดการณ์เป้าหมายเป็นการคำนวณตามตัวเลขที่คุณตั้งเอง ไม่ได้คิดภาษีหรือค่าธรรมเนียม และไม่ใช่การรับประกันผลตอบแทน ตัวเลขเงินบาทใช้อัตราแลกเปลี่ยนล่าสุดโดยประมาณ กราฟการเติบโตใช้ราคาปิดรายสัปดาห์ของหุ้นเท่านั้น</p>
 </div>
 <div id="view-biz" hidden>
-  <p class="pf-intro">จดรายรับรายจ่ายของธุรกิจ ดูกำไรแต่ละเดือน เงินหมดไปกับอะไร และคิดต้นทุนต่อชิ้นเพื่อตั้งราคาขายให้มีกำไร ใช้ได้กับธุรกิจทุกแบบ ตั้งหมวดเองได้ ล็อกอินบัญชีเดียวกับพอร์ตแล้วข้อมูลจะซิงค์ทุกเครื่อง</p>
+  <p class="pf-intro" data-sub="sum">จดรายรับรายจ่ายของธุรกิจ ดูกำไรแต่ละเดือน เงินหมดไปกับอะไร และคิดต้นทุนต่อชิ้นเพื่อตั้งราคาขายให้มีกำไร ใช้ได้กับธุรกิจทุกแบบ ตั้งหมวดเองได้ ล็อกอินบัญชีเดียวกับพอร์ตแล้วข้อมูลจะซิงค์ทุกเครื่อง</p>
 
-  <div class="b-month"><button type="button" class="b-nav" id="b-prev" aria-label="เดือนก่อน">‹</button><h2 id="b-month"></h2><button type="button" class="b-nav" id="b-next" aria-label="เดือนถัดไป">›</button></div>
-  <div class="strip" id="b-strip">
+  <div class="b-month" data-sub="sum add"><button type="button" class="b-nav" id="b-prev" aria-label="เดือนก่อน">‹</button><h2 id="b-month"></h2><button type="button" class="b-nav" id="b-next" aria-label="เดือนถัดไป">›</button></div>
+  <div class="strip" id="b-strip" data-sub="sum">
     <div><div class="k">รายรับ</div><div class="v pos" id="b-in">0 บาท</div><div class="h" id="b-in-h"></div></div>
     <div><div class="k">รายจ่าย</div><div class="v" id="b-out">0 บาท</div><div class="h" id="b-out-h"></div></div>
     <div><div class="k">กำไรสุทธิ</div><div class="v" id="b-pl">0 บาท</div><div class="h" id="b-pl-h"></div></div>
     <div><div class="k">กำไรสะสมทั้งปี</div><div class="v" id="b-yr">0 บาท</div><div class="h" id="b-yr-h"></div></div>
   </div>
 
-  <section class="panel" id="b-add">
+  <section class="panel" id="b-add" data-sub="add">
     <h3 id="b-title">บันทึกรายรับรายจ่าย</h3>
     <p id="b-sub">เลือกรับหรือจ่าย ใส่จำนวนเงิน แล้วเลือกหมวด (พิมพ์หมวดใหม่เองได้)</p>
     <div class="f-types"><span class="seg" id="b-kind"><button type="button" data-v="in" aria-pressed="true">รายรับ</button><button type="button" data-v="out" aria-pressed="false">รายจ่าย</button></span></div>
@@ -722,13 +778,13 @@ details.ded summary { color: var(--jade); }
     </div>
   </section>
 
-  <section class="panel" style="margin-top:16px">
+  <section class="panel" style="margin-top:16px" data-sub="sum">
     <div class="ph"><div><h3>รายรับรายจ่าย 12 เดือน</h3><p>แท่งเขียวคือรายรับ แท่งส้มคือรายจ่าย เส้นคือกำไรสุทธิ กดที่เดือนเพื่อดูรายละเอียด</p></div></div>
     <div class="g-key"><span><i class="k1"></i>รายรับ</span><span><i class="kx"></i>รายจ่าย</span><span><i class="k2"></i>กำไรสุทธิ</span></div>
     <div class="chart" id="b-chart"></div>
   </section>
 
-  <div class="b-two">
+  <div class="b-two" data-sub="sum">
     <section class="panel">
       <h3>รายจ่ายเดือนนี้ไปไหน</h3>
       <div id="b-outcat" class="b-cats"></div>
@@ -740,7 +796,7 @@ details.ded summary { color: var(--jade); }
     </section>
   </div>
 
-  <section class="panel" style="margin-top:16px" id="b-taxp">
+  <section class="panel" style="margin-top:16px" id="b-taxp" data-sub="tax">
     <div class="ph"><div><h3>ภาษีและรายงานสำหรับยื่น</h3><p>สำหรับคนทำธุรกิจในนามตัวเอง (บุคคลธรรมดา เงินได้ประเภท 40(8) เช่น ขายของ) ใช้ตัวเลขจากรายการที่บันทึกไว้</p></div>
       <div class="b-month sm"><button type="button" class="b-nav" id="tx-prev" aria-label="ปีก่อน">‹</button><b id="tx-year"></b><button type="button" class="b-nav" id="tx-next" aria-label="ปีถัดไป">›</button></div></div>
     <div class="mini-grid" id="tx-grid"></div>
@@ -765,13 +821,13 @@ details.ded summary { color: var(--jade); }
     </div>
   </section>
 
-  <section class="panel" style="margin-top:16px" id="b-products">
+  <section class="panel" style="margin-top:16px" id="b-products" data-sub="prod">
     <div class="ph"><div><h3>ต้นทุนต่อชิ้นและราคาขาย</h3><p>ใส่วัตถุดิบหรือค่าใช้จ่ายที่ใช้ทำสินค้า 1 ชิ้น ระบบจะบอกต้นทุน กำไรต่อชิ้น และราคาที่ควรตั้งถ้าอยากได้กำไรตามเป้า</p></div>
       <button class="btn-line" id="p-add" type="button">+ เพิ่มสินค้า</button></div>
     <div id="p-list" class="p-list"></div>
   </section>
 
-  <section class="panel" style="margin-top:16px">
+  <section class="panel" style="margin-top:16px" data-sub="add">
     <div class="ph"><h3>รายการเดือนนี้</h3>
       <span class="seg" id="b-filter"><button type="button" data-v="all" aria-pressed="true">ทั้งหมด</button><button type="button" data-v="in" aria-pressed="false">รายรับ</button><button type="button" data-v="out" aria-pressed="false">รายจ่าย</button></span></div>
     <div class="scroll"><table class="tbl" id="b-tx"><thead><tr><th class="l">วันที่</th><th class="l">หมวด</th><th class="l">รายละเอียด</th><th>รายรับ</th><th>รายจ่าย</th><th></th></tr></thead><tbody></tbody></table></div>
@@ -1055,7 +1111,7 @@ dash.calc('sectors', {
     const lab = d3.max(sectors, (s) => { meas.text(s.sector); return meas.node().getComputedTextLength(); }) + 12; meas.remove();
     const x = d3.scaleLinear([0, 100], [lab, W - 54]);
     const g = svg.selectAll('g').data(sectors).join('g').attr('transform', (s, i) => `translate(0,${i * rh + 2})`).style('cursor', 'pointer')
-      .on('click', (ev, s) => { st.sector = st.sector === s.sector ? '' : s.sector; $('sector').value = st.sector; st.allN = 25; drawAll(); $('all').scrollIntoView({ behavior: 'smooth' }); });
+      .on('click', (ev, s) => { st.sector = st.sector === s.sector ? '' : s.sector; $('sector').value = st.sector; st.allN = 25; drawAll(); if (window.VGNav) window.VGNav.go('scan', 'all'); $('all').scrollIntoView({ behavior: 'smooth' }); });
     g.append('text').attr('x', lab - 10).attr('y', rh / 2 + 4).attr('text-anchor', 'end').attr('font-size', 13).attr('fill', css('--ink')).text((s) => s.sector);
     g.append('rect').attr('x', lab).attr('y', 6).attr('height', rh - 12).attr('rx', 6).attr('width', (s) => Math.max(3, x(s.avgVi) - lab)).attr('fill', (s) => (s.buys > 0 ? css('--jade') : css('--line')));
     g.append('text').attr('x', (s) => x(s.avgVi) + 8).attr('y', rh / 2 + 4).attr('font-size', 12).attr('fill', css('--ink-2')).text((s) => `${s.avgVi} (${s.buys})`);
@@ -1143,6 +1199,9 @@ dash.calc('sectors', {
       if (!newBuy.length && !dropped.length) body.prepend(el('div', 'pf-hint', 'รายชื่อหุ้นน่าซื้อสะสมไม่เปลี่ยนจากรอบก่อน'));
       $('today-note').textContent = `เทียบราคาปิดวันที่ ${thDate(pj.asOf)} กับ ${thDate(j.asOf)}: หุ้นขึ้น ${ups} ตัว ลง ${moves.length - ups} ตัว จาก ${moves.length} ตัว`;
       $('today').hidden = false;
+      const S = (x) => ({ s: x.r ? x.r.symbol : x.symbol, c: x.c !== undefined ? x.c : chg(x) });
+      window.VG.today = { note: $('today-note').textContent, newBuy: newBuy.map(S), dropped: dropped.map(S), mine: mineM.map(S), ups: byC.slice(0, 5).map(S) };
+      document.dispatchEvent(new Event('vg:data'));
     }).catch(() => { /* no previous snapshot yet */ });
   };
 
@@ -1153,7 +1212,7 @@ dash.calc('sectors', {
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
-    window.VG = { scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
+    window.VG = { market, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -1187,7 +1246,7 @@ dash.calc('sectors', {
   let biz = { entries: [], products: [], name: '' };
   try { const s = JSON.parse(localStorage.getItem(BKEY) || 'null'); if (s && Array.isArray(s.entries)) biz = { entries: s.entries, products: s.products || [], name: s.name || '' }; } catch (e) { /* in memory */ }
   const keep = () => { try { localStorage.setItem(BKEY, JSON.stringify(biz)); return true; } catch (e) { return false; } };
-  const save = () => { keep(); if (window.VGSync) window.VGSync.push('business'); };
+  const save = () => { keep(); if (window.VGSync) window.VGSync.push('business'); document.dispatchEvent(new Event('vg:data')); };
   let ym = ymOf(today()), kind = 'in', editId = null, filter = 'all', shown = false;
 
   /* ---------- sums ---------- */
@@ -1563,7 +1622,13 @@ dash.calc('sectors', {
   const render = () => { if (!shown) return; drawStrip(); drawChart(); drawCats(); drawTx(); fillProdSelect(); drawTax(); };
   document.addEventListener('vg:view', (e) => { shown = e.detail === 'biz'; if (shown) { render(); drawProducts(); drawChips(); } });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) drawChart(); }, 200); });
-  window.VGBiz = { get: () => biz, replace: (d) => { biz = clean(d); keep(); if (editId && !biz.entries.some((e) => e.id === editId)) endEdit(); if (shown) { render(); if (!document.activeElement || !document.activeElement.closest('#p-list')) drawProducts(); } } };
+  const summary = () => {
+    const m = ymOf(today()), y = m.slice(0, 4); const s = monthSum(m); const Y = yearSums(y);
+    const v = dedAll[y] || {}; const A = taxWith(Y.inc, Y.inc * 0.6, v), B = taxWith(Y.inc, Y.outDoc, v);
+    let r12 = 0; biz.entries.forEach((e) => { if (e.kind === 'in' && ymOf(e.date) > ymShift(m, -12) && ymOf(e.date) <= m) r12 += e.amount; });
+    return { n: biz.entries.length, ...s, monthTH: ymTH(m), yi: Y.inc, yp: Y.inc - Y.out, tax: Math.min(A.tax, B.tax), method: B.tax < A.tax ? 'หักค่าใช้จ่ายตามจริง' : 'หักค่าใช้จ่ายเหมา 60%', vat: r12 / 1800000 };
+  };
+  window.VGBiz = { get: () => biz, summary, replace: (d) => { document.dispatchEvent(new Event('vg:data')); biz = clean(d); keep(); if (editId && !biz.entries.some((e) => e.id === editId)) endEdit(); if (shown) { render(); if (!document.activeElement || !document.activeElement.closest('#p-list')) drawProducts(); } } };
   setKind('in'); $('b-date').value = today();
 })();
 </script>
@@ -1595,7 +1660,7 @@ dash.calc('sectors', {
   let db = { tx: [], targets: {}, band: 5 };
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.tx)) db = { tx: s.tx, targets: s.targets || {}, band: s.band || 5 }; } catch (e) { /* storage blocked: work in memory */ }
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); return true; } catch (e) { return false; } };
-  const save = () => { if (!keep() && !window.VGSync) $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; if (window.VGSync) window.VGSync.push(); };
+  const save = () => { if (!keep() && !window.VGSync) $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; if (window.VGSync) window.VGSync.push(); document.dispatchEvent(new Event('vg:data')); };
   let goal = { t: 1000000, m: 5000, r: 8 };
   try { const g = JSON.parse(localStorage.getItem(GKEY) || 'null'); if (g) goal = { ...goal, ...g }; } catch (e) { /* defaults */ }
 
@@ -1603,15 +1668,34 @@ dash.calc('sectors', {
   let fType = 'buy', fDir = 'in', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock', hFilter = 'all';
 
   /* ---------- tabs ---------- */
-  const show = (v) => {
-    ['scan', 'port', 'biz'].forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v;
+  /* sub-pages: each long tab shows one group of sections at a time */
+  const SUBS = { scan: [['picks', 'น่าซื้อวันนี้'], ['all', 'หุ้นทั้งหมด'], ['market', 'ภาพรวมตลาด']],
+    port: [['sum', 'สรุปพอร์ต'], ['add', 'บันทึกและประวัติ'], ['hold', 'ปรับสมดุล'], ['grow', 'การเติบโตและเป้าหมาย'], ['cal', 'ปฏิทิน']],
+    biz: [['sum', 'สรุปเดือน'], ['add', 'จดรายรับรายจ่าย'], ['prod', 'ต้นทุนสินค้า'], ['tax', 'ภาษีและลดหย่อน']] };
+  const subOf = {};
+  const setSub = (v, sub) => {
+    const list = SUBS[v]; if (!list) return; if (!list.some(([k]) => k === sub)) { try { sub = localStorage.getItem('vg-sub-' + v); } catch (e) { sub = null; } if (!list.some(([k]) => k === sub)) sub = list[0][0]; }
+    subOf[v] = sub; try { localStorage.setItem('vg-sub-' + v, sub); } catch (e) { /* ignore */ }
+    $('view-' + v).querySelectorAll('[data-sub]').forEach((n) => n.classList.toggle('sub-off', !n.dataset.sub.split(' ').includes(sub)));
+    $('view-' + v).querySelectorAll('.subnav button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.s === sub)));
+    window.dispatchEvent(new Event('resize'));
+  };
+  Object.entries(SUBS).forEach(([v, list]) => {
+    const nav = el('nav', 'subnav'); nav.setAttribute('aria-label', 'หมวดย่อย');
+    list.forEach(([k, label]) => { const b = el('button', null, label); b.type = 'button'; b.dataset.s = k; b.addEventListener('click', () => { setSub(v, k); window.scrollTo(0, 0); }); nav.append(b); });
+    $('view-' + v).prepend(nav);
+  });
+  const show = (v, sub) => {
+    ['home', 'scan', 'port', 'biz'].forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v;
     document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === v)));
-    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : v === 'biz' ? '#business' : location.pathname); } catch (e) { /* ignore */ }
+    try { history.replaceState(null, '', v === 'port' ? '#portfolio' : v === 'biz' ? '#business' : v === 'scan' ? '#scan' : location.pathname); } catch (e) { /* ignore */ }
+    setSub(v, sub);
     if (v === 'port') { render(); loadHist(); }
     document.dispatchEvent(new CustomEvent('vg:view', { detail: v }));
     window.scrollTo(0, 0);
   };
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.v)));
+  window.VGNav = { go: (v, sub) => show(v, sub) };
 
   /* ---------- holdings (average cost) and the cash/fx ledger ---------- */
   const sorted = () => [...db.tx].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));
@@ -1791,12 +1875,11 @@ dash.calc('sectors', {
   };
 
   /* ---------- calendar: earnings and ex-dividend dates ---------- */
-  const drawCal = (list) => {
-    const box = $('cal-list'); box.replaceChildren();
+  const calEvents = (list) => {
     const watch = window.VGWatch ? window.VGWatch.get() : [];
     const own = new Set(list.map((x) => x.sym)); const syms = [...new Set([...own, ...watch])];
-    if (!syms.length) { box.append(el('div', 'pf-hint', 'เพิ่มหุ้นในพอร์ต หรือกดติดตามหุ้นในหน้าคัดหุ้นก่อน แล้ววันสำคัญจะขึ้นที่นี่')); return; }
-    if (!Object.values(raw).some((s) => s.earningsDate || s.exDivDate)) { box.append(el('div', 'pf-hint', 'ข้อมูลปฏิทินจะมาหลังระบบอัปเดตข้อมูลรอบถัดไป')); return; }
+    if (!syms.length) return { state: 'none', own, ev: [] };
+    if (!Object.values(raw).some((s) => s.earningsDate || s.exDivDate)) return { state: 'nodata', own, ev: [] };
     const t0 = new Date(); t0.setHours(0, 0, 0, 0); const day = 86400000; const ev = [];
     syms.forEach((s) => {
       const r = raw[s]; if (!r) return;
@@ -1805,8 +1888,14 @@ dash.calc('sectors', {
       const sh = own.has(s) ? sharesOn(s) : 0;
       add(r.exDivDate, 'ขึ้น XD', r.lastDiv ? `ปันผลล่าสุด $${r.lastDiv}/หุ้น` + (sh ? ` ถือ ${qty(sh, 2)} หุ้น ≈ ${usd(sh * r.lastDiv)} ก่อนภาษี` : '') : '');
     });
+    return { state: 'ok', own, ev: ev.sort((a, b) => a.d.localeCompare(b.d)) };
+  };
+  const drawCal = (list) => {
+    const box = $('cal-list'); box.replaceChildren(); const { state, own, ev } = calEvents(list);
+    if (state === 'none') { box.append(el('div', 'pf-hint', 'เพิ่มหุ้นในพอร์ต หรือกดติดตามหุ้นในหน้าคัดหุ้นก่อน แล้ววันสำคัญจะขึ้นที่นี่')); return; }
+    if (state === 'nodata') { box.append(el('div', 'pf-hint', 'ข้อมูลปฏิทินจะมาหลังระบบอัปเดตข้อมูลรอบถัดไป')); return; }
     if (!ev.length) { box.append(el('div', 'pf-hint', 'ไม่มีวันประกาศงบหรือ XD ของหุ้นเหล่านี้ใน 60 วันข้างหน้า')); return; }
-    ev.sort((a, b) => a.d.localeCompare(b.d)).forEach((e) => {
+    ev.forEach((e) => {
       const row = el('div', 'cal-row');
       const dd = el('div', 'cal-d'); dd.append(el('b', null, dTH(e.d, { day: 'numeric', month: 'short' })), el('small', null, e.n === 0 ? 'วันนี้' : e.n === 1 ? 'พรุ่งนี้' : `อีก ${e.n} วัน`));
       const what = el('div', 'cal-w'); const sym = el('span', 'sym', e.s); sym.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: e.s })));
@@ -1866,7 +1955,7 @@ dash.calc('sectors', {
   };
   ['goal-t', 'goal-m', 'goal-r'].forEach((id, i) => $(id).addEventListener('input', () => {
     const v = Number($(id).value); if ($(id).value === '' || !isFinite(v)) return; goal['tmr'[i]] = v;
-    try { localStorage.setItem(GKEY, JSON.stringify(goal)); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(GKEY, JSON.stringify(goal)); } catch (e) { /* ignore */ } document.dispatchEvent(new Event('vg:data'));
     const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0));
   }));
 
@@ -2103,7 +2192,7 @@ dash.calc('sectors', {
     e.target.value = '';
   });
 
-  document.addEventListener('vg:add', (e) => { show('port'); endEdit(); setType('buy'); $('f-sym').value = e.detail; symInfo(); $('pf-add').scrollIntoView({ block: 'start' }); $('f-sh').focus({ preventScroll: true }); });
+  document.addEventListener('vg:add', (e) => { show('port', 'add'); endEdit(); setType('buy'); $('f-sym').value = e.detail; symInfo(); $('pf-add').scrollIntoView({ block: 'start' }); $('f-sh').focus({ preventScroll: true }); });
   document.addEventListener('vg:watch', () => { if (!$('view-port').hidden) render(); });
   document.addEventListener('vg:ready', () => {
     map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); raw = window.VG.raw || {}; fx = window.VG.fx || null; ready = true;
@@ -2111,10 +2200,116 @@ dash.calc('sectors', {
     render();
   });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) { drawGrowth(); const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0)); } }, 200); });
-  window.VGPort = { get: () => db, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); } };
+  const summary = () => {
+    const { list, total, cost } = holdings(); const L = ledger(); const cashV = L.cashOn ? L.cash : 0; const all = total + cashV;
+    const pl = list.filter((x) => x.pl != null).reduce((a, x) => a + x.pl, 0); const { w: tw } = targetWeights(list);
+    const outs = list.filter((x) => Math.abs(x.w - tw[x.sym]) > db.band / 100).length; const C = calEvents(list);
+    let G = null; if (fx) { const now = Math.max(0, all * fx); const a = project(now, +goal.m, +goal.r, 600); const i = a.findIndex((x) => x >= +goal.t); G = { t: +goal.t, m: +goal.m, r: +goal.r, now, eta: i > 0 ? monthLabel(i) : null }; }
+    return { n: list.length, all, total, cost, pl, cash: L.cash, cashOn: L.cashOn, fx, outs, top: list.slice(0, 3), events: C.state === 'ok' ? C.ev : null, goal: G };
+  };
+  window.VGPort = { get: () => db, summary, replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); document.dispatchEvent(new Event('vg:data')); } };
   setType('buy');
-  document.body.dataset.view = 'scan';
-  if (location.hash === '#portfolio') show('port'); else if (location.hash === '#business') show('biz');
+  document.body.dataset.view = 'home';
+  const H = location.hash; show(H === '#portfolio' ? 'port' : H === '#business' ? 'biz' : H === '#scan' ? 'scan' : 'home');
+  render();
+})();
+</script>
+<script>
+/* home: one-screen overview of every part of the site; each card links into its tab/sub-page */
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const usd0 = (v) => (v == null || isNaN(v) ? '–' : (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', { maximumFractionDigits: 0 }));
+  const baht = (v) => (v == null || !isFinite(v) ? '–' : (v < 0 ? '-' : '') + Math.round(Math.abs(v)).toLocaleString('th-TH') + ' บาท');
+  const pc = (v, d = 1) => (v == null || !isFinite(v) ? '–' : (v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%');
+  const kv = (box, k, v, cls) => { const r = el('div', 'hkv'); const b = el('b', cls || null, v); r.append(el('span', null, k), b); box.append(r); };
+  const go = (spec) => { const [v, s] = spec.split(':'); if (window.VGNav) window.VGNav.go(v, s); };
+  document.querySelectorAll('#view-home .hlink').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
+  const empty = (box, text, btn, spec) => { const d = el('div', 'hempty', text); if (btn) { d.append(el('br')); const b = el('button', 'btn-line', btn); b.type = 'button'; b.addEventListener('click', () => go(spec)); d.append(b); } box.append(d); };
+  const chip = (sym, c, extra) => { const b = el('button', 'td-sym', sym); b.type = 'button'; if (c != null) b.append(el('small', c >= 0 ? 'pos' : 'neg', pc(c))); if (extra) b.append(el('small', null, extra)); b.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: sym }))); return b; };
+
+  const render = () => {
+    if ($('view-home').hidden) return;
+    const VG = window.VG || {}; const scan = VG.scan || [];
+    $('h-stamp').textContent = $('stamp') ? $('stamp').textContent : '';
+    const buys = scan.filter((r) => r.signal === 'น่าซื้อสะสม');
+    $('h-verdict').textContent = scan.length ? `วันนี้มี ${buys.length} ตัวที่น่าซื้อสะสม จาก ${scan.length} ตัว` : 'กำลังโหลดข้อมูล…';
+
+    const m = $('h-market'); m.replaceChildren(); const mk = VG.market;
+    if (mk) {
+      const mood = el('span', 'mood ' + (mk.regime === 'ขาขึ้น' ? 'up' : mk.regime === 'ขาลง' ? 'down' : 'mid'), mk.regime === 'ขาขึ้น' ? 'ตลาดขาขึ้น' : mk.regime === 'ขาลง' ? 'ตลาดขาลง' : 'ตลาดช่วงระวัง'); m.append(mood);
+      kv(m, 'S&P 500 (SPY)', '$' + mk.spyClose.toLocaleString('en-US', { maximumFractionDigits: 2 }));
+      kv(m, 'ห่างเส้น 40 สัปดาห์', pc(mk.spyVsMa40), mk.spyVsMa40 >= 0 ? 'pos' : 'neg');
+      kv(m, 'หุ้นเหนือเส้น 200 วัน', Math.round(mk.breadth200 * 100) + '%');
+      kv(m, 'ดอกเบี้ยพันธบัตร 10 ปี', mk.yield10y.toFixed(2) + '%');
+    } else m.append(el('div', 'hsub', 'กำลังโหลด…'));
+
+    const p = $('h-picks'); p.replaceChildren();
+    if (!scan.length) p.append(el('div', 'hsub', 'กำลังโหลด…'));
+    else if (!buys.length) empty(p, 'วันนี้ยังไม่มีหุ้นผ่านเกณฑ์ ลองดูกลุ่ม "น่าจับตา"', 'ดูหุ้นทั้งหมด', 'scan:all');
+    else buys.slice(0, window.innerWidth < 640 ? 5 : 8).forEach((r) => {
+      const b = el('button', 'hrow'); b.type = 'button'; const a = el('span'); a.append(el('span', 's', r.symbol), el('span', 'n', r.name));
+      b.append(a, el('span', 'm ' + (r.mos >= 0 ? 'pos' : 'neg'), pc(r.mos, 0)), el('span', 'vi', String(r.vi)));
+      b.title = 'ส่วนลดจากมูลค่า และคะแนน VI'; b.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: r.symbol }))); p.append(b);
+    });
+
+    const P = window.VGPort && window.VGPort.summary ? window.VGPort.summary() : null;
+    const po = $('h-port'); po.replaceChildren();
+    if (!P || !P.n) empty(po, 'ยังไม่มีหุ้นในพอร์ต บันทึกหุ้นที่ซื้อไว้เพื่อติดตามกำไรขาดทุน', 'บันทึกรายการแรก', 'port:add');
+    else {
+      po.append(el('div', 'hbig', usd0(P.all)), el('div', 'hsub', P.fx ? baht(P.all * P.fx) : ''));
+      kv(po, 'กำไร/ขาดทุนหุ้น', `${usd0(P.pl)} (${pc(P.cost ? P.pl / P.cost : null)})`, P.pl >= 0 ? 'pos' : 'neg');
+      if (P.cashOn) kv(po, 'เงินสดดอลลาร์', usd0(P.cash));
+      kv(po, 'ตัวที่ใหญ่สุด', P.top.map((x) => `${x.sym} ${(x.w * 100).toFixed(0)}%`).join(' · '));
+      kv(po, 'ปรับสมดุล', P.outs ? `เบี้ยวจากเป้า ${P.outs} ตัว` : 'อยู่ในเกณฑ์', P.outs ? 'neg' : 'pos');
+    }
+
+    const t = $('h-today'); t.replaceChildren(); const T = VG.today;
+    if (!T) t.append(el('div', 'hsub', 'สรุปการเปลี่ยนแปลงจะเริ่มขึ้นหลังระบบอัปเดตครบ 2 วัน'));
+    else {
+      t.append(el('div', 'hsub', T.note));
+      const sec = (label, arr) => { if (!arr.length) return; t.append(el('div', 'hsub', label)); const c = el('div', 'hchips'); arr.forEach((x) => c.append(x)); t.append(c); };
+      sec('เข้ากลุ่มน่าซื้อสะสม', T.newBuy.slice(0, 6).map((x) => chip(x.s, x.c)));
+      sec('หลุดจากน่าซื้อสะสม', T.dropped.slice(0, 6).map((x) => chip(x.s, x.c)));
+      sec('หุ้นของฉัน', T.mine.slice(0, 6).map((x) => chip(x.s, x.c)));
+      if (!T.newBuy.length && !T.dropped.length && !T.mine.length) sec('ขึ้นแรงสุด', T.ups.slice(0, 5).map((x) => chip(x.s, x.c)));
+    }
+
+    const ca = $('h-cal'); ca.replaceChildren();
+    if (!P || !P.events) ca.append(el('div', 'hsub', 'เพิ่มหุ้นในพอร์ตหรือกดติดตามหุ้น แล้ววันประกาศงบและวัน XD จะขึ้นที่นี่'));
+    else if (!P.events.length) ca.append(el('div', 'hsub', 'ไม่มีวันประกาศงบหรือ XD ใน 60 วันข้างหน้า'));
+    else P.events.slice(0, 5).forEach((e) => {
+      const r = el('div', 'hcal'); r.append(el('b', null, new Date(e.d + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })));
+      const w = el('span'); const s = el('b', null, e.s + ' '); w.append(s, e.kind + (e.n <= 1 ? (e.n ? ' (พรุ่งนี้)' : ' (วันนี้)') : ` (อีก ${e.n} วัน)`)); r.append(w); ca.append(r);
+    });
+
+    const g = $('h-goal'); g.replaceChildren();
+    if (!P || !P.goal || P.goal.now == null) g.append(el('div', 'hsub', 'ตั้งเป้าหมายเงินลงทุนในแท็บพอร์ต'));
+    else {
+      const G = P.goal; const sh = Math.max(0, Math.min(1, G.now / G.t));
+      g.append(el('div', 'hbig', (sh * 100).toFixed(1) + '%'), el('div', 'hsub', `${baht(G.now)} จากเป้า ${baht(G.t)}`));
+      const bar = el('div', 'hbar'); const i = el('i'); i.style.width = sh * 100 + '%'; bar.append(i); g.append(bar);
+      g.append(el('div', 'hsub', G.eta ? `คาดว่าถึงเป้า ${G.eta} ถ้าลงเพิ่มเดือนละ ${baht(G.m)} ผลตอบแทน ${G.r}%` : sh >= 1 ? 'ถึงเป้าแล้ว' : 'ด้วยเงื่อนไขตอนนี้ยังไม่ถึงภายใน 50 ปี'));
+    }
+
+    const B = window.VGBiz && window.VGBiz.summary ? window.VGBiz.summary() : null;
+    const bz = $('h-biz'); bz.replaceChildren();
+    if (!B || !B.n) empty(bz, 'ยังไม่มีรายการธุรกิจ จดรายรับรายจ่ายเพื่อดูกำไรแต่ละเดือน', 'จดรายการแรก', 'biz:add');
+    else {
+      bz.append(el('div', 'hbig ' + (B.p >= 0 ? 'pos' : 'neg'), baht(B.p)), el('div', 'hsub', `กำไรสุทธิ ${B.monthTH}` + (B.i ? ` · อัตรากำไร ${pc(B.p / B.i)}` : '')));
+      const mini = el('div', 'hmini'); [['รายรับ', B.i], ['รายจ่าย', B.o], ['กำไรทั้งปี', B.yp]].map(([k, x]) => [k, (x < 0 ? '-฿' : '฿') + Math.round(Math.abs(x)).toLocaleString('th-TH')]).forEach(([k, v]) => { const d = el('div'); d.append(el('small', null, k), el('b', null, v)); mini.append(d); }); bz.append(mini);
+    }
+    const tx = $('h-tax'); tx.replaceChildren();
+    if (!B || !B.yi) tx.append(el('div', 'hsub', 'ประมาณภาษีจะขึ้นเมื่อมีรายรับธุรกิจในปีนี้'));
+    else {
+      tx.append(el('div', 'hbig', baht(B.tax)), el('div', 'hsub', `ภาษีโดยประมาณถ้า${B.method} (รายได้ปีนี้ ${baht(B.yi)})`));
+      const bar = el('div', 'hbar'); const i = el('i'); i.style.width = Math.min(100, B.vat * 100) + '%'; if (B.vat >= 0.8) i.style.background = 'var(--brick)'; bar.append(i); tx.append(bar);
+      tx.append(el('div', 'hsub', `รายได้ 12 เดือน ${(B.vat * 100).toFixed(0)}% ของเพดาน VAT 1.8 ล้าน`));
+    }
+  };
+  ['vg:ready', 'vg:data', 'vg:watch'].forEach((ev) => document.addEventListener(ev, () => setTimeout(render, 0)));
+  document.addEventListener('vg:view', (e) => { if (e.detail === 'home') render(); });
+  window.addEventListener('storage', render);
   render();
 })();
 </script>
