@@ -650,6 +650,8 @@ body.slip-open { overflow: hidden; }
 .chk-act { margin-top: 8px; font-size: 14px; font-weight: 500; color: var(--ink-2); }
 .alert.sellnote { background: var(--brick-soft); color: var(--brick); }
 .hlink.neg { color: var(--brick); display: block; margin-top: 6px; text-align: left; }
+.home-data { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 14px 18px; }
+.home-data p { margin: 2px 0 0; } #bk-msg:empty { display: none; } #bk-msg { flex-basis: 100%; }
 </style>
 </head>
 <body>
@@ -688,6 +690,12 @@ body.slip-open { overflow: hidden; }
     <article class="hcard" id="hc-biz"><header><h3>ธุรกิจเดือนนี้</h3><button type="button" class="hlink" data-go="biz:sum">เปิดธุรกิจ →</button></header><div class="hbody" id="h-biz"></div></article>
     <article class="hcard" id="hc-tax"><header><h3>ภาษีธุรกิจปีนี้</h3><button type="button" class="hlink" data-go="biz:tax">ดูรายละเอียด →</button></header><div class="hbody" id="h-tax"></div></article>
   </div>
+  <section class="home-data" id="home-data">
+    <div><b>สำรองข้อมูลทั้งหมด</b><p class="pf-hint" id="bk-last">ไฟล์เดียวรวมพอร์ต ธุรกิจ เงินของฉัน และค่าที่ตั้งไว้ทั้งหมด เก็บไว้ในเครื่องหรือ Google Drive ก็ได้</p></div>
+    <div class="pf-actions" style="margin:0"><button class="btn-solid" id="bk-export" type="button">ดาวน์โหลดไฟล์สำรอง</button>
+      <label class="btn-line" style="cursor:pointer">กู้คืนจากไฟล์<input id="bk-import" type="file" accept="application/json,.json" hidden></label></div>
+    <span class="pf-hint" id="bk-msg" role="status"></span>
+  </section>
 </div>
   <div id="view-scan">
   <header class="hero" data-sub="picks">
@@ -1537,6 +1545,31 @@ dash.calc('sectors', {
 </script>
 
 <script>
+/* app preferences that used to live on one device only (DCA plan, goal, deductions, shop header, slip name).
+   Stored locally and, when signed in, synced inside money/{uid}.settings.app. The taxpayer ID is kept on this device only. */
+(() => {
+  const K = 'valuegrab-prefs-v1';
+  const rd = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  let P = rd(K);
+  if (!P || typeof P !== 'object') {
+    P = {}; const dca = rd('valuegrab-dca-v1'), goal = rd('valuegrab-goal-v1'), ded = rd('valuegrab-ded-v2'), prof = rd('valuegrab-bizprofile-v1');
+    if (dca) P.dca = dca; if (goal) P.goal = goal; if (ded) P.ded = ded;
+    if (prof) { const { tin, ...rest } = prof; P.prof = rest; if (tin) { try { localStorage.setItem('valuegrab-tin-v1', tin); } catch (e) { /* ignore */ } } }
+    try { const me = localStorage.getItem('valuegrab-slip-myname'); if (me) P.slipMe = me; } catch (e) { /* ignore */ }
+  }
+  const keep = () => { try { localStorage.setItem(K, JSON.stringify(P)); } catch (e) { /* ignore */ } };
+  keep();
+  let t;
+  window.VGPrefs = {
+    get: (k, d) => (P[k] === undefined ? d : JSON.parse(JSON.stringify(P[k]))),
+    set: (k, v) => { P[k] = JSON.parse(JSON.stringify(v)); keep(); clearTimeout(t); t = setTimeout(() => { if (window.VGSync) window.VGSync.push('money'); }, 800); },
+    all: () => JSON.parse(JSON.stringify(P)),
+    replaceAll: (o) => { if (!o || typeof o !== 'object') return; P = JSON.parse(JSON.stringify(o)); delete P.tin; keep(); document.dispatchEvent(new Event('vg:prefs')); },
+    tin: (v) => { try { if (v === undefined) return localStorage.getItem('valuegrab-tin-v1') || ''; localStorage.setItem('valuegrab-tin-v1', v); } catch (e) { /* ignore */ } return v; },
+  };
+})();
+</script>
+<script>
 /* business ledger: income/expense entries by category, plus per-product cost sheets.
    Kept in this browser and, when signed in, synced to business/{uid} by the account module. */
 (() => {
@@ -1789,7 +1822,7 @@ dash.calc('sectors', {
   /* ---------- tax estimate & cash report (individual, income type 40(8)) ---------- */
   const PKEY = 'valuegrab-bizprofile-v1', DKEY = 'valuegrab-bizded-v1';
   let ty = String(new Date().getFullYear());
-  let prof = {}; try { prof = JSON.parse(localStorage.getItem(PKEY) || '{}') || {}; } catch (e) { /* none */ }
+  let prof = { ...window.VGPrefs.get('prof', {}), tin: window.VGPrefs.tin() };
   const BR = [[150000, 0], [300000, 0.05], [500000, 0.10], [750000, 0.15], [1000000, 0.20], [2000000, 0.25], [5000000, 0.30], [Infinity, 0.35]];
   const prog = (net) => { let t = 0, lo = 0; for (const [hi, r] of BR) { if (net > lo) t += (Math.min(net, hi) - lo) * r; lo = hi; } return t; };
   const workdays = (a, b) => { let n = 0; const d = new Date(a + 'T00:00:00'), e = new Date(b + 'T00:00:00'); while (d < e) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w && w !== 6) n++; } return n; };
@@ -1817,7 +1850,7 @@ dash.calc('sectors', {
     ['เงินบริจาค', [['don2', 'บริจาคเพื่อการศึกษา โรงพยาบาลรัฐ สภากาชาด การกีฬา', 'num', 'หักได้ 2 เท่า รวมไม่เกิน 10% ของเงินได้หลังหักลดหย่อน'],
       ['don1', 'บริจาคทั่วไป เช่น วัด มูลนิธิ', 'num', 'ไม่เกิน 10% ของเงินได้หลังหักลดหย่อน'], ['party', 'บริจาคพรรคการเมือง', 'num', 'ไม่เกิน 10,000']]],
   ];
-  let dedAll = {}; try { dedAll = JSON.parse(localStorage.getItem(D2KEY) || '{}') || {}; } catch (e) { /* none */ }
+  let dedAll = window.VGPrefs.get('ded', {}) || {};
   const dv = () => dedAll[ty] || (dedAll[ty] = {});
   const dedCalc = (v, inc) => {
     const n = (k) => Math.max(0, Number(v[k]) || 0); const sal = n('sal'); const A = inc + sal;
@@ -1847,7 +1880,7 @@ dash.calc('sectors', {
         const l = el('label', 'ded-it' + (type === 'check' ? ' chk' : ''));
         const inp = el('input', type === 'check' ? '' : 'inp'); inp.dataset.k = k;
         if (type === 'check') { inp.type = 'checkbox'; inp.checked = !!v[k]; } else { inp.type = 'number'; inp.min = 0; inp.step = type === 'count' ? 1 : 'any'; inp.inputMode = type === 'count' ? 'numeric' : 'decimal'; inp.value = v[k] ?? ''; inp.placeholder = '0'; }
-        inp.addEventListener(type === 'check' ? 'change' : 'input', () => { dv()[k] = type === 'check' ? inp.checked : inp.value; try { localStorage.setItem(D2KEY, JSON.stringify(dedAll)); } catch (e) { /* ignore */ } drawTax(); });
+        inp.addEventListener(type === 'check' ? 'change' : 'input', () => { dv()[k] = type === 'check' ? inp.checked : inp.value; window.VGPrefs.set('ded', dedAll); drawTax(); });
         const got = el('small', 'ded-got'); got.dataset.k = k;
         if (type === 'check') l.append(inp, el('span', null, label), el('small', 'ded-cap', cap));
         else l.append(el('span', null, label), inp, el('small', 'ded-cap', cap));
@@ -1915,7 +1948,13 @@ dash.calc('sectors', {
   $('tx-next').addEventListener('click', () => { ty = String(+ty + 1); drawTax(); });
   [['pr-owner', 'owner'], ['pr-shop', 'shop'], ['pr-tin', 'tin'], ['pr-addr', 'addr']].forEach(([id, k]) => {
     $(id).value = prof[k] || '';
-    $(id).addEventListener('input', () => { prof[k] = $(id).value.trim(); try { localStorage.setItem(PKEY, JSON.stringify(prof)); } catch (e) { /* ignore */ } });
+    $(id).addEventListener('input', () => { prof[k] = $(id).value.trim(); if (k === 'tin') window.VGPrefs.tin(prof.tin); else { const { tin, ...rest } = prof; window.VGPrefs.set('prof', rest); } });
+  });
+  document.addEventListener('vg:prefs', () => {
+    prof = { ...window.VGPrefs.get('prof', {}), tin: window.VGPrefs.tin() }; dedAll = window.VGPrefs.get('ded', {}) || {};
+    [['pr-owner', 'owner'], ['pr-shop', 'shop'], ['pr-tin', 'tin'], ['pr-addr', 'addr']].forEach(([id, k]) => { if (document.activeElement !== $(id)) $(id).value = prof[k] || ''; });
+    if (!document.activeElement || !document.activeElement.closest('#ded-form')) $('ded-form').dataset.y = '';
+    if (shown) drawTax();
   });
   const printReport = (mode) => {
     const rows = biz.entries.filter((e) => (mode === 'm' ? ymOf(e.date) === ym : e.date.startsWith(ty))).sort((a, b) => (a.date + (a.at || '') + a.id).localeCompare(b.date + (b.at || '') + b.id));
@@ -2450,7 +2489,7 @@ dash.calc('sectors', {
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); return true; } catch (e) { return false; } };
   const save = () => { if (!keep() && !window.VGSync) $('f-hint').textContent = 'เบราว์เซอร์นี้บันทึกข้อมูลถาวรไม่ได้ (เช่น โหมดไม่ระบุตัวตน) ข้อมูลจะหายเมื่อปิดหน้า'; if (window.VGSync) window.VGSync.push(); document.dispatchEvent(new Event('vg:data')); };
   let goal = { t: 1000000, m: 5000, r: 8 };
-  try { const g = JSON.parse(localStorage.getItem(GKEY) || 'null'); if (g) goal = { ...goal, ...g }; } catch (e) { /* defaults */ }
+  goal = { ...goal, ...(window.VGPrefs.get('goal', {}) || {}) };
 
   let map = {}, raw = {}, fx = null, ready = false, hist = null, histState = 'idle';
   let fType = 'buy', fDir = 'in', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock', hFilter = 'all';
@@ -2535,8 +2574,8 @@ dash.calc('sectors', {
   /* DCA: period, budget, and which holdings were already bought in this period */
   const DCAK = 'valuegrab-dca-v1';
   let dcaS = { per: 'm', amt: '', cur: 'THB', skip: true };
-  try { dcaS = { ...dcaS, ...(JSON.parse(localStorage.getItem(DCAK) || '{}') || {}) }; } catch (e) { /* defaults */ }
-  const keepDca = () => { try { localStorage.setItem(DCAK, JSON.stringify(dcaS)); } catch (e) { /* ignore */ } };
+  dcaS = { ...dcaS, ...(window.VGPrefs.get('dca', {}) || {}) };
+  const keepDca = () => { window.VGPrefs.set('dca', dcaS); };
   const iso = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   const period = () => { const n = new Date(); n.setHours(0, 0, 0, 0); let a, b;
     if (dcaS.per === 'w') { a = new Date(n); a.setDate(n.getDate() - ((n.getDay() + 6) % 7)); b = new Date(a); b.setDate(a.getDate() + 6); }
@@ -2774,7 +2813,7 @@ dash.calc('sectors', {
   };
   ['goal-t', 'goal-m', 'goal-r'].forEach((id, i) => $(id).addEventListener('input', () => {
     const v = Number($(id).value); if ($(id).value === '' || !isFinite(v)) return; goal['tmr'[i]] = v;
-    try { localStorage.setItem(GKEY, JSON.stringify(goal)); } catch (e) { /* ignore */ } document.dispatchEvent(new Event('vg:data'));
+    window.VGPrefs.set('goal', goal); document.dispatchEvent(new Event('vg:data'));
     const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0));
   }));
 
@@ -2944,7 +2983,9 @@ dash.calc('sectors', {
   segs('dca-cur', (v) => { dcaCur = v; dcaS.cur = v; keepDca(); render(); });
   segs('dca-per', (v) => { dcaS.per = v; keepDca(); render(); document.dispatchEvent(new Event('vg:data')); });
   $('dca-skip').addEventListener('change', () => { dcaS.skip = $('dca-skip').checked; keepDca(); render(); });
-  dcaCur = dcaS.cur === 'USD' ? 'USD' : 'THB'; setSeg('dca-cur', dcaCur); setSeg('dca-per', dcaS.per); $('dca-skip').checked = dcaS.skip !== false; if (dcaS.amt) $('dca-amt').value = dcaS.amt;
+  const loadDca = () => { dcaCur = dcaS.cur === 'USD' ? 'USD' : 'THB'; setSeg('dca-cur', dcaCur); setSeg('dca-per', dcaS.per); $('dca-skip').checked = dcaS.skip !== false; if (document.activeElement !== $('dca-amt')) $('dca-amt').value = dcaS.amt || ''; };
+  loadDca();
+  document.addEventListener('vg:prefs', () => { dcaS = { per: 'm', amt: '', cur: 'THB', skip: true, ...(window.VGPrefs.get('dca', {}) || {}) }; goal = { t: 1000000, m: 5000, r: 8, ...(window.VGPrefs.get('goal', {}) || {}) }; loadDca(); render(); document.dispatchEvent(new Event('vg:data')); });
   segs('d-mode', (v) => { dMode = v; render(); });
   segs('g-range', (v) => { gRange = Number(v); drawGrowth(); });
   segs('h-filter', (v) => { hFilter = v; drawTx(); });
@@ -3101,6 +3142,7 @@ dash.calc('sectors', {
 
   const render = () => {
     if ($('view-home').hidden) return;
+    drawBk();
     const VG = window.VG || {}; const scan = VG.scan || [];
     $('h-stamp').textContent = $('stamp') ? $('stamp').textContent : '';
     const buys = scan.filter((r) => r.signal === 'น่าซื้อสะสม');
@@ -3201,6 +3243,38 @@ dash.calc('sectors', {
       tx.append(el('div', 'hsub', `รายได้ 12 เดือน ${(B.vat * 100).toFixed(0)}% ของเพดาน VAT 1.8 ล้าน`));
     }
   };
+  /* ---------- one-file backup of everything ---------- */
+  const BK = 'valuegrab-lastbackup';
+  const drawBk = () => {
+    let last = null; try { last = localStorage.getItem(BK); } catch (e) { /* ignore */ }
+    const P = window.VGPort ? window.VGPort.get() : { tx: [] }, B = window.VGBiz ? window.VGBiz.get() : { entries: [] }, M = window.VGMoney ? window.VGMoney.get() : { entries: [], accounts: [] };
+    const has = P.tx.length + B.entries.length + M.entries.length + M.accounts.length > 0; const days = last ? Math.floor((Date.now() - new Date(last)) / 86400000) : null;
+    const t = $('bk-last'); t.className = 'pf-hint';
+    if (last) t.textContent = `สำรองล่าสุดเมื่อ ${new Date(last).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })}` + (days >= 30 ? ` (${days} วันแล้ว ควรสำรองใหม่)` : '');
+    else if (has) { t.textContent = 'ยังไม่เคยสำรองข้อมูล แนะนำให้ดาวน์โหลดไฟล์สำรองเก็บไว้ แม้จะล็อกอินซิงค์อยู่แล้วก็ตาม'; }
+    if ((has && !last) || days >= 30) t.className = 'pf-err';
+  };
+  $('bk-export').addEventListener('click', () => {
+    const d = new Date(); const day = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    const all = { app: 'ValueGrab-all', version: 1, saved: d.toISOString(), portfolio: { ...(window.VGPort ? window.VGPort.get() : {}), watch: window.VGWatch ? window.VGWatch.get() : [] },
+      business: window.VGBiz ? window.VGBiz.get() : {}, money: window.VGMoney ? window.VGMoney.get() : {}, prefs: window.VGPrefs ? window.VGPrefs.all() : {} };
+    const a = el('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(all)], { type: 'application/json' })); a.download = `valuegrab-backup-${day}.json`; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000); try { localStorage.setItem(BK, d.toISOString()); } catch (e) { /* ignore */ }
+    $('bk-msg').textContent = 'ดาวน์โหลดไฟล์สำรองแล้ว'; drawBk();
+  });
+  $('bk-import').addEventListener('change', async (ev) => {
+    const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+    try {
+      const j = JSON.parse(await f.text());
+      if (j.app !== 'ValueGrab-all' || !j.portfolio || !j.business || !j.money) throw new Error('bad');
+      if (!confirm(`กู้คืนข้อมูลจากไฟล์ที่สำรองเมื่อ ${new Date(j.saved).toLocaleString('th-TH')}? ข้อมูลปัจจุบันในเครื่องนี้ (และในบัญชี ถ้าล็อกอินอยู่) จะถูกแทนที่ทั้งหมด`)) return;
+      const p = j.portfolio; if (window.VGPort) window.VGPort.replace({ tx: Array.isArray(p.tx) ? p.tx : [], targets: p.targets || {}, band: p.band || 5 });
+      if (window.VGWatch && Array.isArray(p.watch)) window.VGWatch.set(p.watch.filter((x) => typeof x === 'string'));
+      if (window.VGBiz) window.VGBiz.replace(j.business); if (window.VGMoney) window.VGMoney.replace(j.money); if (window.VGPrefs && j.prefs) window.VGPrefs.replaceAll(j.prefs);
+      if (window.VGSync) ['portfolios', 'business', 'money'].forEach((k) => window.VGSync.push(k));
+      $('bk-msg').textContent = 'กู้คืนข้อมูลเรียบร้อยแล้ว'; render();
+    } catch (e) { $('bk-msg').textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองทั้งหมดของ ValueGrab'; }
+  });
   ['vg:ready', 'vg:data', 'vg:watch'].forEach((ev) => document.addEventListener(ev, () => setTimeout(render, 0)));
   document.addEventListener('vg:view', (e) => { if (e.detail === 'home') render(); });
   window.addEventListener('storage', render);
@@ -3236,8 +3310,9 @@ dash.calc('sectors', {
     let lo = 255, hi = 0; for (let i = 0; i < p.length; i += 16) { const v = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; if (v < lo) lo = v; if (v > hi) hi = v; }
     const r = hi - lo > 20 ? 255 / (hi - lo) : 1; for (let i = 0; i < p.length; i += 4) { const v = Math.max(0, Math.min(255, (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2] - lo) * r)); p[i] = p[i + 1] = p[i + 2] = v; }
     g.putImageData(d, 0, 0); ok(c); }; img.onerror = () => ok(file); img.src = URL.createObjectURL(file); });
-  try { $('slip-me').value = localStorage.getItem(NKEY) || ''; } catch (e) { /* ignore */ }
-  $('slip-me').addEventListener('input', () => { try { localStorage.setItem(NKEY, $('slip-me').value.trim()); } catch (e) { /* ignore */ } items.forEach(guessKind); drawList(); });
+  $('slip-me').value = window.VGPrefs.get('slipMe', '') || '';
+  $('slip-me').addEventListener('input', () => { window.VGPrefs.set('slipMe', $('slip-me').value.trim()); items.forEach(guessKind); drawList(); });
+  document.addEventListener('vg:prefs', () => { if (document.activeElement !== $('slip-me')) $('slip-me').value = window.VGPrefs.get('slipMe', '') || ''; });
 
   const loadTess = () => new Promise((ok, bad) => { if (window.Tesseract) return ok(); const s = document.createElement('script'); s.src = TESS; s.onload = ok; s.onerror = () => bad(new Error('load')); document.head.append(s); });
   const getWorker = async (prog) => {
@@ -3406,14 +3481,16 @@ if (FB && window.VGPort) {
     },
     money: {
       label: 'ข้อมูลเงินส่วนตัว',
-      payload: () => clean(window.VGMoney.get()),
-      apply: (c) => window.VGMoney.replace(c),
-      empty: () => window.VGMoney.replace({}),
-      local: () => { const d = window.VGMoney.get(); const n = d.entries.length + d.accounts.length + d.debts.length + d.bills.length; return { n, has: n > 0 } ; },
+      payload: () => { const m = clean(window.VGMoney.get()); m.settings = { ...(m.settings || {}), app: window.VGPrefs ? window.VGPrefs.all() : {} }; return m; },
+      apply: (c) => { window.VGMoney.replace(c); if (window.VGPrefs && c.settings && c.settings.app) window.VGPrefs.replaceAll(c.settings.app); },
+      empty: () => { window.VGMoney.replace({}); if (window.VGPrefs) window.VGPrefs.replaceAll({}); try { localStorage.removeItem('valuegrab-tin-v1'); } catch (e) { /* ignore */ } },
+      local: () => { const d = window.VGMoney.get(); const n = d.entries.length + d.accounts.length + d.debts.length + d.bills.length; return { n, has: n > 0 || (window.VGPrefs && Object.keys(window.VGPrefs.all()).length > 0) }; },
       merge: (c) => { const l = window.VGMoney.get(); const pick = (k) => byId(c[k] || [], l[k] || []);
         const doc = { ...l, ...c, accounts: pick('accounts'), entries: pick('entries'), debts: pick('debts'), bills: pick('bills'), budgets: { ...(l.budgets || {}), ...(c.budgets || {}) }, snaps: { ...(l.snaps || {}), ...(c.snaps || {}) }, settings: { ...(l.settings || {}), ...(c.settings || {}) } };
         delete doc.updated; const extra = doc.entries.length - (c.entries || []).length;
-        return { extra, changed: ['accounts', 'entries', 'debts', 'bills'].some((k) => doc[k].length !== (c[k] || []).length), doc }; },
+        const appL = window.VGPrefs ? window.VGPrefs.all() : {}; const appC = (c.settings && c.settings.app) || {}; doc.settings.app = { ...appL, ...appC };
+        const prefsNew = Object.keys(appL).some((k) => appC[k] === undefined);
+        return { extra, changed: prefsNew || ['accounts', 'entries', 'debts', 'bills'].some((k) => doc[k].length !== (c[k] || []).length), doc }; },
     },
   };
   try {
