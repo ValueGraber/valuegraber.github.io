@@ -907,7 +907,7 @@ body.slip-open { overflow: hidden; }
     <div class="pf-actions">
       <button class="btn-solid" id="b-save" type="button">บันทึก</button>
       <button class="btn-line" id="b-cancel" type="button" hidden>ยกเลิกการแก้ไข</button>
-      <button class="btn-line btn-scan" id="b-scan" type="button">สแกนสลิป</button>
+      <button class="btn-line btn-scan" id="b-scan" type="button">สแกนสลิป / ใบเสร็จ</button>
       <span class="pf-hint" id="b-hint"></span>
     </div>
   </section>
@@ -1047,7 +1047,7 @@ body.slip-open { overflow: hidden; }
     <div class="pf-actions">
       <button class="btn-solid" id="p-save-btn" type="button">บันทึก</button>
       <button class="btn-line" id="p-cancel" type="button" hidden>ยกเลิกการแก้ไข</button>
-      <button class="btn-line btn-scan" id="p-scan" type="button">สแกนสลิป</button>
+      <button class="btn-line btn-scan" id="p-scan" type="button">สแกนสลิป / ใบเสร็จ</button>
       <span class="pf-hint" id="p-hint"></span>
     </div>
   </section>
@@ -1100,11 +1100,12 @@ body.slip-open { overflow: hidden; }
 
 <div class="slip-modal" id="slip" hidden role="dialog" aria-modal="true" aria-labelledby="slip-h">
   <div class="slip-box">
-    <div class="slip-top"><h3 id="slip-h">สแกนสลิปโอนเงิน</h3><button type="button" class="close" id="slip-close" aria-label="ปิด">✕</button></div>
-    <p class="pf-hint">เลือกรูปสลิปจากแกลเลอรี เลือกได้หลายรูปพร้อมกัน ระบบอ่านจำนวนเงิน วันที่ และชื่อผู้โอนผู้รับให้ ตรวจแล้วกดบันทึก รูปสลิปอ่านในเครื่องนี้ ไม่ถูกส่งไปที่ไหน</p>
+    <div class="slip-top"><h3 id="slip-h">สแกนสลิปและใบเสร็จ</h3><button type="button" class="close" id="slip-close" aria-label="ปิด">✕</button></div>
+    <p class="pf-hint" id="slip-intro">เลือกรูปสลิปจากแกลเลอรี เลือกได้หลายรูปพร้อมกัน ระบบอ่านจำนวนเงิน วันที่ และชื่อผู้โอนผู้รับให้ ตรวจแล้วกดบันทึก รูปอ่านในเครื่องนี้ ไม่ถูกส่งไปที่ไหน</p>
+    <div class="f-types"><span class="seg" id="slip-mode"><button type="button" data-v="slip" aria-pressed="true">สลิปโอนเงิน</button><button type="button" data-v="rc" aria-pressed="false">ใบเสร็จ / บิล</button></span></div>
     <div class="slip-ctl">
-      <label class="btn-solid slip-pick">เลือกรูปสลิป<input type="file" id="slip-files" accept="image/*" multiple hidden></label>
-      <label class="mini">ชื่อบัญชีของฉัน <input class="inp" id="slip-me" placeholder="เช่น สมชาย ใจดี" style="width:180px"></label>
+      <label class="btn-solid slip-pick"><span id="slip-pick-t">เลือกรูปสลิป</span><input type="file" id="slip-files" accept="image/*" multiple hidden></label>
+      <label class="mini" id="slip-me-l">ชื่อบัญชีของฉัน <input class="inp" id="slip-me" placeholder="เช่น สมชาย ใจดี" style="width:180px"></label>
     </div>
     <p class="pf-hint slip-me-h">ใส่ชื่อตัวเองไว้ ระบบจะรู้เองว่าสลิปไหนเป็นเงินออก (เราโอน) หรือเงินเข้า (คนอื่นโอนให้)</p>
     <div id="slip-prog" class="pf-hint"></div>
@@ -1712,7 +1713,7 @@ dash.calc('sectors', {
   $('b-prev').addEventListener('click', () => { ym = ymShift(ym, -1); render(); });
   $('b-scan').addEventListener('click', () => window.VGSlip && window.VGSlip.open({ title: 'สแกนสลิป: ธุรกิจ', defKind: 'in', defCat: (k) => (k === 'in' ? 'ยอดขาย' : 'อื่นๆ'),
     cats: () => ({ in: cats('in'), out: cats('out') }), refs: () => new Set(biz.entries.map((e) => e.ref).filter(Boolean)),
-    add: (list) => { list.forEach((e) => biz.entries.push({ id: newId(), ...e, at: today(), ...(e.kind === 'out' ? { doc: false } : {}) })); save(); if (list.length) ym = ymOf(list[list.length - 1].date); render(); return list.length; } }));
+    add: (list) => { list.forEach((e) => { const { doc, ...rest } = e; biz.entries.push({ id: newId(), ...rest, at: today(), ...(e.kind === 'out' ? { doc: !!doc } : {}) }); }); save(); if (list.length) ym = ymOf(list[list.length - 1].date); render(); return list.length; } }));
   $('b-next').addEventListener('click', () => { ym = ymShift(ym, 1); render(); });
 
   /* ---------- export / backup ---------- */
@@ -2205,7 +2206,7 @@ dash.calc('sectors', {
   $('p-prev').addEventListener('click', () => { ym = ymShift(ym, -1); drawBudget(); });
   $('p-scan').addEventListener('click', () => window.VGSlip && window.VGSlip.open({ title: 'สแกนสลิป: เงินส่วนตัว', defKind: 'out', defCat: (k) => (k === 'out' ? 'อื่นๆ' : 'รายได้อื่น'),
     cats: () => ({ in: cats('in'), out: cats('out') }), refs: () => new Set(M.entries.map((e) => e.ref).filter(Boolean)),
-    add: (list) => { list.forEach((e) => M.entries.push({ id: newId(), ...e })); save(); if (list.length) ym = ymOf(list[list.length - 1].date); refresh(); return list.length; } }));
+    add: (list) => { list.forEach(({ doc, ...e }) => M.entries.push({ id: newId(), ...e })); save(); if (list.length) ym = ymOf(list[list.length - 1].date); refresh(); return list.length; } }));
   $('p-next').addEventListener('click', () => { ym = ymShift(ym, 1); drawBudget(); });
 
   /* ---------- emergency fund ---------- */
@@ -3090,7 +3091,25 @@ dash.calc('sectors', {
   const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
   const MON = { 'มค': 1, 'กพ': 2, 'มีค': 3, 'เมย': 4, 'พค': 5, 'มิย': 6, 'กค': 7, 'สค': 8, 'กย': 9, 'ตค': 10, 'พย': 11, 'ธค': 12,
     jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
-  let target = null, worker = null, items = [];
+  let target = null, worker = null, items = [], mode = 'slip';
+  const INTRO = { slip: 'เลือกรูปสลิปจากแกลเลอรี เลือกได้หลายรูปพร้อมกัน ระบบอ่านจำนวนเงิน วันที่ และชื่อผู้โอนผู้รับให้ ตรวจแล้วกดบันทึก รูปอ่านในเครื่องนี้ ไม่ถูกส่งไปที่ไหน',
+    rc: 'ถ่ายรูปใบเสร็จหรือบิลให้ตรง เห็นทั้งใบ แสงพอ ไม่มีเงา ระบบอ่านยอดรวม วันที่ ชื่อร้าน และเลขที่ใบเสร็จ ใบเสร็จกระดาษอ่านยากกว่าสลิป ควรตรวจตัวเลขทุกครั้ง' };
+  const setMode = (m) => { mode = m; document.querySelectorAll('#slip-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === m))); $('slip-intro').textContent = INTRO[m];
+    $('slip-pick-t').textContent = m === 'rc' ? 'ถ่ายรูป/เลือกใบเสร็จ' : 'เลือกรูปสลิป'; $('slip-me-l').hidden = m === 'rc'; document.querySelector('.slip-me-h').hidden = m === 'rc'; };
+  document.querySelectorAll('#slip-mode button').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.v)));
+  const CATK = [[/(7-?eleven|เซเว่น|ร้านอาหาร|อาหาร|กาแฟ|coffee|cafe|คาเฟ่|KFC|McDonald|ก๋วยเตี๋ยว|ชาบู|บุฟเฟ่|Starbucks|Amazon|เครื่องดื่ม)/i, 'อาหารและเครื่องดื่ม'],
+    [/(ปตท|PTT|บางจาก|Bangchak|Shell|เชลล์|Caltex|คาลเท็กซ์|Esso|น้ำมัน|ดีเซล|แก๊สโซฮอล์|BTS|MRT|ทางด่วน)/i, 'เดินทาง'],
+    [/(การไฟฟ้า|การประปา|ค่าไฟ|ค่าน้ำ|AIS|TRUE|DTAC|อินเทอร์เน็ต|Internet|โทรศัพท์)/i, 'ค่าน้ำไฟเน็ตโทรศัพท์'],
+    [/(โรงพยาบาล|คลินิก|ร้านยา|เภสัช|Pharmacy|Hospital|Boots|Watsons)/i, 'สุขภาพ'],
+    [/(Lotus|โลตัส|Big ?C|บิ๊กซี|Makro|แม็คโคร|Tops|Central|Shopee|Lazada|HomePro|โฮมโปร|ไทวัสดุ|Uniqlo)/i, 'ของใช้/ช้อปปิ้ง']];
+  const guessCat = (text, kind) => { const list = target.cats()[kind] || []; for (const [re, c] of CATK) if (re.test(text) && list.includes(c)) return c; return null; };
+  /* receipts are usually phone photos: upscale small images and boost contrast in grayscale before reading */
+  const prep = (file) => new Promise((ok) => { const img = new Image(); img.onload = () => {
+    const k = Math.min(2.5, Math.max(1, 1600 / img.width)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0, c.width, c.height); const d = g.getImageData(0, 0, c.width, c.height); const p = d.data;
+    let lo = 255, hi = 0; for (let i = 0; i < p.length; i += 16) { const v = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; if (v < lo) lo = v; if (v > hi) hi = v; }
+    const r = hi - lo > 20 ? 255 / (hi - lo) : 1; for (let i = 0; i < p.length; i += 4) { const v = Math.max(0, Math.min(255, (0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2] - lo) * r)); p[i] = p[i + 1] = p[i + 2] = v; }
+    g.putImageData(d, 0, 0); ok(c); }; img.onerror = () => ok(file); img.src = URL.createObjectURL(file); });
   try { $('slip-me').value = localStorage.getItem(NKEY) || ''; } catch (e) { /* ignore */ }
   $('slip-me').addEventListener('input', () => { try { localStorage.setItem(NKEY, $('slip-me').value.trim()); } catch (e) { /* ignore */ } items.forEach(guessKind); drawList(); });
 
@@ -3131,6 +3150,16 @@ dash.calc('sectors', {
     if (fx && !from) from = fx[1].trim(); if (tx && !to) to = tx[1].trim();
     return { amount, date, guess, time, ref: rf ? rf[1] : '', from, to };
   };
+  const parseReceipt = (raw) => {
+    const base = parse(raw); const t = raw.replace(/[ \t]+/g, ' '); const lines = t.split(/\n/).map((x) => x.trim()).filter(Boolean);
+    const KW = [/(?:รวมทั้งสิ้น|ยอดสุทธิ|จำนวนเงินรวมทั้งสิ้น|Grand\s*Total|Net\s*Total|Total\s*Amount)[^\d\n]{0,25}([\d,]+\.\d{2})/gi, /(?:สุทธิ|ยอดชำระ|ยอดรวม|รวมเงิน|รวม|TOTAL|Total|Amount\s*Due)[^\d\n]{0,25}([\d,]+\.\d{2})/g];
+    let amount = null; for (const re of KW) { const m = [...t.matchAll(re)].map((x) => num(x[1])).filter((v) => v > 0); if (m.length) { amount = m[m.length - 1]; break; } }
+    if (!amount) { const all = [...t.matchAll(/(\d{1,3}(?:,\d{3})*\.\d{2})/g)].map((x) => num(x[1])).filter((v) => v > 0 && v < 1e7); if (all.length) amount = Math.max(...all); }
+    const shop = (lines.find((l) => /[ก-ฮA-Za-z]{3,}/.test(l) && !/(ใบเสร็จ|ใบกำกับ|tax\s*invoice|receipt|สาขา|โทร|tel|เลขประจำตัว|tax\s*id|วันที่|date)/i.test(l)) || '').replace(/[^\wก-๙ .&()\-]/g, '').trim().slice(0, 50);
+    const tin = (t.replace(/[\s-]/g, '').match(/(?<!\d)(\d{13})(?!\d)/) || [])[1] || '';
+    const no = (t.match(/(?:เลขท[ีิ]่?|Receipt\s*No|Invoice\s*No|No)\.?\s*[:：#]?\s*([A-Za-z0-9][A-Za-z0-9\-/]{3,})/i) || t.match(/(?:^|\s)([A-Z]{1,4}\d{0,3}-\d{4,})(?:\s|$)/m) || [])[1] || '';
+    return { ...base, amount, shop, tin, no, ref: tin && no ? tin + '/' + no : no ? 'RC' + no + (base.date || '') : '' };
+  };
   const words = (s) => String(s || '').toLowerCase().replace(/^(นาย|นางสาว|นาง|น\.ส\.|mr\.?|mrs\.?|ms\.?|miss)\s*/i, '').split(/\s+/).filter((w) => w.length > 1);
   const guessKind = (it) => {
     const me = words($('slip-me').value); if (!me.length || it.kindTouched) return;
@@ -3152,8 +3181,8 @@ dash.calc('sectors', {
       const top = el('div', 'slip-row');
       const on = el('input'); on.type = 'checkbox'; on.checked = it.on; on.setAttribute('aria-label', 'เลือกรายการนี้'); on.addEventListener('change', () => { it.on = on.checked; card.classList.toggle('off', !it.on); count(); });
       const seg = el('span', 'seg'); [['out', 'เงินออก'], ['in', 'เงินเข้า']].forEach(([k, l]) => { const b = el('button', null, l); b.type = 'button'; b.setAttribute('aria-pressed', String(it.kind === k));
-        b.addEventListener('click', () => { it.kind = k; it.kindTouched = true; if (!it.catTouched) it.cat = target.defCat(k); it.note = k === 'out' ? (it.p.to ? 'โอนให้ ' + it.p.to : 'โอนเงิน') : (it.p.from ? 'รับจาก ' + it.p.from : 'รับโอน'); drawList(); }); seg.append(b); });
-      top.append(on, seg); if (it.dup) top.append(el('span', 'tag trap', 'เคยบันทึกแล้ว'));
+        b.addEventListener('click', () => { it.kind = k; it.kindTouched = true; if (!it.catTouched) it.cat = target.defCat(k); if (it.mode !== 'rc') it.note = k === 'out' ? (it.p.to ? 'โอนให้ ' + it.p.to : 'โอนเงิน') : (it.p.from ? 'รับจาก ' + it.p.from : 'รับโอน'); drawList(); }); seg.append(b); });
+      top.append(on, seg); if (it.mode === 'rc') top.append(el('span', 'tag buy', 'ใบเสร็จ')); if (it.dup) top.append(el('span', 'tag trap', 'เคยบันทึกแล้ว'));
       const amt = el('input', 'inp'); amt.type = 'number'; amt.step = 'any'; amt.min = 0; amt.inputMode = 'decimal'; amt.value = it.amount ?? ''; amt.placeholder = 'จำนวนเงิน'; amt.addEventListener('input', () => { it.amount = amt.value === '' ? null : +amt.value; });
       const dt = el('input', 'inp'); dt.type = 'date'; dt.value = it.date; dt.addEventListener('change', () => { it.date = dt.value; });
       const cat = el('input', 'inp'); cat.setAttribute('list', 'slip-cats'); cat.value = it.cat; cat.placeholder = 'หมวด'; cat.addEventListener('input', () => { it.cat = cat.value; it.catTouched = true; });
@@ -3170,15 +3199,23 @@ dash.calc('sectors', {
     const files = [...ev.target.files].slice(0, 30); ev.target.value = ''; if (!files.length) return;
     const prog = (m) => { $('slip-prog').textContent = m; };
     const refs = target.refs();
-    const batch = files.map((f) => ({ file: f, url: URL.createObjectURL(f), state: 'reading', on: true, kind: target.defKind, p: {}, cat: '', note: '' })); items.push(...batch); drawList();
+    const batch = files.map((f) => ({ file: f, url: URL.createObjectURL(f), state: 'reading', on: true, mode, kind: mode === 'rc' ? 'out' : target.defKind, p: {}, cat: '', note: '' })); items.push(...batch); drawList();
     let w; try { w = await getWorker(prog); } catch (e) { prog('โหลดตัวอ่านสลิปไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่'); batch.forEach((it) => { it.state = 'error'; }); drawList(); return; }
     for (let i = 0; i < batch.length; i++) {
       const it = batch[i]; prog(`กำลังอ่านสลิป ${i + 1}/${batch.length}`);
       try {
-        const { data } = await w.recognize(it.file); it.text = data.text; it.p = parse(data.text);
-        it.amount = it.p.amount; it.date = it.p.date || today(); it.cat = target.defCat(it.kind);
-        it.note = it.kind === 'out' ? (it.p.to ? 'โอนให้ ' + it.p.to : 'โอนเงิน') : (it.p.from ? 'รับจาก ' + it.p.from : 'รับโอน');
-        guessKind(it); it.cat = target.defCat(it.kind);
+        let { data } = await w.recognize(it.file); data = { text: String(data.text || '').replace(/\u0e4d\u0e32/g, '\u0e33') };
+        if (it.mode === 'rc' && !parseReceipt(data.text).amount) { const r2 = await w.recognize(await prep(it.file)); data = { text: String(r2.data.text || '').replace(/\u0e4d\u0e32/g, '\u0e33') }; }
+        it.text = data.text;
+        if (it.mode === 'rc') {
+          it.p = parseReceipt(data.text); it.kindTouched = true; it.amount = it.p.amount; it.date = it.p.date || today();
+          it.cat = guessCat(data.text, it.kind) || target.defCat(it.kind); it.catTouched = !!guessCat(data.text, it.kind);
+          it.note = ['ใบเสร็จ', it.p.shop, it.p.no ? 'เลขที่ ' + it.p.no : ''].filter(Boolean).join(' ');
+        } else {
+          it.p = parse(data.text); it.amount = it.p.amount; it.date = it.p.date || today();
+          it.note = it.kind === 'out' ? (it.p.to ? 'โอนให้ ' + it.p.to : 'โอนเงิน') : (it.p.from ? 'รับจาก ' + it.p.from : 'รับโอน');
+          guessKind(it); it.cat = guessCat(data.text, it.kind) || target.defCat(it.kind);
+        }
         it.dup = !!(it.p.ref && (refs.has(it.p.ref) || items.some((x) => x !== it && x.p && x.p.ref === it.p.ref && x.state === 'ok'))); if (it.dup) it.on = false;
         it.state = 'ok';
       } catch (e) { console.warn(e); it.state = 'error'; it.on = false; }
@@ -3189,7 +3226,7 @@ dash.calc('sectors', {
   $('slip-save').addEventListener('click', () => {
     const ok = items.filter((x) => x.on && x.state === 'ok');
     const bad = ok.find((x) => !(x.amount > 0) || !x.date); if (bad) { $('slip-hint').textContent = 'มีรายการที่ยังไม่มีจำนวนเงินหรือวันที่'; $('slip-hint').className = 'pf-err'; return; }
-    const n = target.add(ok.map((x) => ({ date: x.date, kind: x.kind, amount: Math.round(x.amount * 100) / 100, cat: (x.cat || target.defCat(x.kind)).slice(0, 40), note: ((x.note || '') + (x.p.time ? ' ' + x.p.time : '')).trim().slice(0, 120), ...(x.p.ref ? { ref: x.p.ref.slice(0, 40) } : {}) })));
+    const n = target.add(ok.map((x) => ({ date: x.date, kind: x.kind, amount: Math.round(x.amount * 100) / 100, cat: (x.cat || target.defCat(x.kind)).slice(0, 40), note: ((x.note || '') + (x.p.time && x.mode !== 'rc' ? ' ' + x.p.time : '')).trim().slice(0, 120), ...(x.p.ref ? { ref: x.p.ref.slice(0, 40) } : {}), ...(x.mode === 'rc' ? { doc: true } : {}) })));
     items = items.filter((x) => !ok.includes(x)); drawList(); $('slip-hint').className = 'pf-hint'; $('slip-hint').textContent = `บันทึกแล้ว ${n} รายการ`;
     if (!items.length) setTimeout(close, 900);
   });
@@ -3197,7 +3234,7 @@ dash.calc('sectors', {
   $('slip-close').addEventListener('click', close);
   $('slip').addEventListener('click', (e) => { if (e.target === $('slip')) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('slip').hidden) close(); });
-  window.VGSlip = { open: (t) => { target = t; $('slip-h').textContent = t.title; $('slip').hidden = false; document.body.classList.add('slip-open'); $('slip-hint').textContent = ''; drawList(); }, parse };
+  window.VGSlip = { open: (t, m) => { target = t; setMode(m || 'slip'); $('slip-h').textContent = t.title; $('slip').hidden = false; document.body.classList.add('slip-open'); $('slip-hint').textContent = ''; drawList(); }, parse };
 })();
 </script>
 <script type="module">
