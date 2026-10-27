@@ -442,6 +442,19 @@ body[data-view="scan"] #acct { display: none; }
   #print-area thead { display: table-header-group; } #print-area tr { page-break-inside: avoid; }
   #print-area .pa-sign { margin-top: 28pt; text-align: right; }
 }
+details.ded { margin: 10px 0 4px; border: 1px solid var(--line); border-radius: 14px; padding: 4px 16px 12px; background: var(--bg); }
+details.ded summary { color: var(--jade); }
+.ded-g { margin: 14px 0 6px; font-size: 15px; color: var(--ink); }
+.ded-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 14px; }
+.ded-it { display: grid; gap: 4px; font-size: 14px; color: var(--ink-2); align-content: start; }
+.ded-it .inp { background: var(--surface); }
+.ded-it.chk { grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; }
+.ded-it.chk input { width: 20px; height: 20px; accent-color: var(--jade); }
+.ded-it.chk small { grid-column: 1 / -1; }
+.ded-cap { color: var(--ink-3); font-size: 12px; }
+.ded-got { color: var(--jade); font-size: 13px; font-weight: 600; }
+.ded-got:empty { display: none; }
+.tx-room { display: grid; gap: 4px; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -733,8 +746,9 @@ body[data-view="scan"] #acct { display: none; }
     <div class="mini-grid" id="tx-grid"></div>
     <div class="tx-vat" id="tx-vat"></div>
     <h4 class="b-h4">ประมาณภาษีทั้งปี (ภ.ง.ด.90) เลือกวิธีหักค่าใช้จ่ายที่จ่ายน้อยกว่า</h4>
-    <label class="mini">ค่าลดหย่อนอื่นนอกจากส่วนตัว 60,000 บาท (เช่น ประกันสังคม ประกันชีวิต กองทุน) <input class="inp" id="tx-ded" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label>
+    <details class="log ded" id="ded-box"><summary id="ded-sum">กรอกค่าลดหย่อน</summary><p class="pf-hint">ใส่ยอดที่จ่ายจริงทั้งปี ระบบจะคิดเพดานของแต่ละรายการให้ (ข้อมูลส่วนนี้เก็บไว้ในเครื่องนี้เท่านั้น)</p><div id="ded-form" class="ded-form"></div></details>
     <div class="tx-opts" id="tx-opts"></div>
+    <div class="tx-room" id="tx-room"></div>
     <div class="tx-notes" id="tx-notes"></div>
     <h4 class="b-h4">พิมพ์รายงานเงินสดรับ-จ่าย</h4>
     <p class="pf-hint">คนที่มีเงินได้ 40(8) และไม่ได้จด VAT ต้องทำรายงานเงินสดรับ-จ่าย เป็นภาษาไทย และลงรายการภายใน 3 วันทำการ ใส่ข้อมูลหัวรายงานด้านล่าง (เก็บไว้ในเครื่องนี้เท่านั้น ไม่ขึ้นบัญชี) แล้วกดพิมพ์ เลือก "บันทึกเป็น PDF" ในหน้าพิมพ์ได้</p>
@@ -1399,9 +1413,65 @@ dash.calc('sectors', {
       if (e.at && workdays(e.date, e.at) > 3) r.late++; });
     return r;
   };
+  /* ---------- deductions (ค่าลดหย่อน) for the tax year; kept on this device only ---------- */
+  const D2KEY = 'valuegrab-ded-v2';
+  const DITEMS = [
+    ['รายได้อื่น', [['sal', 'เงินเดือน/ค่าจ้างทั้งปี (ถ้ามี)', 'num', 'หักค่าใช้จ่ายได้ 50% ไม่เกิน 100,000']]],
+    ['ครอบครัว', [['spouse', 'คู่สมรสไม่มีเงินได้', 'check', '60,000 บาท'], ['kid1', 'บุตรคนแรก หรือเกิดก่อนปี 2561 (จำนวนคน)', 'count', 'คนละ 30,000'],
+      ['kid2', 'บุตรคนที่ 2 ขึ้นไปที่เกิดตั้งแต่ปี 2561 (จำนวนคน)', 'count', 'คนละ 60,000'], ['parents', 'พ่อแม่ตัวเองหรือคู่สมรส อายุ 60+ รายได้ไม่เกิน 30,000 (จำนวนคน)', 'count', 'คนละ 30,000 สูงสุด 4 คน'],
+      ['disabled', 'อุปการะคนพิการหรือทุพพลภาพ (จำนวนคน)', 'count', 'คนละ 60,000'], ['prenatal', 'ค่าฝากครรภ์และคลอดบุตร', 'num', 'ไม่เกิน 60,000']]],
+    ['ประกันและเงินออม', [['sso', 'ประกันสังคม (รวมมาตรา 40)', 'num', 'ไม่เกิน 10,500'], ['life', 'เบี้ยประกันชีวิต', 'num', 'รวมกับประกันสุขภาพไม่เกิน 100,000'],
+      ['health', 'เบี้ยประกันสุขภาพตัวเอง', 'num', 'ไม่เกิน 25,000'], ['phealth', 'เบี้ยประกันสุขภาพพ่อแม่', 'num', 'ไม่เกิน 15,000'],
+      ['pension', 'เบี้ยประกันบำนาญ', 'num', '15% ของเงินได้ ไม่เกิน 200,000'], ['rmf', 'กองทุน RMF', 'num', '30% ของเงินได้ ไม่เกิน 500,000'],
+      ['pvd', 'กองทุนสำรองเลี้ยงชีพ / กบข.', 'num', '15% ของเงินได้ ไม่เกิน 500,000'], ['nsf', 'กองทุนการออมแห่งชาติ (กอช.)', 'num', 'ไม่เกิน 30,000'],
+      ['esg', 'กองทุน Thai ESG', 'num', '30% ของเงินได้ ไม่เกิน 300,000'], ['se', 'ลงทุนวิสาหกิจเพื่อสังคม', 'num', 'ไม่เกิน 100,000']]],
+    ['บ้านและมาตรการพิเศษ', [['home', 'ดอกเบี้ยเงินกู้ซื้อบ้าน', 'num', 'ไม่เกิน 100,000'], ['solar', 'ติดโซลาร์รูฟท็อป', 'num', 'ไม่เกิน 200,000 ต้องมี e-Tax Invoice'],
+      ['other', 'มาตรการพิเศษอื่นของปีนั้น (ใส่ยอดที่ลดหย่อนได้)', 'num', 'เช่น โครงการช้อปลดหย่อน ถ้ามี']]],
+    ['เงินบริจาค', [['don2', 'บริจาคเพื่อการศึกษา โรงพยาบาลรัฐ สภากาชาด การกีฬา', 'num', 'หักได้ 2 เท่า รวมไม่เกิน 10% ของเงินได้หลังหักลดหย่อน'],
+      ['don1', 'บริจาคทั่วไป เช่น วัด มูลนิธิ', 'num', 'ไม่เกิน 10% ของเงินได้หลังหักลดหย่อน'], ['party', 'บริจาคพรรคการเมือง', 'num', 'ไม่เกิน 10,000']]],
+  ];
+  let dedAll = {}; try { dedAll = JSON.parse(localStorage.getItem(D2KEY) || '{}') || {}; } catch (e) { /* none */ }
+  const dv = () => dedAll[ty] || (dedAll[ty] = {});
+  const dedCalc = (v, inc) => {
+    const n = (k) => Math.max(0, Number(v[k]) || 0); const sal = n('sal'); const A = inc + sal;
+    const c = {};
+    c.spouse = v.spouse ? 60000 : 0; c.kid1 = Math.floor(n('kid1')) * 30000; c.kid2 = Math.floor(n('kid2')) * 60000; c.parents = Math.min(4, Math.floor(n('parents'))) * 30000;
+    c.disabled = Math.floor(n('disabled')) * 60000; c.prenatal = Math.min(n('prenatal'), 60000);
+    c.sso = Math.min(n('sso'), 10500); c.health = Math.min(n('health'), 25000); c.life = Math.min(n('life'), 100000 - c.health); c.phealth = Math.min(n('phealth'), 15000);
+    const ret = [['pension', Math.min(n('pension'), 0.15 * A, 200000)], ['rmf', Math.min(n('rmf'), 0.3 * A, 500000)], ['pvd', Math.min(n('pvd'), 0.15 * A, 500000)], ['nsf', Math.min(n('nsf'), 30000)]];
+    let room = 500000; ret.forEach(([k, x]) => { c[k] = Math.min(x, room); room -= c[k]; });
+    c.esg = Math.min(n('esg'), 0.3 * A, 300000); c.se = Math.min(n('se'), 100000); c.home = Math.min(n('home'), 100000); c.solar = Math.min(n('solar'), 200000); c.other = n('other'); c.party = Math.min(n('party'), 10000);
+    const D = 60000 + Object.entries(c).reduce((a, [, x]) => a + x, 0);
+    return { c, D, sal, salExp: Math.min(sal * 0.5, 100000), A, retLeft: room, don2: n('don2'), don1: n('don1') };
+  };
+  const taxWith = (inc, exp, v) => {
+    const d = dedCalc(v, inc);
+    const base = inc - exp + d.sal - d.salExp - d.D;
+    const edu = Math.min(d.don2 * 2, 0.1 * Math.max(0, base)); const gen = Math.min(d.don1, 0.1 * Math.max(0, base - edu));
+    const net = Math.max(0, base - edu - gen); const m1 = prog(net);
+    const m2raw = inc >= 120000 ? inc * 0.005 : 0; const m2 = m2raw > 5000 ? m2raw : 0;
+    return { exp, d, edu, gen, net, m1, m2, m2raw, tax: Math.max(m1, m2) };
+  };
+  const buildDed = () => {
+    const box = $('ded-form'); box.replaceChildren(); const v = dv();
+    DITEMS.forEach(([g, items]) => {
+      box.append(el('h5', 'ded-g', g)); const grid = el('div', 'ded-grid');
+      items.forEach(([k, label, type, cap]) => {
+        const l = el('label', 'ded-it' + (type === 'check' ? ' chk' : ''));
+        const inp = el('input', type === 'check' ? '' : 'inp'); inp.dataset.k = k;
+        if (type === 'check') { inp.type = 'checkbox'; inp.checked = !!v[k]; } else { inp.type = 'number'; inp.min = 0; inp.step = type === 'count' ? 1 : 'any'; inp.inputMode = type === 'count' ? 'numeric' : 'decimal'; inp.value = v[k] ?? ''; inp.placeholder = '0'; }
+        inp.addEventListener(type === 'check' ? 'change' : 'input', () => { dv()[k] = type === 'check' ? inp.checked : inp.value; try { localStorage.setItem(D2KEY, JSON.stringify(dedAll)); } catch (e) { /* ignore */ } drawTax(); });
+        const got = el('small', 'ded-got'); got.dataset.k = k;
+        if (type === 'check') l.append(inp, el('span', null, label), el('small', 'ded-cap', cap));
+        else l.append(el('span', null, label), inp, el('small', 'ded-cap', cap));
+        l.append(got); grid.append(l);
+      });
+      box.append(grid);
+    });
+  };
   const drawTax = () => {
     $('tx-year').textContent = 'ปีภาษี ' + (+ty + 543);
-    if (document.activeElement !== $('tx-ded')) { try { $('tx-ded').value = localStorage.getItem(DKEY) || ''; } catch (e) { /* ignore */ } }
+    if (!$('ded-form').childElementCount || $('ded-form').dataset.y !== ty) { buildDed(); $('ded-form').dataset.y = ty; }
     const Y = yearSums(ty), H = yearSums(ty, [1, 2, 3, 4, 5, 6]);
     const g = $('tx-grid'); g.replaceChildren();
     const it = (k, v, h, cls) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v ' + (cls || ''), v)); if (h) d.append(el('div', 'h', h)); g.append(d); };
@@ -1415,23 +1485,38 @@ dash.calc('sectors', {
     const bar = el('div', 'bc-t'); const i = el('i'); i.style.width = (share * 100) + '%'; i.style.background = share >= 0.8 ? 'var(--brick)' : 'var(--jade)'; bar.append(i);
     v.append(el('div', 'pf-hint', `รายได้ 12 เดือนล่าสุด ${baht(r12)} จากเพดาน 1,800,000 บาทที่ต้องจดทะเบียนภาษีมูลค่าเพิ่ม (VAT) ${share >= 1 ? '· เกินแล้ว ต้องจด VAT ภายใน 30 วันนับจากวันที่เกิน' : share >= 0.8 ? '· ใกล้เพดานแล้ว เตรียมจด VAT' : ''}`), bar);
     /* two ways to deduct expenses */
-    const ded = Math.max(0, Number($('tx-ded').value) || 0);
-    const calc = (exp) => {
-      const net = Math.max(0, Y.inc - exp - 60000 - ded); const m1 = prog(net); const m2raw = Y.inc >= 120000 ? Y.inc * 0.005 : 0; const m2 = m2raw > 5000 ? m2raw : 0;
-      return { exp, net, m1, m2, m2raw, tax: Math.max(m1, m2) };
-    };
-    const A = calc(Y.inc * 0.6), B = calc(Y.outDoc);
+    const dvv = dv(); const A = taxWith(Y.inc, Y.inc * 0.6, dvv), B = taxWith(Y.inc, Y.outDoc, dvv);
+    const dd = A.d; document.querySelectorAll('#ded-form .ded-got').forEach((g) => { const k = g.dataset.k; const x = k === 'sal' ? (dd.sal ? dd.sal - dd.salExp : 0) : k === 'don2' ? A.edu : k === 'don1' ? A.gen : dd.c[k]; g.textContent = x ? (k === 'sal' ? 'เงินได้หลังหักค่าใช้จ่าย ' : 'ลดหย่อนได้ ') + baht(x) : ''; });
+    $('ded-sum').textContent = `ค่าลดหย่อนรวม ${baht(dd.D)}` + (A.edu + A.gen ? ` · เงินบริจาคหักได้ ${baht(Math.max(A.edu + A.gen, B.edu + B.gen))}` : '') + ' (กดเพื่อกรอก)';
     const o = $('tx-opts'); o.replaceChildren();
     [['หักเหมา 60%', A, 'ไม่ต้องใช้ใบเสร็จ'], ['หักตามจริง', B, 'ต้องมีใบเสร็จ/หลักฐานทุกรายการ']].forEach(([t, c, sub], k) => {
-      const best = Y.inc > 0 && k === (B.tax < A.tax ? 1 : 0);
+      const best = (Y.inc > 0 || dd.sal > 0) && k === (B.tax < A.tax ? 1 : 0);
       const card = el('div', 'tx-card' + (best ? ' best' : '')); const hd = el('div', 'tx-h'); hd.append(el('b', null, t), el('small', null, sub)); if (best) hd.append(el('span', 'tag buy', 'จ่ายน้อยกว่า'));
       card.append(hd);
-      [['เงินได้', baht(Y.inc)], ['หักค่าใช้จ่าย', '−' + baht(c.exp)], ['ลดหย่อนส่วนตัว', '−60,000 บาท'], ...(ded ? [['ลดหย่อนอื่น', '−' + baht(ded)]] : []), ['เงินได้สุทธิ', baht(c.net)], ['ภาษีแบบขั้นบันได', baht(c.m1)],
-        ['ภาษีวิธีที่ 2 (0.5% ของเงินได้)', c.m2raw ? (c.m2 ? baht(c.m2) : `${baht(c.m2raw)} ไม่เกิน 5,000 จึงยกเว้น`) : 'ไม่ถึง 120,000 บาท ไม่ต้องคิด']]
+      [['เงินได้จากธุรกิจ', baht(Y.inc)], ['หักค่าใช้จ่ายธุรกิจ', '−' + baht(c.exp)], ...(dd.sal ? [['เงินเดือน', baht(dd.sal)], ['หักค่าใช้จ่ายเงินเดือน', '−' + baht(dd.salExp)]] : []),
+        ['ค่าลดหย่อน (รวมส่วนตัว 60,000)', '−' + baht(dd.D)], ...(c.edu + c.gen ? [['เงินบริจาค', '−' + baht(c.edu + c.gen)]] : []), ['เงินได้สุทธิ', baht(c.net)], ['ภาษีแบบขั้นบันได', baht(c.m1)],
+        ['ภาษีวิธีที่ 2 (0.5% ของเงินได้ธุรกิจ)', c.m2raw ? (c.m2 ? baht(c.m2) : `${baht(c.m2raw)} ไม่เกิน 5,000 จึงยกเว้น`) : 'ไม่ถึง 120,000 บาท ไม่ต้องคิด']]
         .forEach(([a, b]) => { const r = el('div', 'kv'); r.append(el('span', null, a), el('span', null, b)); card.append(r); });
       const tot = el('div', 'kv tot'); tot.append(el('span', null, 'ภาษีที่ต้องจ่ายโดยประมาณ'), el('b', null, baht(c.tax))); card.append(tot);
       o.append(card);
     });
+    /* how much more could be deducted, and what it would save */
+    const room = $('tx-room'); room.replaceChildren(); const bestExp = B.tax < A.tax ? Y.outDoc : Y.inc * 0.6; const now0 = Math.min(A.tax, B.tax);
+    if (Y.inc > 0 || dd.sal > 0) {
+      if (now0 <= 0) room.append(el('div', 'pf-hint', 'ตอนนี้ภาษีโดยประมาณเป็น 0 บาทแล้ว ลดหย่อนเพิ่มจะไม่ช่วยลดภาษีปีนี้'));
+      else if (now0 === Math.max(A.m2, B.m2) && now0 > Math.min(A.m1, B.m1)) room.append(el('div', 'pf-hint', 'ภาษีที่ต้องจ่ายตอนนี้มาจากวิธีที่ 2 (0.5% ของเงินได้) ซึ่งค่าลดหย่อนช่วยไม่ได้'));
+      else {
+        room.append(el('h5', 'ded-g', 'ลดหย่อนเพิ่มได้อีก'));
+        const save = (k, add) => { const x = { ...dvv, [k]: (Number(dvv[k]) || 0) + add }; return now0 - Math.min(taxWith(Y.inc, bestExp, x).tax, taxWith(Y.inc, Y.inc * 0.6, x).tax, taxWith(Y.inc, Y.outDoc, x).tax); };
+        const tip = (k, label, left, note) => { if (left < 1) return; const sv = save(k, left); if (sv < 1) return; room.append(el('div', 'pf-hint', `• ${label} เพิ่มได้อีก ${baht(left)} ภาษีลดลงประมาณ ${baht(sv)}${note ? ' (' + note + ')' : ''}`)); };
+        tip('esg', 'Thai ESG', Math.min(0.3 * dd.A, 300000) - dd.c.esg, 'ต้องถือ 5 ปี');
+        tip('rmf', 'RMF', Math.min(Math.min(0.3 * dd.A, 500000) - dd.c.rmf, dd.retLeft), 'ต้องถืออย่างน้อย 5 ปีและขายได้เมื่ออายุ 55');
+        tip('sso', 'ประกันสังคม', 10500 - dd.c.sso, 'เช่น สมัครมาตรา 40 สำหรับคนทำงานอิสระ');
+        tip('health', 'ประกันสุขภาพตัวเอง', Math.min(25000 - dd.c.health, 100000 - dd.c.life - dd.c.health), '');
+        const per = save('other', 10000); if (per > 0) room.append(el('div', 'pf-hint', `• ทุก 10,000 บาทที่ลดหย่อนได้เพิ่ม ภาษีลดลงประมาณ ${baht(per)}`));
+        room.append(el('div', 'pf-hint', 'ซื้อกองทุนหรือประกันเพื่อลดหย่อนควรดูว่าเหมาะกับเป้าหมายและสภาพคล่องของตัวเองด้วย ไม่ใช่ดูแค่ภาษีที่ประหยัดได้'));
+      }
+    }
     const n = $('tx-notes'); n.replaceChildren();
     const li = (t) => n.append(el('div', 'pf-hint', '• ' + t));
     li(`ภ.ง.ด.94 (ครึ่งปี ม.ค.–มิ.ย. ${+ty + 543}) ยื่นภายใน 30 ก.ย. ${+ty + 543} ถ้ารายได้ครึ่งปีเกิน 60,000 บาท (คนโสด) ภาษีที่จ่ายตอนนี้นำไปหักตอนยื่น ภ.ง.ด.90 ได้`);
@@ -1441,7 +1526,6 @@ dash.calc('sectors', {
   };
   $('tx-prev').addEventListener('click', () => { ty = String(+ty - 1); drawTax(); });
   $('tx-next').addEventListener('click', () => { ty = String(+ty + 1); drawTax(); });
-  $('tx-ded').addEventListener('input', () => { try { localStorage.setItem(DKEY, $('tx-ded').value); } catch (e) { /* ignore */ } drawTax(); });
   [['pr-owner', 'owner'], ['pr-shop', 'shop'], ['pr-tin', 'tin'], ['pr-addr', 'addr']].forEach(([id, k]) => {
     $(id).value = prof[k] || '';
     $(id).addEventListener('input', () => { prof[k] = $(id).value.trim(); try { localStorage.setItem(PKEY, JSON.stringify(prof)); } catch (e) { /* ignore */ } });
