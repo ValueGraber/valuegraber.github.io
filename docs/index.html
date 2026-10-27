@@ -652,6 +652,12 @@ body.slip-open { overflow: hidden; }
 .hlink.neg { color: var(--brick); display: block; margin-top: 6px; text-align: left; }
 .home-data { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 14px 18px; }
 .home-data p { margin: 2px 0 0; } #bk-msg:empty { display: none; } #bk-msg { flex-basis: 100%; }
+.crow { display: grid; grid-template-columns: minmax(0, 1.1fr) 150px minmax(0, 1.6fr) auto; gap: 14px; align-items: center; padding: 14px 20px; border-top: 1px solid var(--line); }
+.crow:first-child { border-top: 0; }
+.crow .cpx b { display: block; font-size: 17px; font-weight: 600; } .crow .cpx small, .crow .cst small { font-size: 13px; }
+.crow .cst { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; } .crow .cst .tag { margin: 0; } .crow .cst small { color: var(--ink-2); }
+.crow .cact { display: flex; gap: 6px; } .btn.sm { padding: 5px 12px; font-size: 14px; }
+@media (max-width: 720px) { .crow { grid-template-columns: 1fr auto; padding: 12px 14px; } .crow .cst { grid-column: 1 / -1; } .crow .cact { grid-column: 1 / -1; } }
 </style>
 </head>
 <body>
@@ -751,6 +757,12 @@ body.slip-open { overflow: hidden; }
       <div class="panel"><h3>S&amp;P 500 ย้อนหลัง 3 ปี</h3><p>เส้นประคือค่าเฉลี่ย 40 สัปดาห์ ราคาอยู่เหนือเส้นแปลว่ายังเป็นขาขึ้น</p><div class="chart" id="spy-chart"></div></div>
       <div class="panel"><h3>กลุ่มไหนน่าสนใจ</h3><p>คะแนน VI เฉลี่ยของแต่ละกลุ่ม ตัวเลขในวงเล็บคือจำนวนหุ้นน่าซื้อสะสม กดเพื่อกรองรายชื่อ</p><div class="chart" id="sector-chart"></div></div>
     </div>
+  </section>
+
+  <section id="crypto" data-sub="market">
+    <div class="sec-head"><h2>คริปโตหลัก</h2></div>
+    <p class="sec-note">คริปโตไม่มีกำไรหรืองบการเงิน จึงประเมินมูลค่าแบบหุ้นไม่ได้ ระบบดูเฉพาะแนวโน้มราคา: ขาขึ้นคือราคาและเส้น 50 วันอยู่เหนือเส้น 200 วัน ขาลงคือกลับกัน ราคาปิดรายวันอัปเดตทุกเช้า ราคาผันผวนสูงมาก ควรถือสัดส่วนน้อย</p>
+    <div class="list" id="crypto-list"><div class="empty">ข้อมูลคริปโตจะมาหลังระบบอัปเดตรอบถัดไป</div></div>
   </section>
 
   <details class="method" data-sub="market">
@@ -863,7 +875,7 @@ body.slip-open { overflow: hidden; }
 
   <section class="panel" style="margin-top:16px" id="pf-hold" data-sub="hold">
     <h3>หุ้นในพอร์ตและการปรับสมดุล</h3>
-    <p>ตั้ง "เป้าหมาย %" ของแต่ละตัว ตัวที่ไม่ได้ตั้งจะแบ่งส่วนที่เหลือเท่าๆ กัน ถ้าราคาขึ้นลงจนสัดส่วนห่างเป้าเกินที่กำหนด ระบบจะบอกว่าควรขายหรือซื้อกี่หุ้นเพื่อกลับไปที่เป้า</p>
+    <p>ตั้ง "เป้าหมาย %" ของแต่ละตัว ตัวที่ไม่ได้ตั้งจะแบ่งส่วนที่เหลือเท่าๆ กัน (คริปโตได้แค่หนึ่งในสี่ของส่วนหุ้น เพราะผันผวนสูง) ถ้าราคาขึ้นลงจนสัดส่วนห่างเป้าเกินที่กำหนด ระบบจะบอกว่าควรขายหรือซื้อกี่หุ้นเพื่อกลับไปที่เป้า</p>
     <div class="dca">
       <label class="mini">เตือนเมื่อห่างเป้าเกิน <input class="inp sm" id="band" type="number" min="0.5" step="0.5" inputmode="decimal"> จุด</label>
       <button class="btn-line" id="t-equal" type="button">ตั้งเป้าเท่ากันทุกตัว</button>
@@ -1285,7 +1297,7 @@ dash.calc('sectors', {
   const pr = (v, d = 1) => (v == null ? '–' : v.toFixed(d) + '%');
   const fx = (v, d = 2) => (v == null ? '–' : v.toFixed(d));
   const thDate = (d) => new Date(d + 'T00:00:00Z').toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
-  const TAG = { 'น่าซื้อสะสม': 'buy', 'น่าจับตา': 'watch', 'หุ้นดีแต่แพง': 'rich', 'ระวังกับดักมูลค่า': 'trap', 'ผ่านไปก่อน': 'skip' };
+  const TAG = { 'น่าซื้อสะสม': 'buy', 'น่าจับตา': 'watch', 'หุ้นดีแต่แพง': 'rich', 'ระวังกับดักมูลค่า': 'trap', 'ผ่านไปก่อน': 'skip', 'ขาขึ้น': 'buy', 'ไซด์เวย์': 'watch', 'ขาลง': 'trap' };
   const SIGNALS = ['ทั้งหมด', 'ที่ติดตาม ★', 'น่าซื้อสะสม', 'น่าจับตา', 'หุ้นดีแต่แพง', 'ระวังกับดักมูลค่า'];
   const WKEY = 'valuegrab-watch-v1';
   let watch = new Set(); try { watch = new Set(JSON.parse(localStorage.getItem(WKEY) || '[]')); } catch (e) { /* in memory only */ }
@@ -1486,7 +1498,7 @@ dash.calc('sectors', {
   const closeSheet = () => document.body.classList.remove('open');
   $('scrim').addEventListener('click', closeSheet);
   document.addEventListener('vg:open', (e) => openSheet(e.detail));
-  let dt; document.addEventListener('vg:data', () => { clearTimeout(dt); dt = setTimeout(() => { if (scan.length) { drawPicks(); drawAll(); } }, 50); });
+  let dt; document.addEventListener('vg:data', () => { clearTimeout(dt); dt = setTimeout(() => { if (scan.length) { drawPicks(); drawAll(); } if (window.VG && window.VG.crypto) drawCrypto(window.VG.crypto); }, 50); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 
   $('q').addEventListener('input', (e) => { st.q = e.target.value.trim(); st.allN = 25; drawAll(); });
@@ -1494,6 +1506,24 @@ dash.calc('sectors', {
   $('sector').addEventListener('change', (e) => { st.sector = e.target.value; st.allN = 25; drawAll(); });
   $('all-more').addEventListener('click', () => { st.allN += 25; drawAll(); });
   $('pick-more').addEventListener('click', () => { st.pickN += 10; drawPicks(); });
+
+  const drawCrypto = (rows) => {
+    const box = $('crypto-list'); box.replaceChildren();
+    if (!rows.length) { box.append(el('div', 'empty', 'ข้อมูลคริปโตจะมาหลังระบบอัปเดตรอบถัดไป')); return; }
+    const cm = (v) => (v == null ? '–' : '$' + v.toLocaleString('en-US', { maximumFractionDigits: v < 10 ? 4 : 2 }));
+    rows.forEach((c) => {
+      const r = el('div', 'crow');
+      const who = el('div', 'who'); who.append(el('span', 'sym', c.symbol), el('span', 'nm', c.name));
+      const bo = window.VGPort && window.VGPort.bought ? window.VGPort.bought() : null; if (bo && bo.map[c.symbol]) who.append(el('span', 'tag bought', '✓ ซื้อแล้ว' + bo.label));
+      const px = el('div', 'cpx'); px.append(el('b', null, cm(c.price)), el('small', c.change7d >= 0 ? 'pos' : 'neg', `7 วัน ${pc(c.change7d / 100, 1)}`));
+      const st = el('div', 'cst'); st.append(el('span', 'tag ' + (c.signal === 'ขาขึ้น' ? 'buy' : c.signal === 'ขาลง' ? 'trap' : 'watch'), c.signal),
+        el('small', null, `รอบปี ${pc(c.change52w / 100, 0)} · ต่ำกว่าจุดสูงสุด ${Math.abs(c.drawdown).toFixed(0)}% · RSI ${Math.round(c.rsi)}${c.rsi >= 75 ? ' ร้อนแรง' : c.rsi <= 30 ? ' ขายมากเกินไป' : ''}`));
+      const act = el('div', 'cact');
+      act.append(link('https://www.tradingview.com/chart/?symbol=' + encodeURIComponent('BINANCE:' + c.symbol + 'USDT'), 'กราฟ', 'btn ghost sm'));
+      const add = el('button', 'btn-line sm', 'บันทึกว่าซื้อ'); add.type = 'button'; add.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:add', { detail: c.symbol }))); act.append(add);
+      r.append(who, px, st, act); box.append(r);
+    });
+  };
 
   /* what changed since the previous close: signal moves, my stocks, biggest movers */
   const drawToday = (j) => {
@@ -1532,7 +1562,9 @@ dash.calc('sectors', {
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
-    window.VG = { market, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
+    const cryptoRows = (j.crypto || []).map((c) => ({ ...c, crypto: true, sector: 'คริปโต', mos: null, signal: c.price > c.ma200 && c.ma50 > c.ma200 ? 'ขาขึ้น' : c.price < c.ma50 && c.ma50 < c.ma200 ? 'ขาลง' : 'ไซด์เวย์' }));
+    drawCrypto(cryptoRows);
+    window.VG = { market, crypto: cryptoRows, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -2476,7 +2508,7 @@ dash.calc('sectors', {
   const pc = (v, d = 1) => (v == null || !isFinite(v) ? '–' : sgn(v) + (v * 100).toFixed(d) + '%');
   const qty = (v, d = 4) => (+v).toLocaleString('en-US', { maximumFractionDigits: d });
   const dTH = (s, o = { day: 'numeric', month: 'short', year: '2-digit' }) => new Date(s + 'T00:00:00').toLocaleDateString('th-TH', o);
-  const TAG = { 'น่าซื้อสะสม': 'buy', 'น่าจับตา': 'watch', 'หุ้นดีแต่แพง': 'rich', 'ระวังกับดักมูลค่า': 'trap', 'ผ่านไปก่อน': 'skip' };
+  const TAG = { 'น่าซื้อสะสม': 'buy', 'น่าจับตา': 'watch', 'หุ้นดีแต่แพง': 'rich', 'ระวังกับดักมูลค่า': 'trap', 'ผ่านไปก่อน': 'skip', 'ขาขึ้น': 'buy', 'ไซด์เวย์': 'watch', 'ขาลง': 'trap' };
   const PAL = ['#0f6e5a', '#3a9b7f', '#7cc4a9', '#b9e2d2', '#a86a12', '#d9a95b', '#5b6f8f', '#9aaac4', '#8a5a7a', '#c8a2bd'];
   const CASH_COLOR = '#c9c2b0';
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -2563,10 +2595,10 @@ dash.calc('sectors', {
   const targetWeights = (list) => {
     const set = {}; let sumSet = 0; const unset = [];
     list.forEach((x) => { const t = Number(db.targets[x.sym]); if (t > 0) { set[x.sym] = t; sumSet += t; } else unset.push(x.sym); });
-    const out = {};
-    if (!sumSet) { list.forEach((x) => { out[x.sym] = 1 / list.length; }); return { w: out, sumSet: 0, auto: true }; }
-    const rest = Math.max(0, 100 - sumSet);
-    unset.forEach((s) => { set[s] = unset.length ? rest / unset.length : 0; });
+    const out = {}; const wt = (sym) => (map[sym] && map[sym].crypto ? 0.25 : 1); /* without a set target, a coin gets a quarter of a stock's share */
+    if (!sumSet) { const tw0 = list.reduce((a, x) => a + wt(x.sym), 0); list.forEach((x) => { out[x.sym] = wt(x.sym) / tw0; }); return { w: out, sumSet: 0, auto: true }; }
+    const rest = Math.max(0, 100 - sumSet); const uw = unset.reduce((a, s2) => a + wt(s2), 0);
+    unset.forEach((s2) => { set[s2] = uw ? rest * wt(s2) / uw : 0; });
     const tot = Object.values(set).reduce((a, v) => a + v, 0) || 1;
     list.forEach((x) => { out[x.sym] = set[x.sym] / tot; });
     return { w: out, sumSet, auto: false };
@@ -2590,6 +2622,10 @@ dash.calc('sectors', {
       if (s.price < s.ma50 && s.ma50 < s.ma200) bad('ขาลงชัด ราคาต่ำกว่าเส้น 50 วัน และเส้น 50 วันอยู่ใต้เส้น 200 วัน', 2);
       else if (s.price < s.ma200) bad(`หลุดเส้นค่าเฉลี่ย 200 วัน (${pc(s.price / s.ma200 - 1)}) แนวโน้มเริ่มอ่อน`);
       else if (s.ma50 > s.ma200) good('แนวโน้มขาขึ้น ราคายืนเหนือเส้น 50 และ 200 วัน');
+    }
+    if (s.crypto) {
+      if (s.drawdown <= -50) bad(`ราคาต่ำกว่าจุดสูงสุดรอบปี ${Math.abs(s.drawdown).toFixed(0)}%`);
+      R.push({ t: 'คริปโตไม่มีงบการเงิน สัญญาณดูจากแนวโน้มราคาอย่างเดียว', k: 'na' });
     }
     if (s.mos != null) { if (s.mos < -0.3) bad(`ราคาแพงกว่ามูลค่าที่ประเมิน ${(-s.mos * 100).toFixed(0)}%`, 2); else if (s.mos < -0.1) bad(`ราคาเริ่มแพงกว่ามูลค่า ${(-s.mos * 100).toFixed(0)}%`); else if (s.mos > 0.2) good(`ราคายังต่ำกว่ามูลค่า ${(s.mos * 100).toFixed(0)}%`); }
     if (s.signal === 'ระวังกับดักมูลค่า') bad('คะแนนพื้นฐานอ่อนลง (ระวังกับดักมูลค่า)', 2); else if (s.signal === 'ผ่านไปก่อน') bad('คะแนนรวมต่ำ (ผ่านไปก่อน)'); else if (s.signal === 'น่าซื้อสะสม') good('ยังอยู่ในกลุ่มน่าซื้อสะสม', 1);
@@ -2850,7 +2886,7 @@ dash.calc('sectors', {
       let cells;
       if (isTrade(t)) {
         const feeTxt = t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
-        cells = [t.sym, qty(t.shares) + ' หุ้น', usd(t.price), feeTxt];
+        cells = [t.sym, qty(t.shares, 6) + (map[t.sym] && map[t.sym].crypto ? ' เหรียญ' : ' หุ้น'), usd(t.price), feeTxt];
       } else if (t.type === 'fx') cells = ['–', baht(t.thb), 'เรท ' + (t.thb / t.usd).toFixed(2), ''];
       else cells = [t.sym, '', '', t.tax ? 'ภาษี ' + usd(t.tax) : ''];
       [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], [usdS(cd), cd >= 0 ? 'pos' : '']].forEach(([v, c]) => tr.append(el('td', c || null, v)));
@@ -2893,7 +2929,7 @@ dash.calc('sectors', {
     list.forEach((x) => {
       const tr = el('tr'); const td = (c, t) => { const d = el('td', c, t); tr.append(d); return d; };
       const a = td('l'); const s = el('span', 'sym', x.sym); s.title = 'ดูรายละเอียดหุ้น'; s.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: x.sym }))); a.append(s);
-      td(null, qty(x.shares)); td(null, usd(x.avg)); td(null, x.price != null ? usd(x.price) : 'ไม่มีราคา'); td(null, usd(x.value));
+      td(null, qty(x.shares, x.s && x.s.crypto ? 6 : 4)); td(null, usd(x.avg)); td(null, x.price != null ? usd(x.price) : 'ไม่มีราคา'); td(null, usd(x.value));
       const p = td(x.pl == null ? '' : x.pl >= 0 ? 'pos' : 'neg'); if (x.pl == null) p.textContent = '–'; else p.append(usd(x.pl), el('small', 'sub', pc(x.pl / x.cost)));
       const drift = x.w - tw[x.sym];
       const wc = td(null, (x.w * 100).toFixed(1) + '%'); wc.append(el('small', 'drift ' + (Math.abs(drift) > band ? (drift > 0 ? 'neg' : 'pos') : ''), (drift >= 0 ? '+' : '') + (drift * 100).toFixed(1) + ' จากเป้า'));
@@ -2905,14 +2941,15 @@ dash.calc('sectors', {
       if (Math.abs(drift) > band && x.price && diff > 0 && chk[x.sym].level === 'sell') { rb.className = 'rb neg'; rb.append('ไม่ซื้อเพิ่ม', el('small', 'sub', 'มีสัญญาณขาย')); }
       else if (Math.abs(drift) > band && x.price) {
         const n = Math.abs(diff) / x.price; rb.className = 'rb out ' + (diff > 0 ? 'pos' : 'neg');
-        rb.append((diff > 0 ? 'ซื้อ ' : 'ขาย ') + qty(n, 2) + ' หุ้น', el('small', 'sub', usd(Math.abs(diff))));
-        outs.push({ sym: x.sym, now: x.w, tgt: tw[x.sym], act: (diff > 0 ? 'ซื้อเพิ่ม ' : 'ขาย ') + qty(n, 2) + ' หุ้น (' + usd(Math.abs(diff)) + ')' });
+        const un = x.s && x.s.crypto ? ' เหรียญ' : ' หุ้น'; const dg = x.s && x.s.crypto ? 6 : 2;
+        rb.append((diff > 0 ? 'ซื้อ ' : 'ขาย ') + qty(n, dg) + un, el('small', 'sub', usd(Math.abs(diff))));
+        outs.push({ sym: x.sym, now: x.w, tgt: tw[x.sym], act: (diff > 0 ? 'ซื้อเพิ่ม ' : 'ขาย ') + qty(n, dg) + un + ' (' + usd(Math.abs(diff)) + ')' });
       } else { rb.className = 'rb ok'; rb.textContent = 'อยู่ในเกณฑ์'; }
       const b = plan[x.sym]; const bd = td(); const bo = bought[x.sym];
       if (bo && dcaS.skip) { bd.className = 'rb ok'; bd.append('ซื้อแล้ว', el('small', 'sub', dTH(bo.date, { day: 'numeric', month: 'short' }))); }
       else if (chk[x.sym].level === 'sell') { bd.className = 'neg'; bd.append('พัก DCA', el('small', 'sub', 'ดูสัญญาณขาย')); }
-      else if (b > 0.005) { bd.append(usd(b)); if (x.price) bd.append(el('small', 'sub', `≈ ${qty(b / x.price, 2)} หุ้น`)); bd.className = 'pos'; } else bd.textContent = amt ? '–' : '';
-      const sg = td('l'); if (x.s) sg.append(el('span', 'tag ' + TAG[x.s.signal], x.s.signal)); else sg.textContent = 'นอก S&P 500';
+      else if (b > 0.005) { bd.append(usd(b)); if (x.price) bd.append(el('small', 'sub', x.s && x.s.crypto ? `≈ ${qty(b / x.price, 6)} เหรียญ` : `≈ ${qty(b / x.price, 2)} หุ้น`)); bd.className = 'pos'; } else bd.textContent = amt ? '–' : '';
+      const sg = td('l'); if (x.s) sg.append(el('span', 'tag ' + TAG[x.s.signal], x.s.crypto ? 'คริปโต ' + x.s.signal : x.s.signal)); else sg.textContent = 'นอก S&P 500';
       tb.append(tr);
     });
     if (list.length) {
@@ -2936,9 +2973,10 @@ dash.calc('sectors', {
     list.forEach((x) => {
       const r = el('div', 'dca-row'); const st = el('div', 'dca-st'); const bo = bought[x.sym]; const c = chk[x.sym];
       const sym = el('span', 'sym', x.sym); sym.addEventListener('click', () => document.dispatchEvent(new CustomEvent('vg:open', { detail: x.sym })));
-      if (bo) st.append(el('span', 'tag buy', '✓ ซื้อแล้ว'), el('small', null, `${dTH(bo.date, { day: 'numeric', month: 'short' })} · ${qty(bo.shares, 2)} หุ้น ${usd(bo.usd)}`));
+      const un = x.s && x.s.crypto ? 'เหรียญ' : 'หุ้น', dg = x.s && x.s.crypto ? 6 : 2;
+      if (bo) st.append(el('span', 'tag buy', '✓ ซื้อแล้ว'), el('small', null, `${dTH(bo.date, { day: 'numeric', month: 'short' })} · ${qty(bo.shares, dg)} ${un} ${usd(bo.usd)}`));
       else if (c.level === 'sell') st.append(el('span', 'tag trap', 'พัก DCA'), el('small', null, 'มีสัญญาณขาย ดูหน้าสัญญาณขาย'));
-      else if (plan[x.sym] > 0.005) st.append(el('span', 'tag watch', 'ยังไม่ได้ซื้อ'), el('small', null, `ควรซื้อ ${usd(plan[x.sym])}` + (x.price ? ` ≈ ${qty(plan[x.sym] / x.price, 2)} หุ้น` : '')));
+      else if (plan[x.sym] > 0.005) st.append(el('span', 'tag watch', 'ยังไม่ได้ซื้อ'), el('small', null, `ควรซื้อ ${usd(plan[x.sym])}` + (x.price ? ` ≈ ${qty(plan[x.sym] / x.price, dg)} ${un}` : '')));
       else st.append(el('span', 'tag skip', amt ? 'รอบนี้ไม่ต้องซื้อ' : 'ยังไม่ได้ซื้อ'), el('small', null, amt ? 'สัดส่วนเกินเป้าแล้ว' : 'ใส่เงิน DCA ต่องวดด้านล่างเพื่อคำนวณ'));
       r.append(sym, st); box.append(r);
     });
@@ -3001,7 +3039,7 @@ dash.calc('sectors', {
     if (fType === 'fx') return;
     const s = $('f-sym').value.trim().toUpperCase(); const x = map[s];
     if (fType === 'div') { divSuggest(); return; }
-    hint(x ? `${x.name} ราคาปิดล่าสุด ${usd(x.price)}` : s && ready ? 'ไม่พบใน S&P 500 บันทึกได้ แต่จะไม่มีราคาล่าสุดให้' : '');
+    hint(x ? `${x.name}${x.crypto ? ' (คริปโต ใส่จำนวนเป็นทศนิยมได้ เช่น 0.005)' : ''} ราคาปิดล่าสุด ${x.crypto && x.price < 10 ? '$' + x.price : usd(x.price)}` : s && ready ? 'ไม่พบใน S&P 500 หรือคริปโตหลัก บันทึกได้ แต่จะไม่มีราคาล่าสุดให้' : '');
     if (x && !$('f-px').dataset.touched && !editId) $('f-px').value = x.price;
   };
   const divSuggest = () => {
@@ -3104,8 +3142,8 @@ dash.calc('sectors', {
   document.addEventListener('vg:add', (e) => { show('port', 'add'); endEdit(); setType('buy'); $('f-sym').value = e.detail; symInfo(); $('pf-add').scrollIntoView({ block: 'start' }); $('f-sh').focus({ preventScroll: true }); });
   document.addEventListener('vg:watch', () => { if (!$('view-port').hidden) render(); });
   document.addEventListener('vg:ready', () => {
-    map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); raw = window.VG.raw || {}; fx = window.VG.fx || null; ready = true;
-    $('sym-list').replaceChildren(...window.VG.scan.map((r) => { const o = el('option'); o.value = r.symbol; o.label = r.name; return o; }));
+    map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); (window.VG.crypto || []).forEach((c) => { map[c.symbol] = c; }); raw = window.VG.raw || {}; fx = window.VG.fx || null; ready = true;
+    $('sym-list').replaceChildren(...[...(window.VG.crypto || []), ...window.VG.scan].map((r) => { const o = el('option'); o.value = r.symbol; o.label = r.crypto ? r.name + ' (คริปโต)' : r.name; return o; }));
     render();
   });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) { drawGrowth(); const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0)); } }, 200); });
@@ -3155,6 +3193,7 @@ dash.calc('sectors', {
       kv(m, 'ห่างเส้น 40 สัปดาห์', pc(mk.spyVsMa40), mk.spyVsMa40 >= 0 ? 'pos' : 'neg');
       kv(m, 'หุ้นเหนือเส้น 200 วัน', Math.round(mk.breadth200 * 100) + '%');
       kv(m, 'ดอกเบี้ยพันธบัตร 10 ปี', mk.yield10y.toFixed(2) + '%');
+      const btc = (VG.crypto || []).find((c) => c.symbol === 'BTC'); if (btc) kv(m, 'Bitcoin', `$${Math.round(btc.price).toLocaleString('en-US')} · ${btc.signal}`, btc.signal === 'ขาขึ้น' ? 'pos' : btc.signal === 'ขาลง' ? 'neg' : '');
     } else m.append(el('div', 'hsub', 'กำลังโหลด…'));
 
     const p = $('h-picks'); p.replaceChildren();

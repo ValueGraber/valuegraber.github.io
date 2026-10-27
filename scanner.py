@@ -217,10 +217,46 @@ def usd_thb():
         return None
 
 
+CRYPTO = {"BTC": "Bitcoin", "ETH": "Ethereum", "SOL": "Solana", "BNB": "BNB", "XRP": "XRP"}
+
+
+def crypto_stats():
+    """เหรียญหลัก: ราคาปิดรายวันย้อนหลัง 1 ปี → ราคา, เส้น 50/200 วัน, RSI, เปลี่ยนแปลงรอบปี, ย่อจากจุดสูงสุด"""
+    out = []
+    tick = [f"{c}-USD" for c in CRYPTO]
+    try:
+        df = yf.download(tick, period="1y", interval="1d", auto_adjust=False, progress=False, threads=True, group_by="column")
+        close = df["Close"]
+    except Exception as e:  # noqa: BLE001
+        log("ดึงราคาคริปโตไม่ได้:", e)
+        return out
+    for sym, name in CRYPTO.items():
+        t = f"{sym}-USD"
+        if t not in close:
+            continue
+        c = close[t].dropna()
+        if len(c) < 60:
+            continue
+        hi = float(c.max())
+        out.append({
+            "symbol": sym, "name": name,
+            "price": rnd(c.iloc[-1], 4 if c.iloc[-1] < 10 else 2),
+            "asOf": c.index[-1].strftime("%Y-%m-%d"),
+            "ma50": rnd(c.tail(50).mean(), 4), "ma200": rnd(c.tail(200).mean(), 4),
+            "rsi": rnd(rsi14(c)),
+            "change52w": rnd((c.iloc[-1] / c.iloc[0] - 1) * 100),
+            "change7d": rnd((c.iloc[-1] / c.iloc[-8] - 1) * 100) if len(c) > 8 else None,
+            "high52": rnd(hi, 4), "drawdown": rnd((c.iloc[-1] / hi - 1) * 100),
+        })
+    return out
+
+
 def weekly_history(symbols):
     """ราคาปิดรายสัปดาห์ย้อนหลัง 2 ปี ใช้วาดกราฟการเติบโตของพอร์ตในหน้าเว็บ"""
     tick = {yahoo(s): s for s in symbols}
     tick["SPY"] = "SPY"
+    for c in CRYPTO:
+        tick[f"{c}-USD"] = c
     cols = {}
     names = list(tick)
     for i in range(0, len(names), 100):
@@ -287,6 +323,7 @@ def main():
         "yield": yld or prev.get("yield", []),
         "usdthb": usd_thb() or prev.get("usdthb"),
         "gold": gold_usd() or prev.get("gold"),
+        "crypto": crypto_stats() or prev.get("crypto", []),
     }
     if len(prices) < 300:
         log("ราคาได้น้อยผิดปกติ ไม่เขียนทับไฟล์เดิม")
