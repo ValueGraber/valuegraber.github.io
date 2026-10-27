@@ -1197,7 +1197,7 @@ dash.calc('sectors', {
 </script>
 <script type="module">
 /* account sync (Firebase): each signed-in user reads/writes only portfolios/{their uid} */
-const FB = /*FBCONFIG*/null;
+const FB = { apiKey: "AIzaSyAAIM8jxxdXR1zlODShqoYez1Ysa2zkxo0", authDomain: "valuegrab.firebaseapp.com", projectId: "valuegrab", storageBucket: "valuegrab.firebasestorage.app", messagingSenderId: "81941341766", appId: "1:81941341766:web:64b6b774343deb958b8c47" };
 const $ = (id) => document.getElementById(id);
 if (FB && window.VGPort) {
   $('acct').hidden = false;
