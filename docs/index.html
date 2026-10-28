@@ -564,7 +564,34 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
 .a-row .a-em { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
 .a-row .a-em input { width: 18px; height: 18px; accent-color: var(--jade); }
 .a-row .a-upd { grid-column: 1 / -1; font-size: 12px; color: var(--ink-3); margin-top: -4px; }
-.a-row.debt { grid-template-columns: 2fr 1.2fr 0.9fr 1.2fr auto; }
+.a-row.debt { grid-template-columns: 2fr 1.1fr 0.8fr 1.1fr auto auto; }
+.a-row.debt .mini .inp { width: 64px; }
+.mc-wd, .mc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.mc-wd { margin-top: 6px; } .mc-wd span { font-size: 12px; color: var(--ink-3); text-align: center; }
+.mc-grid { margin-top: 4px; }
+.mc-d { min-height: 78px; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 5px 7px; text-align: left; display: flex; flex-direction: column; gap: 1px; font: inherit; color: var(--ink); cursor: pointer; overflow: hidden; }
+.mc-d:hover { border-color: var(--ink-3); }
+.mc-d.pad { visibility: hidden; }
+.mc-d .n { font-size: 13px; color: var(--ink-2); }
+.mc-d .a { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
+.mc-d .a.i { color: var(--jade); } .mc-d .a.v { color: var(--ink-3); }
+.mc-d .dots { display: flex; gap: 3px; flex-wrap: wrap; margin-top: auto; padding-top: 2px; }
+.mc-d .dots i, .mc-leg i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.mc-d.today .n { color: var(--jade); font-weight: 700; }
+.mc-d.sel { border-color: var(--jade); box-shadow: inset 0 0 0 1px var(--jade); }
+.mc-d.future { background: transparent; }
+.dot-paid { background: var(--jade); } .dot-due { background: var(--ochre); } .dot-late { background: var(--brick); } .dot-inc { background: transparent; border: 2px solid var(--jade); box-sizing: border-box; }
+.mc-leg { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); margin-top: 10px; }
+.mc-leg span { display: inline-flex; align-items: center; gap: 6px; }
+.mc-day { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.mc-day h4 { margin: 0 0 4px; font-size: 17px; }
+.mc-sum { font-size: 14px; color: var(--ink-2); margin-bottom: 8px; }
+.mc-it { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.mc-it:last-of-type { border-bottom: 0; }
+.mc-it small { display: block; font-size: 12px; color: var(--ink-3); }
+.mc-it .amt { white-space: nowrap; text-align: right; }
+.mc-it .act { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+.mc-h5 { font-size: 13px; color: var(--ink-3); font-weight: 500; margin: 12px 0 2px; }
 .a-row.bill { grid-template-columns: 2fr 1fr auto auto auto auto; }
 .a-row .inp { padding: 8px 10px; font-size: 15px; }
 .a-row select.inp { padding: 8px 6px; }
@@ -633,7 +660,11 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
   .a-row .a-name { grid-column: 1 / -1; }
   .a-row .a-v { grid-column: 1 / 2; text-align: left; }
   .a-row.auto { grid-template-columns: 1fr auto; } .a-row.auto .a-t { display: none; }
-  .a-row.debt { grid-template-columns: 1.2fr .8fr 1.2fr auto; } .a-row.debt .a-name { grid-column: 1 / -1; }
+  .a-row.debt { grid-template-columns: 1fr 1fr; } .a-row.debt .a-name { grid-column: 1 / -1; } .a-row.debt .del { grid-column: 1 / -1; justify-self: end; }
+  .mc-wd, .mc-grid { gap: 3px; }
+  .mc-d { min-height: 60px; padding: 3px 4px; border-radius: 8px; }
+  .mc-d .n { font-size: 12px; } .mc-d .a { font-size: 10.5px; } .mc-d .a.v { display: none; }
+  .mc-d .dots i { width: 6px; height: 6px; }
   .a-row.bill { grid-template-columns: 1fr 1fr auto; } .a-row.bill .a-name { grid-column: 1 / -1; }
   .p-budgets { grid-template-columns: 1fr; }
   .g-top { grid-template-columns: 1fr 1fr; } .g-top > .g-f:first-child, .g-top .g-due { grid-column: 1 / -1; } .g-top .del { justify-self: end; grid-column: 1 / -1; }
@@ -1139,6 +1170,13 @@ body.slip-open { overflow: hidden; }
     <div><div class="k">เก็บเงิน/ลงทุน</div><div class="v sav" id="p-sv">0 บาท</div><div class="h" id="p-sv-h"></div></div>
     <div><div class="k">เงินที่ยังใช้ได้</div><div class="v" id="p-left">0 บาท</div><div class="h" id="p-left-h"></div></div>
   </div>
+  <section class="panel" style="margin-bottom:16px" data-sub="budget">
+    <div class="ph"><div><h3>ปฏิทินรายรับรายจ่าย</h3><p>ดูว่าแต่ละวันมีเงินเข้าออกเท่าไหร่ และบิล ค่างวดหนี้ รายรับประจำวันไหนจ่ายหรือได้รับแล้ว กดที่วันเพื่อดูรายละเอียดและจดรายการของวันนั้น</p></div></div>
+    <div class="mc-wd" id="mc-wd"></div>
+    <div class="mc-grid" id="mc-grid"></div>
+    <div class="mc-leg"><span><i class="dot-paid"></i>จ่ายแล้ว / ได้รับแล้ว</span><span><i class="dot-due"></i>ยังไม่ถึงวันจ่าย</span><span><i class="dot-late"></i>เลยวันแล้ว ยังไม่จ่าย</span><span><i class="dot-inc"></i>รายรับที่จะเข้า</span></div>
+    <div class="mc-day" id="mc-day" hidden></div>
+  </section>
   <section class="panel" id="p-add" data-sub="budget">
     <h3 id="p-title">จดรายรับรายจ่ายส่วนตัว</h3>
     <p id="p-sub">แยกจากเงินธุรกิจ เงินที่โอนจากร้านมาใช้เองให้ลงเป็นรายรับหมวด "โอนจากธุรกิจ" เงินที่โอนไปเก็บหรือลงทุนให้ลงเป็น "เก็บเงิน/ลงทุน" ยอดนี้จะไม่นับเป็นรายจ่าย</p>
@@ -1197,7 +1235,7 @@ body.slip-open { overflow: hidden; }
 
   <!-- debts and bills -->
   <section class="panel" data-sub="debt">
-    <div class="ph"><div><h3>หนี้สิน</h3><p>ใส่ยอดหนี้ที่เหลือ ดอกเบี้ยต่อปี และยอดผ่อนขั้นต่ำต่อเดือน ระบบจะเทียบให้ว่าปิดหนี้แบบไหนเสียดอกเบี้ยน้อยกว่า</p></div>
+    <div class="ph"><div><h3>หนี้สิน</h3><p>ใส่ยอดหนี้ที่เหลือ ดอกเบี้ยต่อปี และยอดผ่อนขั้นต่ำต่อเดือน ระบบจะเทียบให้ว่าปิดหนี้แบบไหนเสียดอกเบี้ยน้อยกว่า ใส่ "จ่ายวันที่" ด้วย ค่างวดจะขึ้นในปฏิทิน กดจ่ายแล้วระบบจดรายจ่ายและลดยอดหนี้ให้ตามเงินต้นโดยประมาณ</p></div>
       <button class="btn-line" id="d-add" type="button">+ เพิ่มหนี้</button></div>
     <div id="d-list" class="a-list"></div>
     <div class="goal-in"><label class="mini">นอกจากขั้นต่ำ จ่ายเพิ่มได้อีกเดือนละ (บาท) <input class="inp" id="d-extra" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label></div>
@@ -2266,7 +2304,7 @@ dash.calc('sectors', {
     o.goals = arr(d.goals).map((g) => ({ id: String(g.id || newId()), name: String(g.name || '').slice(0, 40), target: g.target === '' ? '' : +g.target || '', start: g.start === '' ? '' : +g.start || '', due: /^\d{4}-\d{2}$/.test(g.due || '') ? g.due : '' }));
     o.open = {}; if (d.open && typeof d.open === 'object') Object.entries(d.open).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v !== '' && v != null && isFinite(+v)) o.open[k] = +v; });
     o.budgets = {}; if (d.budgets && typeof d.budgets === 'object') Object.entries(d.budgets).forEach(([k, v]) => { if (+v > 0) o.budgets[String(k).slice(0, 40)] = +v; });
-    o.debts = arr(d.debts).map((x) => ({ id: String(x.id || newId()), name: String(x.name || '').slice(0, 60), bal: x.bal === '' ? '' : +x.bal || '', apr: x.apr === '' ? '' : +x.apr || '', min: x.min === '' ? '' : +x.min || '' }));
+    o.debts = arr(d.debts).map((x) => ({ id: String(x.id || newId()), name: String(x.name || '').slice(0, 60), bal: x.bal === '' ? '' : +x.bal || '', apr: x.apr === '' ? '' : +x.apr || '', min: x.min === '' ? '' : +x.min || '', day: +x.day >= 1 && +x.day <= 31 ? +x.day : '', paid: Array.isArray(x.paid) ? x.paid.filter((y) => typeof y === 'string').slice(-36) : [] }));
     o.extra = d.extra === '' || d.extra == null ? '' : +d.extra || '';
     o.bills = arr(d.bills).map((b) => ({ id: String(b.id || newId()), name: String(b.name || '').slice(0, 60), amount: b.amount === '' ? '' : +b.amount || '', day: Math.min(31, Math.max(1, +b.day || 1)), freq: b.freq === 'y' ? 'y' : 'm', month: Math.min(12, Math.max(1, +b.month || 1)), cat: String(b.cat || '').slice(0, 40), paid: Array.isArray(b.paid) ? b.paid.filter((x) => typeof x === 'string').slice(-24) : [] }));
     o.snaps = {}; if (d.snaps && typeof d.snaps === 'object') Object.entries(d.snaps).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v && isFinite(+v.a) && isFinite(+v.l)) o.snaps[k] = { a: +v.a, l: +v.l }; });
@@ -2425,7 +2463,7 @@ dash.calc('sectors', {
     $('p-left-h').textContent = dLeft && left > 0 ? `ใช้ได้วันละ ${baht(left / dLeft)} ถึงสิ้นเดือน` : 'เงินต้นเดือน บวกรายรับ หักรายจ่ายและเงินเก็บ';
     const oi = $('p-open'); if (document.activeElement !== oi) { oi.value = op.set ? op.v : ''; oi.placeholder = op.carry ? String(Math.round(op.v)) : 'เช่น 5000'; }
     $('p-open-h').textContent = op.set ? '' : op.carry ? 'ใช้ยอดที่เหลือจากเดือนก่อนให้ แก้ได้' : 'ใส่ครั้งแรกครั้งเดียว เดือนต่อไประบบใช้ยอดที่เหลือจากเดือนก่อนให้เอง';
-    drawGroups(s); drawWeek();
+    drawGroups(s); drawWeek(); drawCal();
     const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === ym) spent[e.cat || 'อื่นๆ'] = (spent[e.cat || 'อื่นๆ'] || 0) + e.amount; });
     const list = [...new Set([...Object.keys(M.budgets), ...Object.keys(spent), ...DEF.out])];
     list.sort((a, b) => (spent[b] || 0) - (spent[a] || 0) || (M.budgets[b] || 0) - (M.budgets[a] || 0));
@@ -2467,6 +2505,80 @@ dash.calc('sectors', {
     cats: () => ({ in: cats('in'), out: cats('out') }), refs: () => new Set(M.entries.map((e) => e.ref).filter(Boolean)),
     add: (list) => { list.forEach(({ doc, ...e }) => M.entries.push({ id: newId(), ...e })); save(); if (list.length) ym = ymOf(list[list.length - 1].date); refresh(); return list.length; } }));
   $('p-next').addEventListener('click', () => { ym = ymShift(ym, 1); drawBudget(); });
+
+  /* ---------- monthly calendar: daily in/out plus bills, debt installments and recurring income ---------- */
+  let selDay = null;
+  const kfmt = (v) => (v >= 1e6 ? (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k' : String(Math.round(v)));
+  const schedule = (m) => {
+    const a = m + '-01', z = m + '-31', t0 = today(), out = [];
+    const st = (done, d) => (done ? 'paid' : d < t0 ? 'late' : 'due');
+    M.bills.forEach((b) => { if (!(+b.amount > 0) && !b.name) return; datesIn(b, a, z).forEach((d) => out.push({ d, type: 'bill', o: b, name: b.name || 'บิล', amt: +b.amount || 0, st: st(b.paid.includes(d), d) })); });
+    M.debts.forEach((x) => { if (!(x.day >= 1) || !(+x.min > 0)) return; datesIn({ freq: 'm', day: x.day, month: 1 }, a, z).forEach((d) => { const done = x.paid.includes(d); if (!done && !(+x.bal > 0)) return; out.push({ d, type: 'debt', o: x, name: (x.name || 'หนี้') + ' (ค่างวด)', amt: +x.min, st: st(done, d) }); }); });
+    M.incomes.forEach((b) => { if (!(+b.amount > 0)) return; datesIn(b, a, z).forEach((d) => { const done = b.got.includes(d); out.push({ d, type: 'inc', o: b, name: b.name || 'รายรับประจำ', amt: incNet(b), st: done ? 'paid' : 'inc' }); }); });
+    return out;
+  };
+  const payBill = (b, d) => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: d <= today() ? d : today(), kind: 'out', amount: +b.amount, cat: b.cat || 'ค่าน้ำไฟเน็ตโทรศัพท์', note: b.name }); save(); refresh(); };
+  const payDebt = (x, d) => {
+    const amt = +x.min || 0; x.paid.push(d);
+    if (amt > 0) { M.entries.push({ id: newId(), date: d <= today() ? d : today(), kind: 'out', amount: amt, cat: 'ผ่อนชำระหนี้', note: x.name || 'ค่างวดหนี้' });
+      const bal = +x.bal || 0; const prin = Math.max(0, amt - bal * (+x.apr || 0) / 1200); x.bal = Math.max(0, Math.round((bal - prin) * 100) / 100); }
+    save(); drawDebts(true); refreshNW(); refresh();
+  };
+  const unpay = (it) => { const k = it.type === 'inc' ? 'got' : 'paid'; it.o[k] = it.o[k].filter((x) => x !== it.d); save(); refresh(); };
+  const drawCal = () => {
+    const wd = $('mc-wd'); if (!wd.childElementCount) ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].forEach((t) => wd.append(el('span', null, t)));
+    const [y, m] = ym.split('-').map(Number); const dim = new Date(y, m, 0).getDate(), lead = new Date(y, m - 1, 1).getDay(), t0 = today();
+    if (!selDay || ymOf(selDay) !== ym) selDay = ym === ymOf(t0) ? t0 : null;
+    const day = {}; const at = (d) => (day[d] = day[d] || { i: 0, o: 0, v: 0, e: [], s: [] });
+    M.entries.forEach((e) => { if (ymOf(e.date) !== ym) return; const x = at(e.date); x.e.push(e); if (e.kind === 'in') x.i += e.amount; else if (e.kind === 'sav') x.v += e.amount; else x.o += e.amount; });
+    schedule(ym).forEach((it) => at(it.d).s.push(it));
+    const g = $('mc-grid'); g.replaceChildren(); const wide = (g.clientWidth || window.innerWidth) >= 640;
+    const f = (v) => (wide ? Math.round(v).toLocaleString('th-TH') : kfmt(v));
+    for (let k = 0; k < lead; k++) g.append(el('div', 'mc-d pad'));
+    for (let n = 1; n <= dim; n++) {
+      const d = ym + '-' + String(n).padStart(2, '0'); const x = day[d];
+      const b = el('button', 'mc-d' + (d === t0 ? ' today' : '') + (d === selDay ? ' sel' : '') + (d > t0 ? ' future' : '')); b.type = 'button';
+      b.append(el('span', 'n', String(n)));
+      const lab = [`${n} ${ymTH(ym, { month: 'short' })}`];
+      if (x) {
+        if (x.i) { b.append(el('span', 'a i', '+' + f(x.i))); lab.push('รายรับ ' + baht(x.i)); }
+        if (x.o) { b.append(el('span', 'a', '−' + f(x.o))); lab.push('รายจ่าย ' + baht(x.o)); }
+        if (x.v) { b.append(el('span', 'a v', 'เก็บ ' + f(x.v))); lab.push('เก็บเงิน ' + baht(x.v)); }
+        if (x.s.length) { const dots = el('span', 'dots'); x.s.forEach((it) => { const i = el('i', 'dot-' + it.st); i.title = it.name; dots.append(i); }); b.append(dots); lab.push(x.s.map((it) => it.name).join(', ')); }
+      }
+      b.setAttribute('aria-label', lab.join(' · '));
+      b.addEventListener('click', () => { selDay = selDay === d ? null : d; drawCal(); if (selDay) { $('p-date').value = selDay; if (window.innerWidth < 720) $('mc-day').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } });
+      g.append(b);
+    }
+    const box = $('mc-day'); box.replaceChildren(); box.hidden = !selDay; if (!selDay) return;
+    const x = day[selDay] || { i: 0, o: 0, v: 0, e: [], s: [] };
+    box.append(el('h4', null, new Date(selDay + 'T00:00:00').toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' })));
+    box.append(el('div', 'mc-sum', x.e.length ? `รายรับ ${baht(x.i)} · รายจ่าย ${baht(x.o)}${x.v ? ` · เก็บเงิน ${baht(x.v)}` : ''}` : 'ยังไม่ได้จดรายการของวันนี้'));
+    if (x.s.length) {
+      box.append(el('div', 'mc-h5', 'บิล ค่างวด และรายรับประจำของวันนี้'));
+      x.s.forEach((it) => {
+        const r = el('div', 'mc-it'); const nm = el('span', null, it.name);
+        nm.append(el('small', null, it.type === 'inc' ? (it.st === 'paid' ? 'ได้รับแล้ว' : 'รายรับที่จะเข้า') : it.st === 'paid' ? 'จ่ายแล้ว' : it.st === 'late' ? 'เลยวันจ่ายแล้ว ยังไม่ได้กดจ่าย' : 'ยังไม่ถึงวันจ่าย'));
+        const act = el('span', 'act');
+        if (it.st === 'paid') { act.append(el('span', 'tag buy', it.type === 'inc' ? 'ได้รับแล้ว' : 'จ่ายแล้ว')); const u = el('button', 'edit', '↺'); u.type = 'button'; u.title = 'ยกเลิกสถานะ (รายการที่จดไว้ยังอยู่ ลบเองในรายการเดือนนี้)'; u.setAttribute('aria-label', u.title); u.addEventListener('click', () => unpay(it)); act.append(u); }
+        else { const p = el('button', 'btn-line sm', it.type === 'inc' ? 'ได้รับแล้ว' : 'จ่ายแล้ว'); p.type = 'button';
+          p.addEventListener('click', () => (it.type === 'inc' ? receive(it.o, it.d) : it.type === 'debt' ? payDebt(it.o, it.d) : payBill(it.o, it.d))); act.append(p); }
+        r.append(nm, el('span', 'amt ' + (it.type === 'inc' ? 'pos' : ''), baht(it.amt)), act); box.append(r);
+      });
+    }
+    if (x.e.length) {
+      box.append(el('div', 'mc-h5', 'รายการที่จดไว้'));
+      x.e.sort((a, b) => a.kind.localeCompare(b.kind)).forEach((e) => {
+        const r = el('div', 'mc-it'); const nm = el('span', null, e.cat || '–'); if (e.note) nm.append(el('small', null, e.note));
+        const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
+        const act = el('span', 'act'); act.append(ed);
+        r.append(nm, el('span', 'amt ' + (e.kind === 'in' ? 'pos' : ''), (e.kind === 'in' ? '+' : e.kind === 'sav' ? 'เก็บ ' : '−') + baht(e.amount)), act); box.append(r);
+      });
+    }
+    const add = el('button', 'btn-solid', '+ จดรายการของวันนี้'); add.type = 'button'; add.style.marginTop = '12px';
+    add.addEventListener('click', () => { if (editId) endEdit(); $('p-date').value = selDay; $('p-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => $('p-amt').focus({ preventScroll: true }), 350); });
+    box.append(add);
+  };
 
   /* ---------- groups of categories vs. income targets ---------- */
   const gTarget = (k, d) => { const t = (M.settings.gt || {})[k]; return t != null && t !== '' ? +t : d; };
@@ -2595,6 +2707,8 @@ dash.calc('sectors', {
           numIn(d.bal, 'ยอดหนี้ที่เหลือ', 'a-num', (v) => { d.bal = v; save(true); drawDebts(); refreshNW(); }),
           numIn(d.apr, 'ดอกเบี้ยต่อปี %', 'a-num sm2', (v) => { d.apr = v; save(true); drawDebts(); }),
           numIn(d.min, 'ผ่อนขั้นต่ำต่อเดือน', 'a-num', (v) => { d.min = v; save(true); drawDebts(); }),
+          (() => { const l = el('label', 'mini'); const i = el('input', 'inp sm'); i.type = 'number'; i.min = 1; i.max = 31; i.inputMode = 'numeric'; i.value = d.day || ''; i.placeholder = '–'; i.title = 'วันที่ต้องจ่ายค่างวดทุกเดือน จะขึ้นในปฏิทิน';
+            i.addEventListener('input', () => { const v = +i.value; d.day = v >= 1 && v <= 31 ? v : ''; save(true); }); l.append('จ่ายวันที่', i); return l; })(),
           delBtn('ลบหนี้', () => { if (confirm(`ลบ "${d.name || 'หนี้'}"?`)) { M.debts = M.debts.filter((x) => x !== d); save(); drawDebts(true); refreshNW(); } }));
         box.append(r);
       });
@@ -2612,7 +2726,7 @@ dash.calc('sectors', {
       box.append(card);
     });
   };
-  $('d-add').addEventListener('click', () => { M.debts.push({ id: newId(), name: '', bal: '', apr: '', min: '' }); save(); drawDebts(true); const n = $('d-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
+  $('d-add').addEventListener('click', () => { M.debts.push({ id: newId(), name: '', bal: '', apr: '', min: '', day: '', paid: [] }); save(); drawDebts(true); const n = $('d-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
   $('d-extra').addEventListener('input', () => { M.extra = $('d-extra').value === '' ? '' : +$('d-extra').value; save(true); drawDebts(); });
 
   /* ---------- recurring income (salary with gross and deductions, or plain income) ---------- */
@@ -2748,7 +2862,7 @@ dash.calc('sectors', {
       const row = el('div', 'cal-row'); const dd = el('div', 'cal-d'); dd.append(el('b', null, dTH(d)), el('small', null, late ? 'เลยกำหนด' : n === 0 ? 'วันนี้' : `อีก ${n} วัน`));
       const w = el('div', 'cal-w'); w.append(el('span', 'sym', b.name || 'บิล'), el('span', null, baht(+b.amount || 0)));
       if (paid) w.append(el('span', 'tag buy', 'จ่ายเรียบร้อย'));
-      else { const p = el('button', 'btn-line sm', 'จ่ายแล้ว'); p.type = 'button'; p.addEventListener('click', () => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: today(), kind: 'out', amount: +b.amount, cat: b.cat || 'ค่าน้ำไฟเน็ตโทรศัพท์', note: b.name }); save(); refresh(); }); w.append(p); if (late) w.append(el('span', 'tag trap', 'เลยกำหนด')); }
+      else { const p = el('button', 'btn-line sm', 'จ่ายแล้ว'); p.type = 'button'; p.addEventListener('click', () => payBill(b, d)); w.append(p); if (late) w.append(el('span', 'tag trap', 'เลยกำหนด')); }
       row.append(dd, w); due.append(row);
     });
   };
@@ -2798,7 +2912,7 @@ dash.calc('sectors', {
   const rebuildAll = () => { drawAccounts(); drawDebts(true); drawBills(true); drawIncomes(true); drawGoals(true); buildRet(); drawChips(); };
   document.addEventListener('vg:view', (e) => { shown = e.detail === 'money'; if (shown) { rebuildAll(); refresh(); } });
   document.addEventListener('vg:ready', () => { if (shown) { drawAccounts(); refresh(); } });
-  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) { drawNWChart(); drawAssetPie(); drawWeek(); drawRet(); } }, 200); });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) { drawNWChart(); drawAssetPie(); drawWeek(); drawCal(); drawRet(); } }, 200); });
   const summary = () => {
     const t = totals(); const prevK = Object.keys(M.snaps).filter((k) => k < ymOf(today())).sort().pop(); const prev = prevK ? M.snaps[prevK] : null;
     const m = ymOf(today()); const s = monthSum(m); const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === m) spent[e.cat] = (spent[e.cat] || 0) + e.amount; });
