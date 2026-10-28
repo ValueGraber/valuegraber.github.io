@@ -17,10 +17,11 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 |---|---|
 | `/* calm pass` | final CSS overrides (font IBM Plex Sans Thai, hairlines) |
 | `id="view-home"` / `/* home: one-screen` | home dashboard cards + full backup/restore |
-| `id="view-money"` / `/* personal money` | net worth + asset pie (`drawAssetPie`), budget (kinds in/out/sav; `sav` is not expense; opening balance `M.open` → `leftOf`; groups `GROUPS`/`groupOf` with % targets `settings.gt`, map `settings.cg`; `drawWeek` pie + weekly), month calendar `drawCal` (`schedule(ym)` = bills, debt installments from `debt.day`, recurring income; pay/receive buttons, `payDebt` lowers the balance by the principal part), savings goals `M.goals` (entries link by `e.goal`), emergency fund, recurring income + bills (sub `fixed`; `M.incomes` type sal/other, gross + wht/sso/pvd/oth, `receive` logs an `in` entry carrying `sal:{g,t,s,p,o}`; `VGMoney.salary(y)` = received + still expected, used by the biz tax via `eff()` when the boxes are empty), debts (sub `debt`), retirement (`window.VGMoney`) |
+| `id="view-money"` / `/* personal money` | net worth + asset pie (`drawAssetPie`), budget (kinds in/out/sav; `sav` is not expense; opening balance `M.open` → `leftOf`; groups `GROUPS`/`groupOf` with % targets `settings.gt`, map `settings.cg`; `drawWeek` pie + weekly), month calendar `drawCal` (shown on the nw sub-page, own month nav `mc-prev/next`) (`schedule(ym)` = bills, debt installments from `debt.day`, recurring income; pay/receive buttons, `payDebt` lowers the balance by the principal part), savings goals `M.goals` (entries link by `e.goal`), emergency fund, recurring income + bills (sub `fixed`; `M.incomes` type sal/other, gross + wht/sso/pvd/oth, `receive` logs an `in` entry carrying `sal:{g,t,s,p,o}`; `VGMoney.salary(y)` = received + still expected, used by the biz tax via `eff()` when the boxes are empty), debts (sub `debt`), retirement (`window.VGMoney`) |
 | `id="view-scan"` / `const SIGNALS` | stock scanner, crypto list (`drawCrypto`), today summary (`drawToday`), detail sheet (`openSheet`) |
 | `id="view-port"` / `/* portfolio: a single ledger` | trades/fx/div ledger, rebalance, DCA (`dcaS`, `boughtMap`), sell signals (`checkHolding`), growth, goal, calendar, yearly tax table (`window.VGPort`) |
 | `id="view-biz"` / `/* business ledger` | income/expense, product cost + stock, invoices (`printDoc`, `bahtText`), tax 40(8) + deductions (`DITEMS`, `taxWith`) (`window.VGBiz`) |
+| `/* ---------- layout: each card is a widget` | home cards: order / size (n,w,t,b) / hidden kept in `VGPrefs.get('home')`; `hc-left` and `hc-goals` hidden by default |
 | `/* app preferences` | `window.VGPrefs` (dca, goal, ded, prof, slipMe). Taxpayer ID stays local only (`VGPrefs.tin`) |
 | `/* slip scanner` | Tesseract.js 5.1.1 OCR (tha+eng) for slips and receipts (`window.VGSlip`) |
 | `<script type="module">` | Firebase sync: `STORES` = portfolios / business / money docs per uid, `window.VGSync.push(col)` |
@@ -31,6 +32,7 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Navigation: `window.VGNav.go(view, sub)`. Views: home, money, scan, port, biz.
 - Storage keys: `valuegrab-portfolio-v1`, `valuegrab-biz-v1`, `valuegrab-money-v1`, `valuegrab-prefs-v1`, `valuegrab-watch-v1`.
 - Firestore rules (already published by Mon): `match /{col}/{uid}`, owner only, `col in ['portfolios','business','money']`. A new top-level collection needs a rule change.
+- Expense categories: housing + water/electricity = `ที่พักและค่าน้ำไฟ`, internet/phone = `ค่าเน็ตและโทรศัพท์`; old names are mapped in `norm` (`mapCat`).
 - Editing pattern: Python `rep(old, new)` with `assert count == 1`, then `python3 tools/build.py && node tools/smoke.js`, then commit and push. The remote may print "repository moved": that is harmless.
 - Commit message trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 

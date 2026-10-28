@@ -469,6 +469,19 @@ details.ded summary { color: var(--jade); }
 .home-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
 .hcard { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
 .hcard.tall { grid-row: span 2; }
+.hcard.wide { grid-column: span 2; }
+.hcard.big { grid-column: span 2; grid-row: span 2; }
+.home-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.home-head #h-edit { flex: none; }
+.htools { display: none; flex-wrap: wrap; gap: 4px; margin: -2px 0 10px; }
+.home-grid.editing .htools { display: flex; }
+.home-grid.editing .hcard { outline: 2px dashed var(--line); outline-offset: 3px; }
+.htools button { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 3px 10px; font: inherit; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.htools button:disabled { opacity: .35; cursor: default; }
+.htools .hx { margin-left: auto; color: var(--brick); }
+.h-tray { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 12px 16px; margin-bottom: 14px; font-size: 14px; color: var(--ink-2); }
+.h-tray[hidden] { display: none; }
+.h-tray .sp { flex: 1; }
 .hcard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 .hcard h3 { margin: 0; font-size: 16px; }
 .hlink { border: 0; background: none; color: var(--jade); font-size: 14px; cursor: pointer; padding: 2px 0; font-family: inherit; white-space: nowrap; }
@@ -498,7 +511,7 @@ details.ded summary { color: var(--jade); }
 .hcal:last-child { border-bottom: 0; }
 .hcal b { font-family: var(--font); }
 @media (max-width: 980px) { .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .home-grid { grid-template-columns: 1fr; gap: 10px; } .hcard.tall { grid-row: auto; } .h-title { font-size: 22px; } .tabs button { padding: 8px 13px; font-size: 16px; } }
+@media (max-width: 640px) { .home-grid { grid-template-columns: 1fr; gap: 10px; } .hcard.tall, .hcard.big { grid-row: auto; } .hcard.wide, .hcard.big { grid-column: auto; } .h-title { font-size: 22px; } .tabs button { padding: 8px 13px; font-size: 16px; } }
 
 /* calm pass: one typeface, fewer weights, hairlines instead of shadows */
 body { font-size: 17px; line-height: 1.65; letter-spacing: 0; }
@@ -758,7 +771,9 @@ body.slip-open { overflow: hidden; }
     <div class="pf-hint" id="a-msg" role="status"></div>
   </section>
 <div id="view-home" hidden>
-  <header class="home-head"><p class="stamp" id="h-stamp">กำลังโหลดข้อมูลล่าสุด</p><h1 class="h-title" id="h-verdict">ภาพรวมวันนี้</h1></header>
+  <header class="home-head"><div><p class="stamp" id="h-stamp">กำลังโหลดข้อมูลล่าสุด</p><h1 class="h-title" id="h-verdict">ภาพรวมวันนี้</h1></div>
+    <button type="button" class="btn-line sm" id="h-edit">จัดหน้าแรก</button></header>
+  <div class="h-tray" id="h-tray" hidden></div>
   <div class="home-grid">
     <article class="hcard" id="hc-nw"><header><h3>ทรัพย์สินหลังหักหนี้</h3><button type="button" class="hlink" data-go="money:nw">ดูทั้งหมด →</button></header><div class="hbody" id="h-nw"></div></article>
     <article class="hcard tall" id="hc-picks"><header><h3>น่าซื้อสะสม</h3><button type="button" class="hlink" data-go="scan:picks">ดูทั้งหมด →</button></header><div class="hbody" id="h-picks"></div></article>
@@ -769,6 +784,8 @@ body.slip-open { overflow: hidden; }
     <article class="hcard" id="hc-today"><header><h3>อะไรเปลี่ยนวันนี้</h3><button type="button" class="hlink" data-go="scan:picks">ดูสรุป →</button></header><div class="hbody" id="h-today"></div></article>
     <article class="hcard" id="hc-goal"><header><h3>เป้าหมายการลงทุน</h3><button type="button" class="hlink" data-go="port:grow">ดูแผน →</button></header><div class="hbody" id="h-goal"></div></article>
     <article class="hcard" id="hc-biz"><header><h3>ธุรกิจเดือนนี้</h3><button type="button" class="hlink" data-go="biz:sum">เปิดธุรกิจ →</button></header><div class="hbody" id="h-biz"></div></article>
+    <article class="hcard" id="hc-left"><header><h3>เงินที่ยังใช้ได้เดือนนี้</h3><button type="button" class="hlink" data-go="money:budget">จดรายการ →</button></header><div class="hbody" id="h-left"></div></article>
+    <article class="hcard" id="hc-goals"><header><h3>เป้าหมายออม</h3><button type="button" class="hlink" data-go="money:goals">ดูเป้าหมาย →</button></header><div class="hbody" id="h-goals"></div></article>
     <article class="hcard" id="hc-tax"><header><h3>ภาษีธุรกิจปีนี้</h3><button type="button" class="hlink" data-go="biz:tax">ดูรายละเอียด →</button></header><div class="hbody" id="h-tax"></div></article>
   </div>
   <section class="home-data" id="home-data">
@@ -1145,6 +1162,14 @@ body.slip-open { overflow: hidden; }
     <div><div class="k">หนี้สินทั้งหมด</div><div class="v" id="m-li">0 บาท</div><div class="h" id="m-li-h"></div></div>
     <div><div class="k">เงินฉุกเฉิน</div><div class="v" id="m-em">0 เดือน</div><div class="h" id="m-em-h"></div></div>
   </div>
+  <section class="panel" style="margin-bottom:16px" data-sub="nw">
+    <div class="ph"><div><h3>ปฏิทินรายรับรายจ่าย</h3><p>แต่ละวันมีเงินเข้าออกเท่าไหร่ และบิล ค่างวดหนี้ รายรับประจำวันไหนจ่ายหรือได้รับแล้ว กดที่วันเพื่อดูรายละเอียด</p></div>
+      <div class="b-month sm"><button type="button" class="b-nav" id="mc-prev" aria-label="เดือนก่อน">‹</button><b id="mc-month"></b><button type="button" class="b-nav" id="mc-next" aria-label="เดือนถัดไป">›</button></div></div>
+    <div class="mc-wd" id="mc-wd"></div>
+    <div class="mc-grid" id="mc-grid"></div>
+    <div class="mc-leg"><span><i class="dot-paid"></i>จ่ายแล้ว / ได้รับแล้ว</span><span><i class="dot-due"></i>ยังไม่ถึงวันจ่าย</span><span><i class="dot-late"></i>เลยวันแล้ว ยังไม่จ่าย</span><span><i class="dot-inc"></i>รายรับที่จะเข้า</span></div>
+    <div class="mc-day" id="mc-day" hidden></div>
+  </section>
   <section class="panel" data-sub="nw">
     <div class="ph"><div><h3>ทรัพย์สินหลังหักหนี้ แต่ละเดือน</h3><p>ทรัพย์สินทั้งหมดหักหนี้แล้ว ระบบจดยอดของแต่ละเดือนไว้ให้เองทุกครั้งที่เปิดหน้านี้</p></div></div>
     <div class="chart" id="m-chart"></div>
@@ -1170,13 +1195,6 @@ body.slip-open { overflow: hidden; }
     <div><div class="k">เก็บเงิน/ลงทุน</div><div class="v sav" id="p-sv">0 บาท</div><div class="h" id="p-sv-h"></div></div>
     <div><div class="k">เงินที่ยังใช้ได้</div><div class="v" id="p-left">0 บาท</div><div class="h" id="p-left-h"></div></div>
   </div>
-  <section class="panel" style="margin-bottom:16px" data-sub="budget">
-    <div class="ph"><div><h3>ปฏิทินรายรับรายจ่าย</h3><p>ดูว่าแต่ละวันมีเงินเข้าออกเท่าไหร่ และบิล ค่างวดหนี้ รายรับประจำวันไหนจ่ายหรือได้รับแล้ว กดที่วันเพื่อดูรายละเอียดและจดรายการของวันนั้น</p></div></div>
-    <div class="mc-wd" id="mc-wd"></div>
-    <div class="mc-grid" id="mc-grid"></div>
-    <div class="mc-leg"><span><i class="dot-paid"></i>จ่ายแล้ว / ได้รับแล้ว</span><span><i class="dot-due"></i>ยังไม่ถึงวันจ่าย</span><span><i class="dot-late"></i>เลยวันแล้ว ยังไม่จ่าย</span><span><i class="dot-inc"></i>รายรับที่จะเข้า</span></div>
-    <div class="mc-day" id="mc-day" hidden></div>
-  </section>
   <section class="panel" id="p-add" data-sub="budget">
     <h3 id="p-title">จดรายรับรายจ่ายส่วนตัว</h3>
     <p id="p-sub">แยกจากเงินธุรกิจ เงินที่โอนจากร้านมาใช้เองให้ลงเป็นรายรับหมวด "โอนจากธุรกิจ" เงินที่โอนไปเก็บหรือลงทุนให้ลงเป็น "เก็บเงิน/ลงทุน" ยอดนี้จะไม่นับเป็นรายจ่าย</p>
@@ -2283,13 +2301,17 @@ dash.calc('sectors', {
   const dTH = (d, o = { day: 'numeric', month: 'short' }) => new Date(d + 'T00:00:00').toLocaleDateString('th-TH', o);
   const TYPES = { bank: 'บัญชีเงินฝาก', cash: 'เงินสด', gold: 'ทองคำ', fund: 'กองทุนรวม', thstock: 'หุ้นไทย', crypto: 'คริปโต', property: 'บ้าน/ที่ดิน/รถ', biz: 'เงินทุนในธุรกิจ', other: 'อื่นๆ' };
   const INVEST = ['gold', 'fund', 'thstock', 'crypto'];
-  const DEF = { out: ['อาหารและเครื่องดื่ม', 'เดินทาง', 'ที่พัก/ค่าเช่า', 'ค่าน้ำไฟเน็ตโทรศัพท์', 'ของใช้/ช้อปปิ้ง', 'สุขภาพ', 'ครอบครัว', 'บันเทิง/ท่องเที่ยว', 'การศึกษา', 'ประกัน', 'ผ่อนชำระหนี้', 'อื่นๆ'], in: ['เงินเดือน', 'โอนจากธุรกิจ', 'รายได้เสริม', 'รายได้อื่น'] };
+  const DEF = { out: ['อาหารและเครื่องดื่ม', 'เดินทาง', 'ที่พักและค่าน้ำไฟ', 'ค่าเน็ตและโทรศัพท์', 'ของใช้/ช้อปปิ้ง', 'สุขภาพ', 'ครอบครัว', 'บันเทิง/ท่องเที่ยว', 'การศึกษา', 'ประกัน', 'ผ่อนชำระหนี้', 'อื่นๆ'], in: ['เงินเดือน', 'โอนจากธุรกิจ', 'รายได้เสริม', 'รายได้อื่น'] };
   DEF.sav = ['เงินออม', 'เงินฉุกเฉิน', 'ลงทุนหุ้น', 'กองทุน', 'ทองคำ'];
   const BAHT_G = 15.244, OZ_G = 31.1035, PURITY = 0.965;
   const PAL = ['#0f6e5a', '#3a9b7f', '#7cc4a9', '#a86a12', '#d9a95b', '#5b6f8f', '#9aaac4', '#8a5a7a', '#c8a2bd', '#b9e2d2'];
   const GROUPS = [['daily', 'ใช้จ่ายรายวัน', 50, false], ['bills', 'บิลและหนี้', 20, false], ['save', 'เงินเก็บ', 15, true], ['invest', 'ลงทุน', 15, true]];
-  const BILLS_DEF = ['ที่พัก/ค่าเช่า', 'ค่าน้ำไฟเน็ตโทรศัพท์', 'ประกัน', 'ผ่อนชำระหนี้'];
+  const BILLS_DEF = ['ที่พักและค่าน้ำไฟ', 'ค่าเน็ตและโทรศัพท์', 'ประกัน', 'ผ่อนชำระหนี้'];
   const KLABEL = { in: 'รายรับ', out: 'รายจ่าย', sav: 'เก็บเงิน/ลงทุน' };
+  /* housing now includes water and electricity; internet and phone are their own category. Older names are moved on load. */
+  const HOUSE = 'ที่พักและค่าน้ำไฟ', NET = 'ค่าเน็ตและโทรศัพท์', NET_RE = /(เน็ต|net|wi-?fi|โทรศัพท์|มือถือ|AIS|TRUE|DTAC|3BB)/i;
+  const mapCat = (c, note) => (c === 'ที่พัก/ค่าเช่า' ? HOUSE : c === 'ค่าน้ำไฟเน็ตโทรศัพท์' ? (NET_RE.test(note || '') ? NET : HOUSE) : c);
+  const billCat = (b) => b.cat || (NET_RE.test(b.name || '') ? NET : HOUSE);
 
   const blank = () => ({ accounts: [], entries: [], budgets: {}, debts: [], extra: '', bills: [], snaps: {}, settings: {}, goals: [], open: {}, incomes: [] });
   let M = blank();
@@ -2309,6 +2331,10 @@ dash.calc('sectors', {
     o.bills = arr(d.bills).map((b) => ({ id: String(b.id || newId()), name: String(b.name || '').slice(0, 60), amount: b.amount === '' ? '' : +b.amount || '', day: Math.min(31, Math.max(1, +b.day || 1)), freq: b.freq === 'y' ? 'y' : 'm', month: Math.min(12, Math.max(1, +b.month || 1)), cat: String(b.cat || '').slice(0, 40), paid: Array.isArray(b.paid) ? b.paid.filter((x) => typeof x === 'string').slice(-24) : [] }));
     o.snaps = {}; if (d.snaps && typeof d.snaps === 'object') Object.entries(d.snaps).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v && isFinite(+v.a) && isFinite(+v.l)) o.snaps[k] = { a: +v.a, l: +v.l }; });
     o.settings = d.settings && typeof d.settings === 'object' ? JSON.parse(JSON.stringify(d.settings)) : {};
+    o.entries.forEach((e) => { e.cat = mapCat(e.cat, e.note); });
+    o.bills.forEach((b) => { if (b.cat) b.cat = mapCat(b.cat, b.name); });
+    const bud = {}; Object.entries(o.budgets).forEach(([k, v]) => { const n = mapCat(k, ''); bud[n] = (bud[n] || 0) + v; }); o.budgets = bud;
+    if (o.settings.cg) { const cg = {}; Object.entries(o.settings.cg).forEach(([k, v]) => { cg[mapCat(k, '')] = v; }); o.settings.cg = cg; }
     return o;
   };
   try { M = norm(JSON.parse(localStorage.getItem(MKEY) || 'null')); } catch (e) { /* in memory */ }
@@ -2508,6 +2534,9 @@ dash.calc('sectors', {
 
   /* ---------- monthly calendar: daily in/out plus bills, debt installments and recurring income ---------- */
   let selDay = null;
+  const toBudget = () => { if (window.VGNav) window.VGNav.go('money', 'budget'); };
+  $('mc-prev').addEventListener('click', () => { ym = ymShift(ym, -1); selDay = null; drawBudget(); });
+  $('mc-next').addEventListener('click', () => { ym = ymShift(ym, 1); selDay = null; drawBudget(); });
   const kfmt = (v) => (v >= 1e6 ? (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k' : String(Math.round(v)));
   const schedule = (m) => {
     const a = m + '-01', z = m + '-31', t0 = today(), out = [];
@@ -2517,7 +2546,7 @@ dash.calc('sectors', {
     M.incomes.forEach((b) => { if (!(+b.amount > 0)) return; datesIn(b, a, z).forEach((d) => { const done = b.got.includes(d); out.push({ d, type: 'inc', o: b, name: b.name || 'รายรับประจำ', amt: incNet(b), st: done ? 'paid' : 'inc' }); }); });
     return out;
   };
-  const payBill = (b, d) => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: d <= today() ? d : today(), kind: 'out', amount: +b.amount, cat: b.cat || 'ค่าน้ำไฟเน็ตโทรศัพท์', note: b.name }); save(); refresh(); };
+  const payBill = (b, d) => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: d <= today() ? d : today(), kind: 'out', amount: +b.amount, cat: billCat(b), note: b.name }); save(); refresh(); };
   const payDebt = (x, d) => {
     const amt = +x.min || 0; x.paid.push(d);
     if (amt > 0) { M.entries.push({ id: newId(), date: d <= today() ? d : today(), kind: 'out', amount: amt, cat: 'ผ่อนชำระหนี้', note: x.name || 'ค่างวดหนี้' });
@@ -2526,6 +2555,7 @@ dash.calc('sectors', {
   };
   const unpay = (it) => { const k = it.type === 'inc' ? 'got' : 'paid'; it.o[k] = it.o[k].filter((x) => x !== it.d); save(); refresh(); };
   const drawCal = () => {
+    $('mc-month').textContent = ymTH(ym);
     const wd = $('mc-wd'); if (!wd.childElementCount) ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].forEach((t) => wd.append(el('span', null, t)));
     const [y, m] = ym.split('-').map(Number); const dim = new Date(y, m, 0).getDate(), lead = new Date(y, m - 1, 1).getDay(), t0 = today();
     if (!selDay || ymOf(selDay) !== ym) selDay = ym === ymOf(t0) ? t0 : null;
@@ -2547,7 +2577,7 @@ dash.calc('sectors', {
         if (x.s.length) { const dots = el('span', 'dots'); x.s.forEach((it) => { const i = el('i', 'dot-' + it.st); i.title = it.name; dots.append(i); }); b.append(dots); lab.push(x.s.map((it) => it.name).join(', ')); }
       }
       b.setAttribute('aria-label', lab.join(' · '));
-      b.addEventListener('click', () => { selDay = selDay === d ? null : d; drawCal(); if (selDay) { $('p-date').value = selDay; if (window.innerWidth < 720) $('mc-day').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } });
+      b.addEventListener('click', () => { selDay = selDay === d ? null : d; drawCal(); if (selDay) { if (!editId) $('p-date').value = selDay; if (window.innerWidth < 720) $('mc-day').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } });
       g.append(b);
     }
     const box = $('mc-day'); box.replaceChildren(); box.hidden = !selDay; if (!selDay) return;
@@ -2570,13 +2600,13 @@ dash.calc('sectors', {
       box.append(el('div', 'mc-h5', 'รายการที่จดไว้'));
       x.e.sort((a, b) => a.kind.localeCompare(b.kind)).forEach((e) => {
         const r = el('div', 'mc-it'); const nm = el('span', null, e.cat || '–'); if (e.note) nm.append(el('small', null, e.note));
-        const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
+        const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => { toBudget(); startEdit(e); });
         const act = el('span', 'act'); act.append(ed);
         r.append(nm, el('span', 'amt ' + (e.kind === 'in' ? 'pos' : ''), (e.kind === 'in' ? '+' : e.kind === 'sav' ? 'เก็บ ' : '−') + baht(e.amount)), act); box.append(r);
       });
     }
     const add = el('button', 'btn-solid', '+ จดรายการของวันนี้'); add.type = 'button'; add.style.marginTop = '12px';
-    add.addEventListener('click', () => { if (editId) endEdit(); $('p-date').value = selDay; $('p-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => $('p-amt').focus({ preventScroll: true }), 350); });
+    add.addEventListener('click', () => { toBudget(); if (editId) endEdit(); $('p-date').value = selDay; $('p-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => $('p-amt').focus({ preventScroll: true }), 350); });
     box.append(add);
   };
 
@@ -2919,7 +2949,7 @@ dash.calc('sectors', {
     const over = Object.entries(M.budgets).filter(([c, b]) => (spent[c] || 0) > b * 0.8).map(([c, b]) => ({ c, sp: spent[c] || 0, b })).sort((a, b) => b.sp / b.b - a.sp / a.b);
     const ex = emExp();
     return { has: !!(M.accounts.length || M.debts.length || usPort()), entries: M.entries.length, ...t, change: prev ? t.nw - (prev.a - prev.l) : null, prevK,
-      month: s, left: leftOf(m), budget: budgetTotal(), over, emMonths: ex ? t.em / ex : null, emTarget: +M.settings.emMonths || 6, bills: dueBills(14), incomes: dueIncomes(14) };
+      month: s, left: leftOf(m), budget: budgetTotal(), over, emMonths: ex ? t.em / ex : null, emTarget: +M.settings.emMonths || 6, bills: dueBills(14), incomes: dueIncomes(14), goals: M.goals.filter((g) => g.name).map((g) => ({ name: g.name, have: goalSum(g), target: +g.target || 0 })) };
   };
   window.VGMoney = { get: () => M, summary, salary: salaryYear, replace: (d) => { M = norm(d); keep(); if (shown) { rebuildAll(); refresh(); } document.dispatchEvent(new Event('vg:data')); } };
   setKind('out'); $('p-date').value = today();
@@ -3691,6 +3721,20 @@ dash.calc('sectors', {
       MS.over.slice(0, 2).forEach((x) => kv(bu, x.c, `${baht(x.sp)} / ${baht(x.b)}`, x.sp > x.b ? 'neg' : ''));
     }
 
+    const lf = $('h-left'); lf.replaceChildren();
+    if (!MS || !MS.entries) empty(lf, 'จดรายรับรายจ่ายและใส่เงินในมือต้นเดือน เพื่อดูว่าเดือนนี้ยังใช้ได้อีกเท่าไหร่', 'เริ่มจด', 'money:budget');
+    else {
+      const t = new Date(); const dl = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate() - t.getDate() + 1;
+      lf.append(el('div', 'hbig ' + (MS.left >= 0 ? 'pos' : 'neg'), baht(MS.left)), el('div', 'hsub', MS.left > 0 ? `ใช้ได้วันละ ${baht(MS.left / dl)} ถึงสิ้นเดือน` : 'เดือนนี้ใช้เกินแล้ว'));
+      kv(lf, 'รายรับ', baht(MS.month.i), 'pos'); kv(lf, 'รายจ่าย', baht(MS.month.o)); if (MS.month.v) kv(lf, 'เก็บเงิน/ลงทุน', baht(MS.month.v));
+    }
+    const gl = $('h-goals'); gl.replaceChildren();
+    if (!MS || !MS.goals || !MS.goals.length) empty(gl, 'ตั้งเป้าหมายออม เช่น เที่ยว ซื้อรถ แล้วดูว่าใกล้ครบหรือยัง', 'ตั้งเป้าหมาย', 'money:goals');
+    else MS.goals.slice(0, 4).forEach((x) => {
+      const sh = x.target ? Math.min(1, x.have / x.target) : 0; kv(gl, x.name, x.target ? `${Math.round(sh * 100)}%` : baht(x.have), sh >= 1 ? 'pos' : '');
+      if (x.target) { const bar = el('div', 'hbar'); const i = el('i'); i.style.width = sh * 100 + '%'; if (sh < 0.5) i.style.background = 'var(--ochre)'; bar.append(i); gl.append(bar, el('div', 'hsub', `${baht(x.have)} จาก ${baht(x.target)}`)); }
+    });
+
     const g = $('h-goal'); g.replaceChildren();
     if (!P || !P.goal || P.goal.now == null) g.append(el('div', 'hsub', 'ตั้งเป้าหมายเงินลงทุนในแท็บพอร์ต'));
     else {
@@ -3749,8 +3793,44 @@ dash.calc('sectors', {
       $('bk-msg').textContent = 'กู้คืนข้อมูลเรียบร้อยแล้ว'; render();
     } catch (e) { $('bk-msg').textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองทั้งหมดของ ValueGrab'; }
   });
+  /* ---------- layout: each card is a widget the person can move, resize, hide and add back ---------- */
+  const grid = document.querySelector('#view-home .home-grid');
+  const CARDS = [...grid.querySelectorAll(':scope > .hcard')].map((c) => c.id);
+  const DEF_HIDDEN = ['hc-left', 'hc-goals'], DEF_SIZE = { 'hc-picks': 't' };
+  const SIZES = [['n', 'ปกติ', ''], ['w', 'กว้าง', 'wide'], ['t', 'สูง', 'tall'], ['b', 'ใหญ่', 'big']];
+  let editing = false;
+  const title = (id) => { const h = $(id).querySelector('h3'); return h ? h.textContent : id; };
+  const lay = () => {
+    const L = (window.VGPrefs && window.VGPrefs.get('home', null)) || {};
+    const ord = (Array.isArray(L.order) ? L.order : []).filter((id) => CARDS.includes(id));
+    return { order: [...ord, ...CARDS.filter((id) => !ord.includes(id))], hidden: (Array.isArray(L.hidden) ? L.hidden : DEF_HIDDEN).filter((id) => CARDS.includes(id)), size: { ...DEF_SIZE, ...(L.size || {}) } };
+  };
+  const keepLay = (L) => { if (window.VGPrefs) window.VGPrefs.set('home', L); applyLay(); };
+  const applyLay = () => {
+    const L = lay(); const vis = L.order.filter((id) => !L.hidden.includes(id));
+    L.order.forEach((id) => {
+      const c = $(id); grid.append(c); c.hidden = L.hidden.includes(id);
+      SIZES.forEach(([, , cls]) => cls && c.classList.remove(cls)); const sz = SIZES.find((x) => x[0] === (L.size[id] || 'n')) || SIZES[0]; if (sz[2]) c.classList.add(sz[2]);
+      let tb = c.querySelector(':scope > .htools'); if (!tb) { tb = el('div', 'htools'); c.prepend(tb); } tb.replaceChildren();
+      const k = vis.indexOf(id); const btn = (t, label, fn, dis, cls) => { const b = el('button', cls || null, t); b.type = 'button'; b.title = label; b.setAttribute('aria-label', `${label}: ${title(id)}`); b.disabled = !!dis; b.addEventListener('click', fn); tb.append(b); };
+      const move = (dir) => { const v = [...vis]; const a = v.indexOf(id), b2 = a + dir; [v[a], v[b2]] = [v[b2], v[a]]; keepLay({ ...L, order: [...v, ...L.order.filter((x) => !v.includes(x))] }); };
+      btn('←', 'ย้ายไปก่อนหน้า', () => move(-1), k <= 0); btn('→', 'ย้ายไปถัดไป', () => move(1), k < 0 || k >= vis.length - 1);
+      btn('ขนาด ' + sz[1], 'เปลี่ยนขนาด', () => { const n = SIZES[(SIZES.indexOf(sz) + 1) % SIZES.length][0]; keepLay({ ...L, size: { ...L.size, [id]: n } }); });
+      btn('ซ่อน', 'ซ่อนการ์ด', () => keepLay({ ...L, hidden: [...L.hidden, id] }), false, 'hx');
+    });
+    grid.classList.toggle('editing', editing); $('h-edit').textContent = editing ? 'เสร็จ' : 'จัดหน้าแรก';
+    const tray = $('h-tray'); tray.hidden = !editing; tray.replaceChildren(); if (!editing) return;
+    tray.append(el('span', null, L.hidden.length ? 'การ์ดที่ซ่อนไว้ กดเพื่อเพิ่ม:' : 'แสดงครบทุกการ์ดแล้ว'));
+    L.hidden.forEach((id) => { const b = el('button', 'btn-line sm', '+ ' + title(id)); b.type = 'button'; b.addEventListener('click', () => keepLay({ ...L, hidden: L.hidden.filter((x) => x !== id), order: [...L.order.filter((x) => x !== id), id] })); tray.append(b); });
+    tray.append(el('span', 'sp'));
+    const rs = el('button', 'btn-line sm', 'คืนค่าเริ่มต้น'); rs.type = 'button'; rs.addEventListener('click', () => { if (confirm('จัดหน้าแรกกลับเป็นแบบเดิม?')) keepLay({}); }); tray.append(rs);
+  };
+  $('h-edit').addEventListener('click', () => { editing = !editing; applyLay(); });
+  document.addEventListener('vg:prefs', applyLay);
+  applyLay();
+
   ['vg:ready', 'vg:data', 'vg:watch'].forEach((ev) => document.addEventListener(ev, () => setTimeout(render, 0)));
-  document.addEventListener('vg:view', (e) => { if (e.detail === 'home') render(); });
+  document.addEventListener('vg:view', (e) => { if (e.detail === 'home') render(); else if (editing) { editing = false; applyLay(); } });
   window.addEventListener('storage', render);
   render();
 })();
@@ -3773,7 +3853,8 @@ dash.calc('sectors', {
   document.querySelectorAll('#slip-mode button').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.v)));
   const CATK = [[/(7-?eleven|เซเว่น|ร้านอาหาร|อาหาร|กาแฟ|coffee|cafe|คาเฟ่|KFC|McDonald|ก๋วยเตี๋ยว|ชาบู|บุฟเฟ่|Starbucks|Amazon|เครื่องดื่ม)/i, 'อาหารและเครื่องดื่ม'],
     [/(ปตท|PTT|บางจาก|Bangchak|Shell|เชลล์|Caltex|คาลเท็กซ์|Esso|น้ำมัน|ดีเซล|แก๊สโซฮอล์|BTS|MRT|ทางด่วน)/i, 'เดินทาง'],
-    [/(การไฟฟ้า|การประปา|ค่าไฟ|ค่าน้ำ|AIS|TRUE|DTAC|อินเทอร์เน็ต|Internet|โทรศัพท์)/i, 'ค่าน้ำไฟเน็ตโทรศัพท์'],
+    [/(AIS|TRUE|DTAC|3BB|อินเทอร์เน็ต|Internet|โทรศัพท์|มือถือ)/i, 'ค่าเน็ตและโทรศัพท์'],
+    [/(การไฟฟ้า|การประปา|ค่าไฟ|ค่าน้ำ|ค่าเช่า|ค่าส่วนกลาง)/i, 'ที่พักและค่าน้ำไฟ'],
     [/(โรงพยาบาล|คลินิก|ร้านยา|เภสัช|Pharmacy|Hospital|Boots|Watsons)/i, 'สุขภาพ'],
     [/(Lotus|โลตัส|Big ?C|บิ๊กซี|Makro|แม็คโคร|Tops|Central|Shopee|Lazada|HomePro|โฮมโปร|ไทวัสดุ|Uniqlo)/i, 'ของใช้/ช้อปปิ้ง']];
   const guessCat = (text, kind) => { const list = target.cats()[kind] || []; for (const [re, c] of CATK) if (re.test(text) && list.includes(c)) return c; return null; };
