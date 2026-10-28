@@ -20,10 +20,15 @@ const d3p = path.join(__dirname, 'node_modules/d3/dist/d3.min.js');
     });
     const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message)); p.on('dialog', (d) => d.accept());
     await p.goto('http://t/index.html'); await p.waitForTimeout(1500);
-    for (const v of ['home', 'money', 'scan', 'port', 'biz']) {
+    for (const v of ['home', 'money', 'invest', 'biz']) {
       await p.click(`.tabs button[data-v=${v}]`); await p.waitForTimeout(200);
-      for (const s of await p.$$eval(`#view-${v} .subnav button`, (x) => x.map((y) => y.dataset.s))) { await p.click(`#view-${v} .subnav button[data-s=${s}]`); await p.waitForTimeout(150); }
+      for (const s of await p.$$eval('nav.subnav button', (x) => x.map((y) => y.dataset.s))) {
+        await p.click(`nav.subnav button[data-s=${s}]`); await p.waitForTimeout(150);
+        /* open every folded group on the page so its content renders too */
+        for (const h of await p.$$('.acc-h:not([hidden])[aria-expanded="false"]')) { await h.click(); await p.waitForTimeout(120); }
+      }
     }
+    await p.click('#fab'); await p.waitForTimeout(100); await p.click('#fab-menu button[data-q=out]'); await p.waitForTimeout(500);
     const sw = await p.evaluate(() => document.documentElement.scrollWidth);
     console.log(name, errs.length ? errs : 'no errors', sw > w ? `OVERFLOW ${sw}px` : 'no overflow'); bad += errs.length + (sw > w);
     await ctx.close();

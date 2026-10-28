@@ -25,11 +25,11 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 | `/* app preferences` | `window.VGPrefs` (dca, goal, ded, prof, slipMe). Taxpayer ID stays local only (`VGPrefs.tin`) |
 | `/* slip scanner` | Tesseract.js 5.1.1 OCR (tha+eng) for slips and receipts (`window.VGSlip`) |
 | `<script type="module">` | Firebase sync: `STORES` = portfolios / business / money docs per uid, `window.VGSync.push(col)` |
-| `const SUBS =` | sub-page lists per tab; elements carry `data-sub="..."`, hidden via `.sub-off` |
+| `const PAGES =` | navigation: 4 tabs (home, money, invest, biz) → pages → groups of old `data-sub` keys; titled groups fold (`.acc-h`, state in `vg-acc`). invest pages use views `port` and `scan`. Global `nav.subnav` sits before `#view-home`; bottom bar on phones; `#fab` quick-add menu (home script) |
 
 ## Conventions
 - Events: `vg:ready` (data.json loaded), `vg:data` (any user data changed → home + scan re-render), `vg:view` (tab shown), `vg:watch`, `vg:prefs`, `vg:add` (open portfolio form with a symbol), `vg:open` (stock sheet).
-- Navigation: `window.VGNav.go(view, sub)`. Views: home, money, scan, port, biz.
+- Navigation: `window.VGNav.go(view, sub)` still takes old pairs like ('money','goals') or ('port','check'); `resolve()` maps them to tab/page and opens the group. Hashes: #money #invest #biz (old #portfolio #scan #business still work). Views: home, money, scan, port, biz.
 - Storage keys: `valuegrab-portfolio-v1`, `valuegrab-biz-v1`, `valuegrab-money-v1`, `valuegrab-prefs-v1`, `valuegrab-watch-v1`.
 - Firestore rules (already published by Mon): `match /{col}/{uid}`, owner only, `col in ['portfolios','business','money']`. A new top-level collection needs a rule change.
 - Expense categories: housing + water/electricity = `ที่พักและค่าน้ำไฟ`, internet/phone = `ค่าเน็ตและโทรศัพท์`; old names are mapped in `norm` (`mapCat`).
