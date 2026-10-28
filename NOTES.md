@@ -17,7 +17,7 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 |---|---|
 | `/* calm pass` | final CSS overrides (font IBM Plex Sans Thai, hairlines) |
 | `id="view-home"` / `/* home: one-screen` | home dashboard cards + full backup/restore |
-| `id="view-money"` / `/* personal money` | net worth, personal budget, emergency fund, debts & bills, retirement (`window.VGMoney`) |
+| `id="view-money"` / `/* personal money` | net worth + asset pie (`drawAssetPie`), budget (kinds in/out/sav; `sav` is not expense; opening balance `M.open` → `leftOf`; groups `GROUPS`/`groupOf` with % targets `settings.gt`, map `settings.cg`; `drawWeek` pie + weekly), savings goals `M.goals` (entries link by `e.goal`), emergency fund, debts & bills, retirement (`window.VGMoney`) |
 | `id="view-scan"` / `const SIGNALS` | stock scanner, crypto list (`drawCrypto`), today summary (`drawToday`), detail sheet (`openSheet`) |
 | `id="view-port"` / `/* portfolio: a single ledger` | trades/fx/div ledger, rebalance, DCA (`dcaS`, `boughtMap`), sell signals (`checkHolding`), growth, goal, calendar, yearly tax table (`window.VGPort`) |
 | `id="view-biz"` / `/* business ledger` | income/expense, product cost + stock, invoices (`printDoc`, `bahtText`), tax 40(8) + deductions (`DITEMS`, `taxWith`) (`window.VGBiz`) |
@@ -35,5 +35,5 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Commit message trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Open ideas (not built)
-- OwnLife planner ideas for the money tab: a separate "save/invest" kind (not counted as expense), several savings goals with progress, category groups (daily / monthly bills & debt / invest / save) with income targets, monthly opening balance → "left to spend", weekly totals and a pie chart. Import from the OwnLife .xlsx needs the real file.
+- Import from the OwnLife .xlsx (needs the real file).
 - Track record of past "buy" picks vs SPY; a how-to page; offline mode.
