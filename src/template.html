@@ -583,7 +583,8 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
 .grp-row { display: grid; grid-template-columns: 1fr auto auto; gap: 2px 12px; align-items: center; }
 .grp-row .g-k { font-weight: 500; }
 .grp-row .g-k small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
-.grp-row .g-v { font-size: 14px; color: var(--ink-2); text-align: right; white-space: nowrap; }
+.grp-row .g-v { font-size: 15px; font-weight: 500; text-align: right; white-space: nowrap; }
+.grp-row .g-v small { display: block; font-size: 12px; font-weight: 400; color: var(--ink-3); white-space: normal; }
 .grp-row .inp.sm { width: 64px; padding: 5px 8px; font-size: 14px; }
 .grp-row .bc-t { grid-column: 1 / -1; height: 8px; position: relative; }
 .grp-row .bc-t b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink-2); border-radius: 1px; }
@@ -718,7 +719,7 @@ body.slip-open { overflow: hidden; }
 <div id="view-home" hidden>
   <header class="home-head"><p class="stamp" id="h-stamp">กำลังโหลดข้อมูลล่าสุด</p><h1 class="h-title" id="h-verdict">ภาพรวมวันนี้</h1></header>
   <div class="home-grid">
-    <article class="hcard" id="hc-nw"><header><h3>ทรัพย์สินสุทธิ</h3><button type="button" class="hlink" data-go="money:nw">ดูทั้งหมด →</button></header><div class="hbody" id="h-nw"></div></article>
+    <article class="hcard" id="hc-nw"><header><h3>ทรัพย์สินหลังหักหนี้</h3><button type="button" class="hlink" data-go="money:nw">ดูทั้งหมด →</button></header><div class="hbody" id="h-nw"></div></article>
     <article class="hcard tall" id="hc-picks"><header><h3>น่าซื้อสะสม</h3><button type="button" class="hlink" data-go="scan:picks">ดูทั้งหมด →</button></header><div class="hbody" id="h-picks"></div></article>
     <article class="hcard" id="hc-port"><header><h3>พอร์ตหุ้น</h3><button type="button" class="hlink" data-go="port:sum">เปิดพอร์ต →</button></header><div class="hbody" id="h-port"></div></article>
     <article class="hcard" id="hc-budget"><header><h3>งบรายจ่ายเดือนนี้</h3><button type="button" class="hlink" data-go="money:budget">จดรายจ่าย →</button></header><div class="hbody" id="h-budget"></div></article>
@@ -1098,45 +1099,45 @@ body.slip-open { overflow: hidden; }
 <div id="view-money" hidden>
   <!-- net worth -->
   <div class="strip" id="m-strip" data-sub="nw">
-    <div><div class="k">ทรัพย์สินสุทธิ</div><div class="v" id="m-nw">0 บาท</div><div class="h" id="m-nw-h"></div></div>
+    <div><div class="k">ทรัพย์สินหลังหักหนี้</div><div class="v" id="m-nw">0 บาท</div><div class="h" id="m-nw-h"></div></div>
     <div><div class="k">ทรัพย์สินทั้งหมด</div><div class="v" id="m-as">0 บาท</div><div class="h" id="m-as-h"></div></div>
     <div><div class="k">หนี้สินทั้งหมด</div><div class="v" id="m-li">0 บาท</div><div class="h" id="m-li-h"></div></div>
     <div><div class="k">เงินฉุกเฉิน</div><div class="v" id="m-em">0 เดือน</div><div class="h" id="m-em-h"></div></div>
   </div>
   <section class="panel" data-sub="nw">
-    <div class="ph"><div><h3>ทรัพย์สินสุทธิรายเดือน</h3><p>ทรัพย์สินทั้งหมดลบหนี้ ระบบบันทึกยอดของแต่ละเดือนให้เองทุกครั้งที่เปิดหน้านี้</p></div></div>
+    <div class="ph"><div><h3>ทรัพย์สินหลังหักหนี้ แต่ละเดือน</h3><p>ทรัพย์สินทั้งหมดหักหนี้แล้ว ระบบจดยอดของแต่ละเดือนไว้ให้เองทุกครั้งที่เปิดหน้านี้</p></div></div>
     <div class="chart" id="m-chart"></div>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="nw">
-    <div class="ph"><div><h3>บัญชีและทรัพย์สิน</h3><p>ใส่ยอดล่าสุดของแต่ละบัญชี อัปเดตเดือนละครั้งก็พอ พอร์ตหุ้นอเมริกาดึงจากแท็บพอร์ตให้เอง ทองคำใส่เป็นน้ำหนักบาททอง ระบบคิดราคาให้</p></div>
+    <div class="ph"><div><h3>บัญชีและทรัพย์สิน</h3><p>ใส่ยอดล่าสุดของแต่ละบัญชี อัปเดตเดือนละครั้งก็พอ พอร์ตหุ้นอเมริกาดึงจากแท็บพอร์ตให้เอง ทองคำใส่เป็นน้ำหนัก (บาททอง) ระบบคิดเป็นเงินให้</p></div>
       <button class="btn-line" id="a-add" type="button">+ เพิ่มบัญชี/ทรัพย์สิน</button></div>
     <div id="a-list" class="a-list"></div>
     <p class="pf-hint" id="gold-note"></p>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="nw">
-    <div class="ph"><div><h3>สัดส่วนทรัพย์สิน</h3><p>ทรัพย์สินทั้งหมดตามมูลค่าล่าสุด รวมพอร์ตหุ้นอเมริกาจากแท็บพอร์ต</p></div>
+    <div class="ph"><div><h3>สัดส่วนทรัพย์สิน</h3><p>ทรัพย์สินแต่ละอย่างคิดเป็นกี่ % ของทั้งหมด รวมพอร์ตหุ้นอเมริกาจากแท็บพอร์ตด้วย</p></div>
       <span class="seg" id="ap-mode"><button type="button" data-v="type" aria-pressed="true">ตามประเภท</button><button type="button" data-v="acc" aria-pressed="false">รายบัญชี</button></span></div>
     <div class="donut-wrap"><div class="chart" id="ap-donut"></div><div class="legend" id="ap-legend"></div></div>
   </section>
 
   <!-- budget -->
   <div class="b-month" data-sub="budget"><button type="button" class="b-nav" id="p-prev" aria-label="เดือนก่อน">‹</button><h2 id="p-month"></h2><button type="button" class="b-nav" id="p-next" aria-label="เดือนถัดไป">›</button></div>
-  <div class="p-open" data-sub="budget"><label class="mini">ยอดยกมาต้นเดือน (บาท) <input class="inp" id="p-open" type="number" step="any" inputmode="decimal"></label><span class="pf-hint" id="p-open-h"></span></div>
+  <div class="p-open" data-sub="budget"><label class="mini">เงินในมือต้นเดือน (บาท) <input class="inp" id="p-open" type="number" step="any" inputmode="decimal"></label><span class="pf-hint" id="p-open-h"></span></div>
   <div class="strip" id="p-strip" data-sub="budget">
     <div><div class="k">รายรับ</div><div class="v pos" id="p-in">0 บาท</div><div class="h" id="p-in-h"></div></div>
     <div><div class="k">รายจ่าย</div><div class="v" id="p-out">0 บาท</div><div class="h" id="p-out-h"></div></div>
-    <div><div class="k">เก็บ/ลงทุน</div><div class="v sav" id="p-sv">0 บาท</div><div class="h" id="p-sv-h"></div></div>
-    <div><div class="k">เหลือใช้ได้</div><div class="v" id="p-left">0 บาท</div><div class="h" id="p-left-h"></div></div>
+    <div><div class="k">เก็บเงิน/ลงทุน</div><div class="v sav" id="p-sv">0 บาท</div><div class="h" id="p-sv-h"></div></div>
+    <div><div class="k">เงินที่ยังใช้ได้</div><div class="v" id="p-left">0 บาท</div><div class="h" id="p-left-h"></div></div>
   </div>
   <section class="panel" id="p-add" data-sub="budget">
     <h3 id="p-title">จดรายรับรายจ่ายส่วนตัว</h3>
-    <p id="p-sub">แยกจากเงินธุรกิจ เงินที่โอนจากร้านมาใช้เองให้ลงเป็นรายรับหมวด "โอนจากธุรกิจ" เงินที่โอนไปเก็บหรือลงทุนให้ลงเป็น "เก็บ/ลงทุน" จะไม่นับเป็นรายจ่าย</p>
-    <div class="f-types"><span class="seg" id="p-kind"><button type="button" data-v="out" aria-pressed="true">รายจ่าย</button><button type="button" data-v="in" aria-pressed="false">รายรับ</button><button type="button" data-v="sav" aria-pressed="false">เก็บ/ลงทุน</button></span></div>
+    <p id="p-sub">แยกจากเงินธุรกิจ เงินที่โอนจากร้านมาใช้เองให้ลงเป็นรายรับหมวด "โอนจากธุรกิจ" เงินที่โอนไปเก็บหรือลงทุนให้ลงเป็น "เก็บเงิน/ลงทุน" ยอดนี้จะไม่นับเป็นรายจ่าย</p>
+    <div class="f-types"><span class="seg" id="p-kind"><button type="button" data-v="out" aria-pressed="true">รายจ่าย</button><button type="button" data-v="in" aria-pressed="false">รายรับ</button><button type="button" data-v="sav" aria-pressed="false">เก็บเงิน/ลงทุน</button></span></div>
     <form class="pf-form f2" id="p-form" autocomplete="off">
       <label>จำนวนเงิน (บาท)<input class="inp" id="p-amt" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 120"></label>
       <label>หมวด<input class="inp" id="p-cat" list="p-cats" placeholder="เช่น อาหาร"></label>
       <label>วันที่<input class="inp" id="p-date" type="date"></label>
-      <label class="wide2">บันทึกช่วยจำ<input class="inp" id="p-note" placeholder="เช่น ข้าวกลางวัน"></label>
+      <label class="wide2">รายละเอียด (ไม่ใส่ก็ได้)<input class="inp" id="p-note" placeholder="เช่น ข้าวกลางวัน"></label>
     </form>
     <div class="chips b-chips" id="p-chips"></div>
     <datalist id="p-cats"></datalist>
@@ -1148,16 +1149,16 @@ body.slip-open { overflow: hidden; }
     </div>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="budget">
-    <div class="ph"><div><h3>งบรายจ่ายแต่ละหมวด</h3><p>ตั้งงบต่อเดือนในช่องขวาของแต่ละหมวด แถบจะเปลี่ยนเป็นสีส้มเมื่อใช้เกิน 80% และสีแดงเมื่อเกินงบ</p></div></div>
+    <div class="ph"><div><h3>งบรายจ่ายแต่ละหมวด</h3><p>ใส่งบต่อเดือนในช่อง "งบ" ของแต่ละหมวด แถบเป็นสีส้มเมื่อใช้เกิน 80% ของงบ และเป็นสีแดงเมื่อเกินงบ</p></div></div>
     <div id="p-budgets" class="p-budgets"></div>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="budget">
-    <div class="ph"><div><h3>แบ่งเงินตามกลุ่ม</h3><p>ตั้งเป้าว่าแต่ละกลุ่มควรได้กี่ % ของรายรับ เส้นดำคือเป้า กลุ่มใช้จ่ายควรอยู่ต่ำกว่าเป้า กลุ่มเก็บและลงทุนควรถึงเป้า</p></div></div>
+    <div class="ph"><div><h3>แบ่งรายรับเป็น 4 กลุ่ม</h3><p>ตั้งว่าแต่ละกลุ่มควรใช้กี่ % ของรายรับ ขีดบนแถบคือเป้าที่ตั้งไว้ กลุ่มใช้จ่ายรายวันกับบิลและหนี้ไม่ควรเกินขีด ส่วนเงินเก็บกับลงทุนควรถึงขีด</p></div></div>
     <div id="p-groups" class="grp-list"></div>
-    <details class="grp-map"><summary>จัดหมวดเข้ากลุ่ม</summary><div class="gm" id="p-gmap"></div></details>
+    <details class="grp-map"><summary>เลือกว่าหมวดไหนอยู่กลุ่มไหน</summary><div class="gm" id="p-gmap"></div></details>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="budget">
-    <div class="ph"><div><h3>รายจ่ายเดือนนี้แยกหมวดและรายสัปดาห์</h3><p>สัดส่วนรายจ่ายแต่ละหมวด และยอดรวมของแต่ละสัปดาห์ในเดือน</p></div></div>
+    <div class="ph"><div><h3>เดือนนี้จ่ายไปกับอะไรบ้าง</h3><p>วงกลมบอกว่าแต่ละหมวดกินเงินกี่ % ของรายจ่าย ตารางด้านล่างคือยอดรวมของแต่ละสัปดาห์</p></div></div>
     <div class="donut-wrap"><div class="chart" id="p-donut"></div><div class="legend" id="p-legend"></div></div>
     <table class="wk" id="p-week"></table>
   </section>
@@ -1168,7 +1169,7 @@ body.slip-open { overflow: hidden; }
 
   <!-- savings goals -->
   <section class="panel" data-sub="goals">
-    <div class="ph"><div><h3>เป้าหมายการออม</h3><p>ตั้งได้หลายเป้า เช่น เที่ยว ซื้อรถ ดาวน์บ้าน เวลาจดแบบ "เก็บ/ลงทุน" ในหน้างบรายจ่าย ให้เลือกหมวดเป็นชื่อเป้าหมาย ยอดจะนับเข้าเป้านั้นเอง</p></div>
+    <div class="ph"><div><h3>เป้าหมายการออม</h3><p>ตั้งได้หลายเป้า เช่น เที่ยว ซื้อรถ ดาวน์บ้าน วิธีเก็บเข้าเป้า: ไปหน้ารายรับรายจ่าย กด "เก็บเงิน/ลงทุน" แล้วเลือกหมวดเป็นชื่อเป้า ยอดจะนับเข้าเป้านั้นเอง</p></div>
       <button class="btn-line" id="g-add" type="button">+ เพิ่มเป้าหมาย</button></div>
     <div id="g-list" class="g-list"></div>
   </section>
@@ -1176,9 +1177,9 @@ body.slip-open { overflow: hidden; }
   <!-- emergency -->
   <section class="panel" data-sub="emerg">
     <h3>เงินสำรองฉุกเฉิน</h3>
-    <p>เงินที่เก็บไว้ใช้ยามจำเป็น เช่น ตกงาน ป่วย หรือร้านขายไม่ได้ ควรมีอย่างน้อย 3–6 เท่าของรายจ่ายต่อเดือน คนทำธุรกิจของตัวเองควรใช้ 6 เดือนขึ้นไป ติ๊ก "เป็นเงินฉุกเฉิน" ที่บัญชีในหน้าทรัพย์สิน เพื่อนับยอด</p>
+    <p>เงินที่เก็บไว้ใช้ยามจำเป็น เช่น ตกงาน ป่วย หรือร้านขายไม่ได้ ควรมีพอใช้ 3–6 เดือน ถ้าทำธุรกิจของตัวเองควรมี 6 เดือนขึ้นไป ระบบนับเฉพาะบัญชีที่ติ๊กช่อง "เงินฉุกเฉิน" ไว้ในหน้าทรัพย์สิน</p>
     <div class="goal-in">
-      <label class="mini">อยากมีกี่เดือน <input class="inp sm" id="e-months" type="number" min="1" max="24" step="1" inputmode="numeric"></label>
+      <label class="mini">อยากให้พอใช้กี่เดือน <input class="inp sm" id="e-months" type="number" min="1" max="24" step="1" inputmode="numeric"></label>
       <label class="mini">รายจ่ายต่อเดือน (บาท) <input class="inp" id="e-exp" type="number" min="0" step="any" inputmode="decimal"></label>
     </div>
     <div id="e-out"></div>
@@ -1186,17 +1187,17 @@ body.slip-open { overflow: hidden; }
 
   <!-- debts and bills -->
   <section class="panel" data-sub="debt">
-    <div class="ph"><div><h3>หนี้สิน</h3><p>ใส่ยอดหนี้คงเหลือ ดอกเบี้ยต่อปี และยอดผ่อนขั้นต่ำต่อเดือน ระบบจะเทียบสองวิธีปิดหนี้ว่าวิธีไหนเสียดอกเบี้ยน้อยกว่า</p></div>
+    <div class="ph"><div><h3>หนี้สิน</h3><p>ใส่ยอดหนี้ที่เหลือ ดอกเบี้ยต่อปี และยอดผ่อนขั้นต่ำต่อเดือน ระบบจะเทียบให้ว่าปิดหนี้แบบไหนเสียดอกเบี้ยน้อยกว่า</p></div>
       <button class="btn-line" id="d-add" type="button">+ เพิ่มหนี้</button></div>
     <div id="d-list" class="a-list"></div>
-    <div class="goal-in"><label class="mini">จ่ายเพิ่มจากขั้นต่ำได้เดือนละ (บาท) <input class="inp" id="d-extra" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label></div>
+    <div class="goal-in"><label class="mini">นอกจากขั้นต่ำ จ่ายเพิ่มได้อีกเดือนละ (บาท) <input class="inp" id="d-extra" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label></div>
     <div id="d-plan" class="tx-opts"></div>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="debt">
-    <div class="ph"><div><h3>บิลและค่าใช้จ่ายประจำ</h3><p>ค่าเช่า ค่าไฟ ค่าโทรศัพท์ เบี้ยประกัน ระบบจะเตือนในหน้าแรกเมื่อใกล้ครบกำหนด กด "จ่ายแล้ว" เพื่อลงเป็นรายจ่ายให้เลย</p></div>
+    <div class="ph"><div><h3>บิลและค่าใช้จ่ายประจำ</h3><p>ค่าเช่า ค่าไฟ ค่าโทรศัพท์ เบี้ยประกัน ระบบจะเตือนในหน้าแรกเมื่อใกล้ถึงวันจ่าย จ่ายแล้วกดปุ่ม "จ่ายแล้ว" ระบบจะจดเป็นรายจ่ายให้เอง</p></div>
       <button class="btn-line" id="bl-add" type="button">+ เพิ่มบิล</button></div>
     <div id="bl-list" class="a-list"></div>
-    <h5 class="ded-g">ครบกำหนดใน 30 วัน</h5>
+    <h5 class="ded-g">ต้องจ่ายใน 30 วันนี้</h5>
     <div id="bl-due" class="cal"></div>
   </section>
 
@@ -2105,9 +2106,9 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   DEF.sav = ['เงินออม', 'เงินฉุกเฉิน', 'ลงทุนหุ้น', 'กองทุน', 'ทองคำ'];
   const BAHT_G = 15.244, OZ_G = 31.1035, PURITY = 0.965;
   const PAL = ['#0f6e5a', '#3a9b7f', '#7cc4a9', '#a86a12', '#d9a95b', '#5b6f8f', '#9aaac4', '#8a5a7a', '#c8a2bd', '#b9e2d2'];
-  const GROUPS = [['daily', 'ใช้จ่ายรายวัน', 50, false], ['bills', 'บิลและหนี้', 20, false], ['save', 'เก็บออม', 15, true], ['invest', 'ลงทุน', 15, true]];
+  const GROUPS = [['daily', 'ใช้จ่ายรายวัน', 50, false], ['bills', 'บิลและหนี้', 20, false], ['save', 'เงินเก็บ', 15, true], ['invest', 'ลงทุน', 15, true]];
   const BILLS_DEF = ['ที่พัก/ค่าเช่า', 'ค่าน้ำไฟเน็ตโทรศัพท์', 'ประกัน', 'ผ่อนชำระหนี้'];
-  const KLABEL = { in: 'รายรับ', out: 'รายจ่าย', sav: 'เก็บ/ลงทุน' };
+  const KLABEL = { in: 'รายรับ', out: 'รายจ่าย', sav: 'เก็บเงิน/ลงทุน' };
 
   const blank = () => ({ accounts: [], entries: [], budgets: {}, debts: [], extra: '', bills: [], snaps: {}, settings: {}, goals: [], open: {} });
   let M = blank();
@@ -2173,15 +2174,15 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const drawNW = () => {
     const t = totals(); const prevK = Object.keys(M.snaps).filter((k) => k < ymOf(today())).sort().pop(); const prev = prevK ? M.snaps[prevK] : null;
     const set = (id, v, cls) => { $(id).textContent = baht(v); $(id).className = 'v ' + (cls || ''); };
-    set('m-nw', t.nw, t.nw >= 0 ? 'pos' : 'neg'); $('m-nw-h').textContent = prev ? `${bahtS(t.nw - (prev.a - prev.l))} จาก${ymTH(prevK, { month: 'short', year: '2-digit' })}` : 'ทรัพย์สินลบหนี้';
-    set('m-as', t.a); $('m-as-h').textContent = t.inv ? `เป็นเงินลงทุน ${pc(t.inv / (t.a || 1))}` : '';
-    set('m-li', t.l, t.l ? 'neg' : ''); $('m-li-h').textContent = t.a ? `หนี้ต่อทรัพย์สิน ${pc(t.l / t.a)}` : '';
+    set('m-nw', t.nw, t.nw >= 0 ? 'pos' : 'neg'); $('m-nw-h').textContent = prev ? `${bahtS(t.nw - (prev.a - prev.l))} เทียบกับ${ymTH(prevK, { month: 'short', year: '2-digit' })}` : 'ทรัพย์สินทั้งหมดหักหนี้แล้ว';
+    set('m-as', t.a); $('m-as-h').textContent = t.inv ? `ในนี้เป็นเงินลงทุน ${pc(t.inv / (t.a || 1))}` : '';
+    set('m-li', t.l, t.l ? 'neg' : ''); $('m-li-h').textContent = t.a ? `หนี้เท่ากับ ${pc(t.l / t.a)} ของทรัพย์สิน` : '';
     const ex = emExp(); $('m-em').textContent = ex ? (t.em / ex).toFixed(1) + ' เดือน' : '–'; $('m-em').className = 'v ' + (ex && t.em / ex >= (+M.settings.emMonths || 6) ? 'pos' : '');
-    $('m-em-h').textContent = t.em ? baht(t.em) : 'ยังไม่ได้ติ๊กบัญชีฉุกเฉิน';
+    $('m-em-h').textContent = t.em ? baht(t.em) : 'ยังไม่ได้เลือกบัญชีเงินฉุกเฉิน';
     const g = goldPx(); const gn = $('gold-note'); gn.replaceChildren();
     if (M.accounts.some((a) => a.type === 'gold')) {
-      gn.append(g.px ? `ราคาทองที่ใช้ ${baht(g.px)} ต่อบาททอง ${g.manual ? '(ตั้งเอง)' : '(ประมาณจากราคาทองโลก ทอง 96.5%)'} ` : 'ยังไม่มีราคาทอง ', 'ตั้งราคาเองได้: ');
-      const i = el('input', 'inp sm'); i.type = 'number'; i.min = 0; i.step = 'any'; i.inputMode = 'decimal'; i.placeholder = 'ราคา/บาท'; i.style.width = '130px'; i.value = M.settings.goldPx || '';
+      gn.append(g.px ? `ราคาทองที่ใช้ ${baht(g.px)} ต่อบาททอง ${g.manual ? '(ตั้งเอง)' : '(ประมาณจากราคาทองโลก คิดแบบทอง 96.5%)'} ` : 'ยังไม่มีราคาทอง ', 'ใส่ราคาเองได้: ');
+      const i = el('input', 'inp sm'); i.type = 'number'; i.min = 0; i.step = 'any'; i.inputMode = 'decimal'; i.placeholder = 'ราคาต่อบาททอง'; i.style.width = '130px'; i.value = M.settings.goldPx || '';
       i.addEventListener('change', () => { if (+i.value > 0) M.settings.goldPx = +i.value; else delete M.settings.goldPx; save(); refresh(); }); gn.append(i);
     }
     drawNWChart(); drawAssetPie();
@@ -2236,7 +2237,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const drawAccounts = () => {
     const box = $('a-list'); box.replaceChildren();
     const us = usPort();
-    if (us) { const r = el('div', 'a-row auto'); r.append(el('span', 'a-n', 'พอร์ตหุ้นอเมริกา'), el('span', 'a-t', 'ดึงจากแท็บพอร์ตอัตโนมัติ'), el('b', 'a-v', baht(us))); box.append(r); }
+    if (us) { const r = el('div', 'a-row auto'); r.append(el('span', 'a-n', 'พอร์ตหุ้นอเมริกา'), el('span', 'a-t', 'ดึงยอดจากแท็บพอร์ตให้เอง'), el('b', 'a-v', baht(us))); box.append(r); }
     if (!M.accounts.length && !us) box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชี กด "+ เพิ่มบัญชี/ทรัพย์สิน" เช่น บัญชีออมทรัพย์ เงินสด ทองคำ กองทุน'));
     M.accounts.forEach((a) => {
       const r = el('div', 'a-row'); const val = el('b', 'a-v');
@@ -2272,12 +2273,12 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     set('p-in', s.i, 'pos'); set('p-out', s.o); set('p-sv', s.v, 'sav'); set('p-left', left, left < 0 ? 'neg' : left > 0 ? 'pos' : '');
     $('p-in-h').textContent = pv.i ? `เดือนก่อน ${baht(pv.i)}` : '';
     const inB = M.entries.reduce((a, e) => a + (e.kind === 'out' && ymOf(e.date) === ym && M.budgets[e.cat] ? e.amount : 0), 0);
-    $('p-out-h').textContent = budgetTotal() ? `งบ ${baht(budgetTotal())} หมวดที่ตั้งงบใช้ไป ${pc(inB / budgetTotal())}` : pv.o ? `เดือนก่อน ${baht(pv.o)}` : '';
-    $('p-sv-h').textContent = s.i ? `อัตราการออม ${pc(s.s / s.i)} (รายรับลบรายจ่าย)` : '';
+    $('p-out-h').textContent = budgetTotal() ? `ใช้ไป ${pc(inB / budgetTotal())} ของงบ ${baht(budgetTotal())}` : pv.o ? `เดือนก่อน ${baht(pv.o)}` : '';
+    $('p-sv-h').textContent = s.i ? `รายรับเหลือหลังหักรายจ่าย ${pc(s.s / s.i)}` : '';
     const dLeft = ym === ymOf(today()) ? new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate() - +today().slice(8) + 1 : 0;
-    $('p-left-h').textContent = `ยกมา ${baht(op.v)} + รายรับ − รายจ่าย − เก็บ` + (dLeft && left > 0 ? ` · ใช้ได้อีกวันละ ${baht(left / dLeft)}` : '');
-    const oi = $('p-open'); if (document.activeElement !== oi) { oi.value = op.set ? op.v : ''; oi.placeholder = op.carry ? Math.round(op.v) + ' (ยกมาเอง)' : 'เช่น 5000'; }
-    $('p-open-h').textContent = op.set ? '' : op.carry ? 'ยกยอดเหลือจากเดือนก่อนมาให้ แก้ได้' : 'เงินที่มีในมือตอนต้นเดือน ใส่ครั้งเดียว เดือนต่อไปยกมาให้เอง';
+    $('p-left-h').textContent = dLeft && left > 0 ? `ใช้ได้วันละ ${baht(left / dLeft)} ถึงสิ้นเดือน` : 'เงินต้นเดือน บวกรายรับ หักรายจ่ายและเงินเก็บ';
+    const oi = $('p-open'); if (document.activeElement !== oi) { oi.value = op.set ? op.v : ''; oi.placeholder = op.carry ? String(Math.round(op.v)) : 'เช่น 5000'; }
+    $('p-open-h').textContent = op.set ? '' : op.carry ? 'ใช้ยอดที่เหลือจากเดือนก่อนให้ แก้ได้' : 'ใส่ครั้งแรกครั้งเดียว เดือนต่อไประบบใช้ยอดที่เหลือจากเดือนก่อนให้เอง';
     drawGroups(s); drawWeek();
     const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === ym) spent[e.cat || 'อื่นๆ'] = (spent[e.cat || 'อื่นๆ'] || 0) + e.amount; });
     const list = [...new Set([...Object.keys(M.budgets), ...Object.keys(spent), ...DEF.out])];
@@ -2297,7 +2298,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการในเดือนนี้'); td.colSpan = 6; tr.append(td); tb.append(tr); }
     rows.forEach((e) => {
       const tr = el('tr', e.id === editId ? 'editing' : null);
-      [[dTH(e.date), 'l'], [e.cat || '–', 'l'], [e.note || '', 'l det'], [e.kind === 'in' ? baht(e.amount) : '', 'pos'], [e.kind !== 'in' ? baht(e.amount) : '']].forEach(([v, c], k) => { const td = el('td', c, v); if (k === 1 && e.kind === 'sav') td.append(el('span', 'tag sav', 'เก็บ/ลงทุน')); tr.append(td); });
+      [[dTH(e.date), 'l'], [e.cat || '–', 'l'], [e.note || '', 'l det'], [e.kind === 'in' ? baht(e.amount) : '', 'pos'], [e.kind !== 'in' ? baht(e.amount) : '']].forEach(([v, c], k) => { const td = el('td', c, v); if (k === 1 && e.kind === 'sav') td.append(el('span', 'tag sav', 'เก็บเงิน/ลงทุน')); tr.append(td); });
       const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
       const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(ed, delBtn('ลบรายการ', () => { if (confirm(`ลบรายการ${KLABEL[e.kind]} ${baht(e.amount)} (${e.cat})?`)) { M.entries = M.entries.filter((x) => x.id !== e.id); if (editId === e.id) endEdit(); save(); refresh(); } })); tr.append(c); tb.append(tr);
     });
@@ -2325,11 +2326,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const drawGroups = (s) => {
     const box = $('p-groups'); const focus = document.activeElement && box.contains(document.activeElement) ? document.activeElement.dataset.g : null; box.replaceChildren();
     const sum = {}, catsIn = {}; M.entries.forEach((e) => { if (e.kind !== 'in' && ymOf(e.date) === ym) { const g = groupOf(e); sum[g] = (sum[g] || 0) + e.amount; (catsIn[g] = catsIn[g] || new Set()).add(e.cat); } });
-    if (!s.i) box.append(el('div', 'pf-hint', 'ยังไม่มีรายรับในเดือนนี้ จดรายรับก่อน แล้วจะเห็นว่าแต่ละกลุ่มใช้ไปกี่ % ของรายรับ'));
+    if (!s.i) box.append(el('div', 'pf-hint', 'เดือนนี้ยังไม่มีรายรับ จดรายรับก่อน แล้วจะเห็นว่าแต่ละกลุ่มใช้ไปกี่ % ของรายรับ'));
     GROUPS.forEach(([k, label, def, good]) => {
       const t = gTarget(k, def), amt = sum[k] || 0, share = s.i ? amt / s.i : 0, tAmt = s.i * t / 100;
       const r = el('div', 'grp-row'); const nm = el('span', 'g-k', label); if (catsIn[k]) nm.append(el('small', null, [...catsIn[k]].slice(0, 4).join(', ')));
-      const v = el('span', 'g-v', `${baht(amt)}${s.i ? ` · ${pc(share)}` : ''}${tAmt ? ` / เป้า ${baht(tAmt)}` : ''}`);
+      const v = el('span', 'g-v', baht(amt)); if (s.i) v.append(el('small', null, `${pc(share)} ของรายรับ · เป้า ${baht(tAmt)}`));
       const lab = el('label', 'mini'); const i = el('input', 'inp sm'); i.type = 'number'; i.min = 0; i.max = 100; i.step = 'any'; i.inputMode = 'decimal'; i.value = t; i.dataset.g = k; i.setAttribute('aria-label', `เป้า % ของรายรับ ${label}`);
       i.addEventListener('change', () => { M.settings.gt = { ...(M.settings.gt || {}) }; if (i.value === '') delete M.settings.gt[k]; else M.settings.gt[k] = Math.max(0, +i.value); save(); drawBudget(); });
       lab.append(i, '%');
@@ -2339,7 +2340,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       const mark = el('b'); mark.style.left = `calc(${Math.min(100, (t / 100 / scale) * 100)}% - 1px)`; bar.append(fill, mark);
       r.append(nm, v, lab, bar); box.append(r); if (focus === k) i.focus();
     });
-    const tt = GROUPS.reduce((a, [k, , d]) => a + gTarget(k, d), 0); if (Math.abs(tt - 100) > 0.5) box.append(el('div', 'pf-hint', `เป้ารวมทุกกลุ่มเป็น ${tt}% ของรายรับ ปกติควรรวมกันได้ 100%`));
+    const tt = GROUPS.reduce((a, [k, , d]) => a + gTarget(k, d), 0); if (Math.abs(tt - 100) > 0.5) box.append(el('div', 'pf-hint', `เป้าทั้ง 4 กลุ่มรวมกันได้ ${tt}% ควรปรับให้รวมกันได้ 100%`));
     const gm = $('p-gmap'); gm.replaceChildren();
     const all = [...new Set([...cats('out'), ...cats('sav')])];
     all.forEach((c) => { const isSav = !cats('out').includes(c); const l = el('label'); const sel = el('select', 'inp'); GROUPS.forEach(([k, n]) => sel.append(new Option(n, k)));
@@ -2357,7 +2358,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     for (let a = 1; a <= dim; a += 7) W.push({ a, b: Math.min(dim, a + 6), i: 0, o: 0, v: 0 });
     M.entries.forEach((e) => { if (ymOf(e.date) !== ym) return; const w = W[Math.floor((+e.date.slice(8) - 1) / 7)]; if (!w) return; if (e.kind === 'in') w.i += e.amount; else if (e.kind === 'sav') w.v += e.amount; else w.o += e.amount; });
     const mx = Math.max(1, ...W.map((w) => w.o)); const tb = $('p-week'); tb.replaceChildren();
-    const hr = el('tr'); [['สัปดาห์', 'l'], ['รายรับ'], ['รายจ่าย'], ['เก็บ/ลงทุน'], ['', 'bar']].forEach(([t, c]) => hr.append(el('th', c || null, t))); tb.append(hr);
+    const hr = el('tr'); [['สัปดาห์', 'l'], ['รายรับ'], ['รายจ่าย'], ['เก็บเงิน/ลงทุน'], ['', 'bar']].forEach(([t, c]) => hr.append(el('th', c || null, t))); tb.append(hr);
     const mo = new Date(ym + '-01T00:00:00').toLocaleDateString('th-TH', { month: 'short' });
     W.forEach((w) => { const r = el('tr'); r.append(el('td', 'l', `${w.a}–${w.b} ${mo}`), el('td', 'pos', w.i ? baht(w.i) : '–'), el('td', null, w.o ? baht(w.o) : '–'), el('td', null, w.v ? baht(w.v) : '–'));
       const b = el('td', 'bar'); const i = el('i'); i.style.width = (w.o / mx) * 100 + '%'; if (w.o) b.append(i); r.append(b); tb.append(r); });
@@ -2371,11 +2372,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       if (!M.goals.length) box.append(el('div', 'pf-hint', 'ยังไม่มีเป้าหมาย กด "+ เพิ่มเป้าหมาย" เช่น เที่ยวญี่ปุ่น 60,000 บาท'));
       M.goals.forEach((g) => {
         const c = el('div', 'g-card'); c.dataset.id = g.id; const top = el('div', 'g-top');
-        const due = el('input', 'inp'); due.type = 'month'; due.value = g.due || ''; due.title = 'อยากได้ภายในเดือน'; due.addEventListener('change', () => { g.due = due.value; save(); drawGoals(); });
+        const due = el('input', 'inp'); due.type = 'month'; due.value = g.due || ''; due.title = 'อยากให้ครบภายในเดือน'; due.addEventListener('change', () => { g.due = due.value; save(); drawGoals(); });
         const fld = (t, inp, cls) => { const l = el('label', 'g-f' + (cls ? ' ' + cls : '')); l.append(t, inp); return l; };
         top.append(fld('ชื่อเป้าหมาย', txtIn(g.name, 'เช่น เที่ยวญี่ปุ่น', 'a-name', (v) => { const old = g.name; g.name = v.slice(0, 40); M.entries.forEach((e) => { if (e.kind === 'sav' && (e.goal === g.id || (!e.goal && old && e.cat === old))) { e.goal = g.id; e.cat = g.name; } }); save(true); drawGoals(); })),
           fld('เป้าหมาย (บาท)', numIn(g.target, 'เช่น 60000', 'a-num', (v) => { g.target = v; save(true); drawGoals(); })),
-          fld('มีอยู่แล้ว (บาท)', numIn(g.start, '0', 'a-num', (v) => { g.start = v; save(true); drawGoals(); })), fld('อยากได้ภายใน', due, 'g-due'),
+          fld('เก็บไว้แล้ว (บาท)', numIn(g.start, '0', 'a-num', (v) => { g.start = v; save(true); drawGoals(); })), fld('อยากให้ครบภายในเดือน', due, 'g-due'),
           delBtn('ลบเป้าหมาย', () => { if (confirm(`ลบเป้า "${g.name || ''}"? รายการเก็บเงินเดิมยังอยู่`)) { M.goals = M.goals.filter((x) => x !== g); M.entries.forEach((e) => { if (e.goal === g.id) delete e.goal; }); save(); drawGoals(true); } }));
         c.append(top, el('div', 'g-out')); box.append(c);
       });
@@ -2383,19 +2384,19 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     M.goals.forEach((g) => {
       const out = box.querySelector(`.g-card[data-id="${g.id}"] .g-out`); if (!out) return; out.replaceChildren();
       const have = goalSum(g), tg = Number(g.target) || 0, sh = tg ? Math.min(1, have / tg) : 0;
-      out.append(el('div', 'hsub', tg ? `เก็บแล้ว ${baht(have)} จาก ${baht(tg)} (${pc(have / tg)})` : `เก็บแล้ว ${baht(have)} ใส่ยอดเป้าหมายเพื่อดูความคืบหน้า`));
+      out.append(el('div', 'hsub', tg ? `เก็บแล้ว ${baht(have)} จาก ${baht(tg)} (${pc(have / tg)})` : `เก็บแล้ว ${baht(have)} ใส่ยอดเป้าหมายเพื่อดูว่าใกล้ครบหรือยัง`));
       const bar = el('div', 'hbar'); const i = el('i'); i.style.width = sh * 100 + '%'; if (sh < 0.5) i.style.background = 'var(--ochre)'; bar.append(i); out.append(bar);
       const notes = [];
       if (tg && have >= tg) notes.push('ถึงเป้าแล้ว');
       else if (tg) {
         const need = tg - have;
         if (g.due) { const [y, m] = g.due.split('-').map(Number); const [y0, m0] = ymOf(today()).split('-').map(Number); const n = (y - y0) * 12 + (m - m0) + 1;
-          notes.push(n > 0 ? `ขาดอีก ${baht(need)} ต้องเก็บเดือนละ ${baht(need / n)} ให้ทัน${ymTH(g.due, { month: 'short', year: 'numeric' })}` : `เลยกำหนดแล้ว ยังขาดอีก ${baht(need)}`); }
+          notes.push(n > 0 ? `ขาดอีก ${baht(need)} ต้องเก็บเดือนละ ${baht(need / n)} ถึงจะครบทัน${ymTH(g.due, { month: 'short', year: 'numeric' })}` : `เลยกำหนดแล้ว ยังขาดอีก ${baht(need)}`); }
         else notes.push(`ขาดอีก ${baht(need)}`);
         const ms = [0, 1, 2].map((k) => ymShift(ymOf(today()), -k)); const per = M.entries.reduce((a, e) => a + (e.kind === 'sav' && ms.includes(ymOf(e.date)) && (e.goal === g.id || (!e.goal && g.name && e.cat === g.name)) ? e.amount : 0), 0) / 3;
-        if (per > 0) notes.push(`3 เดือนนี้เก็บเฉลี่ยเดือนละ ${baht(per)} จะถึงเป้าในประมาณ ${Math.ceil(need / per)} เดือน`);
+        if (per > 0) notes.push(`3 เดือนล่าสุดเก็บเข้าเป้านี้เฉลี่ยเดือนละ ${baht(per)} ถ้าเก็บแบบนี้ต่อไปจะครบในอีกประมาณ ${Math.ceil(need / per)} เดือน`);
       }
-      if (!g.name) notes.push('ตั้งชื่อเป้าก่อน แล้วเลือกชื่อนี้เป็นหมวดตอนจด "เก็บ/ลงทุน"');
+      if (!g.name) notes.push('ตั้งชื่อเป้าก่อน แล้วเลือกชื่อนี้เป็นหมวดตอนจด "เก็บเงิน/ลงทุน"');
       notes.forEach((t) => out.append(el('div', 'pf-hint', t)));
     });
   };
@@ -2411,11 +2412,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const target = ex * mo, have = t.em, sh = Math.min(1, have / target);
     box.append(el('div', 'hbig ' + (sh >= 1 ? 'pos' : ''), `มีพอใช้ ${(have / ex).toFixed(1)} เดือน`), el('div', 'hsub', `เงินฉุกเฉิน ${baht(have)} จากเป้า ${baht(target)} (${mo} เดือน × ${baht(ex)})`));
     const bar = el('div', 'hbar'); const i = el('i'); i.style.width = sh * 100 + '%'; if (sh < 0.5) i.style.background = 'var(--ochre)'; bar.append(i); box.append(bar);
-    if (sh >= 1) box.append(el('div', 'pf-hint', 'ครบเป้าแล้ว เงินที่เก็บเพิ่มจากนี้เอาไปลงทุนได้')); else {
+    if (sh >= 1) box.append(el('div', 'pf-hint', 'ครบเป้าแล้ว เงินที่เก็บได้หลังจากนี้เอาไปลงทุนได้')); else {
       const need = target - have; const sv = avgSave();
       box.append(el('div', 'pf-hint', `ขาดอีก ${baht(need)} · ถ้าเก็บเดือนละ ${baht(need / 12)} จะครบใน 12 เดือน · เดือนละ ${baht(need / 6)} ครบใน 6 เดือน`));
-      if (sv != null) box.append(el('div', 'pf-hint', sv > 0 ? `ตอนนี้เหลือเก็บเฉลี่ยเดือนละ ${baht(sv)} ถ้าเก็บทั้งหมดเข้าเงินฉุกเฉินจะครบในประมาณ ${Math.ceil(need / sv)} เดือน` : 'ช่วงนี้รายจ่ายมากกว่ารายรับ ควรลดรายจ่ายก่อนเริ่มเก็บ'));
-      if (!M.accounts.some((a) => a.emerg)) box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชีที่ติ๊ก "เงินฉุกเฉิน" ไปที่หน้าทรัพย์สินสุทธิแล้วติ๊กบัญชีที่ใช้เก็บเงินก้อนนี้'));
+      if (sv != null) box.append(el('div', 'pf-hint', sv > 0 ? `ช่วงนี้มีเงินเหลือเฉลี่ยเดือนละ ${baht(sv)} ถ้าเอาทั้งหมดเก็บเป็นเงินฉุกเฉินจะครบในประมาณ ${Math.ceil(need / sv)} เดือน` : 'ช่วงนี้รายจ่ายมากกว่ารายรับ ควรลดรายจ่ายก่อนเริ่มเก็บ'));
+      if (!M.accounts.some((a) => a.emerg)) box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชีที่ติ๊ก "เงินฉุกเฉิน" ไปที่หน้าทรัพย์สิน แล้วติ๊กช่อง "เงินฉุกเฉิน" ที่บัญชีที่ใช้เก็บเงินก้อนนี้'));
     }
   };
   $('e-months').addEventListener('input', () => { const v = +$('e-months').value; if (v > 0) { M.settings.emMonths = v; save(true); drawEmerg(); drawNW(); } });
@@ -2444,9 +2445,9 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       M.debts.forEach((d) => {
         const r = el('div', 'a-row debt');
         r.append(txtIn(d.name, 'ชื่อ เช่น บัตรเครดิต A', 'a-name', (v) => { d.name = v; save(true); drawDebts(); }),
-          numIn(d.bal, 'ยอดคงเหลือ', 'a-num', (v) => { d.bal = v; save(true); drawDebts(); refreshNW(); }),
-          numIn(d.apr, 'ดอกเบี้ย %/ปี', 'a-num sm2', (v) => { d.apr = v; save(true); drawDebts(); }),
-          numIn(d.min, 'ผ่อนขั้นต่ำ/เดือน', 'a-num', (v) => { d.min = v; save(true); drawDebts(); }),
+          numIn(d.bal, 'ยอดหนี้ที่เหลือ', 'a-num', (v) => { d.bal = v; save(true); drawDebts(); refreshNW(); }),
+          numIn(d.apr, 'ดอกเบี้ยต่อปี %', 'a-num sm2', (v) => { d.apr = v; save(true); drawDebts(); }),
+          numIn(d.min, 'ผ่อนขั้นต่ำต่อเดือน', 'a-num', (v) => { d.min = v; save(true); drawDebts(); }),
           delBtn('ลบหนี้', () => { if (confirm(`ลบ "${d.name || 'หนี้'}"?`)) { M.debts = M.debts.filter((x) => x !== d); save(); drawDebts(true); refreshNW(); } }));
         box.append(r);
       });
@@ -2454,12 +2455,12 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     }
     const box = $('d-plan'); box.replaceChildren();
     const A = payoff('av'), S = payoff('sn'); if (!A) return;
-    if (A.stuck) { box.append(el('div', 'pf-err', 'ยอดผ่อนรวมต่อเดือนไม่พอจ่ายดอกเบี้ย หนี้จะไม่ลดลง ต้องเพิ่มยอดผ่อนหรือติดต่อเจ้าหนี้เพื่อปรับโครงสร้างหนี้')); return; }
+    if (A.stuck) { box.append(el('div', 'pf-err', 'เงินที่ผ่อนแต่ละเดือนยังน้อยกว่าดอกเบี้ย หนี้จะไม่ลดลงเลย ต้องผ่อนเพิ่ม หรือคุยกับเจ้าหนี้ขอลดดอกเบี้ยหรือยืดเวลาผ่อน')); return; }
     const end = (n) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + n); return d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }); };
-    [['จ่ายก้อนดอกแพงก่อน', A, 'ประหยัดดอกเบี้ยที่สุด'], ['จ่ายก้อนเล็กก่อน', S, 'เห็นหนี้หมดไปทีละก้อนเร็ว มีกำลังใจ']].forEach(([t, p, sub], k) => {
+    [['ปิดหนี้ดอกเบี้ยสูงก่อน', A, 'เสียดอกเบี้ยน้อยที่สุด'], ['ปิดหนี้ก้อนเล็กก่อน', S, 'หนี้หมดไปทีละก้อนเร็ว ช่วยให้มีกำลังใจ']].forEach(([t, p, sub], k) => {
       const best = k === (S.interest < A.interest - 1 ? 1 : 0);
       const card = el('div', 'tx-card' + (best ? ' best' : '')); const hd = el('div', 'tx-h'); hd.append(el('b', null, t), el('small', null, sub)); if (best) hd.append(el('span', 'tag buy', 'ดอกเบี้ยน้อยกว่า')); card.append(hd);
-      [['หมดหนี้', p.never ? 'เกิน 50 ปี' : `${end(p.months)} (${Math.floor(p.months / 12) ? Math.floor(p.months / 12) + ' ปี ' : ''}${p.months % 12} เดือน)`], ['ดอกเบี้ยรวม', baht(p.interest)], ['ลำดับการปิด', p.order.map((d) => d.name).join(' → ')]]
+      [['หนี้หมดเมื่อ', p.never ? 'เกิน 50 ปี' : `${end(p.months)} (${Math.floor(p.months / 12) ? Math.floor(p.months / 12) + ' ปี ' : ''}${p.months % 12} เดือน)`], ['ดอกเบี้ยรวม', baht(p.interest)], ['ปิดตามลำดับ', p.order.map((d) => d.name).join(' → ')]]
         .forEach(([a, b]) => { const r = el('div', 'kv'); r.append(el('span', null, a), el('span', null, b)); card.append(r); });
       box.append(card);
     });
@@ -2495,7 +2496,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
         const mo = el('select', 'inp'); for (let i = 1; i <= 12; i++) mo.append(new Option(new Date(2026, i - 1, 1).toLocaleDateString('th-TH', { month: 'short' }), i)); mo.value = b.month; mo.hidden = b.freq !== 'y';
         fq.addEventListener('change', () => { b.freq = fq.value; mo.hidden = b.freq !== 'y'; save(); drawBills(); });
         mo.addEventListener('change', () => { b.month = +mo.value; save(); drawBills(); });
-        const day = el('input', 'inp sm'); day.type = 'number'; day.min = 1; day.max = 31; day.value = b.day; day.title = 'วันที่ครบกำหนด'; day.addEventListener('input', () => { if (+day.value >= 1 && +day.value <= 31) { b.day = +day.value; save(true); drawBills(); } });
+        const day = el('input', 'inp sm'); day.type = 'number'; day.min = 1; day.max = 31; day.value = b.day; day.title = 'วันที่ต้องจ่าย'; day.addEventListener('input', () => { if (+day.value >= 1 && +day.value <= 31) { b.day = +day.value; save(true); drawBills(); } });
         const lab = el('label', 'mini'); lab.append('วันที่', day);
         r.append(txtIn(b.name, 'ชื่อบิล เช่น ค่าไฟ', 'a-name', (v) => { b.name = v; save(true); drawBills(); }), numIn(b.amount, 'จำนวนเงิน', 'a-num', (v) => { b.amount = v; save(true); drawBills(); }), fq, mo, lab,
           delBtn('ลบบิล', () => { if (confirm(`ลบบิล "${b.name || ''}"?`)) { M.bills = M.bills.filter((x) => x !== b); save(); drawBills(true); } }));
@@ -2503,21 +2504,21 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       });
     }
     const due = $('bl-due'); due.replaceChildren(); const list = dueBills(30);
-    if (!list.length) { due.append(el('div', 'pf-hint', 'ไม่มีบิลครบกำหนดใน 30 วันข้างหน้า')); return; }
+    if (!list.length) { due.append(el('div', 'pf-hint', 'ไม่มีบิลที่ต้องจ่ายใน 30 วันข้างหน้า')); return; }
     const t0 = new Date(today() + 'T00:00:00');
     list.forEach(({ b, d, paid, late }) => {
       const n = Math.round((new Date(d + 'T00:00:00') - t0) / 86400000);
       const row = el('div', 'cal-row'); const dd = el('div', 'cal-d'); dd.append(el('b', null, dTH(d)), el('small', null, late ? 'เลยกำหนด' : n === 0 ? 'วันนี้' : `อีก ${n} วัน`));
       const w = el('div', 'cal-w'); w.append(el('span', 'sym', b.name || 'บิล'), el('span', null, baht(+b.amount || 0)));
-      if (paid) w.append(el('span', 'tag buy', 'จ่ายแล้ว'));
-      else { const p = el('button', 'btn-line sm', 'บันทึกว่าจ่าย'); p.type = 'button'; p.addEventListener('click', () => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: today(), kind: 'out', amount: +b.amount, cat: b.cat || 'ค่าน้ำไฟเน็ตโทรศัพท์', note: b.name }); save(); refresh(); }); w.append(p); if (late) w.append(el('span', 'tag trap', 'เลยกำหนด')); }
+      if (paid) w.append(el('span', 'tag buy', 'จ่ายเรียบร้อย'));
+      else { const p = el('button', 'btn-line sm', 'จ่ายแล้ว'); p.type = 'button'; p.addEventListener('click', () => { b.paid.push(d); if (+b.amount > 0) M.entries.push({ id: newId(), date: today(), kind: 'out', amount: +b.amount, cat: b.cat || 'ค่าน้ำไฟเน็ตโทรศัพท์', note: b.name }); save(); refresh(); }); w.append(p); if (late) w.append(el('span', 'tag trap', 'เลยกำหนด')); }
       row.append(dd, w); due.append(row);
     });
   };
   $('bl-add').addEventListener('click', () => { M.bills.push({ id: newId(), name: '', amount: '', day: 1, freq: 'm', month: 1, cat: '', paid: [] }); save(); drawBills(true); const n = $('bl-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
 
   /* ---------- retirement ---------- */
-  const RIN = [['age', 'อายุตอนนี้', 30], ['retAge', 'อยากเกษียณตอนอายุ', 60], ['life', 'วางแผนใช้เงินถึงอายุ', 85], ['exp', 'รายจ่ายต่อเดือน (ค่าเงินวันนี้)', null], ['inf', 'เงินเฟ้อต่อปี %', 3], ['rPre', 'ผลตอบแทนก่อนเกษียณ %/ปี', 6], ['rPost', 'ผลตอบแทนหลังเกษียณ %/ปี', 4]];
+  const RIN = [['age', 'อายุตอนนี้', 30], ['retAge', 'อยากเกษียณตอนอายุ', 60], ['life', 'ใช้เงินไปจนถึงอายุ', 85], ['exp', 'รายจ่ายต่อเดือน (ราคาของวันนี้)', null], ['inf', 'ของแพงขึ้นปีละ % (เงินเฟ้อ)', 3], ['rPre', 'ผลตอบแทนลงทุนต่อปี ก่อนเกษียณ %', 6], ['rPost', 'ผลตอบแทนลงทุนต่อปี หลังเกษียณ %', 4]];
   const ret = () => { const r = { ...(M.settings.ret || {}) }; RIN.forEach(([k, , d]) => { if (r[k] == null || r[k] === '') r[k] = k === 'exp' ? Math.round(avgOut() || budgetTotal() || 20000) : d; }); return r; };
   const buildRet = () => {
     const box = $('r-in'); box.replaceChildren(); const r = ret(); const saved = M.settings.ret || {};
@@ -2533,11 +2534,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const rm = Math.pow(1 + a, 1 / 12) - 1, N = 12 * n; const pmt = N ? (rm > 0 ? gap * rm / (Math.pow(1 + rm, N) - 1) : gap / N) : gap;
     const p = el('p', 'goal-main'); p.append('ตอนอายุ ', el('b', null, String(r.retAge)), ' ควรมีเงินก้อนประมาณ ', el('b', null, baht(corpus))); out.append(p);
     const li = (t) => out.append(el('div', 'pf-hint', '• ' + t));
-    li(`รายจ่าย ${baht(r.exp)}/เดือนวันนี้ จะเป็นประมาณ ${baht(E1 / 12)}/เดือน ตอนเกษียณ เพราะเงินเฟ้อ ${r.inf}% ต่อปี และต้องใช้ไปอีก ${T} ปี`);
+    li(`รายจ่ายเดือนละ ${baht(r.exp)} ตอนนี้ พอถึงตอนเกษียณจะกลายเป็นประมาณเดือนละ ${baht(E1 / 12)} เพราะของแพงขึ้นปีละ ${r.inf}% และต้องใช้เงินต่อไปอีก ${T} ปี`);
     li(`เงินลงทุนที่มีตอนนี้ ${baht(cur)} ถ้าได้ผลตอบแทน ${r.rPre}% จะโตเป็นประมาณ ${baht(fv)}`);
     li(gap > 0 ? `ต้องเก็บและลงทุนเพิ่มเดือนละประมาณ ${baht(pmt)} ไปอีก ${n} ปี` : 'เงินที่มีตอนนี้น่าจะพอแล้ว ถ้าผลตอบแทนเป็นไปตามที่ตั้ง');
-    const sv = avgSave(); if (sv != null && gap > 0) li(sv >= pmt ? `ตอนนี้เหลือเก็บเฉลี่ยเดือนละ ${baht(sv)} เพียงพอ ถ้านำไปลงทุนสม่ำเสมอ` : `ตอนนี้เหลือเก็บเฉลี่ยเดือนละ ${baht(sv)} ยังขาดอีกเดือนละประมาณ ${baht(pmt - sv)}`);
-    li('ตัวเลขเป็นการประมาณจากสมมติฐานที่ตั้ง ไม่ใช่การรับประกันผลตอบแทน ลองปรับผลตอบแทนให้ต่ำลงเพื่อดูกรณีที่แย่');
+    const sv = avgSave(); if (sv != null && gap > 0) li(sv >= pmt ? `ช่วงนี้มีเงินเหลือเฉลี่ยเดือนละ ${baht(sv)} พอแล้ว ถ้าเอาไปลงทุนทุกเดือน` : `ช่วงนี้มีเงินเหลือเฉลี่ยเดือนละ ${baht(sv)} ยังขาดอีกเดือนละประมาณ ${baht(pmt - sv)}`);
+    li('ตัวเลขเป็นแค่การประมาณจากค่าที่ใส่ ไม่ได้รับประกันผลตอบแทน ลองใส่ผลตอบแทนต่ำลงเพื่อดูกรณีที่แย่');
     if (!window.d3) return;
     const pts = []; let v = cur; const ry = Math.pow(1 + a, 1);
     for (let y = 0; y <= n; y++) { pts.push({ age: r.age + y, v }); v = v * ry + pmt * 12 * (1 + a / 2); }
@@ -2613,7 +2614,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const SUBS = { scan: [['picks', 'น่าซื้อวันนี้'], ['all', 'หุ้นทั้งหมด'], ['market', 'ภาพรวมตลาด']],
     port: [['sum', 'สรุปพอร์ต'], ['add', 'บันทึกและประวัติ'], ['hold', 'DCA และปรับสมดุล'], ['check', 'สัญญาณขาย'], ['grow', 'การเติบโตและเป้าหมาย'], ['cal', 'ปฏิทิน']],
     biz: [['sum', 'สรุปเดือน'], ['add', 'จดรายรับรายจ่าย'], ['inv', 'ใบเสร็จ/ใบแจ้งหนี้'], ['prod', 'ต้นทุนและสต็อก'], ['tax', 'ภาษีและลดหย่อน']],
-    money: [['nw', 'ทรัพย์สินสุทธิ'], ['budget', 'งบรายจ่าย'], ['goals', 'เป้าหมายออม'], ['emerg', 'เงินฉุกเฉิน'], ['debt', 'หนี้และบิล'], ['retire', 'เกษียณ']] };
+    money: [['nw', 'ทรัพย์สิน'], ['budget', 'รายรับรายจ่าย'], ['goals', 'เป้าหมายออม'], ['emerg', 'เงินฉุกเฉิน'], ['debt', 'หนี้และบิล'], ['retire', 'เกษียณ']] };
   const subOf = {};
   const setSub = (v, sub) => {
     const list = SUBS[v]; if (!list) return; if (!list.some(([k]) => k === sub)) { try { sub = localStorage.getItem('vg-sub-' + v); } catch (e) { sub = null; } if (!list.some(([k]) => k === sub)) sub = list[0][0]; }
@@ -3323,7 +3324,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       const w = el('span'); w.append(el('b', e.bill ? 'neg' : null, e.s + ' '), e.kind + (n < 0 ? '' : n <= 1 ? (n ? ' (พรุ่งนี้)' : ' (วันนี้)') : ` (อีก ${n} วัน)`)); r.append(w); ca.append(r);
     });
     const nw = $('h-nw'); nw.replaceChildren();
-    if (!MS || !MS.has) empty(nw, 'ใส่ยอดบัญชีเงินฝาก เงินสด ทอง กองทุน และหนี้ เพื่อดูว่ามีทรัพย์สินสุทธิเท่าไหร่', 'เพิ่มบัญชี', 'money:nw');
+    if (!MS || !MS.has) empty(nw, 'ใส่ยอดบัญชีเงินฝาก เงินสด ทอง กองทุน และหนี้ เพื่อดูว่าหักหนี้แล้วมีทรัพย์สินเท่าไหร่', 'เพิ่มบัญชี', 'money:nw');
     else {
       nw.append(el('div', 'hbig ' + (MS.nw >= 0 ? '' : 'neg'), baht(MS.nw)), el('div', 'hsub', MS.change != null ? `${MS.change >= 0 ? '+' : ''}${baht(MS.change)} จากเดือนก่อน` : 'ทรัพย์สินลบหนี้สิน'));
       kv(nw, 'ทรัพย์สิน', baht(MS.a)); kv(nw, 'หนี้สิน', baht(MS.l), MS.l ? 'neg' : '');
