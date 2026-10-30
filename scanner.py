@@ -206,15 +206,20 @@ def gold_usd():
         return None
 
 
-def usd_thb():
-    """อัตราแลกเปลี่ยนดอลลาร์เป็นบาท ใช้แปลงมูลค่าพอร์ตเป็นเงินบาท"""
+def fx_thb(ticker):
+    """อัตราแลกเปลี่ยนเป็นบาท (THB=X คือดอลลาร์, EURTHB=X ยูโร, SEKTHB=X โครนาสวีเดน)"""
     try:
-        t = yf.download("THB=X", period="10d", interval="1d", auto_adjust=False, progress=False)["Close"].dropna()
+        t = yf.download(ticker, period="10d", interval="1d", auto_adjust=False, progress=False)["Close"].dropna()
         t = t.iloc[:, 0] if isinstance(t, pd.DataFrame) else t
         return round(float(t.iloc[-1]), 4)
     except Exception as e:  # noqa: BLE001
-        log("ดึงอัตราแลกเปลี่ยนไม่ได้:", e)
+        log("ดึงอัตราแลกเปลี่ยนไม่ได้:", ticker, e)
         return None
+
+
+def usd_thb():
+    """อัตราแลกเปลี่ยนดอลลาร์เป็นบาท ใช้แปลงมูลค่าพอร์ตเป็นเงินบาท"""
+    return fx_thb("THB=X")
 
 
 CRYPTO = {"BTC": "Bitcoin", "ETH": "Ethereum", "SOL": "Solana", "BNB": "BNB", "XRP": "XRP"}
@@ -322,6 +327,8 @@ def main():
         "spy": spy or prev.get("spy", []),
         "yield": yld or prev.get("yield", []),
         "usdthb": usd_thb() or prev.get("usdthb"),
+        "eurthb": fx_thb("EURTHB=X") or prev.get("eurthb"),
+        "sekthb": fx_thb("SEKTHB=X") or prev.get("sekthb"),
         "gold": gold_usd() or prev.get("gold"),
         "crypto": crypto_stats() or prev.get("crypto", []),
     }

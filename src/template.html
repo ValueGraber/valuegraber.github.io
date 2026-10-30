@@ -569,9 +569,26 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
 .tabs::-webkit-scrollbar { display: none; }
 .tabs button { flex: none; }
 .a-list { display: grid; gap: 8px; margin-top: 8px; }
-.a-row { display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr auto auto; gap: 8px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.a-row { display: grid; grid-template-columns: 2fr 1.2fr 0.8fr 1.1fr 1fr auto auto auto; gap: 8px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .a-row:last-child { border-bottom: 0; }
 .a-row.auto { grid-template-columns: 2fr 2.5fr 1fr; color: var(--ink-2); }
+.a-row .a-v small { display: block; font-size: 12px; font-weight: 400; color: var(--ink-3); }
+.fx-note { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin-top: 8px; }
+.fx-note .mini .inp { width: 100px; padding: 5px 8px; font-size: 14px; }
+.pl-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 4px; }
+.pl-sum div { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
+.pl-sum small { display: block; font-size: 12px; color: var(--ink-3); }
+.pl-sum b { font-size: 19px; font-weight: 600; }
+.pl-acc { margin-top: 22px; }
+.pl-acc h4 { margin: 0 0 2px; font-size: 16px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.pl-acc h4 small { font-weight: 400; font-size: 13px; color: var(--ink-3); }
+.pl-t { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+.pl-t th { font-weight: 500; color: var(--ink-3); font-size: 12px; text-align: right; padding: 4px; }
+.pl-t th.l, .pl-t td.l { text-align: left; }
+.pl-t td { padding: 4px; border-top: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.pl-t .inp { width: 100%; max-width: 130px; padding: 5px 8px; font-size: 14px; text-align: right; }
+.pl-t .cur td { background: var(--jade-soft); }
+.pl-more { margin-top: 6px; }
 .a-row .a-n { font-weight: 500; color: var(--ink); }
 .a-row .a-t { font-size: 13px; }
 .a-row .a-v { text-align: right; font-weight: 600; white-space: nowrap; }
@@ -670,9 +687,18 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
 .iv-rec { display: flex !important; gap: 8px; align-items: center; margin-top: 10px; font-size: 14px; }
 .iv-rec input { width: 18px; height: 18px; accent-color: var(--jade); }
 @media (max-width: 760px) {
-  .a-row { grid-template-columns: 1fr 1fr auto; }
+  .a-row { grid-template-columns: 1fr 1fr; }
   .a-row .a-name { grid-column: 1 / -1; }
-  .a-row .a-v { grid-column: 1 / 2; text-align: left; }
+  .a-row .a-v { text-align: left; }
+  .a-row .del { justify-self: end; }
+  .a-row.acc { grid-template-columns: 1fr 1fr auto; }
+  .a-row.acc .a-name { grid-column: 1 / 3; grid-row: 1; } .a-row.acc .del { grid-column: 3; grid-row: 1; }
+  .a-row.acc .a-type, .a-row.acc .a-num, .a-row.acc .a-em:not(.a-pl) { grid-column: 1; }
+  .a-row.acc .a-cur, .a-row.acc .a-v, .a-row.acc .a-pl { grid-column: 2 / 4; }
+  .pl-t .inp { min-width: 62px; padding: 5px 6px; }
+  .pl-t th, .pl-t td { padding: 4px 2px; }
+  .pl-sum { grid-template-columns: 1fr 1fr; } .pl-sum div:first-child { grid-column: 1 / -1; }
+  .pl-t .hide-s { display: none; } .pl-t .inp { max-width: 96px; }
   .a-row.auto { grid-template-columns: 1fr auto; } .a-row.auto .a-t { display: none; }
   .a-row.debt { grid-template-columns: 1fr 1fr; } .a-row.debt .a-name { grid-column: 1 / -1; } .a-row.debt .del { grid-column: 1 / -1; justify-self: end; }
   .mc-wd, .mc-grid { gap: 3px; }
@@ -816,6 +842,7 @@ body.slip-open { overflow: hidden; }
     <article class="hcard" id="hc-goal"><header><h3>เป้าหมายการลงทุน</h3><button type="button" class="hlink" data-go="port:grow">ดูแผน →</button></header><div class="hbody" id="h-goal"></div></article>
     <article class="hcard" id="hc-biz"><header><h3>ธุรกิจเดือนนี้</h3><button type="button" class="hlink" data-go="biz:sum">เปิดธุรกิจ →</button></header><div class="hbody" id="h-biz"></div></article>
     <article class="hcard" id="hc-left"><header><h3>เงินที่ยังใช้ได้เดือนนี้</h3><button type="button" class="hlink" data-go="money:budget">จดรายการ →</button></header><div class="hbody" id="h-left"></div></article>
+    <article class="hcard" id="hc-pl"><header><h3>กำไรขาดทุนการลงทุน</h3><button type="button" class="hlink" data-go="money:pl">ดูรายเดือน →</button></header><div class="hbody" id="h-pl"></div></article>
     <article class="hcard" id="hc-goals"><header><h3>เป้าหมายออม</h3><button type="button" class="hlink" data-go="money:goals">ดูเป้าหมาย →</button></header><div class="hbody" id="h-goals"></div></article>
     <article class="hcard" id="hc-tax"><header><h3>ภาษีธุรกิจปีนี้</h3><button type="button" class="hlink" data-go="biz:tax">ดูรายละเอียด →</button></header><div class="hbody" id="h-tax"></div></article>
   </div>
@@ -1210,11 +1237,18 @@ body.slip-open { overflow: hidden; }
       <button class="btn-line" id="a-add" type="button">+ เพิ่มบัญชี/ทรัพย์สิน</button></div>
     <div id="a-list" class="a-list"></div>
     <p class="pf-hint" id="gold-note"></p>
+    <div class="pf-hint fx-note" id="fx-note"></div>
   </section>
   <section class="panel" style="margin-top:16px" data-sub="nw">
     <div class="ph"><div><h3>สัดส่วนทรัพย์สิน</h3><p>ทรัพย์สินแต่ละอย่างคิดเป็นกี่ % ของทั้งหมด รวมพอร์ตหุ้นอเมริกาจากแท็บลงทุนด้วย</p></div>
       <span class="seg" id="ap-mode"><button type="button" data-v="type" aria-pressed="true">ตามประเภท</button><button type="button" data-v="acc" aria-pressed="false">รายบัญชี</button></span></div>
     <div class="donut-wrap"><div class="chart" id="ap-donut"></div><div class="legend" id="ap-legend"></div></div>
+  </section>
+  <section class="panel" style="margin-top:16px" data-sub="pl">
+    <p class="pf-hint" style="margin-top:0">ติ๊ก "ดูกำไร" ที่บัญชีด้านบน แล้วจดยอดสิ้นเดือนของแต่ละเดือน ถ้าเดือนไหนเติมเงินเข้าใส่เป็นบวก ถอนออกใส่เป็นลบ ระบบจะหักออกให้ จึงเห็นกำไรขาดทุนจริงของการลงทุน ยอดของเดือนนี้ดึงจากยอดบัญชีให้เอง</p>
+    <div class="pl-sum" id="pl-sum"></div>
+    <div class="chart" id="pl-chart"></div>
+    <div id="pl-list"></div>
   </section>
 
   <!-- budget -->
@@ -1633,7 +1667,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
     const cryptoRows = (j.crypto || []).map((c) => ({ ...c, crypto: true, sector: 'คริปโต', mos: null, signal: c.price > c.ma200 && c.ma50 > c.ma200 ? 'ขาขึ้น' : c.price < c.ma50 && c.ma50 < c.ma200 ? 'ขาลง' : 'ไซด์เวย์' }));
     drawCrypto(cryptoRows);
-    window.VG = { market, crypto: cryptoRows, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
+    window.VG = { market, crypto: cryptoRows, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, eur: j.eurthb || null, sek: j.sekthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -2233,6 +2267,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const dTH = (d, o = { day: 'numeric', month: 'short' }) => new Date(d + 'T00:00:00').toLocaleDateString('th-TH', o);
   const TYPES = { bank: 'บัญชีเงินฝาก', cash: 'เงินสด', gold: 'ทองคำ', fund: 'กองทุนรวม', thstock: 'หุ้นไทย', crypto: 'คริปโต', property: 'บ้าน/ที่ดิน/รถ', biz: 'เงินทุนในธุรกิจ', other: 'อื่นๆ' };
   const INVEST = ['gold', 'fund', 'thstock', 'crypto'];
+  const CURS = { THB: 'บาท', USD: 'USD', EUR: 'EUR', SEK: 'SEK' };
   const DEF = { out: ['อาหารและเครื่องดื่ม', 'เดินทาง', 'ที่พักและค่าน้ำไฟ', 'ค่าเน็ตและโทรศัพท์', 'ของใช้/ช้อปปิ้ง', 'สุขภาพ', 'ครอบครัว', 'บันเทิง/ท่องเที่ยว', 'การศึกษา', 'ประกัน', 'ผ่อนชำระหนี้', 'อื่นๆ'], in: ['เงินเดือน', 'โอนจากธุรกิจ', 'รายได้เสริม', 'รายได้อื่น'] };
   DEF.sav = ['เงินออม', 'เงินฉุกเฉิน', 'ลงทุนหุ้น', 'กองทุน', 'ทองคำ'];
   const BAHT_G = 15.244, OZ_G = 31.1035, PURITY = 0.965;
@@ -2250,7 +2285,8 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const norm = (d) => {
     const o = blank(); if (!d || typeof d !== 'object') return o;
     const arr = (x) => (Array.isArray(x) ? x.filter((y) => y && typeof y === 'object') : []);
-    o.accounts = arr(d.accounts).map((a) => ({ id: String(a.id || newId()), name: String(a.name || '').slice(0, 60), type: TYPES[a.type] ? a.type : 'other', value: a.value === '' ? '' : +a.value || '', gold: a.gold === '' ? '' : +a.gold || '', emerg: !!a.emerg, upd: /^\d{4}-\d{2}-\d{2}$/.test(a.upd || '') ? a.upd : '' }));
+    o.accounts = arr(d.accounts).map((a) => ({ id: String(a.id || newId()), name: String(a.name || '').slice(0, 60), type: TYPES[a.type] ? a.type : 'other', value: a.value === '' ? '' : +a.value || '', gold: a.gold === '' ? '' : +a.gold || '', emerg: !!a.emerg, upd: /^\d{4}-\d{2}-\d{2}$/.test(a.upd || '') ? a.upd : '',
+      cur: CURS[a.cur] ? a.cur : 'THB', pl: !!a.pl, log: (() => { const o = {}; if (a.log && typeof a.log === 'object') Object.entries(a.log).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v && typeof v === 'object') o[k] = { v: v.v === '' || v.v == null || !isFinite(+v.v) ? '' : +v.v, f: v.f === '' || v.f == null || !isFinite(+v.f) ? '' : +v.f }; }); return o; })() }));
     o.entries = arr(d.entries).filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out' || e.kind === 'sav') && +e.amount > 0).map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.ref ? { ref: String(e.ref).slice(0, 40) } : {}), ...(e.goal ? { goal: String(e.goal).slice(0, 40) } : {}), ...(e.sal && typeof e.sal === 'object' ? { sal: { g: +e.sal.g || 0, t: +e.sal.t || 0, s: +e.sal.s || 0, p: +e.sal.p || 0, o: +e.sal.o || 0 } } : {}) }));
     const nz = (x) => (x === '' || x == null ? '' : +x || '');
     o.incomes = arr(d.incomes).map((b) => ({ id: String(b.id || newId()), name: String(b.name || '').slice(0, 60), type: b.type === 'other' ? 'other' : 'sal', amount: nz(b.amount), wht: nz(b.wht), sso: nz(b.sso), pvd: nz(b.pvd), oth: nz(b.oth),
@@ -2280,7 +2316,30 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const VG = window.VG || {}; if (VG.gold && VG.fx) return { px: VG.gold * VG.fx * BAHT_G * PURITY / OZ_G, manual: false };
     return { px: null, manual: false };
   };
-  const accValue = (a) => (a.type === 'gold' ? (goldPx().px || 0) * (Number(a.gold) || 0) : Number(a.value) || 0);
+  /* foreign-currency accounts: rate set by hand wins, otherwise the daily rate from data.json */
+  const rate = (c) => { if (!c || c === 'THB') return 1; const m = +((M.settings.fxr || {})[c]); if (m > 0) return m; const VG = window.VG || {}; const r = c === 'USD' ? VG.fx : c === 'EUR' ? VG.eur : c === 'SEK' ? VG.sek : null; return r > 0 ? r : null; };
+  const fmtC = (v, c) => (!c || c === 'THB' ? baht(v) : v == null || !isFinite(v) ? '–' : (v < 0 ? '-' : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + c);
+  const accValue = (a) => (a.type === 'gold' ? (goldPx().px || 0) * (Number(a.gold) || 0) : (Number(a.value) || 0) * (rate(a.cur) || 0));
+  /* profit log works in the account's own currency (gold in baht) */
+  const plCur = (a) => (a.type === 'gold' ? 'THB' : a.cur);
+  const plNow = (a) => Math.round((a.type === 'gold' ? accValue(a) : Number(a.value) || 0) * 100) / 100;
+  const logNow = (a) => { if (!a.pl) return false; const k = ymOf(today()); const x = a.log[k] || { v: '', f: '' }; const v = plNow(a); if (x.v === v) return false; a.log[k] = { ...x, v }; return true; };
+  const plRows = (a) => {
+    const now = ymOf(today()); const ks = Object.keys(a.log).filter((k) => k <= now).sort(); let first = ks[0] || now; if (ymShift(now, -59) > first) first = ymShift(now, -59);
+    const rows = []; let prev = null;
+    for (let m = first; m <= now; m = ymShift(m, 1)) {
+      const x = a.log[m] || { v: '', f: '' }; const v = m === now ? plNow(a) : x.v; const f = Number(x.f) || 0;
+      let p = null, r = null; if (v !== '' && prev != null) { p = v - prev - f; const base = prev + Math.max(0, f); r = base > 0 ? p / base : null; }
+      rows.push({ m, v, f: x.f, p, r }); if (v !== '') prev = v;
+    }
+    return rows;
+  };
+  const plTotals = () => {
+    const now = ymOf(today()), y = now.slice(0, 4), byM = {}; let missing = false;
+    M.accounts.filter((a) => a.pl).forEach((a) => { const r = rate(plCur(a)); if (!r) { missing = true; return; } plRows(a).forEach((x) => { if (x.p != null) byM[x.m] = (byM[x.m] || 0) + x.p * r; }); });
+    const year = Object.entries(byM).reduce((s2, [k, v]) => s2 + (k.startsWith(y) ? v : 0), 0), all = Object.values(byM).reduce((s2, v) => s2 + v, 0);
+    return { byM, month: byM[now] ?? null, prev: byM[ymShift(now, -1)] ?? null, year, all, n: M.accounts.filter((a) => a.pl).length, missing };
+  };
   const usPort = () => { const P = window.VGPort && window.VGPort.summary ? window.VGPort.summary() : null; return P && P.n && P.fx ? P.all * P.fx : 0; };
   const totals = () => {
     const us = usPort(); let a = us, inv = us, em = 0;
@@ -2382,19 +2441,82 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     if (us) { const r = el('div', 'a-row auto'); r.append(el('span', 'a-n', 'พอร์ตหุ้นอเมริกา'), el('span', 'a-t', 'ดึงยอดจากแท็บลงทุนให้เอง'), el('b', 'a-v', baht(us))); box.append(r); }
     if (!M.accounts.length && !us) box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชี กด "+ เพิ่มบัญชี/ทรัพย์สิน" เช่น บัญชีออมทรัพย์ เงินสด ทองคำ กองทุน'));
     M.accounts.forEach((a) => {
-      const r = el('div', 'a-row'); const val = el('b', 'a-v');
-      const upd = () => { val.textContent = baht(accValue(a)); };
-      const sel = el('select', 'inp'); Object.entries(TYPES).forEach(([k, v]) => sel.append(new Option(v, k))); sel.value = a.type;
-      sel.addEventListener('change', () => { a.type = sel.value; save(); drawAccounts(); refresh(); });
-      const valIn = a.type === 'gold' ? numIn(a.gold, 'น้ำหนัก (บาททอง)', 'a-num', (v) => { a.gold = v; a.upd = today(); upd(); refresh(); save(true); }) : numIn(a.value, 'ยอดเงิน (บาท)', 'a-num', (v) => { a.value = v; a.upd = today(); upd(); refresh(); save(true); });
+      const r = el('div', 'a-row acc'); const val = el('b', 'a-v');
+      const upd = () => { val.replaceChildren(); const r = rate(a.cur); if (a.type !== 'gold' && a.cur !== 'THB') { val.append(r ? '≈ ' + baht(accValue(a)) : 'ใส่อัตราแลกเปลี่ยน'); val.append(el('small', null, r ? `1 ${a.cur} = ${r.toFixed(r < 10 ? 3 : 2)} บาท` : `ยังไม่มีอัตรา ${a.cur}`)); } else val.append(baht(accValue(a))); };
+      const sel = el('select', 'inp a-type'); sel.setAttribute('aria-label', 'ประเภท'); Object.entries(TYPES).forEach(([k, v]) => sel.append(new Option(v, k))); sel.value = a.type;
+      sel.addEventListener('change', () => { a.type = sel.value; if (a.type === 'gold') a.cur = 'THB'; save(); drawAccounts(); refresh(); });
+      const valIn = a.type === 'gold' ? numIn(a.gold, 'น้ำหนัก (บาททอง)', 'a-num', (v) => { a.gold = v; a.upd = today(); upd(); refresh(); save(true); }) : numIn(a.value, `ยอดเงิน (${CURS[a.cur]})`, 'a-num', (v) => { a.value = v; a.upd = today(); logNow(a); upd(); refresh(); save(true); });
+      let cs = el('span', 'a-cur'); if (a.type !== 'gold') { cs = el('select', 'inp a-cur'); cs.setAttribute('aria-label', 'สกุลเงิน'); Object.entries(CURS).forEach(([k, v]) => cs.append(new Option(v, k))); cs.value = a.cur;
+        cs.addEventListener('change', () => { a.cur = cs.value; save(); drawAccounts(); refresh(); }); }
+      const pl = el('label', 'a-em a-pl'); const pc2 = el('input'); pc2.type = 'checkbox'; pc2.checked = a.pl; pc2.title = 'จดกำไรขาดทุนของบัญชีนี้ทุกเดือน';
+      pc2.addEventListener('change', () => { a.pl = pc2.checked; logNow(a); save(); refresh(); }); pl.append(pc2, 'ดูกำไร');
       const em = el('label', 'a-em'); const cb = el('input'); cb.type = 'checkbox'; cb.checked = a.emerg; cb.addEventListener('change', () => { a.emerg = cb.checked; save(); refresh(); }); em.append(cb, 'เงินฉุกเฉิน');
-      r.append(txtIn(a.name, 'ชื่อ เช่น ออมทรัพย์ กสิกร', 'a-name', (v) => { a.name = v; save(true); }), sel, valIn, val, em,
+      r.append(txtIn(a.name, 'ชื่อ เช่น ออมทรัพย์ กสิกร', 'a-name', (v) => { a.name = v; save(true); }), sel, cs, valIn, val, em, pl,
         delBtn('ลบบัญชี', () => { if (confirm(`ลบ "${a.name || TYPES[a.type]}"?`)) { M.accounts = M.accounts.filter((x) => x !== a); save(); drawAccounts(); refresh(); } }));
       if (a.upd) r.append(el('small', 'a-upd', 'อัปเดต ' + dTH(a.upd, { day: 'numeric', month: 'short', year: '2-digit' })));
       upd(); box.append(r);
     });
   };
-  $('a-add').addEventListener('click', () => { M.accounts.push({ id: newId(), name: '', type: 'bank', value: '', gold: '', emerg: false, upd: today() }); save(); drawAccounts(); const n = $('a-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
+  $('a-add').addEventListener('click', () => { M.accounts.push({ id: newId(), name: '', type: 'bank', value: '', gold: '', emerg: false, upd: today(), cur: 'THB', pl: false, log: {} }); save(); drawAccounts(); const n = $('a-list').querySelectorAll('.a-name'); if (n.length) n[n.length - 1].focus(); });
+
+  const drawFxNote = () => {
+    const box = $('fx-note'); box.replaceChildren(); const used = [...new Set(M.accounts.filter((a) => a.type !== 'gold' && a.cur !== 'THB').map((a) => a.cur))]; if (!used.length) return;
+    box.append(el('span', null, 'อัตราแลกเปลี่ยนที่ใช้ อัปเดตทุกเช้า ใส่เองได้ถ้าอยากใช้เรตของธนาคาร:'));
+    used.forEach((c) => { const l = el('label', 'mini'); const i = el('input', 'inp sm'); i.type = 'number'; i.min = 0; i.step = 'any'; i.inputMode = 'decimal'; i.value = (M.settings.fxr || {})[c] || '';
+      const VG = window.VG || {}; const auto = c === 'USD' ? VG.fx : c === 'EUR' ? VG.eur : VG.sek; i.placeholder = auto ? String(auto) : 'ใส่เรต';
+      i.addEventListener('change', () => { M.settings.fxr = { ...(M.settings.fxr || {}) }; if (+i.value > 0) M.settings.fxr[c] = +i.value; else delete M.settings.fxr[c]; save(); drawAccounts(); refresh(); });
+      l.append(`1 ${c} =`, i, 'บาท'); box.append(l); });
+  };
+  const plInput = (v, ph, set) => { const i = el('input', 'inp'); i.type = 'number'; i.step = 'any'; i.inputMode = 'decimal'; i.value = v === '' || v == null ? '' : v; i.placeholder = ph; i.addEventListener('input', () => set(i.value === '' ? '' : Number(i.value))); return i; };
+  const sgnC = (v, c) => (v == null ? '–' : (v > 0 ? '+' : '') + fmtC(v, c));
+  const drawPLSum = () => {
+    const T = plTotals(); const box = $('pl-sum'); box.replaceChildren(); const cb = $('pl-chart'); cb.replaceChildren();
+    if (!T.n) return;
+    [['เดือนนี้', T.month], ['ปีนี้', T.year], ['ตั้งแต่เริ่มจด', T.all]].forEach(([k, v]) => { const d = el('div'); d.append(el('small', null, k), el('b', v > 0 ? 'pos' : v < 0 ? 'neg' : null, v == null ? '–' : (v > 0 ? '+' : '') + baht(v))); box.append(d); });
+    if (T.missing) cb.append(el('div', 'pf-err', 'บางบัญชียังไม่มีอัตราแลกเปลี่ยน จึงยังไม่นับรวมในยอดบาท ใส่เรตในส่วนบัญชีด้านบน'));
+    const now = ymOf(today()); const ms = []; for (let k = 11; k >= 0; k--) ms.push(ymShift(now, -k)); const rows = ms.map((m) => ({ m, v: T.byM[m] || 0, has: T.byM[m] != null }));
+    if (!window.d3 || !rows.some((r) => r.has)) return;
+    const W = cb.clientWidth || 600, H = 170, Mg = { t: 16, r: 6, b: 22, l: 52 };
+    const x = d3.scaleBand(ms, [Mg.l, W - Mg.r]).padding(0.25); const ext = d3.extent([0, ...rows.map((r) => r.v)]); const y = d3.scaleLinear(ext[0] === ext[1] ? [0, 1] : ext, [H - Mg.b, Mg.t]).nice();
+    const svg = d3.select(cb).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const kf = (v) => (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + 'k' : Math.round(v));
+    svg.append('g').selectAll('line').data(y.ticks(3)).join('line').attr('x1', Mg.l).attr('x2', W - Mg.r).attr('y1', y).attr('y2', y).attr('stroke', css('--chart-grid'));
+    svg.append('g').selectAll('text').data(y.ticks(3)).join('text').attr('x', Mg.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text(kf);
+    svg.append('g').selectAll('rect').data(rows).join('rect').attr('x', (r) => x(r.m)).attr('width', x.bandwidth()).attr('y', (r) => y(Math.max(0, r.v))).attr('height', (r) => Math.max(r.has ? 1 : 0, Math.abs(y(r.v) - y(0)))).attr('rx', 3)
+      .attr('fill', (r) => (r.v >= 0 ? css('--jade') : css('--brick'))).append('title').text((r) => `${ymTH(r.m, { month: 'short', year: '2-digit' })}: ${r.has ? (r.v > 0 ? '+' : '') + baht(r.v) : 'ไม่มีข้อมูล'}`);
+    svg.append('g').selectAll('text').data(rows).join('text').attr('x', (r) => x(r.m) + x.bandwidth() / 2).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 10.5).attr('fill', css('--ink-3')).text((r) => ymTH(r.m, { month: 'short' }));
+  };
+  const drawPL = () => {
+    const box = $('pl-list'); const fa = document.activeElement; const keepFocus = fa && box.contains(fa) ? fa.dataset.k : null; box.replaceChildren();
+    const list = M.accounts.filter((a) => a.pl); let dirty = false; list.forEach((a) => { if (logNow(a)) dirty = true; }); if (dirty) save(true);
+    drawPLSum();
+    if (!list.length) { box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชีที่ติ๊ก "ดูกำไร" เหมาะกับพอร์ตคริปโต กองทุน หุ้นไทย หรือบัญชีเทรดที่อยากรู้ว่าเดือนไหนได้หรือเสีย')); return; }
+    const now = ymOf(today());
+    list.forEach((a) => {
+      const c = plCur(a); const card = el('div', 'pl-acc'); const h = el('h4', null, a.name || TYPES[a.type]); h.append(el('small', null, `${TYPES[a.type]} · ${CURS[c]}`)); card.append(h);
+      const tot = el('div', 'pf-hint'); card.append(tot);
+      const t = el('table', 'pl-t'); const hr = el('tr'); [['เดือน', 'l'], ['ยอดสิ้นเดือน'], ['เติม+ / ถอน−'], ['กำไร/ขาดทุน'], ['%', 'hide-s']].forEach(([x, cl]) => hr.append(el('th', cl || null, x))); t.append(hr);
+      const rows = plRows(a); const cells = [];
+      [...rows].reverse().forEach((x) => {
+        const tr = el('tr', x.m === now ? 'cur' : null); tr.append(el('td', 'l', x.m === now ? 'เดือนนี้' : ymTH(x.m, { month: 'short', year: '2-digit' })));
+        const tv = el('td'); if (x.m === now) { tv.append(fmtC(x.v, c)); tv.title = 'ดึงจากยอดบัญชีด้านบน'; } else { const i = plInput(x.v, 'ยอด', (v) => { a.log[x.m] = { ...(a.log[x.m] || { f: '' }), v }; save(true); recalc(); }); i.dataset.k = a.id + x.m + 'v'; i.setAttribute('aria-label', `ยอดสิ้นเดือน ${ymTH(x.m)}`); tv.append(i); }
+        const tf = el('td'); const fi = plInput(x.f, '0', (v) => { a.log[x.m] = { ...(a.log[x.m] || { v: '' }), f: v }; save(true); recalc(); }); fi.dataset.k = a.id + x.m + 'f'; fi.setAttribute('aria-label', `เงินเติมหรือถอน ${ymTH(x.m)}`); tf.append(fi);
+        const tp = el('td'), tr2 = el('td', 'hide-s'); tr.append(tv, tf, tp, tr2); t.append(tr); cells.push({ m: x.m, tp, tr2 });
+      });
+      const recalc = () => {
+        const rs = plRows(a); const by = Object.fromEntries(rs.map((x) => [x.m, x]));
+        cells.forEach(({ m, tp, tr2 }) => { const x = by[m]; tp.className = x && x.p != null ? (x.p > 0 ? 'pos' : x.p < 0 ? 'neg' : '') : ''; tp.textContent = x && x.p != null ? sgnC(x.p, c) : x && x.v !== '' ? 'จุดเริ่มต้น' : '–'; tr2.textContent = x && x.r != null ? (x.r > 0 ? '+' : '') + (x.r * 100).toFixed(1) + '%' : ''; });
+        const y = now.slice(0, 4); const py = rs.reduce((s2, x) => s2 + (x.p != null && x.m.startsWith(y) ? x.p : 0), 0), pa = rs.reduce((s2, x) => s2 + (x.p || 0), 0);
+        tot.textContent = rs.some((x) => x.p != null) ? `ปีนี้ ${sgnC(py, c)} · ตั้งแต่เริ่มจด ${sgnC(pa, c)}` : 'ใส่ยอดสิ้นเดือนของเดือนก่อน แล้วจะเห็นกำไรขาดทุนของเดือนนี้';
+        drawPLSum();
+      };
+      recalc(); card.append(t);
+      const more = el('button', 'btn-line sm pl-more', '+ เพิ่มเดือนก่อนหน้า'); more.type = 'button';
+      more.addEventListener('click', () => { const first = rows[0].m; const m = ymShift(first, -1); a.log[m] = { v: '', f: '' }; save(); drawPL(); const i = box.querySelector(`[data-k="${a.id}${m}v"]`); if (i) i.focus(); });
+      card.append(more); box.append(card);
+    });
+    if (keepFocus) { const i = box.querySelector(`[data-k="${keepFocus}"]`); if (i) i.focus(); }
+  };
 
   /* ---------- personal budget ---------- */
   const setSeg = (id, v) => document.querySelectorAll(`#${id} button`).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
@@ -2870,18 +2992,18 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
 
   /* ---------- render ---------- */
   const refreshNW = () => { drawNW(); };
-  const refresh = () => { if (!shown) return; snapshot(); drawNW(); drawBudget(); drawGoals(); drawEmerg(); drawDebts(); drawIncomes(); drawBills(); drawFixedStrip(); drawRet(); };
+  const refresh = () => { if (!shown) return; snapshot(); drawNW(); drawFxNote(); drawPL(); drawBudget(); drawGoals(); drawEmerg(); drawDebts(); drawIncomes(); drawBills(); drawFixedStrip(); drawRet(); };
   const rebuildAll = () => { drawAccounts(); drawDebts(true); drawBills(true); drawIncomes(true); drawGoals(true); buildRet(); drawChips(); };
   document.addEventListener('vg:view', (e) => { shown = e.detail === 'money'; if (shown) { rebuildAll(); refresh(); } });
   document.addEventListener('vg:ready', () => { if (shown) { drawAccounts(); refresh(); } });
-  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) { drawNWChart(); drawAssetPie(); drawWeek(); drawCal(); drawRet(); } }, 200); });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (shown) { drawNWChart(); drawAssetPie(); drawWeek(); drawCal(); drawPLSum(); drawRet(); } }, 200); });
   const summary = () => {
     const t = totals(); const prevK = Object.keys(M.snaps).filter((k) => k < ymOf(today())).sort().pop(); const prev = prevK ? M.snaps[prevK] : null;
     const m = ymOf(today()); const s = monthSum(m); const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === m) spent[e.cat] = (spent[e.cat] || 0) + e.amount; });
     const over = Object.entries(M.budgets).filter(([c, b]) => (spent[c] || 0) > b * 0.8).map(([c, b]) => ({ c, sp: spent[c] || 0, b })).sort((a, b) => b.sp / b.b - a.sp / a.b);
     const ex = emExp();
     return { has: !!(M.accounts.length || M.debts.length || usPort()), entries: M.entries.length, ...t, change: prev ? t.nw - (prev.a - prev.l) : null, prevK,
-      month: s, left: leftOf(m), budget: budgetTotal(), over, emMonths: ex ? t.em / ex : null, emTarget: +M.settings.emMonths || 6, bills: dueBills(14), incomes: dueIncomes(14), goals: M.goals.filter((g) => g.name).map((g) => ({ name: g.name, have: goalSum(g), target: +g.target || 0 })) };
+      month: s, left: leftOf(m), budget: budgetTotal(), over, emMonths: ex ? t.em / ex : null, emTarget: +M.settings.emMonths || 6, bills: dueBills(14), incomes: dueIncomes(14), pl: plTotals(), goals: M.goals.filter((g) => g.name).map((g) => ({ name: g.name, have: goalSum(g), target: +g.target || 0 })) };
   };
   window.VGMoney = { get: () => M, summary, salary: salaryYear, replace: (d) => { M = norm(d); keep(); if (shown) { rebuildAll(); refresh(); } document.dispatchEvent(new Event('vg:data')); } };
   setKind('out'); $('p-date').value = today();
@@ -2926,7 +3048,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
      4 tabs (home, money, invest, biz). Each tab has a few pages; a page shows groups of sections (elements with data-sub) from one view.
      A group with a title folds open/closed; its header is inserted before the group's first section. Old (view, sub) links still work: see resolve(). */
   const PAGES = {
-    money: [['overview', 'ภาพรวม', 'money', [['nw']]],
+    money: [['overview', 'ภาพรวม', 'money', [['nw'], ['pl', 'กำไรขาดทุนรายเดือน', 'สินทรัพย์ที่ลงทุนเพื่อกำไร แต่ละเดือนได้หรือเสียเท่าไหร่', true]]],
       ['flow', 'รายรับรายจ่าย', 'money', [['budget'], ['fixed', 'รับ-จ่ายประจำ', 'เงินเดือน รายรับประจำ และบิลที่ต้องจ่ายทุกเดือน', true]]],
       ['plan', 'แผนการเงิน', 'money', [['goals', 'เป้าหมายออม', 'เก็บเงินเพื่อเป้าหมายต่างๆ', true], ['emerg', 'เงินฉุกเฉิน', 'มีเงินพอใช้กี่เดือนถ้าไม่มีรายได้', false],
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
@@ -3705,6 +3827,10 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       lf.append(el('div', 'hbig ' + (MS.left >= 0 ? 'pos' : 'neg'), baht(MS.left)), el('div', 'hsub', MS.left > 0 ? `ใช้ได้วันละ ${baht(MS.left / dl)} ถึงสิ้นเดือน` : 'เดือนนี้ใช้เกินแล้ว'));
       kv(lf, 'รายรับ', baht(MS.month.i), 'pos'); kv(lf, 'รายจ่าย', baht(MS.month.o)); if (MS.month.v) kv(lf, 'เก็บเงิน/ลงทุน', baht(MS.month.v));
     }
+    const hp = $('h-pl'); hp.replaceChildren();
+    if (!MS || !MS.pl || !MS.pl.n) empty(hp, 'ติ๊ก "ดูกำไร" ที่บัญชีลงทุน เช่น คริปโต กองทุน หุ้นไทย เพื่อดูกำไรขาดทุนแต่ละเดือน', 'ตั้งค่า', 'money:nw');
+    else { const T = MS.pl; hp.append(el('div', 'hbig ' + (T.month > 0 ? 'pos' : T.month < 0 ? 'neg' : ''), T.month == null ? '–' : (T.month > 0 ? '+' : '') + baht(T.month)), el('div', 'hsub', 'กำไรขาดทุนเดือนนี้ (เป็นบาท)'));
+      if (T.prev != null) kv(hp, 'เดือนก่อน', (T.prev > 0 ? '+' : '') + baht(T.prev), T.prev >= 0 ? 'pos' : 'neg'); kv(hp, 'ปีนี้', (T.year > 0 ? '+' : '') + baht(T.year), T.year >= 0 ? 'pos' : 'neg'); }
     const gl = $('h-goals'); gl.replaceChildren();
     if (!MS || !MS.goals || !MS.goals.length) empty(gl, 'ตั้งเป้าหมายออม เช่น เที่ยว ซื้อรถ แล้วดูว่าใกล้ครบหรือยัง', 'ตั้งเป้าหมาย', 'money:goals');
     else MS.goals.slice(0, 4).forEach((x) => {
@@ -3773,7 +3899,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   /* ---------- layout: each card is a widget the person can move, resize, hide and add back ---------- */
   const grid = document.querySelector('#view-home .home-grid');
   const CARDS = [...grid.querySelectorAll(':scope > .hcard')].map((c) => c.id);
-  const DEF_HIDDEN = ['hc-left', 'hc-goals'], DEF_SIZE = { 'hc-picks': 't' };
+  const DEF_HIDDEN = ['hc-left', 'hc-goals', 'hc-pl'], DEF_SIZE = { 'hc-picks': 't' };
   const SIZES = [['n', 'ปกติ', ''], ['w', 'กว้าง', 'wide'], ['t', 'สูง', 'tall'], ['b', 'ใหญ่', 'big']];
   let editing = false;
   const title = (id) => { const h = $(id).querySelector('h3'); return h ? h.textContent : id; };
