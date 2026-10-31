@@ -222,6 +222,15 @@ def usd_thb():
     return fx_thb("THB=X")
 
 
+def cross_thb(cur, usd):
+    """เรตสกุลเงินอื่นเป็นบาท ถ้าไม่มีคู่ตรง (เช่น SEKTHB=X) คิดผ่านดอลลาร์: (บาทต่อดอลลาร์) / (สกุลนั้นต่อดอลลาร์)"""
+    r = fx_thb(f"{cur}THB=X")
+    if r:
+        return r
+    per_usd = fx_thb(f"{cur}=X")
+    return round(usd / per_usd, 4) if usd and per_usd else None
+
+
 CRYPTO = {"BTC": "Bitcoin", "ETH": "Ethereum", "SOL": "Solana", "BNB": "BNB", "XRP": "XRP"}
 
 
@@ -319,6 +328,7 @@ def main():
     log(f"ได้งบ {ok_f}/{len(uni)} ตัว")
 
     spy, yld = market_series()
+    usd = usd_thb() or prev.get("usdthb")
     data = {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "asOf": max((p["asOf"] for p in prices.values()), default=prev.get("asOf")),
@@ -326,9 +336,9 @@ def main():
         "stocks": rows,
         "spy": spy or prev.get("spy", []),
         "yield": yld or prev.get("yield", []),
-        "usdthb": usd_thb() or prev.get("usdthb"),
-        "eurthb": fx_thb("EURTHB=X") or prev.get("eurthb"),
-        "sekthb": fx_thb("SEKTHB=X") or prev.get("sekthb"),
+        "usdthb": usd,
+        "eurthb": cross_thb("EUR", usd) or prev.get("eurthb"),
+        "sekthb": cross_thb("SEK", usd) or prev.get("sekthb"),
         "gold": gold_usd() or prev.get("gold"),
         "crypto": crypto_stats() or prev.get("crypto", []),
     }
