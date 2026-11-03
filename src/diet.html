@@ -55,7 +55,7 @@ section.screen{display:grid;gap:14px}
 .primary.confirm{background:var(--chili);color:var(--surface)}
 .empty{color:var(--muted);font-size:.9rem;padding:6px 0}
 .note{background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:10px 12px;font-size:.87rem}
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:12px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:80}
+.toast{position:fixed;left:50%;bottom:calc(146px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:12px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:80}
 .toast.show{opacity:1}
 
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -228,6 +228,19 @@ section.screen{display:grid;gap:14px}
 .sexsel{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sexsel button{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;font-weight:600}
 .sexsel button[aria-pressed="true"]{border-color:var(--basil);background:var(--basil-soft)}
+.exw + .exw{border-top:1px dashed var(--line)}
+.exbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 0 6px 36px}
+.mini-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:3px 10px;font-size:.8rem;color:var(--basil);font-weight:600}
+.lg{display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)}
+.lg input{width:58px;padding:4px 6px;text-align:right}
+.hint{font-size:.78rem;color:var(--amber);padding:0 0 8px 36px}
+.rests{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(82px + env(safe-area-inset-bottom,0px));z-index:35;background:var(--ink);color:var(--bg);border-radius:16px;padding:8px 10px 8px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+.timer b{font-size:1.4rem;min-width:58px}
+.timer button{border:0;border-radius:10px;padding:6px 10px;background:var(--surface);color:var(--ink);font-weight:600}
+.demo{background:var(--sunk);border-radius:16px;display:grid;place-items:center;padding:8px}
+.demo svg{width:100%;max-width:320px;height:auto;display:block}
+.steps{margin:10px 0 0;padding-left:22px;display:grid;gap:4px}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 </style>
 
@@ -271,6 +284,7 @@ section.screen{display:grid;gap:14px}
       <div id="presetConfirm" style="margin-top:10px" hidden></div>
       <div id="goalEdit" style="margin-top:8px"></div>
     </div>
+    <div class="card" id="libCard"></div>
   </section>
 
   <section class="screen" id="s-me" hidden>
@@ -288,6 +302,7 @@ section.screen{display:grid;gap:14px}
       <div class="legend" id="legend"></div>
       <p class="muted small" id="planText" style="margin:12px 0 0"></p>
     </div>
+    <div class="card" id="sumCard"></div>
     <div class="card">
       <h2>ข้อมูลร่างกาย</h2>
       <form class="form" id="profileForm" style="margin-top:12px">
@@ -309,6 +324,7 @@ section.screen{display:grid;gap:14px}
     <div class="card">
       <div class="cardhead"><h2>น้ำหนัก</h2><button class="linkbtn" data-act="openWeigh">+ ชั่งน้ำหนัก</button></div>
       <div class="chart" id="wChart"></div>
+      <div id="measure" class="small"></div>
     </div>
   </section>
 </div>
@@ -366,11 +382,22 @@ section.screen{display:grid;gap:14px}
 
 <div class="sheet" id="sh-weigh" hidden role="dialog" aria-label="ชั่งน้ำหนัก">
   <div class="grab"></div>
-  <h2>ชั่งน้ำหนักวันนี้</h2>
-  <p class="muted small" style="margin:4px 0 12px">ชั่งตอนเช้าหลังเข้าห้องน้ำ จะได้ค่าที่นิ่งที่สุด</p>
-  <div class="searchbox"><input id="w-today" type="number" inputmode="decimal" step="0.1" placeholder="กิโลกรัม"><button class="primary" data-act="saveWeight">บันทึก</button></div>
+  <h2>ชั่งน้ำหนักและวัดตัว</h2>
+  <p class="muted small" style="margin:4px 0 12px">ชั่งตอนเช้าหลังเข้าห้องน้ำ วัดรอบเอวตรงระดับสะดือ ใส่เฉพาะช่องที่มีก็ได้</p>
+  <div class="form">
+    <label class="wide">น้ำหนัก (กก.)<input id="w-today" type="number" inputmode="decimal" step="0.1"></label>
+    <label>รอบเอว (ซม.)<input id="w-waist" type="number" inputmode="decimal" step="0.5"></label>
+    <label>รอบสะโพก (ซม.)<input id="w-hip" type="number" inputmode="decimal" step="0.5"></label>
+    <div class="wide"><button class="primary block" data-act="saveWeight">บันทึก</button></div>
+  </div>
 </div>
 
+<div class="sheet" id="sh-ex" hidden role="dialog" aria-label="วิธีทำท่า">
+  <div class="grab"></div>
+  <div class="cardhead"><h2 id="exTitle"></h2><button class="linkbtn" data-act="closeSheet">ปิด</button></div>
+  <div id="exBody" style="margin-top:10px"></div>
+</div>
+<div class="timer" id="timer" hidden role="timer" aria-live="off"><span>พัก</span><b class="num" id="tLeft">1:00</b><button data-act="tAdd">+15 วิ</button><button data-act="tStop">หยุด</button></div>
 <div class="ob" id="ob" hidden></div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -518,6 +545,7 @@ const fmtDate=k=>{const d=parseKey(k);return 'วัน'+DAY_FULL[d.getDay()]+' 
 const r0=n=>Math.round(n);
 const r1=n=>Math.round(n*10)/10;
 const clone=o=>JSON.parse(JSON.stringify(o));
+const canon=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(x=>[x,v[x]])):v);
 const uid=()=>Math.random().toString(36).slice(2,9);
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('show'),1800)}
 const norm=s=>s.toLowerCase().trim().replace(/\s+/g,'').replace(/[()]/g,'').replace(/กระเพรา|กะเพา|กระเพา|กระเพาะ/g,'กะเพรา').replace(/ก๋วยเตียว|กวยเตี๋ยว/g,'ก๋วยเตี๋ยว').replace(/โอ้ต|โอต/g,'โอ๊ต');
@@ -588,11 +616,21 @@ const Store={mode:'local',db:null,uid:null,unsubProfile:null,unsubDay:null,unsub
           if(s.exists&&S.ob){S.ob=null;renderOb()}}
       }
       if(this.writing.profile||this.dirty.profile)return;
-      if(s.exists){S.profile=Object.assign(clone(DEFAULT_PROFILE),clone(s.data()),{example:false});renderAll()}
+      if(s.exists){const nd=Object.assign(clone(DEFAULT_PROFILE),clone(s.data()),{example:false});if(canon(nd)===canon(S.profile))return;S.profile=nd;renderAll()}
     },()=>{clearTimeout(t);$('#storeNote').textContent='โหลดข้อมูลไม่สำเร็จ'});
     this.watchDay();
   },
   ref(id){return this.mode==='fb'?Account.ref(id):this.db.collection('data/users/'+this.uid).doc(id)},
+  async readDoc(id){
+    if(this.mode==='local'){try{return JSON.parse(localStorage.getItem('wl-'+id)||'null')}catch(e){return null}}
+    const x=await this.ref(id).get();return x.exists?x.data():null;
+  },
+  async allDays(){
+    if(this.mode==='local'){const out=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^wl-day-/.test(k))out.push({...JSON.parse(localStorage.getItem(k)),d:k.slice(7)})}}catch(e){}return out}
+    if(this.mode==='fb')return Account.allDays();
+    const q=await this.db.collection('data/users/'+this.uid).get();
+    return q.docs.filter(x=>x.id.startsWith('day-')).map(x=>({...x.data(),d:x.id.slice(4)}));
+  },
 
   watchWeek(){
     const k='week-'+mondayOf(S.date);
@@ -602,7 +640,7 @@ const Store={mode:'local',db:null,uid:null,unsubProfile:null,unsubDay:null,unsub
       if(this.unsubWeek)this.unsubWeek();
       this.unsubWeek=this.ref(k).onSnapshot(s=>{
         if(this.writing[k]||this.dirty[k]||this.weekKey!==k)return;
-        S.wk=s.exists?Object.assign({sessions:[]},clone(s.data())):{sessions:[]};
+        const nw=s.exists?Object.assign({sessions:[]},clone(s.data())):{sessions:[]};if(canon(nw)===canon(S.wk))return;S.wk=nw;
         renderHome();renderWorkout();
       },()=>{});
     }else{
@@ -617,8 +655,8 @@ const Store={mode:'local',db:null,uid:null,unsubProfile:null,unsubDay:null,unsub
       S.day=EMPTY_DAY();
       this.unsubDay=this.ref(k).onSnapshot(s=>{
         if(this.writing[k]||this.dirty[k]||('day-'+S.date)!==k)return;
-        S.day=s.exists?Object.assign(EMPTY_DAY(),clone(s.data())):EMPTY_DAY();
-        renderHome();renderDiary();
+        const nd=s.exists?Object.assign(EMPTY_DAY(),clone(s.data())):EMPTY_DAY();if(canon(nd)===canon(S.day))return;S.day=nd;
+        renderHome();renderDiary();renderSummary();
       },()=>{});
     }else{
       try{S.day=Object.assign(EMPTY_DAY(),JSON.parse(localStorage.getItem('wl-'+k)||'null')||{})}catch(e){S.day=EMPTY_DAY()}
@@ -653,9 +691,10 @@ const Account={A:null,F:null,auth:null,fs:null,user:null,state:'off',msg:'',err:
   ref(id){
     const F=this.F,uid=this.user.uid;
     const r=id==='profile'?F.doc(this.fs,'diet',uid):F.doc(this.fs,'diet',uid,id.startsWith('day-')?'days':'weeks',id.slice(id.indexOf('-')+1));
-    return {set:d=>F.setDoc(r,d),get:()=>F.getDoc(r),
+    return {set:d=>F.setDoc(r,d),get:()=>F.getDoc(r).then(x=>({exists:x.exists(),data:()=>x.data()})),
       onSnapshot:(cb,err)=>F.onSnapshot(r,{includeMetadataChanges:true},x=>cb({exists:x.exists(),data:()=>x.data(),metadata:{fromCache:x.metadata.fromCache,hasPendingWrites:x.metadata.hasPendingWrites}}),err)};
   },
+  async allDays(){const F=this.F,q=await F.getDocs(F.collection(this.fs,'diet',this.user.uid,'days'));return q.docs.map(x=>({...x.data(),d:x.id}))},
   async onUser(u){
     this.user=u;this.err=false;
     if(!u){this.state='out';this.msg='';if(Store.mode==='fb'){Store.loadLocal(false);renderAll()}renderAccount();return}
@@ -663,7 +702,7 @@ const Account={A:null,F:null,auth:null,fs:null,user:null,state:'off',msg:'',err:
     try{
       Store.mode='fb';
       const prof=await this.ref('profile').get();
-      if(!prof.exists()){
+      if(!prof.exists){
         const keys=[];let lp=null;
         try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^wl-(day|week)-/.test(k))keys.push(k)}lp=localStorage.getItem('wl-profile')}catch(e){}
         for(const k of keys){try{await this.ref(k.slice(3)).set(JSON.parse(localStorage.getItem(k)))}catch(e){if(e&&e.code==='permission-denied')throw e}}
@@ -753,7 +792,7 @@ function renderHome(){
   $('#waterCard').innerHTML=`<div class="cardhead"><h2>น้ำ</h2><span class="num small muted">${w}/${c.water} แก้ว</span></div>
     <div class="water">${Array.from({length:n},(_,i)=>`<button class="glass" data-act="water" data-i="${i}" aria-label="น้ำแก้วที่ ${i+1}"><svg viewBox="0 0 34 42"><path d="M5 4h24l-3 33a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2z" fill="${i<w?'var(--water)':'var(--water-soft)'}" stroke="var(--water)" stroke-width="1.5"/></svg></button>`).join('')}</div>
     <div class="small muted" style="margin-top:6px">${r0(w*250).toLocaleString()} มล. แตะแก้วเพื่อจด</div>`;
-  const ws=[...(S.profile.weights||[])].sort((a,b)=>a.d<b.d?-1:1),last=ws[ws.length-1],first=ws[0];
+  const ws=[...(S.profile.weights||[])].filter(x=>x.w>0).sort((a,b)=>a.d<b.d?-1:1),last=ws[ws.length-1],first=ws[0];
   const dir=c.mode==='bulk'?1:-1;
   $('#weightCard').innerHTML=`<div class="cardhead"><h2>น้ำหนัก</h2><button class="linkbtn" data-act="openWeigh">+ ชั่ง</button></div>
     <div style="margin-top:8px"><span class="num" style="font-size:1.6rem">${last?last.w:S.profile.weight}</span> <span class="muted">กก.</span></div>
@@ -787,7 +826,7 @@ function renderDiary(){
       <button class="meal-add" data-act="openFood" data-meal="${m}" data-ft="search" aria-label="เพิ่ม${l}">+</button></div>
       ${items.map(f=>`<div class="log"><div style="min-width:0">${esc(f.n)}<div class="small muted"><span class="num">${r0(f.k*f.q)}</span> kcal · ${f.q} ${esc(f.u)} · ${macTxt(f.p*f.q,(f.c||0)*f.q,(f.f||0)*f.q)}</div></div>
       <div class="stepper"><button data-act="qty" data-i="${f.i}" data-d="-0.5" aria-label="ลดจำนวน">−</button><span class="num">${f.q}</span><button data-act="qty" data-i="${f.i}" data-d="0.5" aria-label="เพิ่มจำนวน">+</button></div>
-      <button class="del" data-act="del" data-i="${f.i}" aria-label="ลบ ${esc(f.n)}">×</button></div>`).join('')}</div>`;
+      <button class="del" data-act="del" data-i="${f.i}" aria-label="ลบ ${esc(f.n)}">×</button></div>`).join('')}${items.length?'':`<button class="linkbtn" style="margin-top:6px" data-act="copyMeal" data-meal="${m}">คัดลอก${l}จากเมื่อวาน</button>`}</div>`;
   }).join('');
 }
 
@@ -798,7 +837,7 @@ function renderResults(){
   const q=norm(S.q),mine=S.profile.myMenus||[];
   let html='';
   if(!q){
-    html=`<div class="small muted" style="margin-bottom:6px">กดเพิ่มได้เลย</div><div class="chips">${
+    html=recentHtml()+`<div class="small muted" style="margin:10px 0 6px">เมนูยอดนิยม</div><div class="chips">${
       mine.map(m=>`<button class="chip mine" data-act="addMine" data-id="${m.id}">+ ${esc(m.n)} <span class="num muted">${r0(m.k)}</span></button>`).join('')+
       QUICK.map(n=>{const f=FOODS.find(x=>x.n===n);return `<button class="chip" data-act="addName" data-n="${esc(n)}">+ ${esc(n)} <span class="num muted">${f.k}</span></button>`}).join('')}</div>
       <div class="small muted" style="margin-top:10px">ลองพิมพ์ "ธัญพืช" "ถั่ว" "ผลไม้" เพื่อดูวัตถุดิบทั้งหมวด</div>`;
@@ -852,7 +891,7 @@ function renderSheetState(){
   if(S.ft==='build')renderBuilder();
 }
 function openSheet(id){
-  ['add','food','weigh'].forEach(k=>$('#sh-'+k).hidden=k!==id);
+  ['add','food','weigh','ex'].forEach(k=>$('#sh-'+k).hidden=k!==id);if(id!=='ex')Demo.stop();
   $('#scrim').hidden=!id;S.sheet=id;
   if(id==='food'){renderSheetState();renderResults();renderBResults();renderBuilder()}
 }
@@ -914,7 +953,9 @@ function renderWorkout(){
     if(a&&a.ex){
       const done=new Set(s.done||[]);
       return `<div class="block">${head}<div class="focus">${a.focus.map(f=>`<span class="tag">${esc(f)}</span>`).join('')}</div>
-        ${a.ex.map((e,j)=>`<label class="ex ${done.has(j)?'done':''}"><input type="checkbox" data-sx="${s.id}:${j}" ${done.has(j)?'checked':''}><div style="min-width:0"><div class="exname">${esc(e[0])}</div><div class="how">${esc(e[1])}</div></div><span class="sets">${esc(e[2])}</span></label>`).join('')}
+        ${a.ex.some(e=>lastLift(e[0]))?'':'<div class="small muted" style="margin-top:6px">ใส่จำนวนครั้ง (และน้ำหนักขวดน้ำ) ที่ทำได้ ครั้งหน้าจะบอกว่าควรเพิ่มเท่าไหร่</div>'}
+        ${a.ex.map((e,j)=>exRow(s,e,j,done)).join('')}
+        <div class="rests"><span class="small muted">พักระหว่างเซต</span>${[30,60,90].map(x=>`<button class="mini-btn" data-act="rest" data-s="${x}">${x} วิ</button>`).join('')}</div>
         <button class="finbtn ${s.fin?'on':''}" data-act="sFin" data-id="${s.id}">${s.fin?'✓ ทำเสร็จแล้ว · '+itemKcal(s)+' kcal':'ทำเสร็จแล้ว'}</button></div>`;
     }
     return `<div class="block">${head}<label class="ex ${s.fin?'done':''}" style="padding-top:4px"><input type="checkbox" data-sf="${s.id}" ${s.fin?'checked':''}>
@@ -976,7 +1017,10 @@ function renderMe(){
   if(c.mode==='bulk')txt+=p.goal>p.weight?`อยากเพิ่มอีก ${(p.goal-p.weight).toFixed(1)} กก. ถ้าเล่นเวทสม่ำเสมอใช้เวลาราว ${Math.ceil(c.weeks)} สัปดาห์`:'ตั้งน้ำหนักเป้าให้มากกว่าตอนนี้ เพื่อดูระยะเวลา';
   if(c.mode==='medium')txt+='น้ำหนักขึ้นลงวันละ 1 กก. เป็นเรื่องปกติ ดูรูปร่างและรอบเอวประกอบ';
   $('#planText').textContent=txt+' · เกณฑ์ BMI แบบคนเอเชีย';
-  const w=[...(p.weights||[])].sort((a,b)=>a.d<b.d?-1:1).slice(-30);
+  const ms=(p.weights||[]).filter(x=>x.waist||x.hip).sort((a,b)=>a.d<b.d?-1:1);
+  const mLine=(k,l)=>{const a=ms.filter(x=>x[k]);if(!a.length)return '';const L=a[a.length-1][k],F=a[0][k],d=L-F;return `<div>${l} <b class="num">${L}</b> ซม.${a.length>1&&d?` <span class="muted">(${d>0?'+':''}${r1(d)} ซม. ตั้งแต่ ${dmy(a[0].d)})</span>`:''}</div>`};
+  $('#measure').innerHTML=ms.length?`<div style="margin-top:10px;display:grid;gap:2px">${mLine('waist','รอบเอว')}${mLine('hip','รอบสะโพก')}</div>`:'<div class="muted" style="margin-top:8px">วัดรอบเอวด้วยทุกสัปดาห์ บางทีน้ำหนักไม่ลด แต่เอวเล็กลง</div>';
+  const w=[...(p.weights||[])].filter(x=>x.w>0).sort((a,b)=>a.d<b.d?-1:1).slice(-30);
   const box=$('#wChart');
   if(w.length<2){box.innerHTML=`<p class="empty">${w.length?'ชั่งอีกครั้งพรุ่งนี้ จะเห็นกราฟ':'ยังไม่มีบันทึก กด "+ ชั่งน้ำหนัก" เพื่อเริ่ม'}</p>`;return}
   const Wd=560,H=170,L=40,Rp=14,T=12,B=26;
@@ -1045,7 +1089,236 @@ function renderOb(){
     <button class="primary" data-act="obNext">${step===N-1?'เริ่มเลย':'ต่อไป'}</button></div></div>`;
 }
 
-function renderAll(){renderHome();renderDiary();renderWorkout();renderMe();if(S.sheet==='food'){renderResults();renderBuilder()}}
+/* ===== exercise demos: stick figures (side view unless marked front), two poses animated ===== */
+const P=o=>o;
+const STAND={h:[100,28],s:[100,46],p:[100,92],k1:[101,121],f1:[102,150],e1:[100,69],n1:[100,92]};
+const FRONT={front:1,h:[100,28],s:[100,46],a1:[90,50],a2:[110,50],p:[100,92],k1:[94,121],f1:[92,150],k2:[106,121],f2:[108,150],e1:[86,70],n1:[84,92],e2:[114,70],n2:[116,92]};
+const SQUAT={h:[110,58],s:[104,75],p:[80,112],k1:[110,114],f1:[102,150],e1:[122,76],n1:[140,76]};
+const PLANK_HIGH={h:[166,103],s:[150,112],p:[96,130],k1:[68,139],f1:[40,148],e1:[150,131],n1:[150,150]};
+const CRUNCH_A={h:[30,137],s:[50,142],p:[100,146],k1:[124,116],f1:[140,150],e1:[40,128],n1:[30,130]};
+const POSES={
+ pushup:[PLANK_HIGH,{h:[167,129],s:[150,136],p:[96,142],k1:[68,145],f1:[40,148],e1:[132,128],n1:[150,150]}],
+ narrow:[PLANK_HIGH,{h:[167,129],s:[150,136],p:[96,142],k1:[68,145],f1:[40,148],e1:[140,126],n1:[150,150]}],
+ knee:[{h:[160,100],s:[146,110],p:[100,130],k1:[74,150],f1:[50,138],e1:[146,130],n1:[146,150]},{h:[162,128],s:[146,134],p:[100,142],k1:[74,150],f1:[50,138],e1:[128,126],n1:[146,150]}],
+ plank:[{h:[166,113],s:[150,121],p:[100,131],k1:[70,140],f1:[40,148],e1:[150,150],n1:[172,150]},{h:[166,112],s:[150,120],p:[100,129],k1:[70,139],f1:[40,148],e1:[150,150],n1:[172,150]}],
+ side:[{h:[162,112],s:[148,120],p:[100,140],k1:[70,145],f1:[40,149],e1:[148,150],n1:[166,150],e2:[150,104],n2:[152,86]},{h:[162,103],s:[148,112],p:[100,127],k1:[70,138],f1:[40,148],e1:[148,150],n1:[166,150],e2:[150,90],n2:[152,66]}],
+ dip:[{prop:'chair',h:[98,56],s:[96,73],p:[104,116],k1:[140,116],f1:[142,150],e1:[90,92],n1:[86,108]},{prop:'chair',h:[102,78],s:[100,95],p:[108,134],k1:[140,126],f1:[142,150],e1:[78,94],n1:[86,108]}],
+ squat:[{...STAND,e1:[117,50],n1:[136,50]},SQUAT],
+ lunge:[{...STAND,k2:[99,121],f2:[98,150]},{h:[104,50],s:[104,68],p:[104,110],k1:[132,118],f1:[136,150],k2:[86,146],f2:[60,150],e1:[104,90],n1:[104,110]}],
+ bridge:[{h:[32,138],s:[50,143],p:[100,146],k1:[124,116],f1:[140,150],e1:[72,146],n1:[92,148]},{h:[32,138],s:[52,141],p:[100,113],k1:[128,108],f1:[140,150],e1:[72,146],n1:[92,148]}],
+ calf:[STAND,{h:[100,19],s:[100,37],p:[100,83],k1:[101,112],f1:[104,148],e1:[100,60],n1:[100,83]}],
+ wall:[{prop:'wall',h:[68,52],s:[68,70],p:[68,112],k1:[106,112],f1:[106,150],e1:[84,90],n1:[100,104]},{prop:'wall',h:[68,51],s:[68,69],p:[68,112],k1:[106,112],f1:[106,150],e1:[84,90],n1:[100,104]}],
+ superman:[{h:[162,139],s:[142,144],p:[92,146],k1:[62,147],f1:[32,148],e1:[166,147],n1:[188,147]},{h:[162,128],s:[142,136],p:[92,145],k1:[62,141],f1:[32,134],e1:[166,130],n1:[188,124]}],
+ row:[{prop:'bottle',h:[146,80],s:[130,86],p:[90,96],k1:[96,122],f1:[90,150],e1:[130,106],n1:[130,126]},{prop:'bottle',h:[146,80],s:[130,86],p:[90,96],k1:[96,122],f1:[90,150],e1:[110,86],n1:[126,102]}],
+ curl:[{...STAND,prop:'bottle',e1:[102,70],n1:[106,94]},{...STAND,prop:'bottle',e1:[102,70],n1:[118,54]}],
+ pike:[{h:[150,138],s:[138,122],p:[94,92],k1:[72,120],f1:[52,148],e1:[144,136],n1:[150,150]},{h:[154,147],s:[140,134],p:[96,96],k1:[72,122],f1:[52,148],e1:[128,136],n1:[150,150]}],
+ lateral:[{...FRONT,prop:'bottle'},{...FRONT,prop:'bottle',e1:[74,54],n1:[54,52],e2:[126,54],n2:[146,52]}],
+ press:[{...FRONT,prop:'bottle',e1:[78,60],n1:[80,40],e2:[122,60],n2:[120,40]},{...FRONT,prop:'bottle',e1:[86,28],n1:[90,8],e2:[114,28],n2:[110,8]}],
+ crunch:[CRUNCH_A,{h:[48,116],s:[62,128],p:[100,146],k1:[124,116],f1:[140,150],e1:[56,110],n1:[46,118]}],
+ bicycle:[{h:[48,118],s:[62,130],p:[100,146],k1:[128,136],f1:[156,132],k2:[112,112],f2:[132,118],e1:[74,116],n1:[56,112]},{h:[48,118],s:[62,130],p:[100,146],k1:[112,112],f1:[132,118],k2:[128,136],f2:[156,132],e1:[74,124],n1:[56,112]}],
+ jack:[FRONT,{...FRONT,e1:[84,30],n1:[78,10],e2:[116,30],n2:[122,10],k1:[86,120],f1:[74,150],k2:[114,120],f2:[126,150]}],
+ jumpsquat:[SQUAT,{h:[100,10],s:[100,28],p:[100,74],k1:[101,103],f1:[102,130],e1:[108,12],n1:[114,-4]}],
+ knees:[{...STAND,k1:[122,96],f1:[122,124],k2:[100,121],f2:[100,150],e1:[92,66],n1:[100,84],e2:[108,64],n2:[122,56]},{...STAND,k1:[100,121],f1:[100,150],k2:[122,96],f2:[122,124],e1:[108,64],n1:[122,56],e2:[92,66],n2:[100,84]}],
+ burpee:[STAND,PLANK_HIGH]
+};
+const BOTTLE='ใช้ขวดน้ำแทนดัมเบล ขวด 600 มล. ≈ 0.6 กก. · 1.5 ลิตร ≈ 1.5 กก. · แกลลอน 5 ลิตร ≈ 5 กก.';
+const EX={
+ 'วิดพื้น':{pose:'pushup',steps:['วางมือกว้างกว่าไหล่เล็กน้อย ลำตัวตรงจากหัวถึงส้นเท้า','ย่อตัวลงจนอกเกือบแตะพื้น ศอกกางราว 45 องศา','ดันตัวขึ้น หายใจออกตอนดัน'],warn:'สะโพกไม่ตก ก้นไม่โด่ง ถ้ายังไม่ไหวให้วางเข่าที่พื้น'},
+ 'วิดพื้นมือแคบ':{pose:'narrow',steps:['วางมือชิดกันใต้หน้าอก','ย่อลงโดยให้ศอกแนบลำตัว','ดันขึ้นด้วยแรงหลังแขน'],warn:'ถ้าเจ็บข้อมือ แยกมือออกเล็กน้อย'},
+ 'วิดพื้นเข่าแตะพื้น':{pose:'knee',steps:['เข่าแตะพื้น ไขว้ข้อเท้าไว้','ลำตัวตรงจากเข่าถึงหัว','ย่อลงแล้วดันขึ้น'],warn:'อย่าแอ่นหลัง'},
+ 'ดิปเก้าอี้':{pose:'dip',steps:['นั่งขอบเก้าอี้ มือจับขอบข้างสะโพก แล้วเลื่อนก้นออกมา','งอศอกย่อตัวลงช้าๆ จนแขนท่อนบนขนานพื้น','ดันตัวกลับขึ้น'],warn:'ใช้เก้าอี้ที่ไม่มีล้อ ไหล่ไม่ห่อ'},
+ 'แพลงก์':{pose:'plank',hold:1,steps:['ศอกอยู่ใต้ไหล่ ปลายเท้าจิกพื้น','เกร็งท้องและบีบก้น ลำตัวเป็นเส้นตรง','หายใจปกติ แล้วค้างไว้'],warn:'สะโพกไม่ตกและไม่โด่ง'},
+ 'แพลงก์ข้าง':{pose:'side',steps:['นอนตะแคง ศอกอยู่ใต้ไหล่','ยกสะโพกขึ้นให้ลำตัวตรง','ค้างไว้ แล้วสลับข้าง'],warn:'สะโพกไม่ตก'},
+ 'สควอต':{pose:'squat',steps:['ยืนเท้ากว้างเท่าไหล่ ปลายเท้าแบะออกนิดหน่อย','ดันก้นไปข้างหลังเหมือนนั่งเก้าอี้ ย่อจนต้นขาขนานพื้น','ดันส้นเท้ายืนขึ้น'],warn:'เข่าชี้ทางเดียวกับปลายเท้า หลังตรง ส้นเท้าไม่ลอย',w:'กอดขวดน้ำหรือแกลลอนไว้ที่อกเพื่อให้หนักขึ้น'},
+ 'สควอตกระโดด':{pose:'jumpsquat',steps:['ย่อตัวท่าสควอต','ระเบิดตัวกระโดดขึ้น','ลงเบาๆ แล้วย่อต่อทันที'],warn:'ลงปลายเท้า เข่าไม่บิดเข้าใน'},
+ 'ลันจ์':{pose:'lunge',steps:['ยืนตรง ก้าวขาไปข้างหน้ายาวๆ','ย่อตัวจนเข่าหลังเกือบแตะพื้น เข่าหน้าทำมุม 90 องศา','ดันเท้าหน้ากลับมายืน แล้วสลับข้าง'],warn:'ลำตัวตั้งตรง เข่าหน้าไม่ล้ำปลายเท้ามาก',w:'ถือขวดน้ำทั้งสองมือเพื่อให้หนักขึ้น'},
+ 'กลูตบริดจ์':{pose:'bridge',steps:['นอนหงาย ชันเข่า เท้าวางราบ','บีบก้นแล้วยกสะโพกขึ้นจนลำตัวตรงจากไหล่ถึงเข่า','ค้าง 1 วินาที แล้วลดลงช้าๆ'],warn:'ใช้แรงก้น ไม่แอ่นหลัง',w:'วางขวดน้ำหรือแกลลอนบนสะโพกเพื่อให้หนักขึ้น'},
+ 'ยกส้นเท้า':{pose:'calf',steps:['ยืนตรง มือแตะผนังได้','เขย่งขึ้นให้สูงที่สุด','ลดส้นลงช้าๆ'],warn:'ไม่เด้ง ทำช้าๆ',w:'ถือขวดน้ำข้างลำตัวเพื่อให้หนักขึ้น'},
+ 'นั่งพิงกำแพง':{pose:'wall',hold:1,steps:['ยืนหลังพิงผนัง','ไถลตัวลงจนเข่างอ 90 องศา','ค้างไว้'],warn:'เข่าอยู่เหนือข้อเท้า'},
+ 'ซูเปอร์แมน':{pose:'superman',steps:['นอนคว่ำ เหยียดแขนไปข้างหน้า','ยกแขน อก และขาขึ้นพร้อมกัน','ค้าง 2 วินาที แล้วลดลง'],warn:'มองพื้น คอไม่แหงน'},
+ 'ก้มตัวดึงขวดน้ำ':{pose:'row',steps:['ถือขวดน้ำ ย่อเข่าเล็กน้อย โน้มตัวไปหน้า หลังตรง','ดึงศอกไปด้านหลังจนขวดถึงข้างเอว','บีบสะบัก แล้วลดลงช้าๆ'],warn:'หลังไม่งอ',w:BOTTLE},
+ 'ยกขวดน้ำงอแขน':{pose:'curl',steps:['ยืนตรง ถือขวด ฝ่ามือหันออก','งอศอกยกขวดขึ้นหาไหล่ ศอกแนบลำตัว','ลดลงช้าๆ'],warn:'ไม่เหวี่ยงตัวช่วย',w:BOTTLE},
+ 'งอแขนท่าค้อน':{pose:'curl',steps:['ถือขวดแนวตั้ง ฝ่ามือหันเข้าหาตัว','ยกขึ้นหาไหล่ ศอกแนบลำตัว','ลดลงช้าๆ'],warn:'ไม่เหวี่ยงตัวช่วย',w:BOTTLE},
+ 'วิดพื้นท่าไพค์':{pose:'pike',steps:['ตั้งท่าวิดพื้น แล้วยกก้นสูงเป็นรูปตัว V คว่ำ','งอศอกให้ศีรษะลงหาพื้นระหว่างมือ','ดันกลับขึ้น'],warn:'ทำช้าๆ ถ้าเจ็บไหล่ให้หยุด'},
+ 'ยกขวดน้ำด้านข้าง':{pose:'lateral',front:1,steps:['ยืนตรง ถือขวดข้างลำตัว','ยกแขนออกด้านข้างจนถึงระดับไหล่ ศอกงอนิดหน่อย','ลดลงช้าๆ'],warn:'ไม่ยักไหล่ เริ่มจากขวดเล็กก่อน',w:BOTTLE},
+ 'ดันขวดน้ำเหนือศีรษะ':{pose:'press',front:1,steps:['ถือขวดไว้ระดับไหล่','ดันขึ้นจนแขนเหยียดเหนือหัว','ลดลงช้าๆ'],warn:'เกร็งท้อง ไม่แอ่นเอว',w:BOTTLE},
+ 'ครันช์':{pose:'crunch',steps:['นอนหงาย ชันเข่า มือแตะข้างหู','เกร็งท้อง ยกไหล่พ้นพื้น','ลดลงช้าๆ'],warn:'ไม่ดึงคอ ใช้แรงท้อง'},
+ 'ปั่นจักรยานกลางอากาศ':{pose:'bicycle',steps:['นอนหงาย ยกไหล่และขาขึ้น','ดึงเข่าข้างหนึ่งเข้า เหยียดอีกข้าง แล้วบิดศอกฝั่งตรงข้ามมาหา','สลับข้างไปมา'],warn:'หลังล่างแนบพื้น'},
+ 'กระโดดตบ':{pose:'jack',front:1,steps:['ยืนตรง แขนข้างลำตัว','กระโดดแยกขา พร้อมยกแขนขึ้นเหนือหัว','กระโดดกลับท่าเดิม'],warn:'ลงปลายเท้าเบาๆ ถ้าข้อเข่าไม่ดีให้ก้าวออกข้างแทน'},
+ 'ยกเข่าสูงวิ่งอยู่กับที่':{pose:'knees',steps:['วิ่งอยู่กับที่','ยกเข่าให้สูงถึงระดับสะโพก','แกว่งแขนตามจังหวะ'],warn:'ลงปลายเท้า'},
+ 'เบอร์พี':{pose:'burpee',steps:['ยืน แล้วย่อลงวางมือบนพื้น','ถีบเท้าไปด้านหลังเป็นท่าวิดพื้น','ดึงเท้ากลับ แล้วยืนขึ้นหรือกระโดด'],warn:'ถ้ายังไม่ไหว ให้ก้าวเท้าทีละข้างแทนการถีบ'}
+};
+const L2=(a,b)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`;
+function figure(q,ghost){
+  const g=(k,d)=>q[k]||d;
+  const k2=g('k2',[q.k1[0]-3,q.k1[1]+1]),f2=g('f2',[q.f1[0]-3,q.f1[1]]),e2=g('e2',[q.e1[0]-3,q.e1[1]]),n2=g('n2',[q.n1[0]-3,q.n1[1]]);
+  const a1=g('a1',q.s),a2=g('a2',q.s);
+  const back=`<g opacity=".4">${L2(q.p,k2)+L2(k2,f2)+L2(a2,e2)+L2(e2,n2)}</g>`;
+  const front=L2(q.s,q.p)+(q.a1?L2(a1,a2):'')+L2(q.p,q.k1)+L2(q.k1,q.f1)+L2(a1,q.e1)+L2(q.e1,q.n1);
+  const bottle=n=>`<rect x="${n[0]-4}" y="${n[1]-9}" width="8" height="18" rx="3" fill="var(--water)" stroke="none"/>`;
+  const props=q.prop==='bottle'?bottle(q.n1)+(q.front?bottle(n2):''):'';
+  return `<g opacity="${ghost?.3:1}" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" fill="none">${back}${front}<circle cx="${q.h[0]}" cy="${q.h[1]}" r="10" fill="var(--ink)" stroke="none"/>${props}</g>`;
+}
+function scene(q,ghost){
+  const pr=q.prop==='chair'?`<rect x="52" y="104" width="36" height="8" rx="2" fill="var(--line)"/><line x1="56" y1="112" x2="56" y2="150" stroke="var(--line)" stroke-width="5"/><line x1="84" y1="112" x2="84" y2="150" stroke="var(--line)" stroke-width="5"/>`
+    :q.prop==='wall'?`<rect x="44" y="0" width="14" height="152" fill="var(--line)"/>`:'';
+  return `${pr}<line x1="-6" y1="153" x2="206" y2="153" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>${ghost?figure(ghost,1):''}${figure(q)}`;
+}
+const lerp=(A,B,t)=>{const o={...B};for(const k of ['h','s','p','k1','f1','k2','f2','e1','n1','e2','n2','a1','a2']){if(A[k]||B[k]){const a=A[k]||B[k],b=B[k]||A[k];o[k]=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]}}return o};
+const Demo={raf:0,
+  start(name){
+    cancelAnimationFrame(this.raf);
+    const ex=EX[name],[A,B]=POSES[ex.pose],svg=$('#exSvg');if(!svg)return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){svg.innerHTML=scene(B,A);return}
+    const T=ex.hold?3200:2200,t0=performance.now();
+    const loop=now=>{const ph=((now-t0)%T)/T,t=ex.hold?.5-.5*Math.cos(ph*2*Math.PI):Math.min(1,Math.max(0,(.5-.5*Math.cos(ph*2*Math.PI))*1.25-.12));
+      svg.innerHTML=scene(lerp(A,B,t));this.raf=requestAnimationFrame(loop)};
+    this.raf=requestAnimationFrame(loop);
+  },
+  stop(){cancelAnimationFrame(this.raf)}
+};
+function openEx(name){
+  const ex=EX[name];if(!ex)return;
+  $('#exTitle').textContent=name;
+  const tpl=Object.values(ACT).find(a=>a.ex&&a.ex.some(e=>e[0]===name)),row=tpl&&tpl.ex.find(e=>e[0]===name);
+  $('#exBody').innerHTML=`<div class="demo"><svg id="exSvg" viewBox="-10 -12 220 172" role="img" aria-label="ภาพเคลื่อนไหวท่า${esc(name)}"></svg></div>
+    ${row?`<div class="small muted" style="margin-top:8px">${esc(tpl.n)} · <span class="num">${esc(row[2])}</span>${ex.hold?' · ค้างไว้ตามเวลา':''}</div>`:''}
+    <ol class="steps">${ex.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+    <div class="note" style="margin-top:10px">ระวัง: ${esc(ex.warn)}</div>
+    ${ex.w?`<div class="small" style="margin-top:8px"><b>น้ำหนักที่ใช้:</b> ${esc(ex.w)}</div>`:''}
+    <a class="ghost" style="display:inline-block;margin-top:12px;text-decoration:none;color:var(--ink)" href="https://www.youtube.com/results?search_query=${encodeURIComponent('วิธีทำท่า '+name)}" target="_blank" rel="noopener">ดูคลิปตัวอย่างใน YouTube ↗</a>`;
+  openSheet('ex');Demo.start(name);
+}
+function renderLib(){
+  $('#libCard').innerHTML=`<div class="cardhead"><h2>ท่าทั้งหมด</h2><span class="small muted">แตะเพื่อดูวิธีทำ</span></div>`+
+    Object.values(ACT).filter(a=>a.ex).map(a=>`<div class="libgrp"><div class="label">${esc(a.n)}</div><div class="chips">${a.ex.map(e=>`<button class="chip" data-act="exShow" data-n="${esc(e[0])}">${esc(e[0])}</button>`).join('')}</div></div>`).join('');
+}
+
+/* ===== lift log: reps / seconds and weight per exercise, with a next-time hint ===== */
+const unitOf=sets=>/รอบ/.test(sets)?'':/วิ/.test(sets)?'วิ':'ครั้ง';
+const targetOf=sets=>{const m=String(sets).match(/×\s*(\d+)/);return m?+m[1]:0};
+function lastLift(name){const a=(S.profile.lifts||{})[name]||[];const prev=a.filter(x=>x.d<S.date);return prev[prev.length-1]||null}
+function hintFor(e,last){
+  const u=unitOf(e[2]),tg=targetOf(e[2]);
+  if(!last||!last.r)return '';
+  const w=last.w?` × ${last.w} กก.`:'',was=`ครั้งก่อน ${last.r} ${u}${w}`;
+  if(u==='วิ')return last.r>=tg?`${was} · ลองค้างให้ได้ ${last.r+5} วิ`:`${was} · เป้า ${tg} วิ`;
+  if(last.r>=tg+2&&EX[e[0]]&&EX[e[0]].w)return `${was} · เกินเป้าแล้ว ครั้งนี้เพิ่มน้ำหนักอีกนิด`;
+  if(last.r>=tg)return `${was} · ครั้งนี้ลอง ${last.r+1}–${last.r+2} ครั้ง`;
+  return `${was} · ลองให้ได้ ${last.r+1} ครั้ง (เป้า ${tg})`;
+}
+function exRow(s,e,j,done){
+  const on=done.has(j),lg=(s.log||{})[j]||{},u=unitOf(e[2]),last=lastLift(e[0]),hasDemo=!!EX[e[0]];
+  return `<div class="exw"><label class="ex ${on?'done':''}"><input type="checkbox" data-sx="${s.id}:${j}" ${on?'checked':''}><div style="min-width:0"><div class="exname">${esc(e[0])}</div><div class="how">${esc(e[1])}</div></div><span class="sets">${esc(e[2])}</span></label>
+    <div class="exbar">${hasDemo?`<button class="mini-btn" data-act="exShow" data-n="${esc(e[0])}">ดูท่า</button>`:''}
+    ${u?`<label class="lg"><input type="number" inputmode="numeric" min="0" value="${lg.r??''}" placeholder="${last&&last.r?last.r:''}" data-lr="${s.id}:${j}" aria-label="${u}ที่ทำได้">${u}</label>
+    ${EX[e[0]]&&EX[e[0]].w?`<label class="lg"><input type="number" inputmode="decimal" min="0" step="0.5" value="${lg.w??''}" placeholder="${last&&last.w?last.w:'0'}" data-lw="${s.id}:${j}" aria-label="น้ำหนักที่ใช้">กก.</label>`:''}`:''}</div>
+    ${u&&last&&last.r?`<div class="hint">${esc(hintFor(e,last))}</div>`:''}</div>`;
+}
+function logLift(s,j,field,v){
+  const a=ACT[s.a],e=a.ex[j];if(!e)return;
+  s.log=s.log||{};const L=s.log[j]=s.log[j]||{};
+  if(v>=0&&v!=='')L[field]=v;else delete L[field];
+  const lifts=S.profile.lifts=S.profile.lifts||{},arr=(lifts[e[0]]||[]).filter(x=>x.d!==S.date);
+  if(L.r)arr.push({d:S.date,r:L.r,...(L.w?{w:L.w}:{})});
+  arr.sort((x,y)=>x.d<y.d?-1:1);lifts[e[0]]=arr.slice(-12);
+  saveWeek();saveProfile();
+}
+
+/* ===== rest timer ===== */
+const Timer={end:0,iv:0,ctx:null,
+  start(sec){
+    try{this.ctx=this.ctx||new (window.AudioContext||window.webkitAudioContext)();this.ctx.resume&&this.ctx.resume()}catch(e){}
+    this.end=Date.now()+sec*1000;$('#timer').hidden=false;clearInterval(this.iv);this.iv=setInterval(()=>this.tick(),250);this.tick();
+  },
+  tick(){
+    const left=Math.max(0,Math.ceil((this.end-Date.now())/1000));
+    $('#tLeft').textContent=Math.floor(left/60)+':'+pad(left%60);
+    if(left<=0){this.stop();this.beep();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}toast('หมดเวลาพัก ไปเซตต่อไปได้')}
+  },
+  add(s){this.end+=s*1000;this.tick()},
+  stop(){clearInterval(this.iv);$('#timer').hidden=true},
+  beep(){const c=this.ctx;if(!c)return;try{[0,.25,.5].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.setValueAtTime(.2,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.2);o.connect(g).connect(c.destination);o.start(c.currentTime+t);o.stop(c.currentTime+t+.2)})}catch(e){}}
+};
+
+/* ===== recent foods + copy a meal from yesterday ===== */
+function rememberFood(f){
+  const r={n:f.n,k:r1(f.k),p:r1(f.p||0),c:r1(f.c||0),f:r1(f.f||0),u:f.u};
+  S.profile.recent=[r,...(S.profile.recent||[]).filter(x=>x.n!==r.n)].slice(0,12);
+}
+async function copyMeal(m){
+  const y=addDays(S.date,-1),d=await Store.readDoc('day-'+y),items=((d&&d.foods)||[]).filter(f=>f.m===m);
+  if(!items.length){toast('เมื่อวานไม่ได้จด'+MEALS[m]);return}
+  items.forEach(f=>S.day.foods.push({...clone(f)}));
+  saveDay();markLogged();renderHome();renderDiary();toast('คัดลอก '+items.length+' รายการจากเมื่อวานแล้ว');
+}
+
+/* ===== 7-day summary + CSV export ===== */
+const SumCache={};let sumToken=0;
+async function dayData(k){
+  if(k===S.date)return S.day;
+  if(k in SumCache)return SumCache[k];
+  const d=await Store.readDoc('day-'+k);SumCache[k]=d||{foods:[],water:0};return SumCache[k];
+}
+const dayTot=d=>(d.foods||[]).reduce((a,f)=>{a.k+=f.k*f.q;a.p+=f.p*f.q;a.c+=(f.c||0)*f.q;a.f+=(f.f||0)*f.q;return a},{k:0,p:0,c:0,f:0});
+async function renderSummary(){
+  const el=$('#sumCard');if(!el)return;const tok=++sumToken;
+  const keys=Array.from({length:7},(_,i)=>addDays(S.date,i-6));
+  let rows;try{rows=await Promise.all(keys.map(async k=>({k,t:dayTot(await dayData(k))})))}catch(e){rows=keys.map(k=>({k,t:{k:0,p:0,c:0,f:0}}))}
+  if(tok!==sumToken)return;
+  const c=calc(S.profile),logged=rows.filter(r=>r.t.k>0),avg=logged.length?logged.reduce((a,r)=>a+r.t.k,0)/logged.length:0,avgP=logged.length?logged.reduce((a,r)=>a+r.t.p,0)/logged.length:0;
+  const ok=r=>c.mode==='bulk'?r.t.k>=c.target*.95:c.mode==='lean'?r.t.k<=c.target*1.05:Math.abs(r.t.k-c.target)<=c.target*.1;
+  const onT=logged.filter(ok).length;
+  const W=320,H=150,L=8,R=8,T=14,B=26,max=Math.max(c.target*1.3,...rows.map(r=>r.t.k)),bw=(W-L-R)/7;
+  const Y=v=>T+(H-T-B)*(1-v/max);
+  const bars=rows.map((r,i)=>{const x=L+i*bw+bw*.18,w=bw*.64,h=r.t.k?H-B-Y(r.t.k):0,col=!r.t.k?'var(--line)':ok(r)?'var(--basil)':'var(--chili)';
+    return `<rect x="${x}" y="${r.t.k?Y(r.t.k):H-B-3}" width="${w}" height="${r.t.k?h:3}" rx="5" fill="${col}"/><text x="${x+w/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="${r.k===S.date?'var(--ink)':'var(--muted)'}">${DAY_TH[parseKey(r.k).getDay()]}</text>`}).join('');
+  const ws=(S.profile.weights||[]).filter(x=>x.w>0&&x.d>=keys[0]&&x.d<=keys[6]).sort((a,b)=>a.d<b.d?-1:1);
+  const wTxt=ws.length>1?`น้ำหนัก ${ws[ws.length-1].w-ws[0].w>0?'+':''}${(ws[ws.length-1].w-ws[0].w).toFixed(1)} กก. ใน 7 วัน`:'ชั่งน้ำหนักอย่างน้อย 2 ครั้งต่อสัปดาห์ จะเห็นว่าแผนได้ผลไหม';
+  el.innerHTML=`<div class="cardhead"><h2>สรุป 7 วัน</h2><span class="small muted">${dmy(keys[0])} – ${dmy(keys[6])}</span></div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="margin-top:8px;max-width:100%" role="img" aria-label="แคลอรี่ 7 วัน">
+      <line x1="${L}" x2="${W-R}" y1="${Y(c.target)}" y2="${Y(c.target)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
+      <text x="${W-R}" y="${Y(c.target)-4}" text-anchor="end" font-size="10" fill="var(--muted)">เป้า ${c.target.toLocaleString()}</text>${bars}</svg>
+    <div class="kv" style="margin-top:8px">
+      <div><div class="v">${logged.length?r0(avg).toLocaleString():'–'}</div><div class="k">kcal เฉลี่ยต่อวันที่จด</div></div>
+      <div><div class="v">${logged.length?r0(avgP):'–'}<span class="small muted">/${c.P}</span></div><div class="k">โปรตีนเฉลี่ย (ก.)</div></div>
+      <div><div class="v">${onT}/${logged.length}</div><div class="k">วันที่อยู่ในเป้า</div></div>
+      <div><div class="v">${logged.length}/7</div><div class="k">วันที่จด</div></div>
+    </div>
+    <p class="small muted" style="margin:10px 0 0">${esc(wTxt)} · แท่งเขียว = อยู่ในเป้า แดง = ${c.mode==='bulk'?'กินน้อยไป':c.mode==='lean'?'กินเกิน':'ห่างจากเป้า'}</p>
+    <div class="actions"><button class="ghost" data-act="csvDays">ส่งออกสรุปรายวัน (CSV)</button><button class="ghost" data-act="csvFoods">ส่งออกรายการอาหาร (CSV)</button></div>`;
+}
+const csvCell=v=>{const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+async function saveFile(name,text){
+  const data='﻿'+text;
+  if(Store.mode==='db'&&window.claude&&window.claude.use){
+    try{const dl=await window.claude.use('downloads');if(dl){await dl.save({filename:name,data});return}}catch(e){if(e&&e.code==='declined')return}
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+async function exportCsv(kind){
+  toast('กำลังเตรียมไฟล์…');
+  let days;try{days=await Store.allDays()}catch(e){toast('ดึงข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง');return}
+  days.sort((a,b)=>a.d<b.d?-1:1);
+  const wm={};(S.profile.weights||[]).forEach(x=>wm[x.d]=x);
+  let rows;
+  if(kind==='days'){
+    const all=[...new Set([...days.map(x=>x.d),...Object.keys(wm)])].sort();
+    const dm={};days.forEach(x=>dm[x.d]=x);
+    rows=[['date','kcal','protein_g','carb_g','fat_g','water_glasses','weight_kg','waist_cm','hip_cm']].concat(all.map(d=>{const t=dayTot(dm[d]||{}),w=wm[d]||{};
+      return [d,r0(t.k),r1(t.p),r1(t.c),r1(t.f),(dm[d]||{}).water||0,w.w||'',w.waist||'',w.hip||'']}));
+  }else{
+    rows=[['date','meal','food','qty','unit','kcal','protein_g','carb_g','fat_g']];
+    days.forEach(x=>(x.foods||[]).forEach(f=>rows.push([x.d,MEALS[f.m]||f.m,f.n,f.q,f.u,r0(f.k*f.q),r1(f.p*f.q),r1((f.c||0)*f.q),r1((f.f||0)*f.q)])));
+  }
+  if(rows.length<2){toast('ยังไม่มีข้อมูลให้ส่งออก');return}
+  await saveFile(`diet-${kind==='days'?'daily':'foods'}-${TODAY}.csv`,rows.map(r=>r.map(csvCell).join(',')).join('\n'));
+}
+
+function recentHtml(){const r=S.profile.recent||[];return r.length?`<div class="small muted" style="margin-bottom:6px">ล่าสุด</div><div class="chips">${r.map((x,i)=>`<button class="chip" data-act="addRecent" data-i="${i}">+ ${esc(x.n)} <span class="num muted">${r0(x.k)}</span></button>`).join('')}</div>`:''}
+
+function renderAll(){renderHome();renderDiary();renderWorkout();renderLib();renderMe();renderSummary();if(S.sheet==='food'){renderResults();renderBuilder()}}
 
 function setTab(t){
   S.tab=t;$$('.tabbar [data-tab]').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===t));
@@ -1053,10 +1326,10 @@ function setTab(t){
   window.scrollTo(0,0);
   try{localStorage.setItem('wl-tab',t)}catch(e){}
 }
-function setDate(k){if(k>TODAY)return;S.date=k;Store.watchDay();renderAll()}
+function setDate(k){if(k>TODAY)return;delete SumCache[S.date];S.date=k;Store.watchDay();renderAll()}
 function addFood(f){
   S.day.foods.push({n:f.n,k:r1(f.k),p:r1(f.p||0),c:r1(f.c||0),f:r1(f.f||0),u:f.u,q:1,m:S.meal});
-  saveDay();markLogged();renderHome();renderDiary();toast('เพิ่ม '+f.n+' แล้ว');
+  rememberFood(f);saveDay();markLogged();saveProfile();renderHome();renderDiary();toast('เพิ่ม '+f.n+' แล้ว');
 }
 const gramOf=(n,scope)=>{const el=[...scope.querySelectorAll('[data-gram]')].find(x=>x.dataset.gram===n);return el?parseFloat(el.value):NaN};
 const scaled=(f,g)=>({k:f.k*g/100,p:f.p*g/100,c:f.c*g/100,f:f.f*g/100});
@@ -1070,6 +1343,14 @@ document.addEventListener('click',e=>{
   switch(a){
   case 'gLogin':case 'eLogin':case 'eSignup':case 'logout':Account.act(a);break;
   case 'openAdd':openSheet('add');break;
+  case 'exShow':openEx(t.dataset.n);break;
+  case 'rest':Timer.start(+t.dataset.s);break;
+  case 'tAdd':Timer.add(15);break;
+  case 'tStop':Timer.stop();break;
+  case 'addRecent':{const r=(S.profile.recent||[])[+t.dataset.i];if(r)addFood(r);break}
+  case 'copyMeal':copyMeal(t.dataset.meal);break;
+  case 'csvDays':exportCsv('days');break;
+  case 'csvFoods':exportCsv('foods');break;
   case 'closeSheet':openSheet(null);break;
   case 'openFood':if(t.dataset.meal)S.meal=t.dataset.meal;if(t.dataset.ft)S.ft=t.dataset.ft;openSheet('food');break;
   case 'openWeigh':openSheet('weigh');break;
@@ -1104,10 +1385,14 @@ document.addEventListener('click',e=>{
   case 'mEdit':{const m=S.profile.myMenus.find(x=>x.id===t.dataset.id);if(m){S.build={name:m.n,items:clone(m.items),editId:m.id};renderBuilder();$('#b-name').scrollIntoView({block:'center'})}break}
   case 'mDel':S.profile.myMenus=S.profile.myMenus.filter(x=>x.id!==t.dataset.id);saveProfile();renderBuilder();renderResults();break;
   case 'saveWeight':{
-    const v=parseFloat($('#w-today').value);if(!(v>20&&v<300)){toast('ใส่น้ำหนักเป็นกิโลกรัม');return}
-    const ws=(S.profile.weights||[]).filter(x=>x.d!==TODAY);ws.push({d:TODAY,w:v});
-    S.profile={...S.profile,weights:ws.slice(-180),weight:v};
-    $('#w-today').value='';saveProfile();openSheet(null);renderAll();toast('บันทึกน้ำหนักแล้ว');break}
+    const num=id=>{const v=parseFloat($('#'+id).value);return v>0?v:null};
+    const w=num('w-today'),waist=num('w-waist'),hip=num('w-hip');
+    if(w!==null&&!(w>20&&w<300)){toast('ใส่น้ำหนักเป็นกิโลกรัม');return}
+    if(w===null&&waist===null&&hip===null){toast('ใส่อย่างน้อยหนึ่งช่อง');return}
+    const ws=S.profile.weights||[],old=ws.find(x=>x.d===TODAY)||{d:TODAY};
+    const ent={...old,...(w?{w}:{}),...(waist?{waist}:{}),...(hip?{hip}:{})};
+    S.profile={...S.profile,weights:[...ws.filter(x=>x.d!==TODAY),ent].slice(-180),...(w?{weight:w}:{})};
+    ['w-today','w-waist','w-hip'].forEach(id=>$('#'+id).value='');saveProfile();openSheet(null);renderAll();toast('บันทึกแล้ว');break}
   case 'pick':{const g=goals()[+t.dataset.g];if(g)pickSession(g);break}
   case 'preset':S.pendingPreset=t.dataset.k;renderWorkout();break;
   case 'presetNo':S.pendingPreset=null;renderWorkout();break;
@@ -1140,6 +1425,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.dataset.lr!==undefined||t.dataset.lw!==undefined){const [id,j]=(t.dataset.lr||t.dataset.lw).split(':'),ss=sessById(id);if(ss)logLift(ss,+j,t.dataset.lr!==undefined?'r':'w',t.value===''?'':parseFloat(t.value));return}
   if(t.dataset.sx!==undefined){
     const [id,j]=t.dataset.sx.split(':'),ss=sessById(id);if(!ss)return;
     const d=new Set(ss.done||[]);if(t.checked)d.add(+j);else d.delete(+j);ss.done=[...d].sort();
