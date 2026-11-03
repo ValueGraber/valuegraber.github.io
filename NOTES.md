@@ -10,7 +10,7 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - `tools/smoke.js`: opens every tab and sub-page on desktop and mobile with mock Firebase, fails on JS errors or overflow. Setup: `cd tools && npm i d3@7.9.0`.
 - `tools/mockfb/`: fake Firebase (auth + Firestore in localStorage) for tests.
 - `scanner.py` + `.github/workflows/update.yml`: daily cron (05:30 Thai, Tue–Sat) writes `docs/data.json` (500 S&P stocks, SPY, ^TNX, usdthb, eurthb, sekthb (`fx_thb`), gold GC=F, crypto BTC ETH SOL BNB XRP), `docs/history.json` (2y weekly closes incl. crypto) and `docs/prev.json` (previous day, for "what changed today").
-- Dispatch the workflow: `gh api -X POST repos/ValueGraber/valuegraber.github.io/actions/workflows/update.yml/dispatches -f ref=main`.
+- Schedule: 22:30 UTC Mon–Fri plus a backup 00:17 UTC Tue–Sat (GitHub cron runs late or skips). Dispatch the workflow: `gh api -X POST repos/ValueGraber/valuegraber.github.io/actions/workflows/update.yml/dispatches -f ref=main`.
 
 ## Template map (grep these comment anchors)
 | Anchor | What |
