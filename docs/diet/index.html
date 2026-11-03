@@ -285,6 +285,7 @@ section.screen{display:grid;gap:14px}
 
   <section class="screen" id="s-me" hidden>
     <div class="top"><h1>แผนของฉัน</h1><button class="ghost" data-act="obStart">ตั้งค่าใหม่ทีละขั้น</button></div>
+    <div class="card" id="acctCard" hidden><h2>บัญชี</h2><div id="acctBody" style="margin-top:10px"></div></div>
     <div class="card">
       <h2>โหมด</h2>
       <div class="modes" id="modes" style="margin-top:10px"></div>
@@ -562,39 +563,52 @@ const itemMet=x=>x.a==='custom'?x.met:ACT[x.a].met;
 const itemKcal=x=>r0(itemMet(x)*S.profile.weight*x.min/60);
 
 const EMPTY_DAY=()=>({foods:[],water:0});
-const Store={mode:'local',db:null,uid:null,unsubDay:null,unsubWeek:null,weekKey:null,writing:{},dirty:{},loaded:false,
+const Store={mode:'local',db:null,uid:null,unsubProfile:null,unsubDay:null,unsubWeek:null,weekKey:null,writing:{},dirty:{},loaded:false,
   async init(){
-    try{
-      const [db,user]=await Promise.all([window.claude?.use?.('db'),window.claude?.use?.('user')]);
-      const id=user?await user.id():null;
-      if(db&&id){this.db=db;this.uid=id;this.mode='db'}
-    }catch(e){}
-    if(this.mode==='db'){
-      const t=setTimeout(()=>{$('#storeNote').textContent='ยังเชื่อมต่อข้อมูลไม่ได้ ลองใหม่ภายหลัง'},10000);
-      this.ref('profile').onSnapshot(s=>{
-        if(!s.metadata.fromCache){
-          clearTimeout(t);$('#storeNote').textContent='ข้อมูลบันทึกไว้ในบัญชีของคุณ';
-          if(!this.loaded){this.loaded=true;if(!s.exists&&!S.ob)startOnboarding()}
-        }
-        if(this.writing.profile||this.dirty.profile)return;
-        if(s.exists){S.profile=Object.assign(clone(DEFAULT_PROFILE),clone(s.data()),{example:false});renderAll()}
-      },()=>{clearTimeout(t);$('#storeNote').textContent='โหลดข้อมูลไม่สำเร็จ'});
-      this.watchDay();
-    }else{
-      $('#storeNote').textContent='ข้อมูลบันทึกไว้ในเครื่องนี้ (เบราว์เซอร์นี้)';
-      let found=false;
-      try{const p=JSON.parse(localStorage.getItem('wl-profile')||'null');if(p){S.profile=Object.assign(clone(DEFAULT_PROFILE),p,{example:false});found=true}}catch(e){}
-      this.watchDay();
-      if(!found)startOnboarding();
+    if(window.claude&&window.claude.use){
+      try{
+        const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+        const id=user?await user.id():null;
+        if(db&&id){this.db=db;this.uid=id;this.mode='db'}
+      }catch(e){}
     }
+    if(this.mode==='db')this.subscribeRemote('ข้อมูลบันทึกไว้ในบัญชีของคุณ');
+    else{this.loadLocal(true);Account.init()}
     renderAll();
   },
-  ref(id){return this.db.collection('data/users/'+this.uid).doc(id)},
+  loadLocal(first){
+    this.stopRemote();this.mode='local';
+    $('#storeNote').textContent='ข้อมูลบันทึกไว้ในเครื่องนี้';
+    let found=false;
+    try{const p=JSON.parse(localStorage.getItem('wl-profile')||'null');if(p){S.profile=Object.assign(clone(DEFAULT_PROFILE),p,{example:false});found=true}}catch(e){}
+    if(!found)S.profile=clone(DEFAULT_PROFILE);
+    this.weekKey=null;this.watchDay();
+    if(first&&!found)startOnboarding();
+  },
+  stopRemote(){[this.unsubProfile,this.unsubDay,this.unsubWeek].forEach(u=>{try{if(u)u()}catch(e){}});this.unsubProfile=this.unsubDay=this.unsubWeek=null},
+  subscribeRemote(okText){
+    this.stopRemote();this.loaded=false;this.weekKey=null;
+    $('#storeNote').textContent='กำลังโหลดข้อมูล…';
+    const t=setTimeout(()=>{$('#storeNote').textContent='ยังเชื่อมต่อข้อมูลไม่ได้ ลองใหม่ภายหลัง'},10000);
+    this.unsubProfile=this.ref('profile').onSnapshot(s=>{
+      if(!s.metadata.fromCache){
+        clearTimeout(t);$('#storeNote').textContent=okText;
+        if(!this.loaded){this.loaded=true;
+          if(!s.exists&&!S.ob)startOnboarding();
+          if(s.exists&&S.ob){S.ob=null;renderOb()}}
+      }
+      if(this.writing.profile||this.dirty.profile)return;
+      if(s.exists){S.profile=Object.assign(clone(DEFAULT_PROFILE),clone(s.data()),{example:false});renderAll()}
+    },()=>{clearTimeout(t);$('#storeNote').textContent='โหลดข้อมูลไม่สำเร็จ'});
+    this.watchDay();
+  },
+  ref(id){return this.mode==='fb'?Account.ref(id):this.db.collection('data/users/'+this.uid).doc(id)},
+
   watchWeek(){
     const k='week-'+mondayOf(S.date);
     if(k===this.weekKey)return;
     this.weekKey=k;S.wk={sessions:[]};
-    if(this.mode==='db'){
+    if(this.mode!=='local'){
       if(this.unsubWeek)this.unsubWeek();
       this.unsubWeek=this.ref(k).onSnapshot(s=>{
         if(this.writing[k]||this.dirty[k]||this.weekKey!==k)return;
@@ -608,7 +622,7 @@ const Store={mode:'local',db:null,uid:null,unsubDay:null,unsubWeek:null,weekKey:
   watchDay(){
     this.watchWeek();
     const k='day-'+S.date;
-    if(this.mode==='db'){
+    if(this.mode!=='local'){
       if(this.unsubDay)this.unsubDay();
       S.day=EMPTY_DAY();
       this.unsubDay=this.ref(k).onSnapshot(s=>{
@@ -621,7 +635,7 @@ const Store={mode:'local',db:null,uid:null,unsubDay:null,unsubWeek:null,weekKey:
     }
   },
   async save(id,getData){
-    if(this.mode!=='db'){try{localStorage.setItem(id==='profile'?'wl-profile':'wl-'+id,JSON.stringify(getData()))}catch(e){}return}
+    if(this.mode==='local'){try{localStorage.setItem(id==='profile'?'wl-profile':'wl-'+id,JSON.stringify(getData()))}catch(e){}return}
     this.dirty[id]=true;
     if(this.writing[id])return;
     this.writing[id]=true;
@@ -630,6 +644,73 @@ const Store={mode:'local',db:null,uid:null,unsubDay:null,unsubWeek:null,weekKey:
     finally{this.writing[id]=false}
   }
 };
+/* ===== account sync (Firebase, same project and sign-in as ValueGrab): diet/{uid}, diet/{uid}/days/{date}, diet/{uid}/weeks/{monday} ===== */
+const FB={apiKey:"AIzaSyAAIM8jxxdXR1zlODShqoYez1Ysa2zkxo0",authDomain:"valuegrab.firebaseapp.com",projectId:"valuegrab",storageBucket:"valuegrab.firebasestorage.app",messagingSenderId:"81941341766",appId:"1:81941341766:web:64b6b774343deb958b8c47"};
+const AUTH_TH={'auth/invalid-credential':'อีเมลหรือรหัสผ่านไม่ถูกต้อง','auth/wrong-password':'รหัสผ่านไม่ถูกต้อง','auth/user-not-found':'ไม่พบอีเมลนี้ กด "สมัครใหม่"',
+ 'auth/email-already-in-use':'อีเมลนี้สมัครไว้แล้ว กด "เข้าสู่ระบบ" แทน','auth/weak-password':'รหัสผ่านต้องมีอย่างน้อย 6 ตัว','auth/invalid-email':'อีเมลไม่ถูกต้อง',
+ 'auth/missing-password':'ใส่รหัสผ่านก่อน','auth/too-many-requests':'ลองผิดหลายครั้งเกินไป รอสักครู่แล้วลองใหม่','auth/popup-closed-by-user':'ปิดหน้าต่างล็อกอินก่อนเสร็จ',
+ 'auth/cancelled-popup-request':'','auth/popup-blocked':'เบราว์เซอร์บล็อกหน้าต่างล็อกอิน ลองใช้อีเมลแทน','auth/unauthorized-domain':'เว็บนี้ยังไม่ได้รับอนุญาตใน Firebase'};
+const Account={A:null,F:null,auth:null,fs:null,user:null,state:'off',msg:'',err:false,
+  async init(){
+    $('#acctCard').hidden=false;this.state='loading';renderAccount();
+    try{
+      const base='https://www.gstatic.com/firebasejs/10.12.2/';
+      const [{initializeApp},A,F]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
+      const app=initializeApp(FB);this.A=A;this.F=F;this.auth=A.getAuth(app);this.auth.languageCode='th';this.fs=F.getFirestore(app);
+      A.onAuthStateChanged(this.auth,u=>this.onUser(u));
+    }catch(e){console.warn(e);this.state='fail';renderAccount()}
+  },
+  ref(id){
+    const F=this.F,uid=this.user.uid;
+    const r=id==='profile'?F.doc(this.fs,'diet',uid):F.doc(this.fs,'diet',uid,id.startsWith('day-')?'days':'weeks',id.slice(id.indexOf('-')+1));
+    return {set:d=>F.setDoc(r,d),get:()=>F.getDoc(r),
+      onSnapshot:(cb,err)=>F.onSnapshot(r,{includeMetadataChanges:true},x=>cb({exists:x.exists(),data:()=>x.data(),metadata:{fromCache:x.metadata.fromCache,hasPendingWrites:x.metadata.hasPendingWrites}}),err)};
+  },
+  async onUser(u){
+    this.user=u;this.err=false;
+    if(!u){this.state='out';this.msg='';if(Store.mode==='fb'){Store.loadLocal(false);renderAll()}renderAccount();return}
+    this.state='syncing';this.msg='';renderAccount();
+    try{
+      Store.mode='fb';
+      const prof=await this.ref('profile').get();
+      if(!prof.exists()){
+        const keys=[];let lp=null;
+        try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^wl-(day|week)-/.test(k))keys.push(k)}lp=localStorage.getItem('wl-profile')}catch(e){}
+        for(const k of keys){try{await this.ref(k.slice(3)).set(JSON.parse(localStorage.getItem(k)))}catch(e){if(e&&e.code==='permission-denied')throw e}}
+        if(lp){await this.ref('profile').set(JSON.parse(lp));this.msg='ย้ายข้อมูลในเครื่องนี้ขึ้นบัญชีแล้ว'}
+      }
+      this.state='in';
+      Store.subscribeRemote('ซิงค์กับบัญชีแล้ว · '+(u.email||''));
+    }catch(e){
+      console.warn(e);Store.loadLocal(false);this.state='in';this.err=true;
+      this.msg=e&&e.code==='permission-denied'?'ยังซิงค์ไม่ได้ ต้องเพิ่มกฎ diet ใน Firebase ก่อน (ข้อมูลยังอยู่ในเครื่องนี้)':'ซิงค์ไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้';
+    }
+    renderAll();renderAccount();
+  },
+  act(a){
+    const A=this.A;if(!A)return;
+    const say=e=>{console.warn(e);this.msg=AUTH_TH[e.code]??('เกิดข้อผิดพลาด: '+(e.code||e.message));this.err=true;renderAccount()};
+    const creds=()=>[($('#a-email')||{}).value||'',($('#a-pass')||{}).value||''];
+    if(a==='gLogin')A.signInWithPopup(this.auth,new A.GoogleAuthProvider()).catch(say);
+    if(a==='eLogin')A.signInWithEmailAndPassword(this.auth,...creds()).catch(say);
+    if(a==='eSignup')A.createUserWithEmailAndPassword(this.auth,...creds()).catch(say);
+    if(a==='logout')A.signOut(this.auth);
+  }
+};
+function renderAccount(){
+  const A=Account,el=$('#acctBody');if(!el)return;
+  if(A.state==='loading'){el.innerHTML='<div class="empty">กำลังเชื่อมต่อ…</div>';return}
+  if(A.state==='fail'){el.innerHTML='<div class="empty">เชื่อมต่อระบบบัญชีไม่ได้ ข้อมูลยังบันทึกในเครื่องนี้ตามปกติ</div>';return}
+  if(A.state==='out'){el.innerHTML=`<p class="muted small" style="margin:0 0 10px">ใช้บัญชีเดียวกับ ValueGrab แล้วข้อมูลจะตรงกันทุกเครื่อง เข้าครั้งแรกจะย้ายข้อมูลที่จดในเครื่องนี้ขึ้นไปให้</p>
+    <button class="primary block" data-act="gLogin">เข้าสู่ระบบด้วย Google</button>
+    <div class="label" style="text-align:center">หรือใช้อีเมล</div>
+    <div class="form"><input class="wide" id="a-email" type="email" autocomplete="email" placeholder="อีเมล"><input class="wide" id="a-pass" type="password" autocomplete="current-password" placeholder="รหัสผ่าน">
+    <button class="ghost" data-act="eLogin">เข้าสู่ระบบ</button><button class="ghost" data-act="eSignup">สมัครใหม่</button></div>
+    ${A.msg?`<div class="small" style="margin-top:8px;color:var(--chili)">${esc(A.msg)}</div>`:''}`;return}
+  el.innerHTML=`<div class="cardhead"><div style="min-width:0"><div style="overflow-wrap:anywhere">${esc(A.user&&A.user.email||'บัญชีของคุณ')}</div>
+    <div class="small" style="color:${A.err?'var(--chili)':'var(--muted)'}">${esc(A.msg||(A.state==='syncing'?'กำลังซิงค์…':'ข้อมูลตรงกันทุกเครื่องที่เข้าบัญชีนี้'))}</div></div>
+    <button class="ghost" data-act="logout">ออกจากระบบ</button></div>`;
+}
 function saveDay(){Store.save('day-'+S.date,()=>clone(S.day))}
 function saveWeek(){Store.save(Store.weekKey,()=>clone(S.wk))}
 function saveProfile(){S.profile.example=false;Store.save('profile',()=>{const p=clone(S.profile);delete p.example;return p})}
@@ -997,6 +1078,7 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-act]');if(!t)return;
   const a=t.dataset.act;
   switch(a){
+  case 'gLogin':case 'eLogin':case 'eSignup':case 'logout':Account.act(a);break;
   case 'openAdd':openSheet('add');break;
   case 'closeSheet':openSheet(null);break;
   case 'openFood':if(t.dataset.meal)S.meal=t.dataset.meal;if(t.dataset.ft)S.ft=t.dataset.ft;openSheet('food');break;
