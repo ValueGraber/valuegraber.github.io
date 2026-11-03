@@ -2,11 +2,14 @@ name: อัปเดตข้อมูลหุ้นทุกวัน
 
 on:
   schedule:
-    # 22:30 UTC วันจันทร์–ศุกร์ = 05:30 น. เวลาไทย วันอังคาร–เสาร์ (หลังตลาดสหรัฐปิด)
-    - cron: "30 22 * * 1-5"
-    # รอบสำรอง 00:17 UTC = 07:17 น. เวลาไทย เพราะ GitHub มักเริ่มรอบตามเวลาช้าหรือข้ามไปบ้าง ถ้ารอบแรกได้ข้อมูลแล้ว รอบนี้จะไม่มีอะไรเปลี่ยน
-    - cron: "17 0 * * 2-6"
-  workflow_dispatch: {}   # มีปุ่ม "Run workflow" ให้กดรันเองได้
+    # ลองทุก 30 นาที ช่วง 05:07–10:07 น. เวลาไทย วันอังคาร–เสาร์ (หลังตลาดสหรัฐปิด)
+    # GitHub มักเริ่มรอบตามเวลาช้าหรือข้ามไป และบางวัน Yahoo ยังไม่มีราคาปิด จึงลองหลายรอบ
+    # แต่ละรอบเช็กก่อน (tools/fresh.py) ถ้ามีราคาปิดล่าสุดแล้วจะข้าม จบภายในไม่กี่วินาที
+    # ใช้นาทีที่ 7 และ 37 เพราะต้นชั่วโมงคนใช้ GitHub เยอะ รอบมักช้ากว่า
+    - cron: "7,37 22-23 * * 1-5"   # 05:07–06:37 น. เวลาไทย
+    - cron: "7,37 0-2 * * 2-6"     # 07:07–09:37 น. เวลาไทย
+    - cron: "7 3 * * 2-6"          # 10:07 น. เวลาไทย รอบสุดท้ายของวัน
+  workflow_dispatch: {}   # มีปุ่ม "Run workflow" ให้กดรันเองได้ รันเองจะดึงข้อมูลเสมอ ไม่เช็กก่อน
 
 permissions:
   contents: write
@@ -22,18 +25,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: เช็กว่ามีราคาปิดล่าสุดแล้วหรือยัง
+        id: fresh
+        if: github.event_name == 'schedule'
+        run: python3 tools/fresh.py
+
       - uses: actions/setup-python@v5
+        if: steps.fresh.outputs.skip != 'true'
         with:
           python-version: "3.12"
           cache: pip
 
       - name: ติดตั้งไลบรารี
+        if: steps.fresh.outputs.skip != 'true'
         run: pip install -r requirements.txt
 
       - name: ดึงราคาปิดและงบ คำนวณข้อมูล
+        if: steps.fresh.outputs.skip != 'true'
         run: python scanner.py
 
       - name: บันทึกไฟล์ข้อมูลใหม่
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
