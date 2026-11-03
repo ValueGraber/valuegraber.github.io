@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2E7A48">
+<meta name="description" content="แผนลดน้ำหนัก นับแคล โปรตีน คาร์บ ไขมัน และเป้าออกกำลังกายรายสัปดาห์">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}</style>
+<title>แผนลดน้ำหนัก</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: phone app shell — scrolling screens, fixed bottom tab bar with a raised add button, bottom sheets. Soft minimal cards; basil green primary, macros in rose / mango / sky. */
+:root{
+  --bg:#F3F4F0; --surface:#FFFFFF; --ink:#1B2420; --muted:#66716A; --line:#E2E6DF; --sunk:#EEF1EC;
+  --basil:#2E7A48; --basil-soft:#DFEEE3; --on-basil:#FFFFFF;
+  --pro:#D2486A; --pro-soft:#FBE3E9; --carb:#C98612; --carb-soft:#FBEFD5; --fat:#3C7FC4; --fat-soft:#E0ECF8;
+  --chili:#C9412B; --chili-soft:#FAE4DE; --amber:#94650F; --amber-soft:#F7EDD6; --water:#2F8FB0; --water-soft:#DDF0F6;
+  --shadow:0 1px 2px rgb(20 40 30 / .05),0 6px 18px rgb(20 40 30 / .06);
+  --f-display:"Mitr","IBM Plex Sans Thai Looped",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Thai Looped","IBM Plex Sans Thai",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101512; --surface:#18201B; --ink:#E5ECE6; --muted:#97A49B; --line:#28322C; --sunk:#141B17;
+  --basil:#5FBE80; --basil-soft:#1D3325; --on-basil:#0E1A12;
+  --pro:#F07B97; --pro-soft:#3A1F27; --carb:#E9B04D; --carb-soft:#352A15; --fat:#78ADE6; --fat-soft:#1B2A3B;
+  --chili:#EF7560; --chili-soft:#3A221D; --amber:#E0B05A; --amber-soft:#352B17; --water:#63BEDD; --water-soft:#16303A;
+  --shadow:0 1px 2px rgb(0 0 0 / .3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101512; --surface:#18201B; --ink:#E5ECE6; --muted:#97A49B; --line:#28322C; --sunk:#141B17;
+  --basil:#5FBE80; --basil-soft:#1D3325; --on-basil:#0E1A12;
+  --pro:#F07B97; --pro-soft:#3A1F27; --carb:#E9B04D; --carb-soft:#352A15; --fat:#78ADE6; --fat-soft:#1B2A3B;
+  --chili:#EF7560; --chili-soft:#3A221D; --amber:#E0B05A; --amber-soft:#352B17; --water:#63BEDD; --water-soft:#16303A;
+  --shadow:0 1px 2px rgb(0 0 0 / .3); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px calc(110px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;margin:0;text-wrap:balance}
+h1{font-size:1.5rem;line-height:1.25}
+h2{font-size:1.08rem}
+h3{font-size:.98rem}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.84rem}
+.label{font-size:.8rem;color:var(--muted);letter-spacing:.03em;margin:14px 0 6px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--basil);outline-offset:2px}
+input,select{border:1px solid var(--line);background:var(--sunk);border-radius:10px;padding:9px 10px;min-width:0}
+section.screen{display:grid;gap:14px}
+.card{background:var(--surface);border-radius:20px;padding:16px;min-width:0;box-shadow:var(--shadow)}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.linkbtn{border:0;background:none;color:var(--basil);font-weight:600;font-size:.88rem;padding:4px 0}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 12px;font-size:.88rem}
+.ghost[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.primary{border:0;background:var(--basil);color:var(--on-basil);border-radius:14px;padding:12px 18px;font-weight:600}
+.primary.block{width:100%}
+.primary.confirm{background:var(--chili);color:var(--surface)}
+.empty{color:var(--muted);font-size:.9rem;padding:6px 0}
+.note{background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:10px 12px;font-size:.87rem}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:12px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:80}
+.toast.show{opacity:1}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modechip{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:5px 12px;font-weight:600;font-size:.85rem;background:var(--basil-soft);color:var(--basil)}
+.streak{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:5px 10px;background:var(--amber-soft);color:var(--amber);font-weight:600;font-size:.82rem}
+.strip{display:grid;grid-template-columns:auto repeat(7,1fr) auto;gap:2px;align-items:center;margin-top:12px}
+.strip .d{border:0;background:none;border-radius:14px;padding:6px 0;display:grid;gap:2px;justify-items:center;font-size:.74rem;color:var(--muted);min-width:0}
+.strip .d b{font-family:var(--f-num);font-weight:500;font-size:.95rem;color:var(--ink);width:30px;height:30px;display:grid;place-items:center;border-radius:50%}
+.strip .d.logged b{box-shadow:inset 0 0 0 2px var(--basil-soft)}
+.strip .d[aria-pressed="true"] b{background:var(--basil);color:var(--on-basil)}
+.strip .d:disabled{opacity:.35;cursor:default}
+.strip .nav{border:0;background:none;width:24px;height:30px;font-size:1.1rem;color:var(--muted)}
+.strip .nav:disabled{opacity:.3}
+
+.hero{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{display:block}
+.ring .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .big{font-family:var(--f-num);font-size:1.7rem;line-height:1.1}
+.mini{display:grid;gap:10px}
+.mini .r{display:flex;align-items:center;gap:10px}
+.mini .ic{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:var(--sunk);flex:none}
+.mini .ic svg{width:18px;height:18px}
+.mini .v{font-family:var(--f-num);font-size:1.05rem;line-height:1.2}
+@media (max-width:400px){.hero{grid-template-columns:1fr;justify-items:center}.mini{grid-template-columns:repeat(3,1fr);width:100%}.mini .r{flex-direction:column;text-align:center;gap:4px}}
+
+.macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.macro{border-radius:16px;padding:12px;background:var(--surface);box-shadow:var(--shadow)}
+.macro .k{font-size:.8rem;color:var(--muted)}
+.macro .v{font-family:var(--f-num);font-size:1.05rem;margin-top:2px;white-space:nowrap}
+.macro .bar{height:6px;border-radius:99px;margin-top:8px;overflow:hidden}
+.macro .bar i{display:block;height:100%;border-radius:99px}
+.macro.p .bar{background:var(--pro-soft)}.macro.p .bar i{background:var(--pro)}
+.macro.c .bar{background:var(--carb-soft)}.macro.c .bar i{background:var(--carb)}
+.macro.f .bar{background:var(--fat-soft)}.macro.f .bar i{background:var(--fat)}
+.macro .left{font-size:.76rem;color:var(--muted);margin-top:4px}
+
+.water{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.glass{width:30px;height:38px;border:0;background:none;padding:0}
+.glass svg{width:100%;height:100%;display:block}
+.twocol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:440px){.twocol{grid-template-columns:1fr}}
+.bar{height:8px;border-radius:99px;background:var(--basil-soft);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--basil);border-radius:99px}
+
+.meal-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.meal-add{width:34px;height:34px;border-radius:50%;border:0;background:var(--basil-soft);color:var(--basil);font-size:1.25rem;line-height:1;flex:none}
+.log{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.log:first-of-type{margin-top:8px}
+.mac{display:inline-flex;gap:8px;font-size:.76rem;color:var(--muted)}
+.mac b{font-weight:600}
+.mac .p b{color:var(--pro)}.mac .c b{color:var(--carb)}.mac .f b{color:var(--fat)}
+.stepper{display:flex;align-items:center;gap:2px}
+.stepper button{width:28px;height:28px;border-radius:9px;border:1px solid var(--line);background:var(--sunk)}
+.stepper span{min-width:34px;text-align:center}
+.del{border:0;background:none;color:var(--muted);font-size:1.1rem;width:28px}
+.del:hover{color:var(--chili)}
+
+.scrim{position:fixed;inset:0;background:rgb(10 20 14 / .42);z-index:40}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-radius:24px 24px 0 0;max-height:90vh;overflow:auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px calc(20px + env(safe-area-inset-bottom,0px));max-width:600px;margin:0 auto}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 10px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--sunk);border-radius:12px;padding:4px}
+.seg button{border:0;background:none;border-radius:9px;padding:7px 4px;font-size:.88rem;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.tabs2{display:flex;gap:6px;margin-top:8px}
+.actions-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.act{border:0;background:var(--sunk);border-radius:16px;padding:14px;text-align:left;display:grid;gap:6px}
+.act .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center}
+.act .ic svg{width:20px;height:20px}
+.act b{font-family:var(--f-display);font-weight:500}
+.searchbox{display:flex;gap:8px}
+.searchbox input{flex:1;padding:11px 12px;border-radius:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:.86rem}
+.chip:hover{border-color:var(--basil)}
+.chip.mine{border-color:var(--amber);background:var(--amber-soft)}
+.chip.on{border-color:var(--basil);background:var(--basil-soft);color:var(--basil);font-weight:600}
+.chip.left{border-color:var(--basil);color:var(--basil);font-weight:500}
+.row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .name{min-width:0}
+.gram{display:flex;align-items:center;gap:4px}
+.gram input{width:64px;padding:5px 6px;text-align:right}
+.kind{display:inline-block;font-size:.72rem;border-radius:6px;padding:0 6px;margin-left:4px;vertical-align:1px;background:var(--basil-soft);color:var(--basil)}
+.kind.mine{background:var(--amber-soft);color:var(--amber)}
+.add{border:0;background:var(--basil-soft);color:var(--basil);font-weight:600;border-radius:10px;padding:6px 12px}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.form .wide{grid-column:1/-1}
+.form label{display:grid;gap:4px;font-size:.82rem;color:var(--muted)}
+.bitem{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.btotal{display:flex;justify-content:space-between;gap:8px;font-weight:600;padding-top:10px;flex-wrap:wrap}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.mymenu{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);
+  padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));padding-block:6px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:end}
+.tabbar button{border:0;background:none;display:grid;justify-items:center;gap:2px;font-size:.72rem;color:var(--muted);padding:4px 0}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button[aria-selected="true"]{color:var(--basil);font-weight:600}
+.tabbar .plus{width:54px;height:54px;border-radius:18px;background:var(--basil);color:var(--on-basil);display:grid;place-items:center;margin:-22px auto 0;box-shadow:0 6px 16px rgb(46 122 72 / .35)}
+.tabbar .plus svg{width:26px;height:26px}
+
+.goal{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.goal:last-child{border-bottom:0}
+.goal.full .gname{color:var(--muted)}
+.dots{display:flex;gap:4px;margin-top:4px;align-items:center;flex-wrap:wrap}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--basil)}
+.dot.on{background:var(--basil)}
+.check{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--basil);color:var(--on-basil);font-size:.8rem;font-weight:700}
+.pick{border:1px solid var(--basil);background:var(--surface);color:var(--basil);font-weight:600;border-radius:10px;padding:6px 12px;font-size:.88rem;white-space:nowrap}
+.pick.picked{background:var(--basil-soft);border-color:transparent;cursor:default}
+.prog{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:6px 0;flex-wrap:wrap}
+.focus{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag{background:var(--chili-soft);color:var(--chili);border-radius:6px;padding:1px 8px;font-size:.8rem;font-weight:500}
+.rest{font-size:.72rem;color:var(--amber);margin-left:4px}
+.block{padding:10px 0;border-bottom:1px solid var(--line)}
+.block:last-of-type{border-bottom:0}
+.blockhead{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.ex{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:9px 0 9px 2px}
+.ex + .ex{border-top:1px dashed var(--line)}
+.ex input{width:22px;height:22px;accent-color:var(--basil);padding:0}
+.ex.done .exname{text-decoration:line-through;color:var(--muted)}
+.ex .how{font-size:.84rem;color:var(--muted)}
+.ex .sets{font-family:var(--f-num);font-size:.86rem;white-space:nowrap}
+.finbtn{border:1px solid var(--basil);background:var(--surface);color:var(--basil);border-radius:10px;padding:6px 12px;font-weight:600;margin-top:6px}
+.finbtn.on{background:var(--basil);color:var(--on-basil)}
+.edititem{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.minin{display:flex;align-items:center;gap:4px;font-size:.85rem;color:var(--muted)}
+.minin input{width:60px;text-align:right;padding:5px 6px}
+.stepper.sm button{width:26px;height:26px}
+.addrow{display:flex;flex-wrap:wrap;gap:6px}
+.addrow select{flex:1 1 160px}
+.addrow input.n{flex:1 1 140px}
+.addrow input.m{width:76px}
+
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mode{border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:12px 8px;text-align:center;display:grid;gap:2px}
+.mode b{font-family:var(--f-display);font-weight:500;font-size:1.02rem}
+.mode span{font-size:.76rem;color:var(--muted);line-height:1.35}
+.mode[aria-pressed="true"]{border-color:var(--basil);background:var(--basil-soft)}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kv div{background:var(--sunk);border-radius:14px;padding:10px 12px}
+.kv .v{font-family:var(--f-num);font-size:1.2rem}
+.kv .k{font-size:.8rem;color:var(--muted)}
+.split{display:flex;height:12px;border-radius:99px;overflow:hidden;margin-top:12px}
+.split i:nth-child(1){background:var(--pro)}.split i:nth-child(2){background:var(--carb)}.split i:nth-child(3){background:var(--fat)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+.legend .p::before{background:var(--pro)}.legend .c::before{background:var(--carb)}.legend .f::before{background:var(--fat)}
+.chart{overflow-x:auto;margin-top:10px}
+
+.ob{position:fixed;inset:0;z-index:70;background:var(--bg);overflow:auto}
+.ob .in{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:16px;
+  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:calc(18px + env(safe-area-inset-top,0px)) calc(20px + env(safe-area-inset-bottom,0px))}
+.obbar{display:flex;gap:4px}
+.obbar i{flex:1;height:5px;border-radius:9px;background:var(--line)}
+.obbar i.on{background:var(--basil)}
+.opt{border:2px solid var(--line);background:var(--surface);border-radius:18px;padding:14px 16px;text-align:left;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;width:100%}
+.opt[aria-pressed="true"]{border-color:var(--basil);background:var(--basil-soft)}
+.opt .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--sunk)}
+.opt .ic svg{width:24px;height:24px}
+.opt b{font-family:var(--f-display);font-weight:500;font-size:1.05rem;display:block}
+.opt span{font-size:.85rem;color:var(--muted)}
+.obnav{margin-top:auto;display:flex;gap:10px}
+.obnav .primary{flex:1}
+.bigin{display:grid;gap:6px;font-size:.88rem;color:var(--muted)}
+.bigin input,.bigin select{font-size:1.1rem;padding:12px;border-radius:14px;background:var(--surface)}
+.sexsel{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sexsel button{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;font-weight:600}
+.sexsel button[aria-pressed="true"]{border-color:var(--basil);background:var(--basil-soft)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <section class="screen" id="s-home">
+    <div>
+      <div class="top">
+        <div><div class="muted small" id="hDate"></div><h1 id="hTitle">วันนี้</h1></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <span class="streak" id="streak" hidden></span>
+          <button class="modechip" id="modeChip" data-act="goMe"></button>
+        </div>
+      </div>
+      <div class="strip" id="strip"></div>
+    </div>
+    <div class="card"><div class="hero"><div class="ring" id="ring"></div><div class="mini" id="mini"></div></div></div>
+    <div class="macros" id="macros"></div>
+    <div class="twocol">
+      <div class="card" id="waterCard"></div>
+      <div class="card" id="weightCard"></div>
+    </div>
+    <div class="card" id="homeWorkout"></div>
+    <div class="card" id="homeMeals"></div>
+    <div class="muted small" id="storeNote" style="text-align:center">กำลังโหลดข้อมูล…</div>
+  </section>
+
+  <section class="screen" id="s-diary" hidden>
+    <div class="top"><div><div class="muted small" id="dDate"></div><h1>บันทึกอาหาร</h1></div><span class="num muted" id="dTotal"></span></div>
+    <div id="meals" style="display:grid;gap:14px"></div>
+    <p class="muted small" style="margin:0">ค่าแคลและสารอาหารเป็นค่าประมาณ ถ้าทำกินเอง ใช้ "ทำเมนูเอง" ใส่เป็นกรัมจะแม่นกว่า</p>
+  </section>
+
+  <section class="screen" id="s-workout" hidden>
+    <div class="top"><h1>ออกกำลังกาย</h1></div>
+    <div class="card" id="weekCard"></div>
+    <div class="card" id="todayCard"></div>
+    <div class="card">
+      <div class="cardhead"><h2>เป้าต่อสัปดาห์</h2><button class="ghost" id="editToggle" aria-pressed="false">แก้เป้า</button></div>
+      <p class="muted small" style="margin:2px 0 10px">เลือกแผนตามโหมด หรือสไตล์ที่ชอบ แล้วปรับว่าส่วนไหนเล่นกี่ครั้ง</p>
+      <div class="chips" id="presets"></div>
+      <div id="presetConfirm" style="margin-top:10px" hidden></div>
+      <div id="goalEdit" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-me" hidden>
+    <div class="top"><h1>แผนของฉัน</h1><button class="ghost" data-act="obStart">ตั้งค่าใหม่ทีละขั้น</button></div>
+    <div class="card">
+      <h2>โหมด</h2>
+      <div class="modes" id="modes" style="margin-top:10px"></div>
+      <div id="modeConfirm" style="margin-top:10px" hidden></div>
+    </div>
+    <div class="card">
+      <h2>ตัวเลขต่อวัน</h2>
+      <div class="kv" id="planNums" style="margin-top:12px"></div>
+      <div class="split" id="split"></div>
+      <div class="legend" id="legend"></div>
+      <p class="muted small" id="planText" style="margin:12px 0 0"></p>
+    </div>
+    <div class="card">
+      <h2>ข้อมูลร่างกาย</h2>
+      <form class="form" id="profileForm" style="margin-top:12px">
+        <label>เพศ<select id="f-sex"><option value="f">หญิง</option><option value="m">ชาย</option></select></label>
+        <label>อายุ (ปี)<input id="f-age" type="number" inputmode="numeric" min="15" max="90"></label>
+        <label>ส่วนสูง (ซม.)<input id="f-height" type="number" inputmode="decimal" min="120" max="220"></label>
+        <label>น้ำหนักตอนนี้ (กก.)<input id="f-weight" type="number" inputmode="decimal" step="0.1" min="30" max="250"></label>
+        <label>น้ำหนักเป้าหมาย (กก.)<input id="f-goal" type="number" inputmode="decimal" step="0.1" min="30" max="250"></label>
+        <label id="paceWrap"><span id="paceLabel">ความเร็ว</span><select id="f-pace"></select></label>
+        <label class="wide">ชีวิตประจำวัน<select id="f-act">
+          <option value="1.2">นั่งเป็นส่วนใหญ่ ไม่ค่อยขยับ</option>
+          <option value="1.375">ขยับบ้าง ออกกำลังกาย 1–3 วัน/สัปดาห์</option>
+          <option value="1.55">ออกกำลังกาย 3–5 วัน/สัปดาห์</option>
+          <option value="1.725">ออกกำลังกายหนักเกือบทุกวัน</option>
+        </select></label>
+        <div class="wide"><button class="primary" type="submit">บันทึกข้อมูล</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="cardhead"><h2>น้ำหนัก</h2><button class="linkbtn" data-act="openWeigh">+ ชั่งน้ำหนัก</button></div>
+      <div class="chart" id="wChart"></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar" aria-label="เมนูหลัก"><div class="in" role="tablist">
+  <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>หน้าหลัก</button>
+  <button role="tab" data-tab="diary" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>อาหาร</button>
+  <button data-act="openAdd" aria-label="เพิ่ม"><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
+  <button role="tab" data-tab="workout" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>ออกกำลัง</button>
+  <button role="tab" data-tab="me" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3" stroke-linecap="round"/></svg>ฉัน</button>
+</div></nav>
+
+<div class="scrim" id="scrim" hidden data-act="closeSheet"></div>
+
+<div class="sheet" id="sh-add" hidden role="dialog" aria-label="เพิ่ม">
+  <div class="grab"></div>
+  <h2 style="margin-bottom:12px">เพิ่มอะไรดี</h2>
+  <div class="actions-grid">
+    <button class="act" data-act="openFood" data-ft="search"><span class="ic" style="background:var(--basil-soft);color:var(--basil)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg></span><b>ค้นหาอาหาร</b><span class="small muted">เมนูไทย วัตถุดิบ</span></button>
+    <button class="act" data-act="openFood" data-ft="build"><span class="ic" style="background:var(--carb-soft);color:var(--carb)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16a8 8 0 0 1-16 0zM9 8c0-2 1.5-2 1.5-4M14 8c0-2 1.5-2 1.5-4"/></svg></span><b>ทำเมนูเอง</b><span class="small muted">ใส่ส่วนประกอบเป็นกรัม</span></button>
+    <button class="act" data-act="goWorkout"><span class="ic" style="background:var(--pro-soft);color:var(--pro)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg></span><b>ออกกำลังกาย</b><span class="small muted">เลือกส่วนที่เล่นวันนี้</span></button>
+    <button class="act" data-act="water1"><span class="ic" style="background:var(--water-soft);color:var(--water)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5c3 4 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.5-6 5.5-10z"/></svg></span><b>ดื่มน้ำ 1 แก้ว</b><span class="small muted">250 มล.</span></button>
+    <button class="act" data-act="openWeigh"><span class="ic" style="background:var(--fat-soft);color:var(--fat)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9.5a4 4 0 0 1 6 0l-2 2.5"/></svg></span><b>ชั่งน้ำหนัก</b><span class="small muted">ดูกราฟในหน้า ฉัน</span></button>
+    <button class="act" data-act="openFood" data-ft="manual"><span class="ic" style="background:var(--amber-soft);color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 19h4L19 9l-4-4L5 15z"/></svg></span><b>ใส่แคลเอง</b><span class="small muted">รู้ค่าจากฉลากอยู่แล้ว</span></button>
+  </div>
+</div>
+
+<div class="sheet" id="sh-food" hidden role="dialog" aria-label="เพิ่มอาหาร">
+  <div class="grab"></div>
+  <div class="cardhead" style="margin-bottom:10px"><h2>เพิ่มอาหาร</h2><button class="linkbtn" data-act="closeSheet">ปิด</button></div>
+  <div class="seg" id="mealSeg"><button data-meal="b">เช้า</button><button data-meal="l">กลางวัน</button><button data-meal="d">เย็น</button><button data-meal="s">ของว่าง</button></div>
+  <div class="tabs2" id="ftSeg"><button data-ft="search">ค้นหา</button><button data-ft="build">ทำเมนูเอง</button><button data-ft="manual">ใส่เอง</button></div>
+  <div id="ft-search" style="margin-top:12px">
+    <div class="searchbox"><input id="q" type="search" placeholder="ข้าวกะเพรา, ข้าวโอ๊ต, ธัญพืช…" autocomplete="off"></div>
+    <div id="results" style="margin-top:10px"></div>
+  </div>
+  <div id="ft-build" style="margin-top:12px" hidden>
+    <input id="b-name" type="text" placeholder="ชื่อเมนู เช่น โอ๊ตมีลกล้วย" style="width:100%">
+    <div class="searchbox" style="margin-top:8px"><input id="bq" type="search" placeholder="เพิ่มส่วนประกอบ: ข้าวกล้อง, ควินัว, ไข่…" autocomplete="off"></div>
+    <div id="bResults" style="margin-top:8px"></div>
+    <div id="builder" style="margin-top:6px"></div>
+    <div id="myMenus"></div>
+  </div>
+  <div id="ft-manual" style="margin-top:12px" hidden>
+    <div class="form">
+      <label class="wide">ชื่อเมนู<input id="c-name" placeholder="เช่น ขนมปังร้านข้างบ้าน"></label>
+      <label>แคลอรี่ (kcal)<input id="c-kcal" type="number" inputmode="numeric"></label>
+      <label>โปรตีน (ก.)<input id="c-pro" type="number" inputmode="decimal"></label>
+      <label>คาร์บ (ก.)<input id="c-carb" type="number" inputmode="decimal"></label>
+      <label>ไขมัน (ก.)<input id="c-fat" type="number" inputmode="decimal"></label>
+      <div class="wide"><button class="primary block" data-act="addCustom">เพิ่มลงบันทึก</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="sh-weigh" hidden role="dialog" aria-label="ชั่งน้ำหนัก">
+  <div class="grab"></div>
+  <h2>ชั่งน้ำหนักวันนี้</h2>
+  <p class="muted small" style="margin:4px 0 12px">ชั่งตอนเช้าหลังเข้าห้องน้ำ จะได้ค่าที่นิ่งที่สุด</p>
+  <div class="searchbox"><input id="w-today" type="number" inputmode="decimal" step="0.1" placeholder="กิโลกรัม"><button class="primary" data-act="saveWeight">บันทึก</button></div>
+</div>
+
+<div class="ob" id="ob" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* Ready dishes: [name, kcal, protein g, fat g, unit, keywords]; carbs = (kcal − 4P − 9F) / 4 */
+const mk=(k,p,f)=>Math.max(0,Math.round((k-4*p-9*f)/4*10)/10);
+const FOODS=[
+['ข้าวกะเพราหมูสับ',580,25,24,'จาน'],['ข้าวกะเพราไก่',550,28,20,'จาน'],['ข้าวกะเพราหมูกรอบ',720,22,38,'จาน'],
+['ข้าวกะเพราทะเล',520,26,18,'จาน'],['ข้าวกะเพราเนื้อ',600,28,24,'จาน'],
+['ไข่ดาว',120,6,10,'ฟอง'],['ไข่เจียว',250,11,22,'ฟอง'],['ข้าวไข่เจียว',450,14,24,'จาน'],
+['ข้าวผัดหมู',560,18,20,'จาน'],['ข้าวผัดกุ้ง',530,20,18,'จาน'],['ข้าวผัดอเมริกัน',790,22,35,'จาน'],
+['ข้าวมันไก่ต้ม',600,25,22,'จาน'],['ข้าวมันไก่ทอด',690,24,30,'จาน'],['ข้าวขาหมู',690,26,32,'จาน'],
+['ข้าวหมูแดง',540,22,16,'จาน'],['ข้าวหมูกรอบ',650,20,30,'จาน'],['ข้าวหมูทอดกระเทียม',600,24,24,'จาน'],
+['ข้าวคะน้าหมูกรอบ',650,20,32,'จาน'],['ข้าวพะแนงหมู',600,24,28,'จาน','พะแนง'],
+['ข้าวแกงเขียวหวานไก่',560,22,24,'จาน','แกงเขียวหวาน'],['ข้าวซอยไก่',650,28,32,'ชาม'],['ขนมจีนน้ำยา',400,15,14,'จาน'],
+['ผัดไทยกุ้งสด',550,20,20,'จาน','ผัดไท'],['ผัดซีอิ๊วหมู',680,22,28,'จาน'],['ราดหน้าหมู',400,18,14,'จาน'],
+['ก๋วยเตี๋ยวน้ำใสหมู',300,18,8,'ชาม','เส้นเล็ก เส้นใหญ่'],['ก๋วยเตี๋ยวต้มยำหมู',360,18,12,'ชาม'],
+['ก๋วยเตี๋ยวเรือ',280,14,8,'ชาม'],['เย็นตาโฟ',350,16,10,'ชาม'],['บะหมี่เกี๊ยวหมูแดง',340,18,10,'ชาม'],
+['บะหมี่กึ่งสำเร็จรูป',300,6,12,'ซอง','มาม่า ไวไว'],['สุกี้น้ำ',250,18,6,'ชาม'],['สุกี้แห้ง',350,20,12,'จาน'],
+['ข้าวต้มหมู',220,12,6,'ชาม'],['โจ๊กหมูใส่ไข่',300,15,10,'ชาม','โจ๊ก'],
+['ส้มตำไทย',120,4,3,'จาน','ตำ'],['ส้มตำปูปลาร้า',130,5,2,'จาน','ตำ'],['ไก่ย่าง',200,22,12,'น่อง'],
+['คอหมูย่าง',350,15,28,'จาน'],['ลาบหมู',200,18,10,'จาน'],['น้ำตกหมู',230,20,12,'จาน'],
+['ต้มยำกุ้งน้ำใส',120,15,3,'ถ้วย'],['ต้มข่าไก่',300,15,24,'ถ้วย'],['แกงจืดเต้าหู้หมูสับ',110,10,6,'ถ้วย'],
+['ผัดผักบุ้งไฟแดง',180,4,14,'จาน'],['ผัดผักรวม',150,5,10,'จาน'],['ยำวุ้นเส้น',150,10,4,'จาน'],
+['หมูปิ้ง',100,7,6,'ไม้'],['ลูกชิ้นปิ้ง',80,5,4,'ไม้'],['ไส้กรอกอีสาน',120,5,9,'ไม้'],['ไก่ทอด',220,16,14,'ชิ้น'],
+['ปาท่องโก๋',140,2,8,'คู่'],['หมูกระทะ',800,40,50,'มื้อ'],['ชาบู',600,35,25,'มื้อ'],['หอยทอด',650,15,40,'จาน'],
+['ชาไทยเย็น',330,3,10,'แก้ว','ชาเย็น'],['กาแฟเย็น',300,4,10,'แก้ว'],['อเมริกาโน่ไม่หวาน',10,0,0,'แก้ว','กาแฟดำ กาแฟ'],
+['โกโก้เย็น',320,5,10,'แก้ว'],['ชานมไข่มุก',450,4,12,'แก้ว'],['น้ำอัดลม',140,0,0,'กระป๋อง','โค้ก']
+].map(([n,k,p,f,u,kw])=>({n,k,p,f,c:mk(k,p,f),u,kw:kw||''}));
+
+/* Ingredients per 100 g: [name, kcal, protein, fat, serving label, serving g, group, keywords] */
+const GROUPS={g:'ธัญพืช / แป้ง',p:'โปรตีน',v:'ผัก',f:'ผลไม้',n:'ถั่ว / เมล็ด',m:'นม / เครื่องดื่ม',o:'น้ำมัน / เครื่องปรุง'};
+const ING=[
+['ข้าวสวย',130,2.7,.3,'ทัพพี',60,'g','ข้าวขาว'],['ข้าวกล้อง (สุก)',112,2.6,.9,'ทัพพี',60,'g'],['ข้าวไรซ์เบอร์รี่ (สุก)',120,3,1,'ทัพพี',60,'g'],
+['ข้าวเหนียวนึ่ง',200,4,.4,'ห่อเล็ก',80,'g'],['ข้าวโอ๊ต (ดิบ)',380,13,6.5,'4 ช้อนโต๊ะ',40,'g','โอ๊ต โอ๊ตมีล'],
+['ควินัว (สุก)',120,4.4,1.9,'ครึ่งถ้วย',90,'g','คีนัว'],['ลูกเดือย (สุก)',120,3.5,.5,'ครึ่งถ้วย',90,'g'],
+['กราโนล่า',450,10,18,'ครึ่งถ้วย',40,'g','ธัญพืชอบ ซีเรียล'],['คอร์นเฟลก',370,7,.5,'1 ถ้วย',30,'g','ซีเรียล'],
+['ขนมปังโฮลวีท',250,12,3.5,'แผ่น',30,'g','ขนมปัง'],['ขนมปังขาว',265,9,3.2,'แผ่น',30,'g','ขนมปัง'],
+['เส้นเล็ก (ลวก)',108,1.8,.2,'1 ชาม',120,'g','ก๋วยเตี๋ยว เส้น'],['วุ้นเส้น (ลวก)',85,.1,.1,'1 ถ้วย',100,'g','เส้น'],
+['บะหมี่ไข่ (ลวก)',140,5,2,'1 ก้อน',100,'g','เส้น'],['พาสต้า (สุก)',158,5.8,.9,'1 ถ้วย',140,'g','สปาเก็ตตี้ เส้น'],
+['มันเทศ',86,1.6,.1,'1 หัวกลาง',130,'g'],['มันฝรั่ง',77,2,.1,'1 หัวกลาง',150,'g'],['ฟักทอง',26,1,.1,'1 ถ้วย',120,'g'],
+['ข้าวโพด',96,3.4,1.5,'1 ฝัก',110,'g'],['ถั่วเขียว (ต้ม)',105,7,.4,'ครึ่งถ้วย',100,'g','ถั่ว'],['ถั่วแดง (ต้ม)',127,8.7,.5,'ครึ่งถ้วย',90,'g','ถั่ว'],
+['อกไก่ (สุก)',165,31,3.6,'1 ชิ้น',100,'p','ไก่'],['สะโพกไก่ไม่มีหนัง (สุก)',200,26,11,'1 ชิ้น',100,'p','ไก่'],
+['หมูสันใน (สุก)',143,26,3.5,'1 ขีด',100,'p','หมู'],['หมูสับ',260,17,21,'2 ช้อนโต๊ะ',50,'p','หมู'],['หมูสามชั้น',520,9,53,'1 ขีด',100,'p','หมู'],
+['เนื้อวัว (สุก)',250,26,15,'1 ขีด',100,'p'],['ปลาแซลมอน',208,20,13,'1 ชิ้น',100,'p','ปลา'],['ปลานิล (สุก)',128,26,2.7,'1 ชิ้น',100,'p','ปลา'],
+['ปลาทูน่ากระป๋องในน้ำแร่',116,26,1,'1 กระป๋อง',100,'p','ทูน่า ปลา'],['กุ้ง',99,24,.3,'5 ตัว',60,'p'],['ปลาหมึก',92,16,1.4,'1 ขีด',100,'p'],
+['ไข่ไก่',143,12.6,9.5,'1 ฟอง',50,'p','ไข่'],['ไข่ขาว',52,11,.2,'1 ฟอง',33,'p','ไข่'],
+['เต้าหู้แข็ง',144,16,8.7,'ครึ่งก้อน',100,'p','เต้าหู้'],['เต้าหู้ไข่',79,6,4.5,'1 หลอด',120,'p','เต้าหู้'],
+['เวย์โปรตีน',400,80,5,'1 สกู๊ป',30,'p','โปรตีน'],
+['ผักรวม',30,2,.3,'1 ถ้วย',100,'v','ผัก'],['บรอกโคลี',34,2.8,.4,'1 ถ้วย',90,'v'],['ผักบุ้ง',19,2.6,.2,'1 ถ้วย',80,'v'],
+['คะน้า',30,2.5,.4,'1 ถ้วย',80,'v'],['แตงกวา',15,.7,.1,'1 ลูก',100,'v'],['มะเขือเทศ',18,.9,.2,'1 ลูก',100,'v'],
+['ผักสลัด',15,1.4,.2,'1 ถ้วย',50,'v','สลัด'],['แครอท',41,.9,.2,'1 หัว',60,'v'],['เห็ด',22,3,.3,'1 ถ้วย',70,'v'],
+['กล้วยหอม',89,1.1,.3,'1 ลูก',120,'f','กล้วย'],['กล้วยน้ำว้า',120,1.2,.3,'1 ลูก',60,'f','กล้วย'],['แอปเปิ้ล',52,.3,.2,'1 ลูก',180,'f'],
+['มะละกอ',43,.5,.3,'1 ชิ้น',150,'f'],['ฝรั่ง',68,2.6,1,'ครึ่งลูก',150,'f'],['ส้ม',47,.9,.1,'1 ลูก',130,'f'],
+['ลูกเกด',300,3,.5,'1 ช้อนโต๊ะ',15,'f'],
+['อัลมอนด์',580,21,50,'10 เม็ด',12,'n','ถั่ว'],['ถั่วลิสง',570,26,49,'1 ช้อนโต๊ะ',15,'n','ถั่ว'],
+['เมล็ดเจีย',486,17,31,'1 ช้อนโต๊ะ',12,'n','เจีย'],['งาดำ',570,18,50,'1 ช้อนโต๊ะ',9,'n','งา'],
+['เมล็ดฟักทอง',560,30,49,'1 ช้อนโต๊ะ',10,'n'],['เนยถั่ว',590,25,50,'1 ช้อนโต๊ะ',16,'n','ถั่ว'],
+['นมจืด',64,3.3,3.6,'1 กล่อง',200,'m','นม'],['นมพร่องมันเนย',42,3.4,1,'1 กล่อง',200,'m','นม'],
+['นมอัลมอนด์ไม่หวาน',15,.6,1.1,'1 แก้ว',240,'m','นม'],['นมถั่วเหลือง',54,3,1.8,'1 กล่อง',230,'m','นม'],
+['โยเกิร์ตกรีก',59,10,.4,'1 ถ้วย',150,'m','โยเกิร์ต'],['โยเกิร์ตไขมันต่ำ',63,5,1.5,'1 ถ้วย',150,'m','โยเกิร์ต'],
+['น้ำมันพืช',884,0,100,'1 ช้อนโต๊ะ',13,'o','น้ำมัน'],['น้ำมันมะกอก',884,0,100,'1 ช้อนโต๊ะ',13,'o','น้ำมัน'],
+['เนย',717,.9,81,'1 ช้อนชา',5,'o'],['น้ำตาล',387,0,0,'1 ช้อนชา',4,'o'],['น้ำผึ้ง',304,.3,0,'1 ช้อนชา',7,'o'],
+['น้ำปลา',35,5,0,'1 ช้อนโต๊ะ',18,'o'],['ซีอิ๊วขาว',53,8,.5,'1 ช้อนโต๊ะ',18,'o','ซอส'],['ซอสหอยนางรม',51,1.4,.3,'1 ช้อนโต๊ะ',18,'o','ซอส'],
+['น้ำพริกเผา',400,3,30,'1 ช้อนโต๊ะ',15,'o'],['มายองเนส',680,1,75,'1 ช้อนโต๊ะ',14,'o','น้ำสลัด']
+].map(([n,k,p,f,u,g,grp,kw])=>({n,k,p,f,c:mk(k,p,f),u,g,grp,kw:(kw||'')+' '+GROUPS[grp]}));
+const ingBy=n=>ING.find(x=>x.n===n);
+const QUICK=['ข้าวกะเพราหมูสับ','ไข่ดาว','ก๋วยเตี๋ยวน้ำใสหมู','ส้มตำไทย','ข้าวมันไก่ต้ม','ชาไทยเย็น'];
+const BQUICK=['ข้าวกล้อง (สุก)','ข้าวโอ๊ต (ดิบ)','ควินัว (สุก)','อกไก่ (สุก)','ไข่ไก่','เต้าหู้แข็ง','ผักรวม','น้ำมันพืช','นมจืด','กล้วยหอม'];
+
+const MODES={
+ lean:{n:'ลีน',sub:'ลดไขมัน เก็บกล้าม',pkg:2.0,fat:.25,desc:'กินน้อยกว่าที่ร่างกายใช้ โปรตีนสูง เวทคู่คาร์ดิโอ'},
+ medium:{n:'มีเดียม',sub:'คงน้ำหนัก กระชับขึ้น',pkg:1.6,fat:.30,desc:'กินเท่าที่ร่างกายใช้ เน้นเวทให้รูปร่างกระชับ'},
+ bulk:{n:'บัลค์',sub:'เพิ่มกล้าม',pkg:1.8,fat:.25,desc:'กินเกินเล็กน้อย คาร์บสูง เวทหนักขึ้นทุกสัปดาห์'}
+};
+const LEAN_PACE=[[.25,'ช้า 0.25 กก./สัปดาห์'],[.5,'ปกติ 0.5 กก./สัปดาห์'],[.75,'เร็ว 0.75 กก./สัปดาห์']];
+const BULK_PACE=[[250,'ค่อยเป็นค่อยไป +250 kcal'],[400,'ปกติ +400 kcal'],[550,'เร็ว +550 kcal']];
+const MODE_ICON={
+ lean:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v13M7 12l5 5 5-5"/></svg>',
+ medium:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 9h14M5 15h14"/></svg>',
+ bulk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20V7M7 12l5-5 5 5"/></svg>'
+};
+
+const ACT={
+ walk:{n:'เดิน',met:3.5,min:40,g:'c',tip:'เดินสบายๆ ต่อเนื่อง'},
+ brisk:{n:'เดินเร็ว',met:4.3,min:45,g:'c',tip:'หอบนิดๆ ยังพูดเป็นประโยคได้'},
+ jog:{n:'วิ่งเหยาะ',met:7,min:30,g:'c',tip:'วิ่งช้าๆ สลับเดินได้'},
+ run:{n:'วิ่ง',met:9.8,min:30,g:'c',tip:'เดินวอร์มอัพ 5 นาทีก่อนวิ่ง'},
+ bike:{n:'ปั่นจักรยาน',met:6,min:40,g:'c',tip:'ความเร็วปานกลาง'},
+ swim:{n:'ว่ายน้ำ',met:6,min:30,g:'c',tip:'พักขอบสระได้ตามต้องการ'},
+ aerobic:{n:'เต้นแอโรบิก',met:6.5,min:30,g:'c',tip:'เปิดคลิปเต้นตามได้'},
+ rope:{n:'กระโดดเชือก',met:11,min:15,g:'c',tip:'กระโดด 1 นาที พัก 30 วินาที'},
+ stairs:{n:'ขึ้นลงบันได',met:8,min:20,g:'c',tip:'จับราวทุกครั้ง'},
+ yoga:{n:'โยคะ',met:2.5,min:30,g:'o',tip:'หายใจช้าๆ ไม่ฝืน'},
+ stretch:{n:'ยืดเหยียด',met:2.3,min:10,g:'o',tip:'ค้างท่าละ 30 วินาที'},
+ chest:{n:'อก + หลังแขน',met:5,min:35,g:'s',focus:['อก','หลังแขน'],ex:[
+   ['วิดพื้น','เข่าแตะพื้นได้ถ้ายังไม่ไหว','3 × 10'],['วิดพื้นมือแคบ','มือชิดกันใต้หน้าอก','3 × 8'],
+   ['ดิปเก้าอี้','มือจับขอบเก้าอี้ ย่อลงช้าๆ','3 × 12'],['แพลงก์','ลำตัวตรง เกร็งท้อง','3 × 30 วิ']]},
+ legs:{n:'ขา + ก้น',met:5,min:40,g:'s',focus:['ต้นขา','ก้น','น่อง'],ex:[
+   ['สควอต','นั่งลงเหมือนนั่งเก้าอี้ หลังตรง','4 × 15'],['ลันจ์','ก้าวยาว เข่าหลังเกือบแตะพื้น','3 × 10/ข้าง'],
+   ['กลูตบริดจ์','นอนหงาย ยกสะโพกขึ้น บีบก้น','3 × 15'],['ยกส้นเท้า','ยืนเขย่งช้าๆ','3 × 20'],['นั่งพิงกำแพง','เข่างอ 90 องศา','3 × 30 วิ']]},
+ back:{n:'หลัง + หน้าแขน',met:5,min:35,g:'s',focus:['หลัง','หน้าแขน'],ex:[
+   ['ซูเปอร์แมน','นอนคว่ำ ยกแขนขาพร้อมกัน','3 × 12'],['ก้มตัวดึงขวดน้ำ','ดึงศอกไปด้านหลัง บีบสะบัก','3 × 12'],
+   ['ยกขวดน้ำงอแขน','ศอกแนบลำตัว','3 × 12'],['งอแขนท่าค้อน','กำขวดแนวตั้ง','3 × 12']]},
+ shoulder:{n:'ไหล่',met:5,min:30,g:'s',focus:['ไหล่'],ex:[
+   ['วิดพื้นท่าไพค์','ก้นยกสูง ศีรษะลงหาพื้น','3 × 8'],['ยกขวดน้ำด้านข้าง','ยกถึงระดับไหล่','3 × 12'],
+   ['ดันขวดน้ำเหนือศีรษะ','หลังตรง ไม่แอ่นเอว','3 × 10']]},
+ core:{n:'หน้าท้อง + แกนกลาง',met:4,min:15,g:'s',focus:['หน้าท้อง','สีข้าง'],ex:[
+   ['ครันช์','ยกไหล่พ้นพื้น ไม่ดึงคอ','3 × 15'],['ปั่นจักรยานกลางอากาศ','ศอกแตะเข่าฝั่งตรงข้าม','3 × 20'],
+   ['แพลงก์','ลำตัวตรง เกร็งท้อง','3 × 30 วิ'],['แพลงก์ข้าง','สะโพกไม่ตก','2 × 20 วิ/ข้าง']]},
+ full:{n:'ทั้งตัวเบาๆ',met:4,min:25,g:'s',focus:['ทั้งตัว'],ex:[
+   ['สควอต','หลังตรง ลงเท่าที่ไหว','3 × 12'],['วิดพื้นเข่าแตะพื้น','ลำตัวตรง','3 × 8'],
+   ['กลูตบริดจ์','บีบก้นค้าง 1 วินาที','3 × 12'],['แพลงก์','ลำตัวตรง','3 × 20 วิ']]},
+ hiit:{n:'ทั้งตัวแบบเร็ว',met:8,min:20,g:'s',focus:['ทั้งตัว','หัวใจและปอด'],ex:[
+   ['กระโดดตบ','ทำ 40 วิ พัก 20 วิ','4 รอบ'],['สควอตกระโดด','ลงเบาๆ เข่าไม่บิด','4 รอบ'],
+   ['ยกเข่าสูงวิ่งอยู่กับที่','ทำ 40 วิ พัก 20 วิ','4 รอบ'],['เบอร์พี','ไม่กระโดดก็ได้ ก้าวเท้าแทน','4 รอบ']]}
+};
+const ACT_GROUPS={c:'เดิน / วิ่ง / คาร์ดิโอ',s:'เล่นกล้าม (มีท่าให้)',o:'ยืด / ผ่อนคลาย'};
+const INTENSITY={3:'เบา',5:'ปานกลาง',8:'หนัก'};
+const gl=(a,times,min)=>({a,times,min:min??ACT[a].min});
+const PRESETS={
+ lean:{n:'แผนลีน',g:[gl('legs',1),gl('chest',1),gl('back',1),gl('hiit',1),gl('brisk',3,40),gl('core',2)]},
+ medium:{n:'แผนมีเดียม',g:[gl('chest',1),gl('legs',1),gl('back',1),gl('shoulder',1),gl('core',2),gl('brisk',2,30)]},
+ bulk:{n:'แผนบัลค์',g:[gl('chest',2,40),gl('legs',2,45),gl('back',2,40),gl('shoulder',1,35),gl('core',1),gl('walk',2,30)]},
+ walk:{n:'สายเดิน',g:[gl('walk',3,45),gl('brisk',2,40),gl('full',1),gl('stretch',2)]},
+ run:{n:'สายวิ่ง',g:[gl('jog',3,30),gl('walk',2,40),gl('legs',1),gl('core',2),gl('stretch',2)]},
+ easy:{n:'เริ่มต้นเบาๆ',g:[gl('walk',3,30),gl('full',2),gl('stretch',2)]}
+};
+const DAY_TH=['อา','จ','อ','พ','พฤ','ศ','ส'];
+const DAY_FULL=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const MEALS={b:'มื้อเช้า',l:'มื้อกลางวัน',d:'มื้อเย็น',s:'ของว่าง'};
+const MONTHS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const DEFAULT_PROFILE={mode:'lean',sex:'f',age:30,height:160,weight:65,goal:58,pace:0.5,surplus:400,act:1.375,weights:[],style:'lean',goals:null,myMenus:[],logDays:[],example:true};
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const keyOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseKey=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(k,n)=>{const d=parseKey(k);d.setDate(d.getDate()+n);return keyOf(d)};
+const mondayOf=k=>{const d=parseKey(k);d.setDate(d.getDate()-(d.getDay()+6)%7);return keyOf(d)};
+const dmy=k=>{const d=parseKey(k);return d.getDate()+' '+MONTHS[d.getMonth()]};
+const fmtDate=k=>{const d=parseKey(k);return 'วัน'+DAY_FULL[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]+' '+(d.getFullYear()+543)};
+const r0=n=>Math.round(n);
+const r1=n=>Math.round(n*10)/10;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const uid=()=>Math.random().toString(36).slice(2,9);
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('show'),1800)}
+const norm=s=>s.toLowerCase().trim().replace(/\s+/g,'').replace(/[()]/g,'').replace(/กระเพรา|กะเพา|กระเพา|กระเพาะ/g,'กะเพรา').replace(/ก๋วยเตียว|กวยเตี๋ยว/g,'ก๋วยเตี๋ยว').replace(/โอ้ต|โอต/g,'โอ๊ต');
+const matches=(q,name,kw)=>{const h=norm(name+' '+kw);return h.includes(q)||kw.split(' ').some(w=>w&&q.includes(norm(w)))};
+const macTxt=(p,c,f)=>`<span class="mac"><span class="p">P <b>${r0(p)}</b></span><span class="c">C <b>${r0(c)}</b></span><span class="f">F <b>${r0(f)}</b></span></span>`;
+
+const TODAY=keyOf(new Date());
+const S={tab:'home',date:TODAY,profile:clone(DEFAULT_PROFILE),day:{foods:[],water:0},wk:{sessions:[]},q:'',bq:'',
+  build:{name:'',items:[],editId:null},editGoals:false,pendingPreset:null,pendingMode:null,meal:'l',ft:'search',sheet:null,ob:null};
+const goals=()=>S.profile.goals||PRESETS[PRESETS[S.profile.style]?S.profile.style:(S.profile.mode||'lean')].g;
+function ensureGoals(){if(!S.profile.goals)S.profile.goals=clone(goals())}
+const keyOfAct=x=>x.a==='custom'?'c:'+x.n:x.a;
+
+function calc(p){
+  const mode=MODES[p.mode]?p.mode:'lean',M=MODES[mode];
+  const bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==='m'?5:-161);
+  const tdee=bmr*p.act;
+  const floor=p.sex==='m'?1500:1200;
+  let target=tdee,floored=false;
+  if(mode==='lean'){const raw=tdee-(p.pace||.5)*7700/7;target=Math.max(floor,raw);floored=raw<floor}
+  if(mode==='bulk')target=tdee+(p.surplus||400);
+  target=Math.round(target/10)*10;
+  const refW=mode==='lean'?Math.min(p.weight,(p.goal||p.weight)+5):p.weight;
+  const P=Math.round(M.pkg*refW),F=Math.round(target*M.fat/9),C=Math.max(0,Math.round((target-4*P-9*F)/4));
+  const bmi=p.weight/Math.pow(p.height/100,2);
+  let weeks=null;
+  if(mode==='lean'&&p.goal<p.weight)weeks=(p.weight-p.goal)/Math.max(.05,(tdee-target)*7/7700);
+  if(mode==='bulk'&&p.goal>p.weight)weeks=(p.goal-p.weight)/((p.surplus||400)*7/7700*.6);
+  return {mode,bmr,tdee,target,floored,bmi,P,C,F,weeks,water:Math.max(6,Math.round(p.weight*33/250))};
+}
+const itemName=x=>x.a==='custom'?x.n:ACT[x.a].n;
+const itemMet=x=>x.a==='custom'?x.met:ACT[x.a].met;
+const itemKcal=x=>r0(itemMet(x)*S.profile.weight*x.min/60);
+
+const EMPTY_DAY=()=>({foods:[],water:0});
+const Store={mode:'local',db:null,uid:null,unsubDay:null,unsubWeek:null,weekKey:null,writing:{},dirty:{},loaded:false,
+  async init(){
+    try{
+      const [db,user]=await Promise.all([window.claude?.use?.('db'),window.claude?.use?.('user')]);
+      const id=user?await user.id():null;
+      if(db&&id){this.db=db;this.uid=id;this.mode='db'}
+    }catch(e){}
+    if(this.mode==='db'){
+      const t=setTimeout(()=>{$('#storeNote').textContent='ยังเชื่อมต่อข้อมูลไม่ได้ ลองใหม่ภายหลัง'},10000);
+      this.ref('profile').onSnapshot(s=>{
+        if(!s.metadata.fromCache){
+          clearTimeout(t);$('#storeNote').textContent='ข้อมูลบันทึกไว้ในบัญชีของคุณ';
+          if(!this.loaded){this.loaded=true;if(!s.exists&&!S.ob)startOnboarding()}
+        }
+        if(this.writing.profile||this.dirty.profile)return;
+        if(s.exists){S.profile=Object.assign(clone(DEFAULT_PROFILE),clone(s.data()),{example:false});renderAll()}
+      },()=>{clearTimeout(t);$('#storeNote').textContent='โหลดข้อมูลไม่สำเร็จ'});
+      this.watchDay();
+    }else{
+      $('#storeNote').textContent='ข้อมูลบันทึกไว้ในเครื่องนี้ (เบราว์เซอร์นี้)';
+      let found=false;
+      try{const p=JSON.parse(localStorage.getItem('wl-profile')||'null');if(p){S.profile=Object.assign(clone(DEFAULT_PROFILE),p,{example:false});found=true}}catch(e){}
+      this.watchDay();
+      if(!found)startOnboarding();
+    }
+    renderAll();
+  },
+  ref(id){return this.db.collection('data/users/'+this.uid).doc(id)},
+  watchWeek(){
+    const k='week-'+mondayOf(S.date);
+    if(k===this.weekKey)return;
+    this.weekKey=k;S.wk={sessions:[]};
+    if(this.mode==='db'){
+      if(this.unsubWeek)this.unsubWeek();
+      this.unsubWeek=this.ref(k).onSnapshot(s=>{
+        if(this.writing[k]||this.dirty[k]||this.weekKey!==k)return;
+        S.wk=s.exists?Object.assign({sessions:[]},clone(s.data())):{sessions:[]};
+        renderHome();renderWorkout();
+      },()=>{});
+    }else{
+      try{S.wk=Object.assign({sessions:[]},JSON.parse(localStorage.getItem('wl-'+k)||'null')||{})}catch(e){S.wk={sessions:[]}}
+    }
+  },
+  watchDay(){
+    this.watchWeek();
+    const k='day-'+S.date;
+    if(this.mode==='db'){
+      if(this.unsubDay)this.unsubDay();
+      S.day=EMPTY_DAY();
+      this.unsubDay=this.ref(k).onSnapshot(s=>{
+        if(this.writing[k]||this.dirty[k]||('day-'+S.date)!==k)return;
+        S.day=s.exists?Object.assign(EMPTY_DAY(),clone(s.data())):EMPTY_DAY();
+        renderHome();renderDiary();
+      },()=>{});
+    }else{
+      try{S.day=Object.assign(EMPTY_DAY(),JSON.parse(localStorage.getItem('wl-'+k)||'null')||{})}catch(e){S.day=EMPTY_DAY()}
+    }
+  },
+  async save(id,getData){
+    if(this.mode!=='db'){try{localStorage.setItem(id==='profile'?'wl-profile':'wl-'+id,JSON.stringify(getData()))}catch(e){}return}
+    this.dirty[id]=true;
+    if(this.writing[id])return;
+    this.writing[id]=true;
+    try{while(this.dirty[id]){this.dirty[id]=false;await this.ref(id).set(getData())}}
+    catch(e){toast(e&&e.code==='quota_exceeded'?'พื้นที่เก็บข้อมูลเต็ม':'บันทึกไม่สำเร็จ ลองอีกครั้ง')}
+    finally{this.writing[id]=false}
+  }
+};
+function saveDay(){Store.save('day-'+S.date,()=>clone(S.day))}
+function saveWeek(){Store.save(Store.weekKey,()=>clone(S.wk))}
+function saveProfile(){S.profile.example=false;Store.save('profile',()=>{const p=clone(S.profile);delete p.example;return p})}
+
+function totals(){return S.day.foods.reduce((a,f)=>{a.k+=f.k*f.q;a.p+=f.p*f.q;a.c+=(f.c||0)*f.q;a.f+=(f.f||0)*f.q;return a},{k:0,p:0,c:0,f:0})}
+function sessKcal(s){
+  const a=ACT[s.a];
+  if(s.fin)return itemKcal(s);
+  if(a&&a.ex)return itemKcal(s)*(s.done||[]).length/a.ex.length;
+  return 0;
+}
+function burned(){return r0(S.wk.sessions.filter(s=>s.d===S.date).reduce((t,s)=>t+sessKcal(s),0))}
+function streak(){
+  const set=new Set(S.profile.logDays||[]);let d=TODAY,n=0;
+  if(!set.has(d))d=addDays(d,-1);
+  while(set.has(d)){n++;d=addDays(d,-1)}
+  return n;
+}
+function markLogged(){
+  const L=S.profile.logDays=S.profile.logDays||[];
+  if(!L.includes(S.date)){L.push(S.date);L.sort();S.profile.logDays=L.slice(-400);saveProfile()}
+}
+
+const ICON={
+ eat:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--basil)" stroke-width="2" stroke-linecap="round"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16 3c-2 1-3 4-3 7h3v11"/></svg>',
+ fire:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--chili)" stroke-width="2" stroke-linejoin="round"><path d="M12 21a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-1.5-2-1.5-3C7 10 6 12 6 15a6 6 0 0 0 6 6z"/></svg>',
+ goal:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--fat)" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg>'
+};
+function renderHome(){
+  const c=calc(S.profile),t=totals(),b=burned(),isToday=S.date===TODAY;
+  $('#hDate').textContent=fmtDate(S.date);
+  $('#hTitle').textContent=isToday?'วันนี้':'ย้อนดู '+dmy(S.date);
+  $('#modeChip').innerHTML=`${MODE_ICON[c.mode].replace('<svg','<svg width="14" height="14"')} โหมด${MODES[c.mode].n}`;
+  const st=streak();$('#streak').hidden=!st;$('#streak').textContent=`จดต่อเนื่อง ${st} วัน`;
+  const mon=mondayOf(S.date),logged=new Set(S.profile.logDays||[]);
+  $('#strip').innerHTML=`<button class="nav" data-act="wkShift" data-d="-7" aria-label="สัปดาห์ก่อน">‹</button>`+
+    Array.from({length:7},(_,i)=>{const k=addDays(mon,i),d=parseKey(k);return `<button class="d ${logged.has(k)?'logged':''}" data-act="setDate" data-k="${k}" aria-pressed="${k===S.date}" ${k>TODAY?'disabled':''}>${DAY_TH[d.getDay()]}<b>${d.getDate()}</b></button>`}).join('')+
+    `<button class="nav" data-act="wkShift" data-d="7" aria-label="สัปดาห์ถัดไป" ${addDays(mon,7)>TODAY?'disabled':''}>›</button>`;
+  const pct=Math.min(1,t.k/c.target),over=t.k>c.target,R=64,C=2*Math.PI*R;
+  $('#ring').innerHTML=`<svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
+    <circle cx="75" cy="75" r="${R}" fill="none" stroke="var(--sunk)" stroke-width="13"/>
+    <circle cx="75" cy="75" r="${R}" fill="none" stroke="${over?'var(--chili)':'var(--basil)'}" stroke-width="13" stroke-linecap="round"
+      stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" transform="rotate(-90 75 75)"/></svg>
+    <div class="mid"><div class="big">${r0(Math.abs(c.target-t.k)).toLocaleString()}</div><div class="small muted">${over?'เกินเป้า':'กินได้อีก'} kcal</div></div>`;
+  $('#mini').innerHTML=[['eat','กินแล้ว',r0(t.k)],['fire','เผาผลาญ',b],['goal','เป้าวันนี้',c.target]]
+    .map(([i,l,v])=>`<div class="r"><span class="ic">${ICON[i]}</span><div><div class="small muted">${l}</div><div class="v">${v.toLocaleString()}</div></div></div>`).join('');
+  $('#macros').innerHTML=[['p','โปรตีน',t.p,c.P],['c','คาร์บ',t.c,c.C],['f','ไขมัน',t.f,c.F]].map(([k,l,v,g])=>
+    `<div class="macro ${k}"><div class="k">${l} (ก.)</div><div class="v">${r0(v)}<span class="muted small">/${g}</span></div><div class="bar"><i style="width:${Math.min(100,v/g*100)}%"></i></div><div class="left">${v>g?'เกิน '+r0(v-g):'เหลือ '+r0(g-v)} ก.</div></div>`).join('');
+  const w=S.day.water||0,n=Math.max(c.water,w);
+  $('#waterCard').innerHTML=`<div class="cardhead"><h2>น้ำ</h2><span class="num small muted">${w}/${c.water} แก้ว</span></div>
+    <div class="water">${Array.from({length:n},(_,i)=>`<button class="glass" data-act="water" data-i="${i}" aria-label="น้ำแก้วที่ ${i+1}"><svg viewBox="0 0 34 42"><path d="M5 4h24l-3 33a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2z" fill="${i<w?'var(--water)':'var(--water-soft)'}" stroke="var(--water)" stroke-width="1.5"/></svg></button>`).join('')}</div>
+    <div class="small muted" style="margin-top:6px">${r0(w*250).toLocaleString()} มล. แตะแก้วเพื่อจด</div>`;
+  const ws=[...(S.profile.weights||[])].sort((a,b)=>a.d<b.d?-1:1),last=ws[ws.length-1],first=ws[0];
+  const dir=c.mode==='bulk'?1:-1;
+  $('#weightCard').innerHTML=`<div class="cardhead"><h2>น้ำหนัก</h2><button class="linkbtn" data-act="openWeigh">+ ชั่ง</button></div>
+    <div style="margin-top:8px"><span class="num" style="font-size:1.6rem">${last?last.w:S.profile.weight}</span> <span class="muted">กก.</span></div>
+    <div class="small muted">เป้า ${S.profile.goal} กก.${last&&first&&ws.length>1&&last.w!==first.w?` · ${(last.w-first.w)*dir>0?'ไปถูกทาง':'สวนทาง'} ${Math.abs(last.w-first.w).toFixed(1)} กก.`:''}</div>
+    ${miniSpark(ws.slice(-14))}`;
+  const G=goals();let need=0,got=0;G.forEach(g=>{need+=g.times;got+=Math.min(g.times,S.wk.sessions.filter(s=>keyOfAct(s)===keyOfAct(g)&&s.fin).length)});
+  const ts=S.wk.sessions.filter(s=>s.d===S.date);
+  $('#homeWorkout').innerHTML=`<div class="cardhead"><h2>ออกกำลังกาย</h2><button class="linkbtn" data-act="goWorkout">${ts.length?'ดูท่า':'เลือกเล่นวันนี้'} ›</button></div>
+    <div class="prog"><span class="small">สัปดาห์นี้ทำแล้ว <span class="num">${got}/${need}</span> ครั้ง</span><span class="small muted">${ts.length?ts.map(s=>esc(itemName(s))+(s.fin?' ✓':'')).join(' · '):'วันนี้ยังไม่ได้เลือก'}</span></div>
+    <div class="bar"><i style="width:${need?got/need*100:0}%"></i></div>`;
+  $('#homeMeals').innerHTML=`<div class="cardhead"><h2>มื้ออาหาร</h2><button class="linkbtn" data-act="goDiary">ดูทั้งหมด ›</button></div>`+
+    Object.entries(MEALS).map(([m,l])=>{const it=S.day.foods.filter(f=>f.m===m);const k=it.reduce((a,f)=>a+f.k*f.q,0);
+      return `<div class="log"><div style="min-width:0">${l}<div class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.length?esc(it.map(f=>f.n).join(', ')):'ยังไม่ได้จด'}</div></div><span class="num small">${r0(k)}</span><button class="meal-add" data-act="openFood" data-meal="${m}" data-ft="search" aria-label="เพิ่ม${l}">+</button></div>`}).join('');
+}
+function miniSpark(ws){
+  if(ws.length<2)return `<div class="small muted" style="margin-top:8px">${ws.length?'ชั่งอีกครั้งพรุ่งนี้จะเห็นแนวโน้ม':'ยังไม่มีบันทึก'}</div>`;
+  const W=200,H=44,lo=Math.min(...ws.map(x=>x.w))-.3,hi=Math.max(...ws.map(x=>x.w))+.3;
+  const pts=ws.map((x,i)=>[4+(W-8)*i/(ws.length-1),4+(H-8)*(hi-x.w)/(hi-lo)]);
+  const L=pts[pts.length-1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="44" style="margin-top:8px" aria-hidden="true"><polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--fat)" stroke-width="2.2" stroke-linejoin="round"/><circle cx="${L[0]}" cy="${L[1]}" r="3.5" fill="var(--fat)"/></svg>`;
+}
+
+function renderDiary(){
+  const t=totals();
+  $('#dDate').textContent=fmtDate(S.date);
+  $('#dTotal').textContent=r0(t.k).toLocaleString()+' kcal';
+  $('#meals').innerHTML=Object.entries(MEALS).map(([m,l])=>{
+    const items=S.day.foods.map((f,i)=>({...f,i})).filter(f=>f.m===m);
+    const s=items.reduce((a,f)=>{a.k+=f.k*f.q;a.p+=f.p*f.q;a.c+=(f.c||0)*f.q;a.f+=(f.f||0)*f.q;return a},{k:0,p:0,c:0,f:0});
+    return `<div class="card"><div class="meal-head"><div><h2>${l}</h2><div class="small muted"><span class="num">${r0(s.k)}</span> kcal ${items.length?' · '+macTxt(s.p,s.c,s.f):''}</div></div>
+      <button class="meal-add" data-act="openFood" data-meal="${m}" data-ft="search" aria-label="เพิ่ม${l}">+</button></div>
+      ${items.map(f=>`<div class="log"><div style="min-width:0">${esc(f.n)}<div class="small muted"><span class="num">${r0(f.k*f.q)}</span> kcal · ${f.q} ${esc(f.u)} · ${macTxt(f.p*f.q,(f.c||0)*f.q,(f.f||0)*f.q)}</div></div>
+      <div class="stepper"><button data-act="qty" data-i="${f.i}" data-d="-0.5" aria-label="ลดจำนวน">−</button><span class="num">${f.q}</span><button data-act="qty" data-i="${f.i}" data-d="0.5" aria-label="เพิ่มจำนวน">+</button></div>
+      <button class="del" data-act="del" data-i="${f.i}" aria-label="ลบ ${esc(f.n)}">×</button></div>`).join('')}</div>`;
+  }).join('');
+}
+
+const ingRow=(f,act)=>`<div class="row"><div class="name">${esc(f.n)}<span class="kind">${esc(GROUPS[f.grp])}</span><div class="small muted">${esc(f.u)} ≈ ${f.g} ก. · 100 ก. = ${f.k} kcal</div></div>
+  <label class="gram"><input type="number" inputmode="decimal" min="1" value="${f.g}" data-gram="${esc(f.n)}" aria-label="กรัม"><span class="small muted">ก.</span></label>
+  <button class="add" data-act="${act}" data-n="${esc(f.n)}" aria-label="เพิ่ม ${esc(f.n)}">+</button></div>`;
+function renderResults(){
+  const q=norm(S.q),mine=S.profile.myMenus||[];
+  let html='';
+  if(!q){
+    html=`<div class="small muted" style="margin-bottom:6px">กดเพิ่มได้เลย</div><div class="chips">${
+      mine.map(m=>`<button class="chip mine" data-act="addMine" data-id="${m.id}">+ ${esc(m.n)} <span class="num muted">${r0(m.k)}</span></button>`).join('')+
+      QUICK.map(n=>{const f=FOODS.find(x=>x.n===n);return `<button class="chip" data-act="addName" data-n="${esc(n)}">+ ${esc(n)} <span class="num muted">${f.k}</span></button>`}).join('')}</div>
+      <div class="small muted" style="margin-top:10px">ลองพิมพ์ "ธัญพืช" "ถั่ว" "ผลไม้" เพื่อดูวัตถุดิบทั้งหมวด</div>`;
+  }else{
+    const m=mine.filter(x=>norm(x.n).includes(q));
+    const d=FOODS.filter(f=>matches(q,f.n,f.kw)).sort((a,b)=>norm(b.n).startsWith(q)-norm(a.n).startsWith(q));
+    const g=ING.filter(f=>matches(q,f.n,f.kw)).slice(0,24);
+    const rows=[
+      ...m.map(x=>`<div class="row"><div class="name">${esc(x.n)}<span class="kind mine">เมนูของฉัน</span><div class="small muted">1 จาน · ${macTxt(x.p,x.c||0,x.f||0)}</div></div><span class="num">${r0(x.k)}</span><button class="add" data-act="addMine" data-id="${x.id}" aria-label="เพิ่ม ${esc(x.n)}">+</button></div>`),
+      ...d.map(f=>`<div class="row"><div class="name">${esc(f.n)}<div class="small muted">1 ${esc(f.u)} · ${macTxt(f.p,f.c,f.f)}</div></div><span class="num">${f.k}</span><button class="add" data-act="addName" data-n="${esc(f.n)}" aria-label="เพิ่ม ${esc(f.n)}">+</button></div>`),
+      ...g.map(f=>ingRow(f,'addIng'))];
+    html=rows.length?`<div>${rows.join('')}</div>`:`<div class="empty">ไม่พบ "${esc(S.q)}" ลองแท็บ "ใส่เอง" หรือ "ทำเมนูเอง"</div>`;
+  }
+  $('#results').innerHTML=html;
+}
+function bTotals(){return S.build.items.reduce((a,x)=>{const f=ingBy(x.n);if(f){const r=x.g/100;a.k+=f.k*r;a.p+=f.p*r;a.c+=f.c*r;a.f+=f.f*r}return a},{k:0,p:0,c:0,f:0})}
+function renderBResults(){
+  const q=norm(S.bq);
+  $('#bResults').innerHTML=!q
+    ?`<div class="chips">${BQUICK.map(n=>`<button class="chip" data-act="bAdd" data-n="${esc(n)}">+ ${esc(n)}</button>`).join('')}</div>`
+    :(()=>{const g=ING.filter(f=>matches(q,f.n,f.kw));return g.length?`<div>${g.map(f=>ingRow(f,'bAddG')).join('')}</div>`:`<div class="empty">ไม่พบวัตถุดิบนี้ ใช้แท็บ "ใส่เอง" แทนได้</div>`})();
+}
+function renderBuilder(){
+  const b=S.build,t=bTotals();
+  if(document.activeElement!==$('#b-name'))$('#b-name').value=b.name;
+  $('#builder').innerHTML=b.items.length?`
+    <div>${b.items.map((x,i)=>{const f=ingBy(x.n);return `<div class="bitem"><div style="min-width:0">${esc(x.n)}</div>
+      <label class="gram"><input type="number" inputmode="decimal" min="1" value="${x.g}" data-bg="${i}" aria-label="กรัมของ ${esc(x.n)}"><span class="small muted">ก.</span></label>
+      <span class="num small" id="bk-${i}" style="min-width:48px;text-align:right">${f?r0(f.k*x.g/100):0}</span>
+      <button class="del" data-act="bDel" data-i="${i}" aria-label="ลบ ${esc(x.n)}">×</button></div>`}).join('')}</div>
+    <div class="btotal"><span>รวม <span class="num" id="bTotK">${r0(t.k)} kcal</span></span><span id="bTotM">${macTxt(t.p,t.c,t.f)}</span></div>
+    <div class="actions">
+      <button class="primary" data-act="bLog">ใส่${MEALS[S.meal]}</button>
+      <button class="ghost" data-act="bSave">${b.editId?'บันทึกการแก้เมนู':'เก็บเป็นเมนูของฉัน'}</button>
+      <button class="ghost" data-act="bClear">ล้าง</button>
+    </div>`:`<div class="empty">ยังไม่มีส่วนประกอบ เช่น ข้าวโอ๊ต 40 ก. + นมจืด 200 ก. + กล้วยหอม</div>`;
+  const mine=S.profile.myMenus||[];
+  $('#myMenus').innerHTML=mine.length?`<div class="label">เมนูของฉัน</div>${mine.map(m=>`<div class="mymenu"><div style="min-width:0">${esc(m.n)}<div class="small muted">${esc(m.items.map(x=>x.n.replace(/ \(.+\)/,'')+' '+x.g+'ก.').join(', '))}</div></div>
+    <span class="num small">${r0(m.k)}</span><button class="ghost" data-act="mEdit" data-id="${m.id}">แก้</button><button class="del" data-act="mDel" data-id="${m.id}" aria-label="ลบเมนู ${esc(m.n)}">×</button></div>`).join('')}`:'';
+}
+function updateBTotals(){
+  const t=bTotals();
+  S.build.items.forEach((x,i)=>{const f=ingBy(x.n),el=$('#bk-'+i);if(el&&f)el.textContent=r0(f.k*x.g/100)});
+  if($('#bTotK')){$('#bTotK').textContent=r0(t.k)+' kcal';$('#bTotM').innerHTML=macTxt(t.p,t.c,t.f)}
+}
+function bAdd(n,g){const f=ingBy(n);if(!f)return;S.build.items.push({n,g:g||f.g});S.bq='';$('#bq').value='';renderBResults();renderBuilder()}
+function renderSheetState(){
+  $$('#mealSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.meal===S.meal));
+  $$('#ftSeg button').forEach(b=>{b.className=b.dataset.ft===S.ft?'chip on':'chip'});
+  ['search','build','manual'].forEach(k=>$('#ft-'+k).hidden=k!==S.ft);
+  if(S.ft==='build')renderBuilder();
+}
+function openSheet(id){
+  ['add','food','weigh'].forEach(k=>$('#sh-'+k).hidden=k!==id);
+  $('#scrim').hidden=!id;S.sheet=id;
+  if(id==='food'){renderSheetState();renderResults();renderBResults();renderBuilder()}
+}
+
+function actOptions(sel){
+  return Object.entries(ACT_GROUPS).map(([g,label])=>`<optgroup label="${label}">${Object.entries(ACT).filter(([,a])=>a.g===g).map(([k,a])=>`<option value="${k}" ${k===sel?'selected':''}>${esc(a.n)}</option>`).join('')}</optgroup>`).join('')
+   +`<optgroup label="อื่นๆ"><option value="custom">พิมพ์เอง…</option></optgroup>`;
+}
+function addRow(prefix){
+  return `<div class="addrow" data-addrow="${prefix}">
+    <select id="${prefix}-a" aria-label="กิจกรรม">${actOptions('brisk')}</select>
+    <input class="n" id="${prefix}-n" placeholder="ชื่อกิจกรรม เช่น ทำสวน" hidden>
+    <select id="${prefix}-i" aria-label="ความหนัก" hidden>${Object.entries(INTENSITY).map(([v,l])=>`<option value="${v}" ${v==='5'?'selected':''}>${l}</option>`).join('')}</select>
+    <input class="m" id="${prefix}-m" type="number" inputmode="numeric" min="1" value="45" aria-label="นาที">
+    <button class="add" data-act="${prefix}Add">เพิ่ม</button></div>`;
+}
+function readAddRow(prefix){
+  const a=$('#'+prefix+'-a').value,min=parseFloat($('#'+prefix+'-m').value);
+  if(!(min>0)){toast('ใส่จำนวนนาที');return null}
+  if(a==='custom'){const n=$('#'+prefix+'-n').value.trim();if(!n){toast('ใส่ชื่อกิจกรรม');return null}return {a,n,min,met:+$('#'+prefix+'-i').value}}
+  return {a,min};
+}
+function sessionsOf(key){return S.wk.sessions.filter(s=>keyOfAct(s)===key)}
+const dayShort=k=>DAY_TH[parseKey(k).getDay()];
+function renderWorkout(){
+  const G=goals(),mon=mondayOf(S.date),end=addDays(mon,6);
+  const todaysKeys=new Set(S.wk.sessions.filter(s=>s.d===S.date).map(keyOfAct));
+  const yest=addDays(S.date,-1);
+  let need=0,got=0;
+  const rows=G.map((g,i)=>{
+    const key=keyOfAct(g),fin=sessionsOf(key).filter(s=>s.fin);
+    need+=g.times;got+=Math.min(fin.length,g.times);
+    const full=fin.length>=g.times,a=ACT[g.a],strength=a&&a.g==='s';
+    const restNote=strength&&fin.some(s=>s.d===yest)?'<span class="rest">เล่นเมื่อวานแล้ว ควรพัก</span>':'';
+    const picked=todaysKeys.has(key);
+    return `<div class="goal ${full?'full':''}"><div style="min-width:0">
+      <div class="gname" style="font-family:var(--f-display)">${esc(itemName(g))}${restNote}</div>
+      ${a&&a.focus?`<div class="focus">${a.focus.map(f=>`<span class="tag">${esc(f)}</span>`).join('')}</div>`:''}
+      <div class="dots">${Array.from({length:g.times},(_,j)=>`<span class="dot ${j<fin.length?'on':''}"></span>`).join('')}
+        <span class="small muted" style="margin-left:4px">${fin.length}/${g.times}${fin.length?' · '+fin.map(s=>dayShort(s.d)).join(', '):''}</span></div></div>
+      ${full&&!picked?'<span class="check" aria-label="ครบแล้ว">✓</span>':picked?'<button class="pick picked" disabled>เลือกแล้ว</button>':`<button class="pick" data-act="pick" data-g="${i}">เล่น${S.date===TODAY?'วันนี้':'วันนั้น'}</button>`}
+    </div>`;
+  }).join('');
+  const extras=S.wk.sessions.filter(s=>s.fin&&!G.some(g=>keyOfAct(g)===keyOfAct(s)));
+  $('#weekCard').innerHTML=`<div class="cardhead"><h2>สัปดาห์นี้</h2><span class="small muted">${dmy(mon)} – ${dmy(end)}</span></div>
+    <div class="prog"><span class="small">ทำแล้ว <span class="num">${got}/${need}</span> ครั้ง</span><span class="small muted">${got>=need&&need?'ครบเป้าสัปดาห์นี้แล้ว':'เลือกเล่นวันไหนก็ได้'}</span></div>
+    <div class="bar"><i style="width:${need?got/need*100:0}%"></i></div>
+    ${S.profile.mode==='bulk'?'<div class="note" style="margin-top:10px">โหมดบัลค์: ทุกสัปดาห์เพิ่มจำนวนครั้ง หรือใช้ขวดน้ำ/ของที่หนักขึ้น กล้ามถึงจะโต</div>':''}
+    <div style="margin-top:6px">${rows||'<div class="empty">ยังไม่มีเป้า กด "แก้เป้า" ด้านล่าง</div>'}</div>
+    ${extras.length?`<div class="label">ทำเพิ่มนอกเป้า</div><div class="small">${extras.map(s=>esc(itemName(s))+' ('+dayShort(s.d)+')').join(', ')}</div>`:''}`;
+
+  const ts=S.wk.sessions.filter(s=>s.d===S.date);
+  const left=G.map((g,i)=>({g,i})).filter(({g})=>sessionsOf(keyOfAct(g)).filter(s=>s.fin).length<g.times&&!todaysKeys.has(keyOfAct(g)));
+  const body=ts.length?ts.map(s=>{
+    const a=ACT[s.a];
+    const head=`<div class="blockhead"><h3>${esc(itemName(s))}</h3><span style="display:flex;gap:6px;align-items:center">
+      <label class="minin"><input type="number" inputmode="numeric" min="1" value="${s.min}" data-smin="${s.id}" aria-label="นาที">นาที</label>
+      <button class="del" data-act="sDel" data-id="${s.id}" aria-label="เอาออก">×</button></span></div>`;
+    if(a&&a.ex){
+      const done=new Set(s.done||[]);
+      return `<div class="block">${head}<div class="focus">${a.focus.map(f=>`<span class="tag">${esc(f)}</span>`).join('')}</div>
+        ${a.ex.map((e,j)=>`<label class="ex ${done.has(j)?'done':''}"><input type="checkbox" data-sx="${s.id}:${j}" ${done.has(j)?'checked':''}><div style="min-width:0"><div class="exname">${esc(e[0])}</div><div class="how">${esc(e[1])}</div></div><span class="sets">${esc(e[2])}</span></label>`).join('')}
+        <button class="finbtn ${s.fin?'on':''}" data-act="sFin" data-id="${s.id}">${s.fin?'✓ ทำเสร็จแล้ว · '+itemKcal(s)+' kcal':'ทำเสร็จแล้ว'}</button></div>`;
+    }
+    return `<div class="block">${head}<label class="ex ${s.fin?'done':''}" style="padding-top:4px"><input type="checkbox" data-sf="${s.id}" ${s.fin?'checked':''}>
+      <div style="min-width:0"><div class="exname">${s.fin?'ทำแล้ว':'ติ๊กเมื่อทำเสร็จ'}</div><div class="how">${esc(a?a.tip:(INTENSITY[s.met]?'ความหนัก'+INTENSITY[s.met]:''))}</div></div>
+      <span class="sets">≈ ${itemKcal(s)} kcal</span></label></div>`;
+  }).join(''):`<div class="empty">ยังไม่ได้เลือก กดส่วนที่อยากเล่นด้านล่าง หรือกด "เล่นวันนี้" ในรายการสัปดาห์</div>`;
+  $('#todayCard').innerHTML=`<div class="cardhead"><h2>${S.date===TODAY?'วันนี้เล่นอะไร':fmtDate(S.date).replace(/ \d{4}$/,'')}</h2>${ts.length?`<span class="small muted num">≈ ${burned()} kcal</span>`:''}</div>${body}
+    ${left.length?`<div class="label">ยังเหลือในสัปดาห์นี้</div><div class="chips">${left.map(({g,i})=>`<button class="chip left" data-act="pick" data-g="${i}">+ ${esc(itemName(g))}</button>`).join('')}</div>`:''}
+    <div class="label">หรือเลือกอย่างอื่น</div>${addRow('x')}
+    ${ts.length?'<div class="note" style="margin-top:12px">วอร์มอัพ 5 นาทีก่อนเริ่ม ถ้าเจ็บแปลบที่ข้อต่อหรือเวียนหัวให้หยุด</div>':''}`;
+
+  $('#presets').innerHTML=Object.entries(PRESETS).map(([k,p])=>`<button class="chip ${S.profile.style===k?'on':''}" data-act="preset" data-k="${k}">${esc(p.n)}</button>`).join('')
+    +(S.profile.style==='own'?`<span class="chip on">จัดเอง</span>`:'');
+  const pc=$('#presetConfirm');
+  if(S.pendingPreset){pc.hidden=false;pc.innerHTML=`<div class="note">จะใช้ "${esc(PRESETS[S.pendingPreset].n)}" แทนเป้าเดิม (สิ่งที่ทำไปแล้วยังนับอยู่) <div class="actions" style="margin-top:8px"><button class="primary confirm" data-act="presetYes">ใช้แบบนี้</button><button class="ghost" data-act="presetNo">ยกเลิก</button></div></div>`}
+  else pc.hidden=true;
+  $('#editToggle').setAttribute('aria-pressed',S.editGoals);
+  $('#editToggle').textContent=S.editGoals?'เสร็จแล้ว':'แก้เป้า';
+  $('#goalEdit').innerHTML=S.editGoals?(G.map((g,i)=>`<div class="edititem"><div style="min-width:0">${esc(itemName(g))}</div>
+      <div class="stepper sm"><button data-act="gTimes" data-i="${i}" data-d="-1" aria-label="ลด">−</button><span class="num small">${g.times}×</span><button data-act="gTimes" data-i="${i}" data-d="1" aria-label="เพิ่ม">+</button></div>
+      <label class="minin"><input type="number" inputmode="numeric" min="1" value="${g.min}" data-gmin="${i}" aria-label="นาที">น.</label>
+      <button class="del" data-act="gDel" data-i="${i}" aria-label="ลบ ${esc(itemName(g))}">×</button></div>`).join('')
+      +`<div class="label">เพิ่มเป้า</div>${addRow('g')}`)
+    :`<div class="small muted">${G.map(g=>esc(itemName(g))+' '+g.times+'×').join(' · ')}</div>`;
+}
+function changeGoals(fn){ensureGoals();fn(S.profile.goals);S.profile.style='own';saveProfile();renderWorkout();renderHome()}
+function pickSession(x){
+  S.wk.sessions.push({id:uid(),d:S.date,a:x.a,min:x.min,...(x.a==='custom'?{n:x.n,met:x.met}:{}),done:[],fin:false});
+  saveWeek();renderWorkout();renderHome();
+}
+const sessById=id=>S.wk.sessions.find(s=>s.id===id);
+
+function paceOptions(mode,sel){
+  const list=mode==='bulk'?BULK_PACE:LEAN_PACE;
+  return list.map(([v,l])=>`<option value="${v}" ${String(v)===String(sel)?'selected':''}>${l}</option>`).join('');
+}
+function renderMe(){
+  const p=S.profile,c=calc(p);
+  $('#modes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button class="mode" data-act="mode" data-k="${k}" aria-pressed="${c.mode===k}"><b>${m.n}</b><span>${m.sub}</span></button>`).join('');
+  const mc=$('#modeConfirm');
+  if(S.pendingMode){mc.hidden=false;mc.innerHTML=`<div class="note">เปลี่ยนเป็นโหมด${MODES[S.pendingMode].n}แล้ว จะใช้ "${PRESETS[S.pendingMode].n}" สำหรับออกกำลังกายด้วยไหม<div class="actions" style="margin-top:8px"><button class="primary" data-act="modePlanYes">ใช้แผนนี้</button><button class="ghost" data-act="modePlanNo">ใช้แผนเดิม</button></div></div>`}
+  else mc.hidden=true;
+  const set=(id,v)=>{const el=$(id);if(document.activeElement!==el)el.value=v};
+  set('#f-sex',p.sex);set('#f-age',p.age);set('#f-height',p.height);set('#f-weight',p.weight);set('#f-goal',p.goal);set('#f-act',String(p.act));
+  $('#paceWrap').hidden=c.mode==='medium';
+  $('#paceLabel').textContent=c.mode==='bulk'?'กินเกินวันละ':'ความเร็วที่อยากลด';
+  $('#f-pace').innerHTML=paceOptions(c.mode,c.mode==='bulk'?p.surplus:p.pace);
+  const bmiTxt=c.bmi<18.5?'น้อยกว่าเกณฑ์':c.bmi<23?'ปกติ':c.bmi<25?'ท้วม':c.bmi<30?'อ้วน':'อ้วนมาก';
+  $('#planNums').innerHTML=`
+    <div><div class="v">${c.target.toLocaleString()}</div><div class="k">kcal ที่ควรกินต่อวัน</div></div>
+    <div><div class="v">${r0(c.tdee).toLocaleString()}</div><div class="k">kcal ที่ร่างกายใช้ต่อวัน</div></div>
+    <div><div class="v">${c.bmi.toFixed(1)}</div><div class="k">BMI · ${bmiTxt}</div></div>
+    <div><div class="v">${c.water}</div><div class="k">แก้วน้ำต่อวัน</div></div>`;
+  const kP=c.P*4,kC=c.C*4,kF=c.F*9,tot=kP+kC+kF||1;
+  $('#split').innerHTML=`<i style="width:${kP/tot*100}%"></i><i style="width:${kC/tot*100}%"></i><i style="width:${kF/tot*100}%"></i>`;
+  $('#legend').innerHTML=`<span class="p">โปรตีน <b class="num">${c.P}</b> ก.</span><span class="c">คาร์บ <b class="num">${c.C}</b> ก.</span><span class="f">ไขมัน <b class="num">${c.F}</b> ก.</span>`;
+  let txt=MODES[c.mode].desc+' ';
+  if(c.mode==='lean')txt+=p.goal<p.weight?`ต้องลดอีก ${(p.weight-p.goal).toFixed(1)} กก. ถึงเป้าในราว ${Math.ceil(c.weeks)} สัปดาห์${c.floored?' (ตั้งแคลไว้ไม่ต่ำกว่า '+(p.sex==='m'?'1,500':'1,200')+' เพื่อความปลอดภัย)':''}`:'ถึงน้ำหนักเป้าแล้ว ลองเปลี่ยนเป็นโหมดมีเดียม';
+  if(c.mode==='bulk')txt+=p.goal>p.weight?`อยากเพิ่มอีก ${(p.goal-p.weight).toFixed(1)} กก. ถ้าเล่นเวทสม่ำเสมอใช้เวลาราว ${Math.ceil(c.weeks)} สัปดาห์`:'ตั้งน้ำหนักเป้าให้มากกว่าตอนนี้ เพื่อดูระยะเวลา';
+  if(c.mode==='medium')txt+='น้ำหนักขึ้นลงวันละ 1 กก. เป็นเรื่องปกติ ดูรูปร่างและรอบเอวประกอบ';
+  $('#planText').textContent=txt+' · เกณฑ์ BMI แบบคนเอเชีย';
+  const w=[...(p.weights||[])].sort((a,b)=>a.d<b.d?-1:1).slice(-30);
+  const box=$('#wChart');
+  if(w.length<2){box.innerHTML=`<p class="empty">${w.length?'ชั่งอีกครั้งพรุ่งนี้ จะเห็นกราฟ':'ยังไม่มีบันทึก กด "+ ชั่งน้ำหนัก" เพื่อเริ่ม'}</p>`;return}
+  const Wd=560,H=170,L=40,Rp=14,T=12,B=26;
+  const vals=w.map(x=>x.w).concat([p.goal]);const lo=Math.floor(Math.min(...vals)-1),hi=Math.ceil(Math.max(...vals)+1);
+  const X=i=>L+(Wd-L-Rp)*i/(w.length-1),Y=v=>T+(H-T-B)*(hi-v)/(hi-lo);
+  const ticks=[lo,(lo+hi)/2,hi].map(r1);
+  const line=w.map((x,i)=>`${X(i)},${Y(x.w)}`).join(' ');
+  const last=w[w.length-1],first=w[0];
+  box.innerHTML=`<svg viewBox="0 0 ${Wd} ${H}" width="100%" style="min-width:300px" role="img" aria-label="กราฟน้ำหนัก">
+    ${ticks.map(v=>`<line x1="${L}" x2="${Wd-Rp}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${v}</text>`).join('')}
+    <line x1="${L}" x2="${Wd-Rp}" y1="${Y(p.goal)}" y2="${Y(p.goal)}" stroke="var(--chili)" stroke-dasharray="4 4"/>
+    <text x="${Wd-Rp}" y="${Y(p.goal)-5}" text-anchor="end" font-size="11" fill="var(--chili)">เป้า ${p.goal}</text>
+    <polygon points="${X(0)},${H-B} ${line} ${X(w.length-1)},${H-B}" fill="var(--fat-soft)"/>
+    <polyline points="${line}" fill="none" stroke="var(--fat)" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="${X(w.length-1)}" cy="${Y(last.w)}" r="4.5" fill="var(--fat)"/>
+    <text x="${L}" y="${H-6}" font-size="11" fill="var(--muted)">${dmy(first.d)}</text>
+    <text x="${Wd-Rp}" y="${H-6}" text-anchor="end" font-size="11" fill="var(--muted)">${dmy(last.d)} · ${last.w} กก.</text>
+  </svg>`;
+}
+
+const ACT_OPTS=[[1.2,'นั่งเป็นส่วนใหญ่','ทำงานโต๊ะ ไม่ค่อยขยับ'],[1.375,'ขยับบ้าง','ออกกำลังกาย 1–3 วัน/สัปดาห์'],[1.55,'แอคทีฟ','ออกกำลังกาย 3–5 วัน/สัปดาห์'],[1.725,'แอคทีฟมาก','ออกกำลังกายหนักเกือบทุกวัน']];
+function startOnboarding(){
+  const p=S.profile;
+  S.ob={step:0,d:{mode:p.mode||'lean',sex:p.sex,age:p.age,height:p.height,weight:p.weight,goal:p.goal,pace:p.pace||.5,surplus:p.surplus||400,act:p.act}};
+  renderOb();
+}
+function obRead(){
+  const d=S.ob.d,v=id=>{const el=$('#ob-'+id);return el?parseFloat(el.value):undefined};
+  if(S.ob.step===1){d.age=v('age');d.height=v('height');d.weight=v('weight');return [d.age,d.height,d.weight].every(x=>x>0)}
+  if(S.ob.step===3){if(d.mode!=='medium'){d.goal=v('goal');const pv=v('pace');if(d.mode==='bulk')d.surplus=pv;else d.pace=pv;return d.goal>0}d.goal=d.weight;return true}
+  return true;
+}
+function renderOb(){
+  const ob=$('#ob');
+  if(!S.ob){ob.hidden=true;return}
+  ob.hidden=false;
+  const {step,d}=S.ob,N=5;
+  let body='';
+  if(step===0)body=`<h1>อยากไปทางไหน</h1><p class="muted" style="margin:0">เปลี่ยนได้ภายหลังในหน้า ฉัน</p>
+    <div style="display:grid;gap:10px">${Object.entries(MODES).map(([k,m])=>`<button class="opt" data-act="obSet" data-f="mode" data-v="${k}" aria-pressed="${d.mode===k}"><span class="ic" style="color:var(--basil)">${MODE_ICON[k]}</span><span><b>${m.n} · ${m.sub}</b><span>${m.desc}</span></span></button>`).join('')}</div>`;
+  if(step===1)body=`<h1>ข้อมูลร่างกาย</h1><p class="muted" style="margin:0">ใช้คำนวณว่าร่างกายใช้พลังงานวันละเท่าไหร่</p>
+    <div class="sexsel"><button data-act="obSet" data-f="sex" data-v="f" aria-pressed="${d.sex==='f'}">หญิง</button><button data-act="obSet" data-f="sex" data-v="m" aria-pressed="${d.sex==='m'}">ชาย</button></div>
+    <label class="bigin">อายุ (ปี)<input id="ob-age" type="number" inputmode="numeric" value="${d.age}"></label>
+    <label class="bigin">ส่วนสูง (ซม.)<input id="ob-height" type="number" inputmode="decimal" value="${d.height}"></label>
+    <label class="bigin">น้ำหนักตอนนี้ (กก.)<input id="ob-weight" type="number" inputmode="decimal" step="0.1" value="${d.weight}"></label>`;
+  if(step===2)body=`<h1>ปกติขยับมากแค่ไหน</h1>
+    <div style="display:grid;gap:10px">${ACT_OPTS.map(([v,t,s])=>`<button class="opt" style="grid-template-columns:1fr" data-act="obSet" data-f="act" data-v="${v}" aria-pressed="${d.act===v}"><span><b>${t}</b><span>${s}</span></span></button>`).join('')}</div>`;
+  if(step===3)body=d.mode==='medium'
+    ?`<h1>โหมดมีเดียม</h1><p class="muted">คงน้ำหนักไว้ที่ ${d.weight} กก. แล้วเน้นเวทให้รูปร่างกระชับ ไม่ต้องตั้งน้ำหนักเป้า</p>`
+    :`<h1>${d.mode==='bulk'?'อยากเพิ่มเป็นเท่าไหร่':'อยากลดเหลือเท่าไหร่'}</h1>
+    <label class="bigin">น้ำหนักเป้าหมาย (กก.)<input id="ob-goal" type="number" inputmode="decimal" step="0.1" value="${d.mode==='bulk'?Math.max(d.goal,d.weight+3):Math.min(d.goal,d.weight-3)}"></label>
+    <label class="bigin">${d.mode==='bulk'?'กินเกินวันละ':'ความเร็ว'}<select id="ob-pace">${paceOptions(d.mode,d.mode==='bulk'?d.surplus:d.pace)}</select></label>
+    <p class="muted small" style="margin:0">${d.mode==='bulk'?'กินเกินน้อยๆ ได้กล้ามมากกว่าไขมัน':'0.5 กก./สัปดาห์ ทำได้จริงและไม่โยโย่'}</p>`;
+  if(step===4){
+    const c=calc({...S.profile,...d});
+    body=`<h1>แผนของคุณพร้อมแล้ว</h1>
+    <div class="card" style="text-align:center"><div class="muted small">กินวันละ</div><div class="num" style="font-size:2.4rem;line-height:1.1">${c.target.toLocaleString()}</div><div class="muted small">kcal · โหมด${MODES[c.mode].n}</div>
+      <div class="split"><i style="width:${c.P*4/c.target*100}%"></i><i style="width:${c.C*4/c.target*100}%"></i><i style="width:${c.F*9/c.target*100}%"></i></div>
+      <div class="legend" style="justify-content:center"><span class="p">โปรตีน ${c.P} ก.</span><span class="c">คาร์บ ${c.C} ก.</span><span class="f">ไขมัน ${c.F} ก.</span></div></div>
+    <div class="card"><h3>ออกกำลังกายต่อสัปดาห์</h3><div class="small muted" style="margin-top:4px">${PRESETS[c.mode].g.map(g=>esc(ACT[g.a].n)+' '+g.times+'×').join(' · ')}</div>
+      ${c.weeks?`<p class="small" style="margin:8px 0 0">ถึงเป้า ${d.goal} กก. ในราว <b class="num">${Math.ceil(c.weeks)}</b> สัปดาห์</p>`:''}</div>
+    <p class="muted small" style="margin:0">ทุกอย่างแก้ได้ภายหลัง ทั้งเป้าแคลและท่าที่เล่น</p>`;
+  }
+  ob.innerHTML=`<div class="in"><div class="obbar">${Array.from({length:N},(_,i)=>`<i class="${i<=step?'on':''}"></i>`).join('')}</div>${body}
+    <div class="obnav">${step>0?'<button class="ghost" data-act="obBack" style="border-radius:14px;padding:12px 18px">ย้อนกลับ</button>':(S.profile.example?'':'<button class="ghost" data-act="obClose" style="border-radius:14px;padding:12px 18px">ปิด</button>')}
+    <button class="primary" data-act="obNext">${step===N-1?'เริ่มเลย':'ต่อไป'}</button></div></div>`;
+}
+
+function renderAll(){renderHome();renderDiary();renderWorkout();renderMe();if(S.sheet==='food'){renderResults();renderBuilder()}}
+
+function setTab(t){
+  S.tab=t;$$('.tabbar [data-tab]').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===t));
+  ['home','diary','workout','me'].forEach(k=>$('#s-'+k).hidden=k!==t);
+  window.scrollTo(0,0);
+  try{localStorage.setItem('wl-tab',t)}catch(e){}
+}
+function setDate(k){if(k>TODAY)return;S.date=k;Store.watchDay();renderAll()}
+function addFood(f){
+  S.day.foods.push({n:f.n,k:r1(f.k),p:r1(f.p||0),c:r1(f.c||0),f:r1(f.f||0),u:f.u,q:1,m:S.meal});
+  saveDay();markLogged();renderHome();renderDiary();toast('เพิ่ม '+f.n+' แล้ว');
+}
+const gramOf=(n,scope)=>{const el=[...scope.querySelectorAll('[data-gram]')].find(x=>x.dataset.gram===n);return el?parseFloat(el.value):NaN};
+const scaled=(f,g)=>({k:f.k*g/100,p:f.p*g/100,c:f.c*g/100,f:f.f*g/100});
+
+document.addEventListener('click',e=>{
+  const tb=e.target.closest('.tabbar [data-tab]');if(tb){setTab(tb.dataset.tab);return}
+  const ms=e.target.closest('#mealSeg [data-meal]');if(ms){S.meal=ms.dataset.meal;renderSheetState();return}
+  const fs=e.target.closest('#ftSeg [data-ft]');if(fs){S.ft=fs.dataset.ft;renderSheetState();return}
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act;
+  switch(a){
+  case 'openAdd':openSheet('add');break;
+  case 'closeSheet':openSheet(null);break;
+  case 'openFood':if(t.dataset.meal)S.meal=t.dataset.meal;if(t.dataset.ft)S.ft=t.dataset.ft;openSheet('food');break;
+  case 'openWeigh':openSheet('weigh');break;
+  case 'goWorkout':openSheet(null);setTab('workout');break;
+  case 'goDiary':setTab('diary');break;
+  case 'goMe':setTab('me');break;
+  case 'water1':S.day.water=(S.day.water||0)+1;saveDay();renderHome();openSheet(null);toast('ดื่มน้ำแล้ว '+S.day.water+' แก้ว');break;
+  case 'water':{const i=+t.dataset.i;S.day.water=(S.day.water||0)===i+1?i:i+1;saveDay();renderHome();break}
+  case 'setDate':setDate(t.dataset.k);break;
+  case 'wkShift':{let k=addDays(S.date,+t.dataset.d);if(k>TODAY)k=TODAY;setDate(k);break}
+  case 'addName':{const f=FOODS.find(x=>x.n===t.dataset.n);if(f)addFood(f);break}
+  case 'addIng':{const f=ingBy(t.dataset.n),g=gramOf(t.dataset.n,$('#results'));if(!(g>0)){toast('ใส่จำนวนกรัม');return}addFood({n:f.n+' '+g+' ก.',...scaled(f,g),u:'ที่'});break}
+  case 'addMine':{const m=(S.profile.myMenus||[]).find(x=>x.id===t.dataset.id);if(m)addFood({n:m.n,k:m.k,p:m.p,c:m.c,f:m.f,u:'จาน'});break}
+  case 'addCustom':{
+    const n=$('#c-name').value.trim(),k=parseFloat($('#c-kcal').value);
+    if(!n||!(k>0)){toast('ใส่ชื่อเมนูและจำนวน kcal');return}
+    addFood({n,k,p:parseFloat($('#c-pro').value)||0,c:parseFloat($('#c-carb').value)||0,f:parseFloat($('#c-fat').value)||0,u:'ที่'});
+    ['c-name','c-kcal','c-pro','c-carb','c-fat'].forEach(id=>$('#'+id).value='');break}
+  case 'qty':{const f=S.day.foods[+t.dataset.i];f.q=Math.max(0.5,Math.round((f.q+parseFloat(t.dataset.d))*2)/2);saveDay();renderHome();renderDiary();break}
+  case 'del':S.day.foods.splice(+t.dataset.i,1);saveDay();renderHome();renderDiary();break;
+  case 'bAdd':bAdd(t.dataset.n);break;
+  case 'bAddG':{const g=gramOf(t.dataset.n,$('#bResults'));if(!(g>0)){toast('ใส่จำนวนกรัม');return}bAdd(t.dataset.n,g);break}
+  case 'bDel':S.build.items.splice(+t.dataset.i,1);renderBuilder();break;
+  case 'bClear':S.build={name:'',items:[],editId:null};renderBuilder();break;
+  case 'bLog':{const tt=bTotals();addFood({n:S.build.name.trim()||'เมนูทำเอง',...tt,u:'จาน'});break}
+  case 'bSave':{
+    const n=S.build.name.trim();if(!n){toast('ตั้งชื่อเมนูก่อนเก็บ');$('#b-name').focus();return}
+    const tt=bTotals(),menus=S.profile.myMenus=S.profile.myMenus||[];
+    const rec={id:S.build.editId||uid(),n,k:r1(tt.k),p:r1(tt.p),c:r1(tt.c),f:r1(tt.f),items:clone(S.build.items)};
+    const i=menus.findIndex(x=>x.id===rec.id);if(i>=0)menus[i]=rec;else menus.unshift(rec);
+    saveProfile();S.build={name:'',items:[],editId:null};renderBuilder();renderResults();toast('เก็บ "'+n+'" แล้ว ค้นหาชื่อนี้ได้เลย');break}
+  case 'mEdit':{const m=S.profile.myMenus.find(x=>x.id===t.dataset.id);if(m){S.build={name:m.n,items:clone(m.items),editId:m.id};renderBuilder();$('#b-name').scrollIntoView({block:'center'})}break}
+  case 'mDel':S.profile.myMenus=S.profile.myMenus.filter(x=>x.id!==t.dataset.id);saveProfile();renderBuilder();renderResults();break;
+  case 'saveWeight':{
+    const v=parseFloat($('#w-today').value);if(!(v>20&&v<300)){toast('ใส่น้ำหนักเป็นกิโลกรัม');return}
+    const ws=(S.profile.weights||[]).filter(x=>x.d!==TODAY);ws.push({d:TODAY,w:v});
+    S.profile={...S.profile,weights:ws.slice(-180),weight:v};
+    $('#w-today').value='';saveProfile();openSheet(null);renderAll();toast('บันทึกน้ำหนักแล้ว');break}
+  case 'pick':{const g=goals()[+t.dataset.g];if(g)pickSession(g);break}
+  case 'preset':S.pendingPreset=t.dataset.k;renderWorkout();break;
+  case 'presetNo':S.pendingPreset=null;renderWorkout();break;
+  case 'presetYes':{const k=S.pendingPreset;S.pendingPreset=null;S.profile.goals=clone(PRESETS[k].g);S.profile.style=k;saveProfile();renderWorkout();renderHome();toast('ใช้ '+PRESETS[k].n+' แล้ว');break}
+  case 'xAdd':{const x=readAddRow('x');if(x)pickSession(x);break}
+  case 'gAdd':{const x=readAddRow('g');if(x)changeGoals(G=>G.push({...x,times:1}));break}
+  case 'gDel':changeGoals(G=>G.splice(+t.dataset.i,1));break;
+  case 'gTimes':changeGoals(G=>{const g=G[+t.dataset.i];g.times=Math.max(1,Math.min(7,g.times+ +t.dataset.d))});break;
+  case 'sDel':S.wk.sessions=S.wk.sessions.filter(s=>s.id!==t.dataset.id);saveWeek();renderWorkout();renderHome();break;
+  case 'sFin':{const s=sessById(t.dataset.id);if(s){s.fin=!s.fin;saveWeek();renderWorkout();renderHome();if(s.fin)toast(itemName(s)+' ครบแล้วสำหรับสัปดาห์นี้')}break}
+  case 'mode':{const k=t.dataset.k;if(k===S.profile.mode)return;S.profile.mode=k;
+    if(k==='lean'&&S.profile.goal>=S.profile.weight)S.profile.goal=r1(S.profile.weight-3);
+    if(k==='bulk'&&S.profile.goal<=S.profile.weight)S.profile.goal=r1(S.profile.weight+3);
+    if(k==='medium')S.profile.goal=S.profile.weight;
+    saveProfile();S.pendingMode=S.profile.style===k?null:k;renderAll();break}
+  case 'modePlanYes':{const k=S.pendingMode;S.pendingMode=null;S.profile.goals=clone(PRESETS[k].g);S.profile.style=k;saveProfile();renderAll();toast('ใช้ '+PRESETS[k].n+' แล้ว');break}
+  case 'modePlanNo':S.pendingMode=null;renderMe();break;
+  case 'obStart':startOnboarding();break;
+  case 'obClose':S.ob=null;renderOb();break;
+  case 'obSet':{const f=t.dataset.f;obRead();S.ob.d[f]=f==='act'?+t.dataset.v:t.dataset.v;renderOb();break}
+  case 'obBack':obRead();S.ob.step--;renderOb();break;
+  case 'obNext':{
+    if(!obRead()){toast('กรอกตัวเลขให้ครบ');return}
+    if(S.ob.step<4){S.ob.step++;renderOb();$('#ob').scrollTo(0,0);return}
+    const d=S.ob.d;
+    S.profile={...S.profile,...d,style:d.mode,goals:clone(PRESETS[d.mode].g)};
+    if(!(S.profile.weights||[]).length)S.profile.weights=[{d:TODAY,w:d.weight}];
+    S.ob=null;saveProfile();renderOb();renderAll();setTab('home');toast('ตั้งค่าเสร็จแล้ว เริ่มจดอาหารได้เลย');break}
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.sx!==undefined){
+    const [id,j]=t.dataset.sx.split(':'),ss=sessById(id);if(!ss)return;
+    const d=new Set(ss.done||[]);if(t.checked)d.add(+j);else d.delete(+j);ss.done=[...d].sort();
+    if(ss.done.length===ACT[ss.a].ex.length&&!ss.fin){ss.fin=true;toast(itemName(ss)+' ครบแล้วสำหรับสัปดาห์นี้')}
+    saveWeek();renderWorkout();renderHome();
+  }else if(t.dataset.sf!==undefined){
+    const ss=sessById(t.dataset.sf);if(ss){ss.fin=t.checked;saveWeek();renderWorkout();renderHome()}
+  }else if(t.dataset.smin!==undefined){
+    const ss=sessById(t.dataset.smin),v=parseFloat(t.value);if(ss&&v>0){ss.min=v;saveWeek();renderWorkout();renderHome()}
+  }else if(t.dataset.gmin!==undefined){
+    const v=parseFloat(t.value);if(v>0)changeGoals(G=>{G[+t.dataset.gmin].min=v});
+  }else if(t.closest('[data-addrow]')&&t.tagName==='SELECT'&&t.id.endsWith('-a')){
+    const p=t.id.slice(0,-2),custom=t.value==='custom';
+    $('#'+p+'-n').hidden=!custom;$('#'+p+'-i').hidden=!custom;
+    if(!custom)$('#'+p+'-m').value=ACT[t.value].min;
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.bg!==undefined){const v=parseFloat(t.value);if(v>=0){S.build.items[+t.dataset.bg].g=v;updateBTotals()}}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet)openSheet(null)});
+$('#q').addEventListener('input',e=>{S.q=e.target.value;renderResults()});
+$('#bq').addEventListener('input',e=>{S.bq=e.target.value;renderBResults()});
+$('#b-name').addEventListener('input',e=>{S.build.name=e.target.value});
+$('#editToggle').onclick=()=>{S.editGoals=!S.editGoals;renderWorkout()};
+$('#profileForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const num=id=>parseFloat($(id).value),mode=S.profile.mode;
+  const p={...S.profile,sex:$('#f-sex').value,age:num('#f-age'),height:num('#f-height'),weight:num('#f-weight'),goal:num('#f-goal'),act:num('#f-act')};
+  if(mode==='bulk')p.surplus=num('#f-pace');else if(mode==='lean')p.pace=num('#f-pace');
+  if([p.age,p.height,p.weight,p.goal].some(v=>!(v>0))){toast('กรอกตัวเลขให้ครบ');return}
+  S.profile=p;saveProfile();renderAll();toast('บันทึกข้อมูลแล้ว');
+});
+(function(){const h=new Date().getHours();S.meal=h<10?'b':h<15?'l':h<21?'d':'s'})();
+try{const tab=localStorage.getItem('wl-tab');if(['diary','workout','me'].includes(tab))setTab(tab)}catch(e){}
+
+renderAll();
+Store.init();
+</script>
+</body>
+</html>
