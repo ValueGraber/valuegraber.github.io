@@ -15,7 +15,8 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 ## Template map (grep these comment anchors)
 | Anchor | What |
 |---|---|
-| `/* calm pass` | final CSS overrides (font IBM Plex Sans Thai, hairlines) |
+| `/* calm pass` | older CSS overrides (sizes, hairlines) |
+| `/* passbook world` | the last CSS block: current look (passbook cover band, page tabs, Noto Sans Thai Looped + Chivo Mono figures, double-rule totals). See `DESIGN.md` and `PRODUCT.md` |
 | `id="view-home"` / `/* home: one-screen` | home dashboard cards + full backup/restore |
 | `id="view-money"` / `/* personal money` | net worth + asset pie (`drawAssetPie`), accounts have `cur` THB/USD/EUR/SEK (`rate()`: `settings.fxr` manual else `VG.fx/eur/sek`), monthly P/L for accounts with `pl` (`a.inv` total invested in the account currency, kept in step with later `f` entries from `a.invAt`; `a.log[ym] = {v, f}`, `plRows`, `plTotals`; group `pl` on the overview page; home card `hc-pl`), budget (kinds in/out/sav; `sav` is not expense; opening balance `M.open` → `leftOf`; groups `GROUPS`/`groupOf` with % targets `settings.gt`, map `settings.cg`; `drawWeek` pie + weekly), month calendar `drawCal` (shown on the nw sub-page, own month nav `mc-prev/next`) (`schedule(ym)` = bills, debt installments from `debt.day`, recurring income; pay/receive buttons, `payDebt` lowers the balance by the principal part), savings goals `M.goals` (entries link by `e.goal`), emergency fund, recurring income + bills (sub `fixed`; `M.incomes` type sal/other, gross + wht/sso/pvd/oth, `receive` logs an `in` entry carrying `sal:{g,t,s,p,o}`; `VGMoney.salary(y)` = received + still expected, used by the biz tax via `eff()` when the boxes are empty), debts (sub `debt`), retirement (`window.VGMoney`) |
 | `id="view-scan"` / `const SIGNALS` | stock scanner, crypto list (`drawCrypto`), today summary (`drawToday`), detail sheet (`openSheet`) |
