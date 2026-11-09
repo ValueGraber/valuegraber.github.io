@@ -1906,7 +1906,7 @@ dash.calc('sectors', {
     market = CALC.market.fn(j.spy, j.yield, j.stocks)[0];
     sectors = CALC.sectors.fn(scan);
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-    $('stamp').textContent = `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
+    $('stamp').textContent = j.live ? `ราคาระหว่างวัน (ตลาดยังเปิดอยู่) วันที่ ${thDate(j.asOf)} อัปเดตเมื่อ ${upd} น. ราคาปิดจะมาเช้าวันถัดไป` : `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
     const cryptoRows = (j.crypto || []).map((c) => ({ ...c, crypto: true, sector: 'คริปโต', mos: null, signal: c.price > c.ma200 && c.ma50 > c.ma200 ? 'ขาขึ้น' : c.price < c.ma50 && c.ma50 < c.ma200 ? 'ขาลง' : 'ไซด์เวย์' }));
     drawCrypto(cryptoRows);

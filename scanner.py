@@ -21,6 +21,8 @@ ROOT = Path(__file__).parent
 OUT = ROOT / "docs" / "data.json"
 HIST = ROOT / "docs" / "history.json"
 PREV = ROOT / "docs" / "prev.json"
+sys.path.insert(0, str(ROOT / "tools"))
+from fresh import CLOSE_DONE, NY, is_trading_day  # noqa: E402
 CONSTITUENTS_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 SECTOR_TH = {
     "Information Technology": "เทคโนโลยี", "Health Care": "สุขภาพ", "Financials": "การเงิน",
@@ -329,9 +331,14 @@ def main():
 
     spy, yld = market_series()
     usd = usd_thb() or prev.get("usdthb")
+    as_of = max((p["asOf"] for p in prices.values()), default=prev.get("asOf"))
+    ny = datetime.now(NY)
+    # รันตอนตลาดยังไม่ปิด แท่งวันนี้คือราคาระหว่างวัน ไม่ใช่ราคาปิด
+    live = as_of == ny.date().isoformat() and is_trading_day(ny.date()) and ny.time() < CLOSE_DONE
     data = {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "asOf": max((p["asOf"] for p in prices.values()), default=prev.get("asOf")),
+        "asOf": as_of,
+        "live": live,
         "fundamentalsOk": ok_f,
         "stocks": rows,
         "spy": spy or prev.get("spy", []),
