@@ -990,6 +990,10 @@ tr.editing td { background: var(--accent-soft); }
 .tr-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; color: var(--ink-2); margin-top: 2px; }
 .tr-notel { grid-column: 1 / -1; }
 #tr-cancel[hidden] { display: none; }
+.fxbox { margin: 0 0 18px; } .fx-row { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: flex-end; }
+.fx-row small { display: block; color: var(--ink-2); font-size: 13px; } .fx-row b { display: block; font-family: var(--num); font-size: 22px; }
+.fx-row small.pos { color: var(--jade); } .fx-row small.neg { color: var(--brick); }
+.fx-calc { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; margin-top: 12px; } .fx-calc .inp { width: 9em; } .fx-calc span { padding-bottom: 10px; color: var(--ink-2); }
 @media (max-width: 640px) { .sw-lvs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sw-row { grid-template-columns: 1fr; } .sw-row .sw-act { justify-content: flex-start; } }
 </style>
 </head>
@@ -1050,6 +1054,14 @@ tr.editing td { background: var(--accent-soft); }
   </header>
 
   
+  <section class="panel fxbox" id="fxbox" hidden data-sub="picks">
+    <div class="fx-row"><div><small>ค่าเงินดอลลาร์วันนี้</small><b id="fx-now">–</b><small id="fx-chg"></small></div>
+      <div id="fx-mine-w" hidden><small>เรทเฉลี่ยที่ฉันแลก</small><b id="fx-mine">–</b><small id="fx-mine-h"></small></div>
+      <div class="fx-other"><small id="fx-other"></small></div></div>
+    <div class="fx-calc"><label class="mini">บาท <input class="inp" id="fx-thb" type="number" step="any" min="0" inputmode="decimal" placeholder="10000"></label><span>≈</span><label class="mini">ดอลลาร์ <input class="inp" id="fx-usd" type="number" step="any" min="0" inputmode="decimal" placeholder="300"></label></div>
+    <p class="pf-hint" id="fx-note"></p>
+  </section>
+
   <section id="today" hidden data-sub="picks">
     <div class="sec-head"><h2>สรุปวันนี้</h2></div>
     <p class="sec-note" id="today-note"></p>
@@ -1981,6 +1993,20 @@ dash.calc('sectors', {
     });
   };
 
+  /* baht per dollar: today, change from the previous close, my average exchange rate, and a quick converter */
+  const drawFx = (j) => {
+    const fx = j.usdthb; if (!fx) return; $('fxbox').hidden = false;
+    $('fx-now').textContent = fx.toFixed(2) + ' บาท/$';
+    $('fx-other').textContent = [j.eurthb ? `1 EUR = ${j.eurthb.toFixed(2)} บาท` : '', j.sekthb ? `1 SEK = ${j.sekthb.toFixed(2)} บาท` : ''].filter(Boolean).join(' · ');
+    $('fx-note').textContent = `เรทกลางจากตลาด ณ ${thDate(j.asOf)} อัปเดตทุกเช้า เรทที่แลกจริงในแอปจะแย่กว่านี้เล็กน้อย (ส่วนต่างซื้อขายของธนาคาร)`;
+    const mine = () => { const r = window.VGPort && window.VGPort.avgRate ? window.VGPort.avgRate() : null; $('fx-mine-w').hidden = !r; if (r) { $('fx-mine').textContent = r.toFixed(2) + ' บาท/$'; const d = fx - r; $('fx-mine-h').textContent = Math.abs(d) < 0.005 ? 'เท่ากับวันนี้' : d > 0 ? `บาทอ่อนลง ${d.toFixed(2)} ดอลลาร์ที่มีอยู่มีค่ามากขึ้น` : `บาทแข็งขึ้น ${(-d).toFixed(2)} ตอนนี้แลกได้ถูกกว่าที่เคยแลก`; $('fx-mine-h').className = d >= 0 ? 'pos' : 'neg'; } };
+    mine(); document.addEventListener('vg:data', mine);
+    fetch('prev.json?v=' + j.updated).then((r) => (r.ok ? r.json() : null)).then((pj) => { if (!pj || !pj.usdthb || pj.asOf === j.asOf) return; const c = fx / pj.usdthb - 1; $('fx-chg').textContent = `${c >= 0 ? 'บาทอ่อนลง' : 'บาทแข็งขึ้น'} ${Math.abs(c * 100).toFixed(2)}% จาก ${pj.usdthb.toFixed(2)} (${thDate(pj.asOf)})`; }).catch(() => {});
+    const tb = $('fx-thb'), us = $('fx-usd');
+    tb.addEventListener('input', () => { us.value = tb.value ? (+tb.value / fx).toFixed(2) : ''; });
+    us.addEventListener('input', () => { tb.value = us.value ? (+us.value * fx).toFixed(2) : ''; });
+  };
+
   /* what changed since the previous close: signal moves, my stocks, biggest movers */
   const drawToday = (j) => {
     fetch('prev.json?v=' + j.updated).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pj) => {
@@ -2021,7 +2047,7 @@ dash.calc('sectors', {
     const cryptoRows = (j.crypto || []).map((c) => ({ ...c, crypto: true, sector: 'คริปโต', mos: null, signal: c.price > c.ma200 && c.ma50 > c.ma200 ? 'ขาขึ้น' : c.price < c.ma50 && c.ma50 < c.ma200 ? 'ขาลง' : 'ไซด์เวย์' }));
     drawCrypto(cryptoRows);
     window.VG = { market, crypto: cryptoRows, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, eur: j.eurthb || null, sek: j.sekthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
-    drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j);
+    drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j); drawFx(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
     console.error(e);
@@ -4099,7 +4125,7 @@ dash.calc('sectors', {
       sells: chk.filter((c) => c.level === 'sell').map((c) => c.sym), watch: chk.filter((c) => c.level === 'watch').map((c) => c.sym), bought: Object.keys(bm), perLabel: Pd.label,
       notBought: list.filter((x) => !bm[x.sym] && (chk.find((c) => c.sym === x.sym) || {}).level !== 'sell' && x.w <= tw[x.sym] + db.band / 100).map((x) => x.sym) };
   };
-  window.VGPort = { get: () => db, summary, bought: () => ({ map: boughtMap(), ...period() }), replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); document.dispatchEvent(new Event('vg:data')); } };
+  window.VGPort = { get: () => db, summary, avgRate: () => ledger().avgRate, bought: () => ({ map: boughtMap(), ...period() }), replace: (d) => { db = { tx: Array.isArray(d.tx) ? d.tx : [], targets: d.targets || {}, band: d.band || 5 }; keep(); if (editId && !db.tx.some((t) => t.id === editId)) endEdit(); render(); document.dispatchEvent(new Event('vg:data')); } };
   setType('buy');
   document.body.dataset.view = 'home';
   const H = location.hash.slice(1); show({ portfolio: 'port', business: 'biz', scan: 'scan', money: 'money', invest: 'invest', biz: 'biz' }[H] || 'home');
@@ -4496,7 +4522,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '81c2d7ff5c';
+  const BUILD = 'f329e71d43';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
