@@ -973,6 +973,15 @@ tr.editing td { background: var(--accent-soft); }
 .sw-stat { margin-bottom: 14px; }
 .sw-hist { list-style: none; padding: 0; margin: 10px 0 0; font-size: 14px; }
 .sw-hist li { padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.tr-scroll { overflow-x: auto; }
+.tr-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+.tr-table th { text-align: right; font-weight: 600; color: var(--ink-2); padding: 6px 8px; border-bottom: 1px solid var(--line-2, var(--line)); }
+.tr-table td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); font-family: var(--num); }
+.tr-table th:first-child, .tr-table td:first-child { text-align: left; font-family: var(--font); }
+.tr-table .pos, .sw-hist .pos { color: var(--jade); } .tr-table .neg, .sw-hist .neg { color: var(--brick); }
+.tr-del { margin-left: 8px; border: 0; background: none; color: var(--ink-3, var(--ink-2)); cursor: pointer; font-size: 15px; }
+#tr-strip .v.pos { color: var(--jade); } #tr-strip .v.neg { color: var(--brick); }
+.tr-feebox { margin-top: 16px; }
 @media (max-width: 640px) { .sw-lvs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sw-row { grid-template-columns: 1fr; } .sw-row .sw-act { justify-content: flex-start; } }
 </style>
 </head>
@@ -1098,10 +1107,46 @@ tr.editing td { background: var(--accent-soft); }
     <div id="sw-top"></div>
     <h3 class="sw-h3" id="sw-more-h" hidden>สัญญาณอื่น</h3>
     <div class="td-row" id="sw-more"></div>
-    <h3 class="sw-h3">ไม้ที่ถืออยู่</h3>
-    <p class="pf-hint">ระบบดูราคาให้แล้วบอกว่าถือต่อ ขายครึ่ง หรือขายทั้งหมด (คริปโตดูสด หุ้นช้าได้ถึง 30 นาที) เก็บไว้ในเครื่องนี้เท่านั้น</p>
+    <h3 class="sw-h3">ไม้คริปโตที่ติดตาม</h3>
+    <p class="pf-hint">หุ้นจะไปอยู่ใน "พอร์ตเทรดหุ้น" ด้านล่าง ส่วนคริปโตติดตามตรงนี้ ระบบดูราคาสดแล้วบอกว่าถือต่อ ขายครึ่ง หรือขายทั้งหมด เก็บไว้ในเครื่องนี้เท่านั้น</p>
     <div id="sw-pos"></div>
     <div class="alert sw-warn">สัญญาณเป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ไม่รับประกันกำไร ส่วนใหญ่ชนะราว 4–5 ไม้จาก 10 กำไรมาจากไม้ที่ได้ได้มากกว่าไม้ที่เสีย จึงต้องตัดขาดทุนตามจุดทุกครั้ง ยังไม่รวมค่าธรรมเนียม ใช้เงินที่เสียได้เท่านั้น และลองดู "ผลย้อนหลัง" สัก 2–4 สัปดาห์ก่อนใช้เงินจริง</div>
+  </section>
+
+  <section id="tport" data-sub="tport">
+    <p class="sec-note">พอร์ตแยกสำหรับเทรดหุ้นระยะสั้น ไม่ปนกับพอร์ตลงทุนหลัก คิดเป็นดอลลาร์ ทุนเฉลี่ยรวมค่าธรรมเนียมซื้อแล้ว กำไรหักค่าธรรมเนียมขายแล้ว ค่าธรรมเนียมคิดตามอัตรา Dime ให้อัตโนมัติ (แก้ตัวเลขในช่องให้ตรงกับในแอปได้) ล็อกอินแล้วซิงค์ทุกเครื่องไปกับพอร์ตหลัก</p>
+    <div class="strip" id="tr-strip"></div>
+    <h3 class="sw-h3">หุ้นในพอร์ตเทรด</h3>
+    <div id="tr-hold"></div>
+    <h3 class="sw-h3">บันทึกรายการ</h3>
+    <div class="pf-form f2" id="tr-form">
+      <label>ประเภท <select class="sel" id="tr-type"><option value="buy">ซื้อ</option><option value="sell">ขาย</option><option value="dep">ฝากเงิน (บาท → ดอลลาร์)</option><option value="wd">ถอนเงิน (ดอลลาร์ → บาท)</option></select></label>
+      <label>วันเวลา (ว่าง = ตอนนี้) <input class="inp" id="tr-at" type="datetime-local"></label>
+      <label id="tr-sym-l">หุ้น <input class="inp" id="tr-sym" placeholder="เช่น NVDA" autocapitalize="characters" autocomplete="off"></label>
+      <label id="tr-q-l">จำนวนหุ้น <input class="inp" id="tr-q" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-px-l">ราคาที่ได้ ($ ต่อหุ้น) <input class="inp" id="tr-px" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-fee-l">ค่าธรรมเนียม ($) <input class="inp" id="tr-fee" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-thb-l" hidden>จำนวนบาท <input class="inp" id="tr-thb" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-rate-l" hidden>เรทที่ได้ (บาทต่อ $) <input class="inp" id="tr-rate" type="number" step="any" min="0" inputmode="decimal"></label>
+      <button class="btn" type="button" id="tr-add">บันทึก</button>
+    </div>
+    <p class="pf-hint" id="tr-prev"></p>
+    <p class="pf-hint" id="tr-msg" role="status"></p>
+    <h3 class="sw-h3" id="tr-tx-h" hidden>รายการล่าสุด</h3>
+    <ul class="sw-hist" id="tr-tx"></ul>
+    <details class="method tr-feebox">
+      <summary>อัตราค่าธรรมเนียม (ตั้งไว้ตาม Dime)</summary>
+      <div class="body">
+        <p>ค่าเริ่มต้นจากหน้าเว็บ Dime: ไม้แรกของทุกเดือนไม่เสียค่าคอม ไม้ต่อไป 0.15% ของมูลค่า (หุ้นราคาต่ำกว่า $6.67 คิด $0.01 ต่อหุ้น) ตอนขายมี SEC fee 0.00206% และ TAF $0.000195 ต่อหุ้น (ไม่เกิน $9.79) ทุกคำสั่งมี CAT $0.000003 ต่อหุ้น ถ้าเลือกแพ็กเกจค่าคอมแบบอื่นใน Dime หรือในสลิปมี VAT ให้แก้ตรงนี้ ยังไม่รวมส่วนต่างค่าเงินตอนแลก (ใส่เรทที่ได้จริงตอนฝากเงินแทน)</p>
+        <div class="pf-form f2" id="tr-fees"></div>
+      </div>
+    </details>
+  </section>
+
+  <section id="tday" data-sub="tday">
+    <p class="sec-note">ผลแต่ละวันซื้อขาย นับตามวันของตลาดสหรัฐ (ซื้อขายคืนวันจันทร์ถึงเช้าวันอังคารไทย = วันจันทร์) กำไรหักค่าธรรมเนียมแล้ว มูลค่าพอร์ตสิ้นวันจดอัตโนมัติเมื่อเปิดหน้านี้ "เปลี่ยนจากวันก่อน" รวมหุ้นที่ยังไม่ขาย และไม่นับเงินฝากถอน</p>
+    <div id="tr-days"></div>
+    <button class="btn ghost sm" type="button" id="tr-csv" style="margin-top:10px">ดาวน์โหลด CSV ทุกรายการ</button>
   </section>
 
   <section id="swlog" data-sub="swlog">
@@ -3272,7 +3317,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาดและคริปโต', 'ตลาดตอนนี้ถูกหรือแพง และราคาคริปโตหลัก', false]]],
-      ['swing', 'เก็งกำไร', 'scan', [['swing'], ['swlog', 'ผลย้อนหลัง', 'สัญญาณที่ผ่านมาชนเป้าหรือโดนตัดขาดทุนกี่ครั้ง', false]]],
+      ['swing', 'เก็งกำไร', 'scan', [['swing'], ['tport', 'พอร์ตเทรดหุ้น', 'ซื้อขายระยะสั้นแยกจากพอร์ตหลัก คิดค่าธรรมเนียม Dime ให้', true], ['tday', 'กำไรรายวัน', 'ผลแต่ละวันซื้อขาย หักค่าธรรมเนียมแล้ว', true], ['swlog', 'ผลย้อนหลัง', 'สัญญาณที่ผ่านมาชนเป้าหรือโดนตัดขาดทุนกี่ครั้ง', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
@@ -4335,6 +4380,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
 <script>
 /*SWINGCORE*/
 /*SWING*/
+/*TRADE*/
 </script>
 <script type="module">
 /* account sync (Firebase): each signed-in user reads/writes only portfolios/{uid} and business/{uid} */
@@ -4359,13 +4405,14 @@ if (FB && window.VGPort) {
   const STORES = {
     portfolios: {
       label: 'พอร์ต',
-      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [] }); },
-      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); },
-      empty: () => { window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]); },
-      local: () => { const d = window.VGPort.get(); return { n: d.tx.length, has: d.tx.length > 0 || (window.VGWatch && window.VGWatch.get().length > 0) }; },
+      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { trade: window.VGTrade.trade() } : {}) }); },
+      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.trade) window.VGTrade.replace(c.trade); },
+      empty: () => { window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]); if (window.VGTrade) window.VGTrade.replace({}); },
+      local: () => { const d = window.VGPort.get(); const tn = window.VGTrade ? window.VGTrade.trade().tx.length : 0; return { n: d.tx.length + tn, has: d.tx.length > 0 || tn > 0 || (window.VGWatch && window.VGWatch.get().length > 0) }; },
       merge: (c) => { const l = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : []; const tx = byId(c.tx || [], l.tx);
-        return { extra: tx.length - (c.tx || []).length, changed: tx.length !== (c.tx || []).length || lw.some((s) => !(c.watch || []).includes(s)),
-          doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])] } }; },
+        const trM = window.VGTrade ? (() => { const m = window.VGTrade.merge(c.trade || {}); return { extra: m.extra, doc: { trade: m.doc } }; })() : { extra: 0, doc: {} };
+        return { extra: tx.length - (c.tx || []).length + trM.extra, changed: tx.length !== (c.tx || []).length || trM.extra > 0 || lw.some((s) => !(c.watch || []).includes(s)),
+          doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])], ...trM.doc } }; },
     },
     business: {
       label: 'ข้อมูลธุรกิจ',

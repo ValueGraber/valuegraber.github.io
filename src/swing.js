@@ -105,8 +105,8 @@
 
   /* ---------- sizing + view ---------- */
   const size = (g) => {
-    const risk = S.cap * S.risk / 100, rTHB = g.R * fx(); if (!(rTHB > 0)) return null;
-    let u = risk / rTHB; const cost = u * g.price * fx(); if (cost > S.cap) u = S.cap / (g.price * fx());
+    const cap = (window.VGTrade && window.VGTrade.equityTHB()) || S.cap; const risk = cap * S.risk / 100, rTHB = g.R * fx(); if (!(rTHB > 0)) return null;
+    let u = risk / rTHB; const cost = u * g.price * fx(); if (cost > cap) u = cap / (g.price * fx());
     if (!g.crypto && u >= 1) u = Math.floor(u * 100) / 100;
     return { u, cost: u * g.price * fx(), loss: u * g.R * fx() };
   };
@@ -124,11 +124,11 @@
     lv.append(level('เข้าซื้อแถว', g.entry, 'ไม่ไล่ซื้อเกิน ' + usd(g.entry + 0.5 * g.R)), level('ตัดขาดทุน', g.sl, pct(g.sl / g.entry - 1), 'neg'),
       level('เป้าแรก ขายครึ่ง', g.tp1, pct(g.tp1 / g.entry - 1), 'pos'), level('เป้าสอง ขายที่เหลือ', g.tp2, pct(g.tp2 / g.entry - 1), 'pos'));
     const z = size(g);
-    const sz = el('p', 'sw-size', z ? `ซื้อประมาณ ${z.u < 1 ? z.u.toPrecision(3) : z.u.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${g.crypto ? 'เหรียญ' : 'หุ้น'} ≈ ${thb(z.cost)} ถ้าโดนตัดขาดทุนจะเสียราว ${thb(z.loss)} (${S.risk}% ของเงินเทรด)` : '');
+    const sz = el('p', 'sw-size', z ? `${window.VGTrade && window.VGTrade.equityTHB() ? 'จากพอร์ตเทรด: ' : ''}ซื้อประมาณ ${z.u < 1 ? z.u.toPrecision(3) : z.u.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${g.crypto ? 'เหรียญ' : 'หุ้น'} ≈ ${thb(z.cost)} ถ้าโดนตัดขาดทุนจะเสียราว ${thb(z.loss)} (${S.risk}% ของเงินเทรด)` : '');
     const act = el('div', 'sw-act');
     const a = el('a', 'btn ghost sm', 'กราฟ'); a.href = chart(g.s); a.target = '_blank'; a.rel = 'noopener noreferrer';
     const b = el('button', 'btn-line sm', 'เข้าซื้อแล้ว'); b.type = 'button';
-    b.addEventListener('click', () => { S.pos.push({ s: g.s, entry: +g.price.toPrecision(6), units: z ? +z.u.toPrecision(4) : 0, sl: g.sl, tp1: g.tp1, tp2: g.tp2, R: g.R, kind: g.kind, at: Date.now(), half: false }); save(); draw(); $('sw-pos').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    b.addEventListener('click', () => { if (!g.crypto && window.VGTrade) { window.VGTrade.prefill({ type: 'buy', s: g.s, q: z ? z.u : null, px: g.price, plan: { s: g.s, sl: g.sl, kind: g.kind } }); return; } S.pos.push({ s: g.s, entry: +g.price.toPrecision(6), units: z ? +z.u.toPrecision(4) : 0, sl: g.sl, tp1: g.tp1, tp2: g.tp2, R: g.R, kind: g.kind, at: Date.now(), half: false }); save(); draw(); $('sw-pos').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
     act.append(a, b);
     c.append(h, px, el('p', 'sw-why', why(g)), lv, sz, act); return c;
   };
@@ -136,7 +136,7 @@
   const e20Of = (s) => { if (isCrypto(s)) { const b = bars[s]; return b && b.length > 20 ? SWC.ema(b.map((x) => x.c), 20).pop() : null; } return stocks && stocks.px && stocks.px[s] ? stocks.px[s][1] : null; };
   const drawPos = () => {
     const box = $('sw-pos'); if (!box) return; box.replaceChildren();
-    if (!S.pos.length) { box.append(el('div', 'empty', 'ยังไม่มีไม้ที่ถืออยู่ กด "เข้าซื้อแล้ว" ที่สัญญาณด้านบน ระบบจะบอกว่าเมื่อไหร่ควรขาย')); return; }
+    if (!S.pos.length) { box.append(el('div', 'empty', 'ยังไม่มีไม้คริปโตที่ติดตาม กด "เข้าซื้อแล้ว" ที่สัญญาณคริปโตด้านบน ระบบจะบอกว่าเมื่อไหร่ควรขาย')); return; }
     S.pos.forEach((p, i) => {
       const px = priceOf(p.s), a = SWC.advise(p, px, e20Of(p.s));
       const r = el('div', 'sw-row');
@@ -173,6 +173,7 @@
     const ss = stocks ? `หุ้น US ${stocks.n} ตัว: ${stocks.open ? 'ตลาดเปิด' : 'ตลาดปิด'} คำนวณล่าสุด ${hm(stocks.updated)} น. (อัปเดตทุก 30 นาทีช่วงตลาดเปิด)` : 'หุ้น US: ยังไม่มีข้อมูล จะมาหลังตลาดสหรัฐเปิดรอบถัดไป';
     $('sw-status').textContent = cs + ' · ' + ss;
     drawPos();
+    document.dispatchEvent(new Event('vg:swing'));
   };
   const stats = (rows) => {
     const d = rows.filter((x) => x.res && x.res !== 'old'); if (!d.length) return null;
@@ -220,5 +221,5 @@
     loadStocks(); drawLog(); draw();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
-  window.VGSwing = { get: () => S, signals };
+  window.VGSwing = { get: () => S, signals, price: (s) => { const p = priceOf(s); return p == null ? null : p; }, e20: (s) => e20Of(s) };
 })();
