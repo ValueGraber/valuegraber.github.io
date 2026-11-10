@@ -12,7 +12,7 @@
 
   const SP = () => window.VGSpot;
   const isGold = (s) => s === 'GOLD';
-  const unit = (s) => (isGold(s) ? 'กรัม' : 'เหรียญ');
+  const unit = (s) => (isGold(s) ? 'ออนซ์' : 'เหรียญ');
   const nameOf = (s) => (SP() ? SP().nameOf(s) : s);
   const r2 = (x) => Math.round(x * 100) / 100;
   const sgn = (v) => (v > 0 ? '+' : v < 0 ? '−' : '');
@@ -58,7 +58,7 @@
   const preview = () => {
     const f = F(); const trade = f.type === 'buy' || f.type === 'sell';
     ['tr-sym-l', 'tr-q-l', 'tr-px-l', 'tr-fee-l'].forEach((k) => { $(k).hidden = !trade; }); $('tr-thb-l').hidden = trade;
-    $('tr-q-lab').textContent = `จำนวน (${unit(f.s)})`; $('tr-px-lab').textContent = `ราคาที่ได้ (บาทต่อ${isGold(f.s) ? 'กรัม' : 'เหรียญ'})`;
+    $('tr-q-lab').textContent = `จำนวน (${unit(f.s)})`; $('tr-px-lab').textContent = `ราคาที่ได้ (บาทต่อ${unit(f.s)})`;
     const out = $('tr-prev');
     if (!trade) { out.textContent = f.type === 'dep' ? 'เงินบาทที่โอนเข้า Binance TH หรือ Dime เพื่อลงทุนส่วนนี้' : 'เงินบาทที่ถอนออก'; return; }
     if (!(f.q > 0 && f.px > 0)) { out.textContent = `ค่าธรรมเนียมคิดให้อัตโนมัติ: ${isGold(f.s) ? `ทอง Dime ${T.fees.gold}%` : `Binance TH ${T.fees.crypto}%`} · ใส่จำนวนกับราคาก่อน`; return; }
@@ -168,7 +168,7 @@
   };
   const csv = () => {
     const B = book(); const rows = [['date', 'time', 'type', 'asset', 'qty', 'unit', 'price_thb', 'fee_thb', 'realized_thb', 'amount_thb']];
-    sorted().forEach((x) => rows.push([bkDay(x.at), new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' }), x.type, x.s || '', x.q ?? '', x.s ? (isGold(x.s) ? 'gram' : 'coin') : '', x.px ?? '', x.fee ?? '', B.real[x.id] ? r2(B.real[x.id].pl) : '', x.thb ?? '']));
+    sorted().forEach((x) => rows.push([bkDay(x.at), new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' }), x.type, x.s || '', x.q ?? '', x.s ? (isGold(x.s) ? 'ounce' : 'coin') : '', x.px ?? '', x.fee ?? '', B.real[x.id] ? r2(B.real[x.id].pl) : '', x.thb ?? '']));
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' })); a.download = 'valuegrab-crypto-gold.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   const setupFees = () => {

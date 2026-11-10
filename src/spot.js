@@ -1,16 +1,16 @@
 /* invest → คริปโตและทอง: long-term entry timing for crypto majors + gold (PAXG as the gold price), spot only.
    Daily bars from Binance public market data (data-api.binance.vision), live price by WebSocket with a REST poll fallback;
-   runs only while the page is visible. Prices shown in baht = USDT price × VG.fx. Gold in baht per gram. */
+   runs only while the page is visible. Prices shown in baht = USDT price × VG.fx. Gold shown in USD per troy ounce (money()); portfolio keeps baht, gold counted in ounces. */
 (() => {
   const $ = (id) => document.getElementById(id);
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const API = 'https://data-api.binance.vision/api/v3/', WS = 'wss://data-stream.binance.vision/stream?streams=';
   const ASSETS = [['BTC', 'บิตคอยน์'], ['ETH', 'อีเธอเรียม'], ['BNB', 'BNB'], ['SOL', 'โซลานา'], ['XRP', 'XRP'], ['ADA', 'คาร์ดาโน'], ['DOGE', 'ดอจคอยน์'],
     ['TRX', 'ทรอน'], ['LINK', 'เชนลิงก์'], ['AVAX', 'อวาแลนช์'], ['DOT', 'โพลคาดอต'], ['LTC', 'ไลต์คอยน์'], ['GOLD', 'ทองคำ']];
-  const OZ = 31.1035, KEY = 'valuegrab-spotset-v1';
+  const KEY = 'valuegrab-spotset-v1';
   const pair = (a) => (a === 'GOLD' ? 'PAXGUSDT' : a + 'USDT');
   const isGold = (a) => a === 'GOLD';
-  const unit = (a) => (isGold(a) ? 'กรัม' : 'เหรียญ');
+  const unit = (a) => (isGold(a) ? 'ออนซ์' : 'เหรียญ');
   const KIND = { pb: 'ย่อในขาขึ้น', rc: 'กลับเป็นขาขึ้น', dv: 'ทยอยสะสมช่วงถูก' };
   const ST = { hot: ['trap', 'ร้อนแรง'], up: ['watch', 'ขาขึ้น รอย่อ'], zone: ['buy', 'ในโซนซื้อ'], deep: ['watch', 'ย่อลึก'], down: ['trap', 'ขาลง'], turn: ['', 'ไซด์เวย์'] };
   let set = { cap: 50000, risk: 2 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
@@ -18,7 +18,9 @@
 
   const bars = {}, live = {}, bt = {}; let ws = null, on = false, lastTick = 0, lastPoll = 0, err = '', loaded = false;
   const fx = () => (window.VG && window.VG.fx) || 33;
-  const toTHB = (a, usd) => (usd == null ? null : usd * fx() / (isGold(a) ? OZ : 1));
+  const toTHB = (a, usd) => (usd == null ? null : usd * fx());
+  /* gold is shown in USD per troy ounce, crypto in baht */
+  const money = (a, v) => (isGold(a) ? (v == null || !isFinite(v) ? '–' : '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : thb(toTHB(a, v)));
   const thb = (v) => (v == null || !isFinite(v) ? '–' : '฿' + v.toLocaleString('en-US', { maximumFractionDigits: v < 1 ? 4 : v < 100 ? 2 : 0 }));
   const usd = (v) => (v == null || !isFinite(v) ? '–' : '$' + v.toLocaleString('en-US', { maximumFractionDigits: v < 1 ? 5 : v < 100 ? 3 : 0 }));
   const pct = (v, d = 1) => (v == null || !isFinite(v) ? '–' : (v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%');
@@ -81,10 +83,10 @@
   const card = (g, i) => {
     const c = el('div', 'panel sw-card'); const P = (v) => toTHB(g.a, v);
     const h = el('div', 'sw-h'); h.append(el('span', 'sw-rank', '#' + (i + 1)), el('b', 'sw-sym', nameOf(g.a)), el('span', 'tag ' + (g.kind === 'dv' ? 'watch' : 'buy'), KIND[g.kind]), el('span', 'sw-score', 'คะแนน ' + g.score));
-    const px = el('div', 'sw-px'); px.append(el('b', null, thb(P(g.price))), el('small', null, `${usd(g.price)}${isGold(g.a) ? ' ต่อออนซ์' : ''} · สัญญาณจากแท่งวันที่ ${day(g.t)}`));
+    const px = el('div', 'sw-px'); px.append(el('b', null, money(g.a, g.price)), el('small', null, `${isGold(g.a) ? 'USD ต่อออนซ์' : usd(g.price)} · สัญญาณจากแท่งวันที่ ${day(g.t)}`));
     const lv = el('div', 'sw-lvs');
-    lv.append(level('เข้าซื้อแถว', thb(P(g.entry)), 'ไม่ไล่ซื้อเกิน ' + thb(P(g.entry + 0.5 * g.R))), level('จุดยอมรับว่าผิด', thb(P(g.sl)), pct(g.sl / g.entry - 1) + ' ปิดต่ำกว่านี้ขาย', 'neg'),
-      level('เป้าแรก ขาย 1/3', thb(P(g.tp1)), pct(g.tp1 / g.entry - 1), 'pos'), level('เป้าสอง ขายอีก 1/3', thb(P(g.tp2)), pct(g.tp2 / g.entry - 1) + ' ที่เหลือถือตามเทรนด์', 'pos'));
+    lv.append(level('เข้าซื้อแถว', money(g.a, g.entry), 'ไม่ไล่ซื้อเกิน ' + money(g.a, g.entry + 0.5 * g.R)), level('จุดยอมรับว่าผิด', money(g.a, g.sl), pct(g.sl / g.entry - 1) + ' ปิดต่ำกว่านี้ขาย', 'neg'),
+      level('เป้าแรก ขาย 1/3', money(g.a, g.tp1), pct(g.tp1 / g.entry - 1), 'pos'), level('เป้าสอง ขายอีก 1/3', money(g.a, g.tp2), pct(g.tp2 / g.entry - 1) + ' ที่เหลือถือตามเทรนด์', 'pos'));
     const z = size(g);
     const sz = el('p', 'sw-size', z ? `${window.VGTrade && window.VGTrade.equityTHB() ? 'จากพอร์ต: ' : ''}ซื้อประมาณ ${z.q < 1 ? +z.q.toPrecision(3) : z.q.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${unit(g.a)} ≈ ${thb(z.cost)} ถ้าผิดทางจะเสียราว ${thb(z.loss)} (${set.risk}% ของเงินลงทุน) ยังไม่รวมค่าธรรมเนียม` : '');
     const act = el('div', 'sw-act');
@@ -104,12 +106,12 @@
     ASSETS.forEach(([a]) => {
       const s = SPC.status(bars[a], live[a], isGold(a)); const sig = sigs.find((x) => x.a === a);
       const r = el('div', 'sw-arow');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(a)), el('small', null, s ? `${thb(toTHB(a, s.px))}${isGold(a) ? '/กรัม' : ''} · ${usd(s.px)}` : 'กำลังโหลด'));
+      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(a)), el('small', null, s ? (isGold(a) ? `${money(a, s.px)} ต่อออนซ์ · ≈ ${thb(toTHB(a, s.px))}` : `${thb(toTHB(a, s.px))} · ${usd(s.px)}`) : 'กำลังโหลด'));
       const st = el('div', 'sw-ast');
       if (s) {
         const [cls, lab] = sig ? ['buy', 'ถึงจังหวะ: ' + KIND[sig.kind]] : ST[s.k];
         st.append(el('span', 'tag ' + cls, lab), el('small', null, sig ? `อันดับ ${sigs.indexOf(sig) + 1} ดูด้านบน` : s.t));
-        const zone = s.trend === 'bull' && !sig ? ` · โซนซื้อ ${thb(toTHB(a, s.zone[0]))}–${thb(toTHB(a, s.zone[1]))}` : '';
+        const zone = s.trend === 'bull' && !sig ? ` · โซนซื้อ ${money(a, s.zone[0])}–${money(a, s.zone[1])}` : '';
         st.append(el('small', 'sw-meta', `RSI ${Math.round(s.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(s.dd * 100)}%${zone}`));
       }
       r.append(who, st); list.append(r);
