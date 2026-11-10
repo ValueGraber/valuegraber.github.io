@@ -51,12 +51,12 @@ def main() -> int:
     except (OSError, ValueError):
         cur = {}
     have, live = cur.get("asOf") or "", bool(cur.get("live"))
-    if "--live" in sys.argv:
-        ny = now.astimezone(NY)
+    ny = now.astimezone(NY)
+    market_open = is_trading_day(ny.date()) and OPEN <= ny.time() < CLOSE
+    if "--live" in sys.argv or ("--auto" in sys.argv and market_open):
         today = ny.date().isoformat()
-        is_open = is_trading_day(ny.date()) and OPEN <= ny.time() < CLOSE
-        skip = not is_open or (have == today and live)
-        why = "ตลาดไม่ได้เปิด ข้าม" if not is_open else ("มีราคาระหว่างวันแล้ว ข้าม" if skip else "ตลาดเปิดอยู่ ดึงราคาระหว่างวัน")
+        skip = not market_open or (have == today and live)
+        why = "ตลาดไม่ได้เปิด ข้าม" if not market_open else ("มีราคาระหว่างวันแล้ว ข้าม" if skip else "ตลาดเปิดอยู่ ดึงราคาระหว่างวัน")
         print(f"รอบระหว่างวัน {today} · ในไฟล์ตอนนี้ {have or '-'}{' (ระหว่างวัน)' if live else ''} · {why}")
     else:
         want = last_trading_day(now).isoformat()

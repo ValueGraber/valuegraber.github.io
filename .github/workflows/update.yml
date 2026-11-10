@@ -13,7 +13,16 @@ on:
     # ตลาดเปิด 21:30 น. ไทยช่วงหน้าหนาว (20:30 น. ช่วงหน้าร้อน) ถ้ายังไม่เปิดจะข้าม ได้ราคาแล้วรอบถัดไปก็ข้าม
     - cron: "30 13 * * 1"          # 20:30 น. เวลาไทย วันจันทร์
     - cron: "0,30 14-15 * * 1"     # 21:00–22:30 น. เวลาไทย วันจันทร์
-  workflow_dispatch: {}   # มีปุ่ม "Run workflow" ให้กดรันเองได้ รันเองจะดึงข้อมูลเสมอ ไม่เช็กก่อน
+  # ปุ่ม "Run workflow" กดรันเองได้ (ค่าเริ่มต้น force = ดึงข้อมูลเสมอ)
+  # cron-job.org เรียกผ่าน API ด้วย {"ref":"main","inputs":{"mode":"auto"}} ให้เช็กก่อนเหมือนรอบตามเวลา
+  # auto: ถ้าตลาดสหรัฐเปิดอยู่จะดึงราคาระหว่างวัน (ครั้งเดียวต่อวัน) ถ้าปิดจะดึงราคาปิดล่าสุดถ้ายังไม่มี
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "force = ดึงเสมอ, auto = เช็กก่อน"
+        type: choice
+        options: [force, auto]
+        default: force
 
 permissions:
   contents: write
@@ -31,8 +40,8 @@ jobs:
 
       - name: เช็กว่ามีราคาปิดล่าสุดแล้วหรือยัง
         id: fresh
-        if: github.event_name == 'schedule'
-        run: python3 tools/fresh.py ${{ endsWith(github.event.schedule, ' 1') && '--live' || '' }}
+        if: github.event_name == 'schedule' || inputs.mode == 'auto'
+        run: python3 tools/fresh.py ${{ github.event_name == 'schedule' && endsWith(github.event.schedule, ' 1') && '--live' || '' }} ${{ inputs.mode == 'auto' && '--auto' || '' }}
 
       - uses: actions/setup-python@v5
         if: steps.fresh.outputs.skip != 'true'
