@@ -959,12 +959,14 @@ tr.editing td { background: var(--accent-soft); }
 .sw-size { margin: 10px 0 8px; font-size: 15px; }
 .sw-act { display: flex; flex-wrap: wrap; gap: 8px; }
 .sw-h3 { margin: 22px 0 6px; font-size: 17px; }
-#sw-more { margin-top: 4px; }
+.sw-arow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 4px 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sw-ast small { display: block; } .sw-ast .tag { margin-bottom: 2px; } .sw-meta { color: var(--ink-2); font-size: 13px; }
+@media (max-width: 640px) { .sw-arow { grid-template-columns: 1fr; } }
 .sw-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .sw-who b { display: block; font-size: 18px; } .sw-who small, .sw-now small { display: block; }
 .sw-adv { grid-column: 1 / -1; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--slate-soft); font-weight: 600; }
 .sw-adv.sw-out { background: var(--brick-soft); color: var(--brick); }
-.sw-adv.sw-tp1, .sw-adv.sw-win { background: var(--jade-soft); color: var(--jade); }
+.sw-adv.sw-tp1, .sw-adv.sw-win, .sw-adv.sw-tp { background: var(--jade-soft); color: var(--jade); }
 .sw-adv.sw-slow { background: var(--ochre-soft); color: var(--ochre); }
 .sw-lvl { grid-column: 1 / -1; font-size: 14px; }
 .sw-ed { display: flex; gap: 10px; flex-wrap: wrap; } .sw-ed .inp { width: 8em; }
@@ -1096,38 +1098,33 @@ tr.editing td { background: var(--accent-soft); }
   </section>
 
   <section id="swing" data-sub="swing">
-    <div class="sec-head"><h2>จังหวะเก็งกำไรตอนนี้</h2></div>
-    <p class="sec-note">สแกนคริปโตหลัก 40 ตัว ทอง (PAXG) และหุ้น S&amp;P 500 บนกราฟ 1 ชั่วโมง หา 2 แบบ: <b>ย่อในขาขึ้น</b> (ราคายังเป็นขาขึ้นแล้วย่อมาแตะเส้น EMA20 แล้วเด้ง) และ <b>ทะลุกรอบ</b> (ปิดเหนือจุดสูงสุด 20 ชม. พร้อมวอลุ่มสูง) แล้วยก 3 อันดับที่ดีที่สุดตอนนี้ พร้อมจุดเข้า จุดตัดขาดทุน และเป้าขาย ตั้งให้ถือไม่กี่ชั่วโมงถึง 2–3 วัน</p>
+    <div class="sec-head"><h2>จังหวะเข้าซื้อคริปโตและทอง</h2></div>
+    <p class="sec-note">สำหรับซื้อแบบ spot (ซื้อของจริง ไม่ใช้เงินกู้) แล้วถือเป็นสัปดาห์ถึงหลายเดือน ดูกราฟรายวันของคริปโตหลัก 12 ตัวและทองคำ แล้วยก 3 ตัวที่ถึงจังหวะดีที่สุดตอนนี้ มี 3 แบบ: <b>ย่อในขาขึ้น</b> (ขาขึ้นใหญ่แล้วย่อมาแถวเส้น 50 วัน), <b>กลับเป็นขาขึ้น</b> (ปิดกลับเหนือเส้น 200 วัน) และ <b>ทยอยสะสมช่วงถูก</b> (ลงมาลึกจากจุดสูงสุดแล้วเริ่มหยุดลง) แต่ละตัวบอกจุดเข้า จุดยอมรับว่าผิด และเป้าขายทีละ 1/3</p>
     <div class="controls sw-set">
-      <label class="mini">เงินที่กันไว้เทรด (บาท) <input class="inp" id="sw-cap" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="mini">เงินลงทุนส่วนนี้ (บาท) <input class="inp" id="sw-cap" type="number" step="any" min="0" inputmode="decimal"></label>
       <label class="mini">ยอมเสียต่อไม้ (%) <input class="inp" id="sw-risk" type="number" step="0.1" min="0.1" max="10" inputmode="decimal"></label>
-      <label class="mini sw-chk"><input type="checkbox" id="sw-good"> หุ้นเฉพาะตัวพื้นฐานดี (คุณภาพ 50 ขึ้นไป)</label>
     </div>
     <p class="pf-hint" id="sw-status">กำลังโหลด…</p>
     <div id="sw-top"></div>
-    <h3 class="sw-h3" id="sw-more-h" hidden>สัญญาณอื่น</h3>
-    <div class="td-row" id="sw-more"></div>
-    <h3 class="sw-h3">ไม้คริปโตที่ติดตาม</h3>
-    <p class="pf-hint">หุ้นจะไปอยู่ใน "พอร์ตเทรดหุ้น" ด้านล่าง ส่วนคริปโตติดตามตรงนี้ ระบบดูราคาสดแล้วบอกว่าถือต่อ ขายครึ่ง หรือขายทั้งหมด เก็บไว้ในเครื่องนี้เท่านั้น</p>
-    <div id="sw-pos"></div>
-    <div class="alert sw-warn">สัญญาณเป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ไม่รับประกันกำไร ส่วนใหญ่ชนะราว 4–5 ไม้จาก 10 กำไรมาจากไม้ที่ได้ได้มากกว่าไม้ที่เสีย จึงต้องตัดขาดทุนตามจุดทุกครั้ง ยังไม่รวมค่าธรรมเนียม ใช้เงินที่เสียได้เท่านั้น และลองดู "ผลย้อนหลัง" สัก 2–4 สัปดาห์ก่อนใช้เงินจริง</div>
+    <h3 class="sw-h3">ทุกตัวตอนนี้</h3>
+    <div id="sw-all"></div>
+    <div class="alert sw-warn">เป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ไม่รับประกันกำไร คริปโตลงได้ 50–80% ในขาลง ทองนิ่งกว่ามาก ถ้าราคาปิดต่ำกว่าจุดยอมรับว่าผิดให้ขายตามแผน ใช้เงินที่ไม่ต้องใช้ในหลายปีข้างหน้า และดู "ผลย้อนหลังของกติกา" ประกอบ</div>
   </section>
 
   <section id="tport" data-sub="tport">
-    <p class="sec-note">พอร์ตแยกสำหรับเทรดหุ้นระยะสั้น ไม่ปนกับพอร์ตลงทุนหลัก คิดเป็นดอลลาร์ ทุนเฉลี่ยรวมค่าธรรมเนียมซื้อแล้ว กำไรหักค่าธรรมเนียมขายแล้ว ค่าธรรมเนียมคิดตามอัตรา Dime ให้อัตโนมัติ (แก้ตัวเลขในช่องให้ตรงกับในแอปได้) ล็อกอินแล้วซิงค์ทุกเครื่องไปกับพอร์ตหลัก</p>
+    <p class="sec-note">พอร์ตแยกสำหรับคริปโต (Binance TH คู่เงินบาท) และทองคำ 99.99% (Dime) คิดเป็นบาท คริปโตนับเป็นเหรียญ ทองนับเป็นกรัม ทุนเฉลี่ยรวมค่าธรรมเนียมซื้อแล้ว กำไรหักค่าธรรมเนียมขายแล้ว ล็อกอินแล้วซิงค์ทุกเครื่องไปกับพอร์ตหลัก</p>
     <div class="strip" id="tr-strip"></div>
-    <h3 class="sw-h3">หุ้นในพอร์ตเทรด</h3>
+    <h3 class="sw-h3">ที่ถืออยู่</h3>
     <div id="tr-hold"></div>
     <h3 class="sw-h3">บันทึกรายการ</h3>
     <div class="pf-form f2" id="tr-form">
-      <label>ประเภท <select class="sel" id="tr-type"><option value="buy">ซื้อ</option><option value="sell">ขาย</option><option value="dep">ฝากเงิน (บาท → ดอลลาร์)</option><option value="wd">ถอนเงิน (ดอลลาร์ → บาท)</option></select></label>
+      <label>ประเภท <select class="sel" id="tr-type"><option value="buy">ซื้อ</option><option value="sell">ขาย</option><option value="dep">ฝากเงิน</option><option value="wd">ถอนเงิน</option></select></label>
       <label>วันเวลา (ว่าง = ตอนนี้) <input class="inp" id="tr-at" type="datetime-local"></label>
-      <label id="tr-sym-l">หุ้น <input class="inp" id="tr-sym" placeholder="เช่น NVDA" autocapitalize="characters" autocomplete="off"></label>
-      <label id="tr-q-l">จำนวนหุ้น <input class="inp" id="tr-q" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label id="tr-px-l">ราคาที่ได้ ($ ต่อหุ้น) <input class="inp" id="tr-px" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label id="tr-fee-l">ค่าธรรมเนียม ($) <input class="inp" id="tr-fee" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label id="tr-thb-l" hidden>จำนวนบาท <input class="inp" id="tr-thb" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label id="tr-rate-l" hidden>เรทที่ได้ (บาทต่อ $) <input class="inp" id="tr-rate" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-sym-l">สินทรัพย์ <select class="sel" id="tr-sym"></select></label>
+      <label id="tr-q-l"><span id="tr-q-lab">จำนวน</span> <input class="inp" id="tr-q" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-px-l"><span id="tr-px-lab">ราคาที่ได้ (บาท)</span> <input class="inp" id="tr-px" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-fee-l">ค่าธรรมเนียม (บาท) <input class="inp" id="tr-fee" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-thb-l" hidden>จำนวนเงิน (บาท) <input class="inp" id="tr-thb" type="number" step="any" min="0" inputmode="decimal"></label>
       <button class="btn" type="button" id="tr-add">บันทึก</button>
     </div>
     <p class="pf-hint" id="tr-prev"></p>
@@ -1135,22 +1132,22 @@ tr.editing td { background: var(--accent-soft); }
     <h3 class="sw-h3" id="tr-tx-h" hidden>รายการล่าสุด</h3>
     <ul class="sw-hist" id="tr-tx"></ul>
     <details class="method tr-feebox">
-      <summary>อัตราค่าธรรมเนียม (ตั้งไว้ตาม Dime)</summary>
+      <summary>อัตราค่าธรรมเนียม</summary>
       <div class="body">
-        <p>ค่าเริ่มต้นจากหน้าเว็บ Dime: ไม้แรกของทุกเดือนไม่เสียค่าคอม ไม้ต่อไป 0.15% ของมูลค่า (หุ้นราคาต่ำกว่า $6.67 คิด $0.01 ต่อหุ้น) ตอนขายมี SEC fee 0.00206% และ TAF $0.000195 ต่อหุ้น (ไม่เกิน $9.79) ทุกคำสั่งมี CAT $0.000003 ต่อหุ้น ถ้าเลือกแพ็กเกจค่าคอมแบบอื่นใน Dime หรือในสลิปมี VAT ให้แก้ตรงนี้ ยังไม่รวมส่วนต่างค่าเงินตอนแลก (ใส่เรทที่ได้จริงตอนฝากเงินแทน)</p>
+        <p>Binance TH คู่เงินบาทคิด 0.25% ต่อครั้ง (รวม VAT แล้ว) ทองคำ 99.99% ใน Dime ไม่มีค่าธรรมเนียมบริการ แต่ราคาซื้อกับราคาขายต่างกันเล็กน้อย ให้ใส่ราคาที่ได้จริงในแอป ถ้าค่าธรรมเนียมในแอปไม่ตรง แก้ตรงนี้หรือพิมพ์ทับในช่องตอนบันทึก</p>
         <div class="pf-form f2" id="tr-fees"></div>
       </div>
     </details>
   </section>
 
   <section id="tday" data-sub="tday">
-    <p class="sec-note">ผลแต่ละวันซื้อขาย นับตามวันของตลาดสหรัฐ (ซื้อขายคืนวันจันทร์ถึงเช้าวันอังคารไทย = วันจันทร์) กำไรหักค่าธรรมเนียมแล้ว มูลค่าพอร์ตสิ้นวันจดอัตโนมัติเมื่อเปิดหน้านี้ "เปลี่ยนจากวันก่อน" รวมหุ้นที่ยังไม่ขาย และไม่นับเงินฝากถอน</p>
+    <p class="sec-note">ผลแต่ละวันตามเวลาไทย กำไรหักค่าธรรมเนียมแล้ว มูลค่าพอร์ตจดอัตโนมัติวันที่เปิดหน้านี้ "เปลี่ยนจากวันก่อน" รวมของที่ยังไม่ขาย และไม่นับเงินฝากถอน</p>
     <div id="tr-days"></div>
     <button class="btn ghost sm" type="button" id="tr-csv" style="margin-top:10px">ดาวน์โหลด CSV ทุกรายการ</button>
   </section>
 
   <section id="swlog" data-sub="swlog">
-    <p class="sec-note">ทุกสัญญาณที่เกิดจะถูกจดไว้แล้วตามดูด้วยกติกาเดียวกัน: โดนจุดตัดขาดทุนก่อน = −1R, ถึงเป้าแรกขายครึ่งแล้วกลับมาที่ทุน = +0.75R, ถึงเป้าสอง = +2.25R, ครบ 72 แท่งยังไม่จบ = ปิดที่ราคาตลาด ยังไม่หักค่าธรรมเนียม</p>
+    <p class="sec-note">ลองใช้กติกาเดียวกันกับราคาย้อนหลังราว 2.7 ปีของแต่ละตัว ซื้อทีละไม้ ขาย 1/3 ที่เป้าแรก (+1.5R) แล้วเลื่อนจุดตัดขาดทุนมาที่ทุน ขายอีก 1/3 ที่เป้าสอง (+3R) ส่วนสุดท้ายขายเมื่อราคาปิดหลุดเส้น 50 วัน R คือเงินที่ยอมเสียต่อไม้ เทียบกับซื้อแล้วถือเฉยๆ ช่วงเดียวกัน ยังไม่หักค่าธรรมเนียม ผลในอดีตไม่ได้บอกอนาคต</p>
     <div id="sw-log"></div>
   </section>
 
@@ -3317,7 +3314,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาดและคริปโต', 'ตลาดตอนนี้ถูกหรือแพง และราคาคริปโตหลัก', false]]],
-      ['swing', 'เก็งกำไร', 'scan', [['swing'], ['tport', 'พอร์ตเทรดหุ้น', 'ซื้อขายระยะสั้นแยกจากพอร์ตหลัก คิดค่าธรรมเนียม Dime ให้', true], ['tday', 'กำไรรายวัน', 'ผลแต่ละวันซื้อขาย หักค่าธรรมเนียมแล้ว', true], ['swlog', 'ผลย้อนหลัง', 'สัญญาณที่ผ่านมาชนเป้าหรือโดนตัดขาดทุนกี่ครั้ง', false]]],
+      ['swing', 'คริปโตและทอง', 'scan', [['swing'], ['tport', 'พอร์ตคริปโตและทอง', 'ซื้อแบบ spot ถือยาว คิดค่าธรรมเนียม Binance TH และ Dime ให้', true], ['tday', 'กำไรรายวัน', 'ผลแต่ละวัน หักค่าธรรมเนียมแล้ว', true], ['swlog', 'ผลย้อนหลังของกติกา', 'ถ้าใช้กติกานี้ย้อนหลังราว 2.7 ปี ได้ผลยังไง', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
@@ -4378,8 +4375,8 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
 })();
 </script>
 <script>
-/*SWINGCORE*/
-/*SWING*/
+/*SPOTCORE*/
+/*SPOT*/
 /*TRADE*/
 </script>
 <script type="module">
@@ -4405,12 +4402,12 @@ if (FB && window.VGPort) {
   const STORES = {
     portfolios: {
       label: 'พอร์ต',
-      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { trade: window.VGTrade.trade() } : {}) }); },
-      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.trade) window.VGTrade.replace(c.trade); },
+      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { spot: window.VGTrade.trade() } : {}) }); },
+      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.spot) window.VGTrade.replace(c.spot); },
       empty: () => { window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]); if (window.VGTrade) window.VGTrade.replace({}); },
       local: () => { const d = window.VGPort.get(); const tn = window.VGTrade ? window.VGTrade.trade().tx.length : 0; return { n: d.tx.length + tn, has: d.tx.length > 0 || tn > 0 || (window.VGWatch && window.VGWatch.get().length > 0) }; },
       merge: (c) => { const l = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : []; const tx = byId(c.tx || [], l.tx);
-        const trM = window.VGTrade ? (() => { const m = window.VGTrade.merge(c.trade || {}); return { extra: m.extra, doc: { trade: m.doc } }; })() : { extra: 0, doc: {} };
+        const trM = window.VGTrade ? (() => { const m = window.VGTrade.merge(c.spot || {}); return { extra: m.extra, doc: { spot: m.doc } }; })() : { extra: 0, doc: {} };
         return { extra: tx.length - (c.tx || []).length + trM.extra, changed: tx.length !== (c.tx || []).length || trM.extra > 0 || lw.some((s) => !(c.watch || []).includes(s)),
           doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])], ...trM.doc } }; },
     },
