@@ -938,6 +938,42 @@ tr.editing td { background: var(--accent-soft); }
 .scrim { background: rgba(13, 18, 32, .42); }
 .slip-modal { background: rgba(13, 18, 32, .5); }
 @media (prefers-reduced-motion: reduce) { .tabs button, .subnav button, .inp, .btn-solid, .btn.primary { transition: none; } }
+/* swing: short-term signals (invest → เก็งกำไร) */
+.sw-set { flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.sw-set .inp { width: 9em; }
+.sw-chk { display: flex; align-items: center; gap: 6px; }
+.sw-card { margin: 12px 0; }
+.sw-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.sw-rank { font-family: var(--num); color: var(--foil-ink); font-weight: 700; }
+.sw-sym { font-size: 20px; }
+.sw-score { margin-left: auto; font-family: var(--num); font-size: 14px; color: var(--ink-2); }
+.sw-px { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-top: 6px; }
+.sw-px b, .sw-now b { font-family: var(--num); font-size: 22px; }
+.sw-px small, .sw-hist span, .sw-who small, .sw-lvl { color: var(--ink-2); }
+.sw-why { margin: 6px 0 10px; font-size: 15px; }
+.sw-lvs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.sw-lv { border-top: 1px solid var(--line); padding-top: 6px; min-width: 0; }
+.sw-lv small { display: block; font-size: 13px; color: var(--ink-2); }
+.sw-lv b { display: block; font-family: var(--num); font-size: 17px; overflow-wrap: anywhere; }
+.sw-lv.neg b { color: var(--brick); } .sw-lv.pos b { color: var(--jade); }
+.sw-size { margin: 10px 0 8px; font-size: 15px; }
+.sw-act { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw-h3 { margin: 22px 0 6px; font-size: 17px; }
+#sw-more { margin-top: 4px; }
+.sw-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.sw-who b { display: block; font-size: 18px; } .sw-who small, .sw-now small { display: block; }
+.sw-adv { grid-column: 1 / -1; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--slate-soft); font-weight: 600; }
+.sw-adv.sw-out { background: var(--brick-soft); color: var(--brick); }
+.sw-adv.sw-tp1, .sw-adv.sw-win { background: var(--jade-soft); color: var(--jade); }
+.sw-adv.sw-slow { background: var(--ochre-soft); color: var(--ochre); }
+.sw-lvl { grid-column: 1 / -1; font-size: 14px; }
+.sw-ed { display: flex; gap: 10px; flex-wrap: wrap; } .sw-ed .inp { width: 8em; }
+.sw-row .sw-act { align-items: flex-end; justify-content: flex-end; }
+.sw-warn { margin-top: 18px; }
+.sw-stat { margin-bottom: 14px; }
+.sw-hist { list-style: none; padding: 0; margin: 10px 0 0; font-size: 14px; }
+.sw-hist li { padding: 4px 0; border-bottom: 1px dashed var(--line); }
+@media (max-width: 640px) { .sw-lvs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sw-row { grid-template-columns: 1fr; } .sw-row .sw-act { justify-content: flex-start; } }
 </style>
 </head>
 <body>
@@ -1048,6 +1084,29 @@ tr.editing td { background: var(--accent-soft); }
     <div class="sec-head"><h2>คริปโตหลัก</h2></div>
     <p class="sec-note">คริปโตไม่มีกำไรหรืองบการเงิน จึงประเมินมูลค่าแบบหุ้นไม่ได้ ระบบดูเฉพาะแนวโน้มราคา: ขาขึ้นคือราคาและเส้น 50 วันอยู่เหนือเส้น 200 วัน ขาลงคือกลับกัน ราคาปิดรายวันอัปเดตทุกเช้า ราคาผันผวนสูงมาก ควรถือสัดส่วนน้อย</p>
     <div class="list" id="crypto-list"><div class="empty">ข้อมูลคริปโตจะมาหลังระบบอัปเดตรอบถัดไป</div></div>
+  </section>
+
+  <section id="swing" data-sub="swing">
+    <div class="sec-head"><h2>จังหวะเก็งกำไรตอนนี้</h2></div>
+    <p class="sec-note">สแกนคริปโตหลัก 40 ตัว ทอง (PAXG) และหุ้น S&amp;P 500 บนกราฟ 1 ชั่วโมง หา 2 แบบ: <b>ย่อในขาขึ้น</b> (ราคายังเป็นขาขึ้นแล้วย่อมาแตะเส้น EMA20 แล้วเด้ง) และ <b>ทะลุกรอบ</b> (ปิดเหนือจุดสูงสุด 20 ชม. พร้อมวอลุ่มสูง) แล้วยก 3 อันดับที่ดีที่สุดตอนนี้ พร้อมจุดเข้า จุดตัดขาดทุน และเป้าขาย ตั้งให้ถือไม่กี่ชั่วโมงถึง 2–3 วัน</p>
+    <div class="controls sw-set">
+      <label class="mini">เงินที่กันไว้เทรด (บาท) <input class="inp" id="sw-cap" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="mini">ยอมเสียต่อไม้ (%) <input class="inp" id="sw-risk" type="number" step="0.1" min="0.1" max="10" inputmode="decimal"></label>
+      <label class="mini sw-chk"><input type="checkbox" id="sw-good"> หุ้นเฉพาะตัวพื้นฐานดี (คุณภาพ 50 ขึ้นไป)</label>
+    </div>
+    <p class="pf-hint" id="sw-status">กำลังโหลด…</p>
+    <div id="sw-top"></div>
+    <h3 class="sw-h3" id="sw-more-h" hidden>สัญญาณอื่น</h3>
+    <div class="td-row" id="sw-more"></div>
+    <h3 class="sw-h3">ไม้ที่ถืออยู่</h3>
+    <p class="pf-hint">ระบบดูราคาให้แล้วบอกว่าถือต่อ ขายครึ่ง หรือขายทั้งหมด (คริปโตดูสด หุ้นช้าได้ถึง 30 นาที) เก็บไว้ในเครื่องนี้เท่านั้น</p>
+    <div id="sw-pos"></div>
+    <div class="alert sw-warn">สัญญาณเป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ไม่รับประกันกำไร ส่วนใหญ่ชนะราว 4–5 ไม้จาก 10 กำไรมาจากไม้ที่ได้ได้มากกว่าไม้ที่เสีย จึงต้องตัดขาดทุนตามจุดทุกครั้ง ยังไม่รวมค่าธรรมเนียม ใช้เงินที่เสียได้เท่านั้น และลองดู "ผลย้อนหลัง" สัก 2–4 สัปดาห์ก่อนใช้เงินจริง</div>
+  </section>
+
+  <section id="swlog" data-sub="swlog">
+    <p class="sec-note">ทุกสัญญาณที่เกิดจะถูกจดไว้แล้วตามดูด้วยกติกาเดียวกัน: โดนจุดตัดขาดทุนก่อน = −1R, ถึงเป้าแรกขายครึ่งแล้วกลับมาที่ทุน = +0.75R, ถึงเป้าสอง = +2.25R, ครบ 72 แท่งยังไม่จบ = ปิดที่ราคาตลาด ยังไม่หักค่าธรรมเนียม</p>
+    <div id="sw-log"></div>
   </section>
 
   <details class="method" data-sub="market">
@@ -3213,6 +3272,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาดและคริปโต', 'ตลาดตอนนี้ถูกหรือแพง และราคาคริปโตหลัก', false]]],
+      ['swing', 'เก็งกำไร', 'scan', [['swing'], ['swlog', 'ผลย้อนหลัง', 'สัญญาณที่ผ่านมาชนเป้าหรือโดนตัดขาดทุนกี่ครั้ง', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
@@ -4271,6 +4331,10 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('slip').hidden) close(); });
   window.VGSlip = { open: (t, m) => { target = t; setMode(m || 'slip'); $('slip-h').textContent = t.title; $('slip').hidden = false; document.body.classList.add('slip-open'); $('slip-hint').textContent = ''; drawList(); }, parse };
 })();
+</script>
+<script>
+/*SWINGCORE*/
+/*SWING*/
 </script>
 <script type="module">
 /* account sync (Firebase): each signed-in user reads/writes only portfolios/{uid} and business/{uid} */
