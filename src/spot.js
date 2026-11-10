@@ -125,7 +125,7 @@
   };
 
   /* ---------- wiring ---------- */
-  const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && ['swing', 'tport', 'tday', 'swlog'].some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
+  const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && ['swing', 'tport', 'swlog'].some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const setup = () => {
     const w = $('sw-week'); if (!w) return; w.value = set.week;
     w.addEventListener('change', () => { const v = +w.value; if (v >= 0) { set.week = v; keep(); draw(); } else w.value = set.week; });

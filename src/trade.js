@@ -1,6 +1,6 @@
 /* spot portfolio (invest → คริปโตและทอง → พอร์ต): baht ledger for crypto (Binance TH, THB pairs) and gold (Dime, USD/oz).
    Buy-and-hold: target weights per asset, rebalancing within a band, and profit-taking when an asset runs hot,
-   so paper gains become real ones. Data { tx, snaps, fees, targets, band } syncs inside the portfolios doc as `spot`.
+   so paper gains become real ones. Data { tx, fees, targets, band } syncs inside the portfolios doc as `spot`.
    tx: dep/wd {thb}; buy {s, amt, q, px, fx?, fee, cost}; sell {s, amt, q, px, fx?, fee, net}.
    Crypto px is baht per coin; gold px is USD per ounce with fx baht per USD (as on the Dime slip). */
 (() => {
@@ -27,18 +27,33 @@
   const qty = (q) => (+q.toPrecision(8)).toLocaleString('en-US', { maximumFractionDigits: 8 });
   const tone = (v) => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
   const bkDay = (t) => new Date(t).toLocaleDateString('sv-SE', { timeZone: 'Asia/Bangkok' });
-  const thDay = (d) => new Date(d + 'T12:00:00').toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: '2-digit' });
   const hm = (t) => new Date(t).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const sorted = () => T.tx.map((x, i) => [x, i]).sort((a, b) => a[0].at - b[0].at || a[1] - b[1]).map((x) => x[0]);
+  /* gold saved by older versions had no fx: px was baht/oz (≥ 20,000) or USD/oz typed into the baht box */
+  const migrate = () => {
+    const fx = window.VG && window.VG.fx; if (!fx) return false; let ch = false;
+    T.tx.forEach((x) => {
+      if (x.s !== 'GOLD' || x.fx || (x.type !== 'buy' && x.type !== 'sell')) return;
+      const fee = x.fee || 0;
+      if (x.px >= 20000) { x.amt = r2(x.q * x.px + (x.type === 'buy' ? fee : -fee)); x.px = r2(x.px / fx); }
+      else { x.amt = r2(x.q * x.px); x.q = x.type === 'buy' ? Math.floor(x.amt / fx / x.px * 1e4) / 1e4 : x.amt / fx / x.px; }
+      x.fx = +fx.toFixed(2); const v = x.q * x.px * x.fx; if (x.type === 'buy') { x.cost = r2(v + fee); delete x.net; } else { x.net = r2(v - fee); delete x.cost; }
+      x.fixed = true; ch = true;
+    });
+    if (ch) save(); return ch;
+  };
   const rate = (s) => (isGold(s) ? T.fees.gold : T.fees.crypto) / 100;
   const costOf = (x) => (x.cost != null ? x.cost : x.q * x.px + (x.fee || 0));
   const netOf = (x) => (x.net != null ? x.net : x.q * x.px - (x.fee || 0));
 
   /* replay the ledger: cash, holdings (average cost incl. fees), realized P/L per sell */
-  const book = () => {
-    let cash = 0, dep = 0; const h = {}, real = {};
+  const book = (skip) => {
+    let cash = 0, dep = 0, inv = 0, hasCash = false; const h = {}, real = {};
     sorted().forEach((x) => {
+      if (x.id === skip) return;
+      if (x.type === 'dep' || x.type === 'wd') hasCash = true;
+      if (x.type === 'buy') inv += costOf(x); if (x.type === 'sell') inv -= netOf(x);
       if (x.type === 'dep') { cash += x.thb; dep += x.thb; }
       else if (x.type === 'wd') { cash -= x.thb; dep -= x.thb; }
       else if (x.type === 'buy') { const p = h[x.s] || (h[x.s] = { q: 0, cost: 0 }); const c = costOf(x); cash -= c; p.q += x.q; p.cost += c; }
@@ -48,7 +63,9 @@
         if (h[x.s]) { p.q -= q; p.cost -= avg * q; if (p.q <= 1e-12) delete h[x.s]; }
       }
     });
-    return { cash, dep, h, real };
+    /* no deposits recorded: a plain investment journal, money in = what the buys cost (net of sells) */
+    if (!hasCash) { cash = 0; dep = inv; }
+    return { cash, dep, h, real, hasCash };
   };
   const priceOf = (s) => (SP() ? SP().price(s) : null);
   const sellFee = (s, v) => v * rate(s);
@@ -59,7 +76,7 @@
   };
 
   /* ---------- form ---------- */
-  let nTouched = false, feeTouched = false;
+  let nTouched = false, feeTouched = false, editId = null;
   const F = () => ({ type: $('tr-type').value, s: $('tr-sym').value, amt: +$('tr-q').value, px: +$('tr-px').value, fx: +$('tr-fx').value, n: +$('tr-n').value, thb: +$('tr-thb').value,
     at: (() => { const v = $('tr-at').value ? new Date($('tr-at').value).getTime() : NaN; return isFinite(v) && Math.abs(v - Date.now()) > 120e3 ? v : Date.now(); })() });
   /* fills auto values and returns the record to save (or null) */
@@ -69,7 +86,7 @@
     let q, fee;
     if (g) { q = f.type === 'buy' ? Math.floor(f.amt / fx / f.px * 1e4) / 1e4 : f.amt / fx / f.px; fee = r2(q * f.px * fx * rate(f.s)); }
     else { fee = r2(f.amt * rate(f.s)); q = f.type === 'buy' ? f.amt / f.px * (1 - rate(f.s)) : f.amt / f.px; }
-    if (f.type === 'sell') { const p = book().h[f.s]; if (p && Math.abs(q - p.q) <= p.q * 0.005) q = p.q; }
+    if (f.type === 'sell') { const p = book(editId).h[f.s]; if (p && Math.abs(q - p.q) <= p.q * 0.005) q = p.q; }
     if (!nTouched) $('tr-n').value = q > 0 ? +q.toPrecision(8) : ''; else if (f.n > 0) q = f.n;
     if (!feeTouched) $('tr-fee').value = fee.toFixed(2); else fee = +$('tr-fee').value || 0;
     if (!(q > 0)) return null;
@@ -95,7 +112,7 @@
     let t = `ได้ ${qty(x.q)} ${unit(x.s)} · ค่าธรรมเนียม ${thb(x.fee)}`;
     if (isGold(x.s) && f.type === 'buy') { const v = x.q * x.px * x.fx; t += ` · มูลค่าทอง $${(x.q * x.px).toFixed(2)} = ${thb(v)} · เงินที่เหลือ ${thb(f.amt - x.cost)} กลับเข้าเงินสด`; }
     else if (f.type === 'buy') t += ` · ทุน ${thb(x.cost)}`;
-    if (f.type === 'sell') { const p = book().h[x.s]; t += ` · ได้รับสุทธิ ${thb(x.net)}`; if (p) { const avg = p.cost / p.q, pl = x.net - avg * Math.min(x.q, p.q); t += ` · กำไรจริงไม้นี้ ${pthb(pl)} (${pct(pl / (avg * Math.min(x.q, p.q)))})`; } }
+    if (f.type === 'sell') { const p = book(editId).h[x.s]; t += ` · ได้รับสุทธิ ${thb(x.net)}`; if (p) { const avg = p.cost / p.q, pl = x.net - avg * Math.min(x.q, p.q); t += ` · กำไรจริงไม้นี้ ${pthb(pl)} (${pct(pl / (avg * Math.min(x.q, p.q)))})`; } }
     out.textContent = t;
   };
   const add = () => {
@@ -103,13 +120,32 @@
     let x;
     if (trade) {
       x = calc(f); if (!x) { msg.textContent = isGold(f.s) ? 'ใส่ยอดบาท ราคา USD/oz และอัตราแลกเปลี่ยนให้ครบ' : 'ใส่ยอดบาทและราคาให้ครบ'; return; }
-      if (f.type === 'sell') { const p = book().h[f.s]; if (!(p && p.q >= x.q - 1e-12)) { msg.textContent = `ในพอร์ตมี ${nameOf(f.s)} ไม่ถึง ${qty(x.q)} ${unit(f.s)}`; return; } }
+      if (f.type === 'sell') { const p = book(editId).h[f.s]; if (!(p && p.q >= x.q - 1e-12)) { msg.textContent = `ในพอร์ตมี ${nameOf(f.s)} ไม่ถึง ${qty(x.q)} ${unit(f.s)}`; return; } }
     } else { if (!(f.thb > 0)) { msg.textContent = 'ใส่จำนวนเงินบาท'; return; } x = { thb: f.thb }; }
-    T.tx.push({ id: uid(), type: f.type, at: f.at, ...x }); save();
-    nTouched = false; feeTouched = false; ['tr-q', 'tr-px', 'tr-fee', 'tr-n', 'tr-thb', 'tr-at'].forEach((k) => { $(k).value = ''; }); preview();
-    msg.textContent = 'บันทึกแล้ว'; setTimeout(() => { msg.textContent = ''; }, 2500); draw();
+    const note = $('tr-note').value.trim(); if (note) x.note = note;
+    if (editId) {
+      const i = T.tx.findIndex((y) => y.id === editId); const old = T.tx[i];
+      const at = $('tr-at').value ? f.at : old.at;
+      if (i >= 0) T.tx[i] = { id: editId, type: f.type, at, ...x };
+    } else T.tx.push({ id: uid(), type: f.type, at: f.at, ...x });
+    save(); const was = !!editId; clearForm();
+    msg.textContent = was ? 'แก้ไขแล้ว' : 'บันทึกแล้ว'; setTimeout(() => { msg.textContent = ''; }, 2500); draw();
+  };
+  const clearForm = () => {
+    editId = null; nTouched = false; feeTouched = false; ['tr-q', 'tr-px', 'tr-fee', 'tr-n', 'tr-thb', 'tr-at', 'tr-note'].forEach((k) => { $(k).value = ''; });
+    $('tr-add').textContent = 'บันทึก'; $('tr-cancel').hidden = true; preview();
+  };
+  const localInput = (t) => new Date(t - new Date(t).getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
+  const edit = (x) => {
+    editId = x.id; $('tr-type').value = x.type; if (x.s) $('tr-sym').value = x.s;
+    $('tr-at').value = localInput(x.at); $('tr-note').value = x.note || '';
+    if (x.s) { $('tr-q').value = x.amt != null ? x.amt : r2(x.type === 'buy' ? costOf(x) : netOf(x) + (x.fee || 0)); $('tr-px').value = x.px; $('tr-fx').value = x.fx || ''; $('tr-n').value = x.q; $('tr-fee').value = x.fee || 0; nTouched = true; feeTouched = true; }
+    else $('tr-thb').value = x.thb;
+    $('tr-add').textContent = 'บันทึกการแก้ไข'; $('tr-cancel').hidden = false; preview();
+    $('tr-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
   const prefill = (o) => {
+    clearForm();
     $('tr-type').value = o.type; if (o.s) $('tr-sym').value = o.s;
     const g = isGold(o.s); const fx = fxNow();
     $('tr-q').value = o.amt != null ? Math.round(o.amt) : ''; $('tr-fx').value = g ? fx.toFixed(2) : '';
@@ -146,30 +182,17 @@
 
   /* ---------- views ---------- */
   const card = (k, v, h, cls) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v' + (cls ? ' ' + cls : ''), v), el('div', 'h', h || '')); return d; };
-  const daily = (B) => {
-    const days = {}; const D = (d) => days[d] || (days[d] = { d, n: 0, pl: 0, fee: 0, flow: 0, buy: 0, sell: 0 });
-    sorted().forEach((x) => {
-      const r = D(bkDay(x.at));
-      if (x.type === 'buy') { r.n++; r.fee += x.fee || 0; r.buy += costOf(x); }
-      if (x.type === 'sell') { r.n++; r.fee += x.fee || 0; r.sell += netOf(x); if (B.real[x.id]) r.pl += B.real[x.id].pl; }
-      if (x.type === 'dep') r.flow += x.thb; if (x.type === 'wd') r.flow -= x.thb;
-    });
-    Object.keys(T.snaps).forEach((d) => D(d));
-    const list = Object.values(days).sort((a, b) => a.d.localeCompare(b.d)); let prev = null, cum = 0;
-    list.forEach((r) => { cum += r.pl; r.cum = cum; const s = T.snaps[r.d]; r.eq = s ? s.eq : null; r.unreal = s ? s.unreal : null; r.chg = s && prev != null ? s.eq - prev - r.flow : null; if (s) prev = s.eq; });
-    return list;
-  };
   const draw = () => {
     if (!$('tr-strip')) return;
-    const B = book(), V = value(B), today = bkDay(Date.now());
-    if (T.tx.length && V.miss === 0) { const s = T.snaps[today], snap = { eq: Math.round(V.eq), cash: Math.round(B.cash), unreal: Math.round(V.unreal) }; if (!s || s.eq !== snap.eq || s.unreal !== snap.unreal) { T.snaps[today] = snap; save(false); } }
+    const B = book(), V = value(B);
+    if (migrate()) return draw();
     const realAll = Object.values(B.real).reduce((a, x) => a + x.pl, 0), feeAll = T.tx.reduce((a, x) => a + (x.fee || 0), 0);
     const tot = realAll + V.unreal, locked = tot > 0 && realAll > 0 ? realAll / Math.max(tot, realAll) : 0;
     $('tr-strip').replaceChildren(
-      card('มูลค่าพอร์ต', thb(V.eq), `เงินสด ${thb(B.cash)}${V.miss ? ' · ราคาบางตัวยังไม่มา ใช้ทุนแทน' : ''}`),
+      card('มูลค่าพอร์ต', thb(V.eq), `${B.hasCash ? 'เงินสด ' + thb(B.cash) : 'มูลค่าของที่ถืออยู่'}${V.miss ? ' · ราคาบางตัวยังไม่มา ใช้ทุนแทน' : ''}`),
       card('กำไรบนกระดาษ', pthb(V.unreal), 'ยังไม่ได้ขาย ราคาลงก็หายได้ (หักค่าธรรมเนียมขายแล้ว)', tone(V.unreal)),
       card('กำไรจริง (ขายแล้ว)', pthb(realAll), `ล็อกไว้แล้ว ${Math.round(locked * 100)}% ของกำไรทั้งหมด · ค่าธรรมเนียมรวม ${thb(feeAll)}`, tone(realAll)),
-      card('เทียบเงินที่ใส่', B.dep > 0 ? pthb(V.eq - B.dep) : '–', B.dep > 0 ? `ใส่สุทธิ ${thb(B.dep)} · ${pct(V.eq / B.dep - 1)}` : 'บันทึก "ฝากเงิน" ก่อน', B.dep > 0 ? tone(V.eq - B.dep) : ''));
+      card('เทียบเงินที่ลงไป', B.dep > 0 ? pthb(V.eq - B.dep) : '–', B.dep > 0 ? `ลงไปสุทธิ ${thb(B.dep)} · ${pct(V.eq / B.dep - 1)}` : 'ยังไม่มีรายการ', B.dep > 0 ? tone(V.eq - B.dep) : ''));
     const P = plan(B, V);
     /* holdings */
     const hb = $('tr-hold'); hb.replaceChildren(); const hs = Object.entries(B.h);
@@ -185,7 +208,7 @@
       a.acts.forEach(([k, t, kind, amt, lab]) => { row.append(el('div', 'sw-adv sw-' + k, t + (amt ? ` ≈ ${thb(amt)}` : ''))); if (kind === 'sell') act.append(sellBtn(lab, s, amt)); if (kind === 'buy') act.append(buyBtn(lab, s, amt)); });
       act.append(sellBtn('ขายทั้งหมด', s, r.v)); row.append(act); hb.append(row);
     });
-    drawTargets(B, V, P); drawLedger(B); drawDays(B);
+    drawTargets(B, V, P); drawLedger(B);
   };
   const drawTargets = (B, V, P) => {
     const box = $('tr-targets'); if (!box) return;
@@ -203,37 +226,25 @@
     note.textContent = sum ? `รวม ${sum}% ที่เหลือ ${Math.max(0, 100 - sum)}% เป็นเงินสด (ตอนนี้เงินสด ${V.eq > 0 ? Math.round(B.cash / V.eq * 100) : 0}%)${sum > 100 ? ' · เกิน 100% ลดลงก่อน' : ''}` : 'ยังไม่ได้ตั้งเป้า ตั้งไว้แล้วระบบจะบอกว่าตัวไหนควรขายส่วนเกินหรือซื้อเติม เช่น ทอง 40 BTC 30 ETH 10 ที่เหลือเป็นเงินสด';
   };
   const drawLedger = (B) => {
-    const lb = $('tr-tx'); lb.replaceChildren(); const TY = { buy: 'ซื้อ', sell: 'ขาย', dep: 'ฝากเงิน', wd: 'ถอนเงิน' };
-    sorted().reverse().slice(0, 30).forEach((x) => {
-      const li = el('li'); const rl = B.real[x.id];
+    const lb = $('tr-tx'); lb.replaceChildren(); const TY = { buy: 'ซื้อ', sell: 'ขาย', dep: 'ฝากเงิน', wd: 'ถอนเงิน' }; let month = '';
+    sorted().reverse().forEach((x) => {
+      const m = new Date(x.at).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' }); if (m !== month) { month = m; lb.append(el('li', 'tr-month', m)); }
+      const li = el('li', 'tr-entry'); const rl = B.real[x.id];
       const px = x.s ? (isGold(x.s) && x.fx ? `$${(+x.px).toFixed(2)}/oz เรท ${x.fx}` : thb(x.px)) : '';
-      li.append(el('b', null, TY[x.type] + (x.s ? ' ' + nameOf(x.s) : '')), el('span', null, x.s ? ` ${qty(x.q)} ${unit(x.s)} @ ${px} · ${x.type === 'buy' ? 'ทุน ' + thb(costOf(x)) : 'ได้ ' + thb(netOf(x))} · ${hm(x.at)} ` : ` ${thb(x.thb)} · ${hm(x.at)} `));
-      if (rl) li.append(el('b', tone(rl.pl), pthb(rl.pl)));
-      const del = el('button', 'tr-del', '×'); del.type = 'button'; del.setAttribute('aria-label', 'ลบรายการนี้');
-      del.addEventListener('click', () => { if (del.dataset.ok) { T.tx = T.tx.filter((y) => y.id !== x.id); save(); draw(); } else { del.dataset.ok = '1'; del.textContent = 'ลบ?'; setTimeout(() => { if (del.isConnected) { delete del.dataset.ok; del.textContent = '×'; } }, 3000); } });
-      li.append(del); lb.append(li);
+      const top = el('div'); top.append(el('b', null, TY[x.type] + (x.s ? ' ' + nameOf(x.s) : '')), el('span', null, x.s ? ` ${qty(x.q)} ${unit(x.s)} @ ${px} · ${x.type === 'buy' ? 'ทุน ' + thb(costOf(x)) : 'ได้ ' + thb(netOf(x))}${x.fee ? ' · ค่าธรรมเนียม ' + thb(x.fee) : ''} ` : ` ${thb(x.thb)} `));
+      if (rl) top.append(el('b', tone(rl.pl), 'กำไรจริง ' + pthb(rl.pl) + ' '));
+      const meta = el('small', 'tr-meta', hm(x.at) + (x.fixed ? ' · ปรับจากรายการเก่าอัตโนมัติ ตรวจเรทกับน้ำหนักให้ตรงสลิป' : ''));
+      const ed = el('button', 'tr-del', 'แก้'); ed.type = 'button'; ed.addEventListener('click', () => edit(x));
+      const del = el('button', 'tr-del', 'ลบ'); del.type = 'button';
+      del.addEventListener('click', () => { if (del.dataset.ok) { T.tx = T.tx.filter((y) => y.id !== x.id); if (editId === x.id) clearForm(); save(); draw(); } else { del.dataset.ok = '1'; del.textContent = 'ยืนยันลบ'; setTimeout(() => { if (del.isConnected) { delete del.dataset.ok; del.textContent = 'ลบ'; } }, 3000); } });
+      meta.append(ed, del); li.append(top); if (x.note) li.append(el('p', 'tr-note', x.note)); li.append(meta); lb.append(li);
     });
-    $('tr-tx-h').hidden = !T.tx.length;
-  };
-  const drawDays = (B) => {
-    const box = $('tr-days'); if (!box) return; box.replaceChildren();
-    const rows = daily(B).reverse();
-    if (!rows.length) { box.append(el('div', 'empty', 'ยังไม่มีรายการในพอร์ตนี้')); return; }
-    const tb = el('table', 'tr-table'); const hd = el('tr');
-    ['วันที่', 'ซื้อ', 'ขาย', 'กำไรจริง', 'ค่าธรรมเนียม', 'กำไรจริงสะสม', 'กำไรบนกระดาษ', 'มูลค่าพอร์ต', 'เปลี่ยนจากวันก่อน'].forEach((h) => hd.append(el('th', null, h)));
-    const th = el('thead'); th.append(hd); tb.append(th); const bd = el('tbody');
-    rows.forEach((r) => {
-      const tr = el('tr'); const td = (v, c) => tr.append(el('td', c || null, v));
-      td(thDay(r.d)); td(r.buy ? thb(r.buy) : '–'); td(r.sell ? thb(r.sell) : '–'); td(r.sell ? pthb(r.pl) : '–', tone(r.pl)); td(r.fee ? thb(r.fee) : '–'); td(pthb(r.cum));
-      td(r.unreal != null ? pthb(r.unreal) : '–', tone(r.unreal)); td(r.eq != null ? thb(r.eq) : '–'); td(r.chg != null ? pthb(r.chg) : '–', tone(r.chg)); bd.append(tr);
-    });
-    tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); box.append(w);
-    box.append(el('p', 'pf-hint', 'กำไรบนกระดาษกับมูลค่าพอร์ตจดอัตโนมัติวันที่เปิดหน้านี้ กำไรจริงนับเฉพาะที่ขายแล้ว'));
+    if (!T.tx.length) lb.append(el('li', 'empty', 'ยังไม่มีรายการ'));
   };
   const csv = () => {
-    const B = book(); const rows = [['date', 'time', 'type', 'asset', 'amount_thb', 'qty', 'unit', 'price', 'price_unit', 'fx', 'fee_thb', 'cost_or_net_thb', 'realized_thb']];
+    const B = book(); const rows = [['date', 'time', 'type', 'asset', 'amount_thb', 'qty', 'unit', 'price', 'price_unit', 'fx', 'fee_thb', 'cost_or_net_thb', 'realized_thb', 'note']];
     sorted().forEach((x) => rows.push([bkDay(x.at), new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' }), x.type, x.s || '', x.amt ?? x.thb ?? '', x.q ?? '', x.s ? (isGold(x.s) ? 'oz' : 'coin') : '', x.px ?? '', x.s ? (isGold(x.s) && x.fx ? 'USD/oz' : 'THB') : '', x.fx ?? '', x.fee ?? '',
-      x.type === 'buy' ? r2(costOf(x)) : x.type === 'sell' ? r2(netOf(x)) : '', B.real[x.id] ? r2(B.real[x.id].pl) : '']));
+      x.type === 'buy' ? r2(costOf(x)) : x.type === 'sell' ? r2(netOf(x)) : '', B.real[x.id] ? r2(B.real[x.id].pl) : '', '"' + (x.note || '').replace(/"/g, '""') + '"']));
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' })); a.download = 'valuegrab-crypto-gold.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   const setupFees = () => {
@@ -246,11 +257,11 @@
     if (!$('tr-form')) return;
     const sel = $('tr-sym'); (SP() ? SP().assets : [['GOLD'], ['BTC']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
     ['tr-type', 'tr-sym', 'tr-q', 'tr-px', 'tr-fx', 'tr-at', 'tr-thb'].forEach((k) => $(k).addEventListener('input', preview));
-    $('tr-sym').addEventListener('change', () => { nTouched = false; feeTouched = false; $('tr-fx').value = ''; preview(); });
-    $('tr-type').addEventListener('change', () => { nTouched = false; feeTouched = false; preview(); });
+    $('tr-sym').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; $('tr-fx').value = ''; } preview(); });
+    $('tr-type').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; } preview(); });
     $('tr-n').addEventListener('input', () => { nTouched = !!$('tr-n').value; preview(); });
     $('tr-fee').addEventListener('input', () => { feeTouched = true; preview(); });
-    $('tr-add').addEventListener('click', add); $('tr-csv').addEventListener('click', csv);
+    $('tr-add').addEventListener('click', add); $('tr-cancel').addEventListener('click', () => { clearForm(); $('tr-msg').textContent = ''; }); $('tr-csv').addEventListener('click', csv);
     document.addEventListener('vg:spot', draw); document.addEventListener('vg:ready', draw);
     setupFees(); preview(); draw();
   };
