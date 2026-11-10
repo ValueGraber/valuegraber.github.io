@@ -1221,9 +1221,12 @@ tr.editing td { background: var(--accent-soft); }
     <div class="f-types"><span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อหุ้น</button><button type="button" data-v="sell" aria-pressed="false">ขายหุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ได้ปันผล</button></span></div>
     <form class="pf-form f2" id="pf-form" autocomplete="off">
       <label class="for-trade for-div">หุ้น<input class="inp" id="f-sym" list="sym-list" placeholder="เช่น MSFT"></label>
+      <label class="for-trade wide2">จ่าย/รับเป็น<span class="seg" id="f-cur"><button type="button" data-v="thb" aria-pressed="true">เงินบาท</button><button type="button" data-v="usd" aria-pressed="false">ดอลลาร์ (USD)</button></span></label>
+      <label class="for-trade cur-thb"><span id="f-pay-lab">จ่ายรวม (บาท)</span><input class="inp" id="f-pay" type="number" step="any" min="0" inputmode="decimal" placeholder="ไม่ใส่ก็ได้"></label>
       <label class="for-trade">จำนวนหุ้น<input class="inp" id="f-sh" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2.5"></label>
       <label class="for-trade">ราคาต่อหุ้น ($)<input class="inp" id="f-px" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label class="for-trade">ค่าธรรมเนียม (บาท)<input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
+      <label class="for-trade cur-thb">อัตราแลกเปลี่ยน (บาท/$)<input class="inp" id="f-rate" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="for-trade"><span id="f-fee-lab">ค่าธรรมเนียม (บาท)</span><input class="inp" id="f-fee" type="number" step="any" min="0" inputmode="decimal" value="0"></label>
       <label class="for-fx wide2">ทิศทาง<span class="seg" id="f-dir"><button type="button" data-v="in" aria-pressed="true">บาท → ดอลลาร์</button><button type="button" data-v="out" aria-pressed="false">ดอลลาร์ → บาท</button></span></label>
       <label class="for-fx">เงินบาท<input class="inp" id="f-thb" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 35000"></label>
       <label class="for-fx">ได้/ใช้ดอลลาร์<input class="inp" id="f-usd" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 1040.50"></label>
@@ -3327,7 +3330,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const CASH_COLOR = '#c9c2b0';
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const isTrade = (t) => t.type === 'buy' || t.type === 'sell';
-  const cashDelta = (t) => t.type === 'buy' ? -(t.shares * t.price + (t.fee || 0)) : t.type === 'sell' ? t.shares * t.price - (t.fee || 0)
+  const cashDelta = (t) => isTrade(t) && t.cur === 'thb' ? 0 : t.type === 'buy' ? -(t.shares * t.price + (t.fee || 0)) : t.type === 'sell' ? t.shares * t.price - (t.fee || 0)
     : t.type === 'fx' ? (t.dir === 'out' ? -t.usd : t.usd) : t.type === 'div' ? t.amount - (t.tax || 0) : 0;
 
   let db = { tx: [], targets: {}, band: 5 };
@@ -3338,7 +3341,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   goal = { ...goal, ...(window.VGPrefs.get('goal', {}) || {}) };
 
   let map = {}, raw = {}, fx = null, ready = false, hist = null, histState = 'idle';
-  let fType = 'buy', fDir = 'in', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock', hFilter = 'all';
+  let fCur = (() => { try { return localStorage.getItem('vg-paycur') || 'thb'; } catch (e) { return 'thb'; } })(); setTimeout(() => setSeg('f-cur', fCur), 0); let fType = 'buy', fDir = 'in', dcaCur = 'THB', editId = null, gRange = 0, dMode = 'stock', hFilter = 'all';
 
   /* ---------- navigation ----------
      4 tabs (home, money, invest, biz). Each tab has a few pages; a page shows groups of sections (elements with data-sub) from one view.
@@ -3446,6 +3449,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       L.cash += cashDelta(t);
       if (t.type === 'fx') { L.cashOn = true; if (t.dir === 'out') { L.thbOut += t.thb; L.usdOut += t.usd; } else { L.thbIn += t.thb; L.usdIn += t.usd; } }
       if (t.type === 'div') { const n = t.amount - (t.tax || 0); L.divNet += n; if (t.date.startsWith(y)) L.divYear += n; }
+      if (isTrade(t) && t.cur === 'thb' && t.rate > 0) { const u = t.shares * t.price + (t.type === 'buy' ? 1 : -1) * (t.fee || 0); if (t.type === 'buy') { L.usdIn += u; L.thbIn += u * t.rate; } else { L.usdOut += u; L.thbOut += u * t.rate; } }
     });
     L.avgRate = L.usdIn ? L.thbIn / L.usdIn : null;
     return L;
@@ -3746,11 +3750,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       const tr = el('tr', t.id === editId ? 'editing' : null); const [tn, tc] = TYPE_TH(t); const cd = cashDelta(t);
       let cells;
       if (isTrade(t)) {
-        const feeTxt = t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
+        const feeTxt = t.cur === 'thb' ? `จ่ายเป็นบาท เรท ${t.rate} · ค่าธรรมเนียม ${(t.feeThb || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท` : t.cur === 'usd' ? `จ่ายเป็นดอลลาร์ · ค่าธรรมเนียม ${usd(t.fee || 0)}` : t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
         cells = [t.sym, qty(t.shares, 6) + (map[t.sym] && map[t.sym].crypto ? ' เหรียญ' : ' หุ้น'), usd(t.price), feeTxt];
       } else if (t.type === 'fx') cells = ['–', baht(t.thb), 'เรท ' + (t.thb / t.usd).toFixed(2), ''];
       else cells = [t.sym, '', '', t.tax ? 'ภาษี ' + usd(t.tax) : ''];
-      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], [usdS(cd), cd >= 0 ? 'pos' : '']].forEach(([v, c]) => tr.append(el('td', c || null, v)));
+      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], isTrade(t) && t.cur === 'thb' ? [(t.type === 'buy' ? '−' : '+') + baht(t.shares * t.price * t.rate + (t.type === 'buy' ? 1 : -1) * (t.feeThb || 0)), t.type === 'sell' ? 'pos' : ''] : [usdS(cd), cd >= 0 ? 'pos' : '']].forEach(([v, c]) => tr.append(el('td', c || null, v)));
       const e = el('button', 'edit', '✎'); e.type = 'button'; e.title = 'แก้ไข'; e.setAttribute('aria-label', 'แก้ไขรายการ'); e.addEventListener('click', () => startEdit(t));
       const d = el('button', 'del', '✕'); d.type = 'button'; d.title = 'ลบ'; d.setAttribute('aria-label', 'ลบรายการ');
       d.addEventListener('click', () => { if (confirm(`ลบรายการ${tn} ${t.sym || baht(t.thb)} วันที่ ${dTH(t.date)}?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); if (editId === t.id) endEdit(); save(); render(); } });
@@ -3874,11 +3878,28 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const hint = (m, err) => { $('f-hint').textContent = m || ''; $('f-hint').className = err ? 'pf-err' : 'pf-hint'; };
   const setType = (v) => {
     fType = v; setSeg('f-type', v); const grp = isTrade({ type: v }) ? 'trade' : v;
-    document.querySelectorAll('#pf-form label').forEach((l) => { const fors = [...l.classList].filter((c) => c.startsWith('for-')); l.hidden = fors.length > 0 && !fors.includes('for-' + grp); });
+    document.querySelectorAll('#pf-form label').forEach((l) => { const fors = [...l.classList].filter((c) => c.startsWith('for-')); l.hidden = (fors.length > 0 && !fors.includes('for-' + grp)) || (l.classList.contains('cur-thb') && fCur !== 'thb'); });
+    $('f-fee-lab').textContent = fCur === 'thb' ? 'ค่าธรรมเนียม (บาท)' : 'ค่าธรรมเนียม ($)'; $('f-pay-lab').textContent = v === 'sell' ? 'ได้รับรวม (บาท)' : 'จ่ายรวม (บาท)';
+    if (fCur === 'thb' && !$('f-rate').value && fx) $('f-rate').value = fx.toFixed(2);
     hint(''); if (v === 'div') divSuggest(); if (v === 'fx') fxInfo(); else symInfo();
   };
   segs('f-type', (v) => setType(v));
   segs('f-dir', (v) => { fDir = v; fxInfo(); });
+  segs('f-cur', (v) => { fCur = v; try { localStorage.setItem('vg-paycur', v); } catch (e) { /* ignore */ } setType(fType); tradeInfo(); });
+  /* paying in baht: shares from the baht total when shares were not typed, and a running summary */
+  const tradeInfo = () => {
+    if (!isTrade({ type: fType })) return;
+    const sh = Number($('f-sh').value), px = Number($('f-px').value), fee = Number($('f-fee').value) || 0;
+    if (fCur === 'thb') {
+      const r = Number($('f-rate').value), pay = Number($('f-pay').value);
+      if (pay > 0 && px > 0 && r > 0 && !$('f-sh').dataset.touched) { const n = fType === 'buy' ? (pay - fee) / r / px : (pay + fee) / r / px; $('f-sh').value = n > 0 ? +n.toFixed(6) : ''; }
+      const n = Number($('f-sh').value);
+      if (n > 0 && px > 0 && r > 0) { const u = n * px, b = u * r; hint(`มูลค่าหุ้น $${u.toFixed(2)} × เรท ${r} = ${baht(b)} ${fType === 'buy' ? 'จ่ายรวม ' + baht(b + fee) : 'ได้รับสุทธิ ' + baht(b - fee)} (ค่าธรรมเนียม ${baht(fee)})`); }
+      else hint('ใส่ราคาต่อหุ้นเป็นดอลลาร์ เรทจากสลิป แล้วใส่จำนวนหุ้น หรือใส่ยอดบาทรวมให้ระบบคำนวณจำนวนหุ้น');
+    } else if (sh > 0 && px > 0) hint(`มูลค่าหุ้น $${(sh * px).toFixed(2)} ${fType === 'buy' ? 'จ่ายรวม $' + (sh * px + fee).toFixed(2) : 'ได้รับสุทธิ $' + (sh * px - fee).toFixed(2)} ใช้เงินดอลลาร์ในพอร์ต`);
+  };
+  ['f-pay', 'f-px', 'f-rate', 'f-fee'].forEach((id) => $(id).addEventListener('input', tradeInfo));
+  $('f-sh').addEventListener('input', () => { $('f-sh').dataset.touched = $('f-sh').value ? '1' : ''; if (!$('f-sh').value) delete $('f-sh').dataset.touched; tradeInfo(); });
   segs('dca-cur', (v) => { dcaCur = v; dcaS.cur = v; keepDca(); render(); });
   segs('dca-per', (v) => { dcaS.per = v; keepDca(); render(); document.dispatchEvent(new Event('vg:data')); });
   $('dca-skip').addEventListener('change', () => { dcaS.skip = $('dca-skip').checked; keepDca(); render(); });
@@ -3922,13 +3943,17 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   $('f-sym').addEventListener('input', symInfo);
   $('f-date').addEventListener('change', () => { if (fType === 'div') divSuggest(); });
   const clearForm = () => {
-    ['f-sh', 'f-px', 'f-sym', 'f-thb', 'f-usd', 'f-amt', 'f-tax'].forEach((id) => { $(id).value = ''; delete $(id).dataset.touched; });
-    $('f-fee').value = '0'; $('f-date').value = today();
+    ['f-sh', 'f-px', 'f-sym', 'f-thb', 'f-usd', 'f-amt', 'f-tax', 'f-pay'].forEach((id) => { $(id).value = ''; delete $(id).dataset.touched; });
+    $('f-fee').value = '0'; $('f-rate').value = fx ? fx.toFixed(2) : ''; $('f-date').value = today();
   };
   const startEdit = (t) => {
     editId = t.id; clearForm(); setType(t.type); $('f-date').value = t.date;
     ['f-px', 'f-thb', 'f-usd', 'f-amt', 'f-tax'].forEach((id) => { $(id).dataset.touched = '1'; });
-    if (isTrade(t)) { $('f-sym').value = t.sym; $('f-sh').value = t.shares; $('f-px').value = t.price; $('f-fee').value = t.feeThb != null ? t.feeThb : fx ? +((t.fee || 0) * fx).toFixed(2) : 0; }
+    if (isTrade(t)) {
+      fCur = t.cur === 'usd' ? 'usd' : t.cur === 'thb' ? 'thb' : t.feeThb != null ? 'usd' : 'usd'; setSeg('f-cur', fCur); setType(t.type);
+      $('f-sym').value = t.sym; $('f-sh').value = t.shares; $('f-sh').dataset.touched = '1'; $('f-px').value = t.price; $('f-rate').value = t.rate || (fx ? fx.toFixed(2) : '');
+      $('f-fee').value = fCur === 'thb' ? (t.feeThb != null ? t.feeThb : +((t.fee || 0) * (t.rate || fx || 0)).toFixed(2)) : +(t.fee || 0).toFixed(2);
+    }
     else if (t.type === 'fx') { fDir = t.dir || 'in'; setSeg('f-dir', fDir); $('f-thb').value = t.thb; $('f-usd').value = t.usd; }
     else { $('f-sym').value = t.sym; $('f-amt').value = t.amount; $('f-tax').value = t.tax || 0; }
     $('f-title').textContent = 'แก้ไขรายการ' + (t.sym ? ' ' + t.sym : ''); $('f-sub').textContent = 'แก้ตัวเลขที่ลงผิด แล้วกด "บันทึกการแก้ไข"';
@@ -3946,10 +3971,10 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const old = editId ? db.tx.find((t) => t.id === editId) : null; const id = old ? old.id : newId();
     let rec, err = null, done;
     if (isTrade({ type: fType })) {
-      const sh = Number($('f-sh').value), px = Number($('f-px').value), feeThb = Number($('f-fee').value) || 0;
-      err = !sym ? 'ใส่ตัวย่อหุ้นก่อน' : !(sh > 0) ? 'ใส่จำนวนหุ้นมากกว่า 0' : !(px > 0) ? 'ใส่ราคาต่อหุ้นมากกว่า 0' : !date ? 'เลือกวันที่' : feeThb > 0 && !fx ? 'ยังโหลดอัตราแลกเปลี่ยนไม่เสร็จ ลองใหม่อีกครั้ง' : null;
-      rec = { id, sym, type: fType, shares: sh, price: px, fee: feeThb > 0 && fx ? feeThb / fx : 0, feeThb, date };
-      if (old && isTrade(old) && old.feeThb == null && Math.abs(feeThb - (old.fee || 0) * (fx || 0)) < 0.01) rec.fee = old.fee || 0;
+      const sh = Number($('f-sh').value), px = Number($('f-px').value), feeIn = Number($('f-fee').value) || 0, rate = Number($('f-rate').value);
+      err = !sym ? 'ใส่ตัวย่อหุ้นก่อน' : !(sh > 0) ? 'ใส่จำนวนหุ้นมากกว่า 0' : !(px > 0) ? 'ใส่ราคาต่อหุ้นมากกว่า 0' : !date ? 'เลือกวันที่' : fCur === 'thb' && !(rate > 10 && rate < 100) ? 'ใส่อัตราแลกเปลี่ยน (บาทต่อดอลลาร์) ตามสลิป' : null;
+      rec = fCur === 'thb' ? { id, sym, type: fType, shares: sh, price: px, cur: 'thb', rate, fee: rate > 0 ? feeIn / rate : 0, feeThb: feeIn, date }
+        : { id, sym, type: fType, shares: sh, price: px, cur: 'usd', fee: feeIn, date };
       done = `${old ? 'แก้ไข' : 'บันทึก'}${fType === 'buy' ? 'ซื้อ' : 'ขาย'} ${sym} ${qty(sh)} หุ้นแล้ว`;
     } else if (fType === 'fx') {
       const t = Number($('f-thb').value), u = Number($('f-usd').value);
@@ -3980,7 +4005,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     if (!t || !/^\d{4}-\d{2}-\d{2}$/.test(t.date)) return null;
     const base = { id: String(t.id || newId()), date: t.date };
     if ((t.type === 'buy' || t.type === 'sell') && typeof t.sym === 'string' && t.shares > 0 && t.price > 0)
-      return { ...base, sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), ...(t.feeThb != null && isFinite(+t.feeThb) ? { feeThb: +t.feeThb } : {}) };
+      return { ...base, sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), ...(t.feeThb != null && isFinite(+t.feeThb) ? { feeThb: +t.feeThb } : {}), ...(t.cur === 'thb' || t.cur === 'usd' ? { cur: t.cur } : {}), ...(+t.rate > 0 ? { rate: +t.rate } : {}) };
     if (t.type === 'fx' && +t.thb > 0 && +t.usd > 0) return { ...base, type: 'fx', dir: t.dir === 'out' ? 'out' : 'in', thb: +t.thb, usd: +t.usd };
     if (t.type === 'div' && typeof t.sym === 'string' && +t.amount > 0) return { ...base, type: 'div', sym: t.sym.toUpperCase().slice(0, 12), amount: +t.amount, tax: Math.max(0, +(t.tax || 0)) };
     return null;
