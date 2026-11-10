@@ -56,11 +56,11 @@
       if (x.type === 'buy') inv += costOf(x); if (x.type === 'sell') inv -= netOf(x);
       if (x.type === 'dep') { cash += x.thb; dep += x.thb; }
       else if (x.type === 'wd') { cash -= x.thb; dep -= x.thb; }
-      else if (x.type === 'buy') { const p = h[x.s] || (h[x.s] = { q: 0, cost: 0 }); const c = costOf(x); cash -= c; p.q += x.q; p.cost += c; }
+      else if (x.type === 'buy') { const p = h[x.s] || (h[x.s] = { q: 0, cost: 0, usd: 0 }); const c = costOf(x); cash -= c; p.q += x.q; p.cost += c; if (x.fx) p.usd += x.q * x.px; }
       else if (x.type === 'sell') {
         const p = h[x.s] || { q: 0, cost: 0 }; const avg = p.q > 0 ? p.cost / p.q : 0; const q = Math.min(x.q, p.q); const n = netOf(x);
         cash += n; real[x.id] = { pl: n - avg * q, avg };
-        if (h[x.s]) { p.q -= q; p.cost -= avg * q; if (p.q <= 1e-12) delete h[x.s]; }
+        if (h[x.s]) { const k = p.q > 0 ? q / p.q : 1; p.usd = (p.usd || 0) * (1 - k); p.q -= q; p.cost -= avg * q; if (p.q <= 1e-12) delete h[x.s]; }
       }
     });
     /* no deposits recorded: a plain investment journal, money in = what the buys cost (net of sells) */
@@ -193,6 +193,8 @@
       card('กำไรบนกระดาษ', pthb(V.unreal), 'ยังไม่ได้ขาย ราคาลงก็หายได้ (หักค่าธรรมเนียมขายแล้ว)', tone(V.unreal)),
       card('กำไรจริง (ขายแล้ว)', pthb(realAll), `ล็อกไว้แล้ว ${Math.round(locked * 100)}% ของกำไรทั้งหมด · ค่าธรรมเนียมรวม ${thb(feeAll)}`, tone(realAll)),
       card('เทียบเงินที่ลงไป', B.dep > 0 ? pthb(V.eq - B.dep) : '–', B.dep > 0 ? `ลงไปสุทธิ ${thb(B.dep)} · ${pct(V.eq / B.dep - 1)}` : 'ยังไม่มีรายการ', B.dep > 0 ? tone(V.eq - B.dep) : ''));
+    const fxl = $('tr-fx-now'); if (fxl) { const fx = fxNow(); const g = B.h.GOLD; const avg = g && g.usd > 0 ? g.cost / g.usd : null;
+      fxl.textContent = `ค่าเงินวันนี้ ${fx.toFixed(2)} บาท/$` + (avg ? ` · เรทเฉลี่ยที่ซื้อทองไว้ ${avg.toFixed(2)} บาท/$ (${fx >= avg ? 'บาทอ่อนลง ทองที่ถือมีค่าเป็นบาทมากขึ้น' : 'บาทแข็งขึ้น ตอนนี้แลกดอลลาร์ได้ถูกกว่า'})` : '') + ' · ช่องเรทในฟอร์มเติมเรทวันนี้ให้ แก้เป็นเรทจริงจากสลิป'; }
     const P = plan(B, V);
     /* holdings */
     const hb = $('tr-hold'); hb.replaceChildren(); const hs = Object.entries(B.h);
@@ -203,6 +205,11 @@
       const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(s)), el('small', null, `${qty(p.q)} ${unit(s)} · ทุน ${thb(p.cost)} (เฉลี่ย ${thb(avg)}${isGold(s) ? '/oz' : ''})`));
       const now = el('div', 'sw-now'); now.append(el('b', null, thb(r.v)), r.px == null ? el('small', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('small', tone(r.u), `บนกระดาษ ${pthb(r.u)} (${pct(r.u / p.cost)}) · ${Math.round(a.w * 100)}% ของพอร์ต${a.t ? ' เป้า ' + Math.round(a.t * 100) + '%' : ''}`));
       row.append(who, now);
+      if (isGold(s) && p.usd > 0 && SP() && SP().usd(s) != null) {
+        const fx = fxNow(), avgFx = p.cost / p.usd, vUsd = p.q * SP().usd(s);
+        const fromGold = (vUsd - p.usd) * avgFx, fromFx = vUsd * (fx - avgFx);
+        row.append(el('small', 'sw-lvl', `ต้นทุน $${p.usd.toFixed(2)} ที่เรทเฉลี่ย ${avgFx.toFixed(2)} บาท/$ · ตอนนี้ $${vUsd.toFixed(2)} เรท ${fx.toFixed(2)} → กำไรจากราคาทอง ${pthb(fromGold)} · จากค่าเงินบาท ${pthb(fromFx)}`));
+      }
       if (a.st) { const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + SP().G[a.st.g][0], SP().G[a.st.g][1]), el('span', 'tag ' + SP().H[a.st.h][0], SP().H[a.st.h][1])); row.append(tags); }
       const act = el('div', 'sw-act');
       a.acts.forEach(([k, t, kind, amt, lab]) => { row.append(el('div', 'sw-adv sw-' + k, t + (amt ? ` ≈ ${thb(amt)}` : ''))); if (kind === 'sell') act.append(sellBtn(lab, s, amt)); if (kind === 'buy') act.append(buyBtn(lab, s, amt)); });
