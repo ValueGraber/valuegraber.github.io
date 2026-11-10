@@ -54,22 +54,25 @@
   /* ---------- form ---------- */
   let plan = null, feeTouched = false;
   const F = () => ({ type: $('tr-type').value, at: (() => { const v = $('tr-at').value ? new Date($('tr-at').value).getTime() : NaN; return isFinite(v) && Math.abs(v - Date.now()) > 120e3 ? v : Date.now(); })(),
-    s: $('tr-sym').value, q: +$('tr-q').value, px: +$('tr-px').value, thb: +$('tr-thb').value });
+    s: $('tr-sym').value, amt: +$('tr-q').value, px: +$('tr-px').value, thb: +$('tr-thb').value });
+  const qOf = (f) => { if (!(f.amt > 0 && f.px > 0)) return 0; let q = f.amt / f.px; if (f.type === 'sell') { const p = book().h[f.s]; if (p && Math.abs(q - p.q) <= p.q * 0.005) q = p.q; } return q; };
   const preview = () => {
     const f = F(); const trade = f.type === 'buy' || f.type === 'sell';
     ['tr-sym-l', 'tr-q-l', 'tr-px-l', 'tr-fee-l'].forEach((k) => { $(k).hidden = !trade; }); $('tr-thb-l').hidden = trade;
-    $('tr-q-lab').textContent = `จำนวน (${unit(f.s)})`; $('tr-px-lab').textContent = `ราคาที่ได้ (บาทต่อ${unit(f.s)})`;
+    $('tr-q-lab').textContent = f.type === 'sell' ? 'ขายเป็นเงิน (บาท)' : 'ซื้อเป็นเงิน (บาท)'; $('tr-px-lab').textContent = `ราคาที่ได้ (บาทต่อ${unit(f.s)})`;
     const out = $('tr-prev');
     if (!trade) { out.textContent = f.type === 'dep' ? 'เงินบาทที่โอนเข้า Binance TH หรือ Dime เพื่อลงทุนส่วนนี้' : 'เงินบาทที่ถอนออก'; return; }
+    f.q = qOf(f);
     if (!(f.q > 0 && f.px > 0)) { out.textContent = `ค่าธรรมเนียมคิดให้อัตโนมัติ: ${isGold(f.s) ? `ทอง Dime ${T.fees.gold}%` : `Binance TH ${T.fees.crypto}%`} · ใส่จำนวนกับราคาก่อน`; return; }
     if (!feeTouched) $('tr-fee').value = feeOf(f.s, f.q, f.px).toFixed(2);
     const fee = +$('tr-fee').value || 0, v = f.q * f.px; let tail = '';
     if (f.type === 'sell') { const p = book().h[f.s]; if (p) { const avg = p.cost / p.q, pl = v - fee - avg * Math.min(f.q, p.q); tail = ` · กำไรไม้นี้ ${pthb(pl)} (${pct(pl / (avg * Math.min(f.q, p.q)))}) จากทุนเฉลี่ย ${thb(avg)}`; } }
-    out.textContent = `มูลค่า ${thb(v)} ค่าธรรมเนียม ${thb(fee)} · ${f.type === 'buy' ? 'จ่ายรวม ' + thb(v + fee) : 'ได้รับ ' + thb(v - fee)}${tail}`;
+    out.textContent = `ได้ ${qty(f.q)} ${unit(f.s)} · มูลค่า ${thb(v)} ค่าธรรมเนียม ${thb(fee)} · ${f.type === 'buy' ? 'จ่ายรวม ' + thb(v + fee) : 'ได้รับ ' + thb(v - fee)}${tail}`;
   };
   const add = () => {
     const f = F(); const trade = f.type === 'buy' || f.type === 'sell'; const msg = $('tr-msg');
-    if (trade && !(f.q > 0 && f.px > 0)) { msg.textContent = 'ใส่จำนวนและราคาให้ครบ'; return; }
+    f.q = qOf(f);
+    if (trade && !(f.q > 0 && f.px > 0)) { msg.textContent = 'ใส่จำนวนเงินและราคาให้ครบ'; return; }
     if (!trade && !(f.thb > 0)) { msg.textContent = 'ใส่จำนวนเงินบาท'; return; }
     const x = { id: uid(), type: f.type, at: f.at };
     if (trade) {
@@ -84,7 +87,7 @@
   };
   const prefill = (o) => {
     $('tr-type').value = o.type; if (o.s) $('tr-sym').value = o.s;
-    $('tr-q').value = o.q != null ? +(+o.q).toPrecision(6) : ''; $('tr-px').value = o.px != null ? +(+o.px).toPrecision(7) : ''; $('tr-at').value = '';
+    $('tr-q').value = o.q != null && o.px != null ? Math.round(o.q * o.px * 100) / 100 : ''; $('tr-px').value = o.px != null ? +(+o.px).toPrecision(7) : ''; $('tr-at').value = '';
     feeTouched = false; plan = o.plan || null; preview();
     if (window.VGNav) window.VGNav.go('scan', 'tport');
     setTimeout(() => { $('tr-form').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('tr-q').focus({ preventScroll: true }); }, 80);
