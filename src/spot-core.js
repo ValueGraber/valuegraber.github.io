@@ -1,8 +1,9 @@
-/* spot core: long-term entry timing for crypto majors and gold on daily bars (spot, no leverage).
-   bars: [{t, o, h, l, c, v}] oldest first, closed bars only. opt.gold = true uses gold thresholds. */
+/* spot core: buy-and-hold timing for crypto majors and gold on daily bars (no stop-loss / take-profit trading).
+   Two questions per asset: is it worth holding (long trend), and is now a good price to add (timing).
+   bars: [{t, o, h, l, c, v}] oldest first, closed bars only. gold = true uses gold thresholds. */
 const SPC = (() => {
   const sma = (a, n) => { const o = new Array(a.length).fill(null); let s = 0; a.forEach((x, i) => { s += x; if (i >= n) s -= a[i - n]; if (i >= n - 1) o[i] = s / n; }); return o; };
-  const ema = (a, n) => { const k = 2 / (n + 1); const o = []; let e = null; a.forEach((x, i) => { e = i === 0 ? x : x * k + e * (1 - k); o.push(e); }); return o; };
+  const ema = (a, n) => { const k = 2 / (n + 1); let e = null; return a.map((x, i) => (e = i ? x * k + e * (1 - k) : x)); };
   const rsi = (c, n = 14) => {
     const o = new Array(c.length).fill(null); let g = 0, l = 0;
     for (let i = 1; i < c.length; i++) {
@@ -12,129 +13,52 @@ const SPC = (() => {
     }
     return o;
   };
-  const atr = (b, n = 14) => {
-    const o = new Array(b.length).fill(null); let a = 0;
-    for (let i = 1; i < b.length; i++) {
-      const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c));
-      if (i <= n) { a += tr / n; if (i === n) o[i] = a; } else { a = (a * (n - 1) + tr) / n; o[i] = a; }
-    }
-    return o;
-  };
-  const ind = (b) => {
-    const c = b.map((x) => x.c); const ath = []; let m = -Infinity; b.forEach((x) => { m = Math.max(m, x.h); ath.push(m); });
-    return { s50: sma(c, 50), s200: sma(c, 200), e20: ema(c, 20), rsi: rsi(c), atr: atr(b), vol: sma(b.map((x) => x.v), 20), ath };
-  };
-  const clamp = (x, a, z) => Math.max(a, Math.min(z, x));
-  const lowest = (b, a, z) => { let m = Infinity; for (let k = Math.max(0, a); k <= z; k++) m = Math.min(m, b[k].l); return m; };
-  const highest = (b, a, z) => { let m = -Infinity; for (let k = Math.max(0, a); k <= z; k++) m = Math.max(m, b[k].h); return m; };
+  const ind = (b) => { const c = b.map((x) => x.c); const ath = []; let m = -Infinity; b.forEach((x) => { m = Math.max(m, x.h); ath.push(m); }); return { c, s50: sma(c, 50), s200: sma(c, 200), e20: ema(c, 20), rsi: rsi(c), ath }; };
+  /* price ÷ 200-day average: normal top and "too hot" line */
+  const LIM = (gold) => (gold ? { norm: 1.08, hot: 1.15 } : { norm: 1.35, hot: 1.6 });
+  const W = { buy: 2, knife: 1.5, dca: 1, wait: 0.5, hot: 0 };
 
-  /* what the market looks like at closed bar i (no setup needed) */
-  const regime = (b, I, i, gold) => {
-    const x = b[i], s50 = I.s50[i], s200 = I.s200[i], A = I.atr[i], r = I.rsi[i];
-    if (s200 == null) return null;
-    const dd = 1 - x.c / I.ath[i];
-    const hot = r >= 72 || x.c - s50 > 3 * A || x.c > s200 * (gold ? 1.25 : 1.7);
-    const trend = x.c > s200 && s50 > s200 ? 'bull' : x.c < s200 && s50 < s200 ? 'bear' : 'turn';
-    return { trend, hot, dd, rsi: r, s50, s200, atr: A, zone: [Math.max(s200, s50 - A), s50 + 0.5 * A] };
+  /* timing grade at bar i (px = live price for the last bar) */
+  const gradeAt = (b, I, i, gold, px) => {
+    const c = px ?? I.c[i], s50 = I.s50[i], s200 = I.s200[i], r = I.rsi[i]; if (s200 == null) return null;
+    const mm = c / s200, L = LIM(gold); let lo5 = Infinity; for (let k = i - 4; k <= i; k++) lo5 = Math.min(lo5, b[k].l);
+    let g;
+    if (mm > L.hot || r >= 72) g = 'hot';
+    else if (mm <= 1) g = c > I.e20[i] ? 'buy' : 'knife';
+    else if (c > s200 && s50 > s200 && lo5 <= s50 * 1.02 && r <= 50) g = 'buy';
+    else if (mm <= L.norm && r < 65) g = 'dca';
+    else g = 'wait';
+    return { g, mm, rsi: r, dd: 1 - c / I.ath[i], s50, s200 };
   };
-
-  /* buy setup at closed bar i, or null. kinds: pb = pullback in an uptrend, rc = back above the 200-day, dv = deep discount and steadying */
-  const setupAt = (b, I, i, gold) => {
-    if (i < 210) return null;
-    const g = regime(b, I, i, gold); if (!g || g.hot) return null;
-    const x = b[i], A = g.atr; const maxStop = gold ? 0.12 : 0.25;
-    let kind = null;
-    if (g.trend === 'bull' && lowest(b, i - 4, i) <= g.s50 + 0.5 * A && x.c >= g.s50 - 1.5 * A && g.rsi <= 55 && x.c > x.o && x.c > b[i - 1].h) kind = 'pb';
-    else if (x.c > g.s200 && x.c > g.s50 && I.s200[i] >= I.s200[i - 10] * 0.995 && [...Array(10).keys()].some((k) => b[i - 1 - k].c < I.s200[i - 1 - k])) kind = 'rc';
-    else if (x.c < g.s200 && g.dd >= (gold ? 0.15 : 0.55) && x.c > I.e20[i] && g.rsi >= 40 && g.rsi <= 60) kind = 'dv';
-    if (!kind) return null;
-    const base = kind === 'dv' ? lowest(b, i - 60, i) : kind === 'rc' ? Math.min(lowest(b, i - 20, i), g.s200) : lowest(b, i - 20, i);
-    const entry = x.c;
-    const sl = Math.min(entry - A, Math.max(base - 1.0 * A, entry * (1 - maxStop)));
-    const R = entry - sl;
-    const vr = I.vol[i] ? x.v / I.vol[i] : 1;
-    const score = (kind === 'pb' ? 60 : kind === 'rc' ? 55 : 42) + 15 * clamp((g.s50 / g.s200 - 1) / 0.2, 0, 1) * (kind === 'dv' ? 0 : 1)
-      + 15 * (1 - clamp(Math.abs(g.rsi - 47) / 20, 0, 1)) + 10 * clamp((vr - 0.8) / 1.2, 0, 1) - 10 * clamp((R / entry) / maxStop - 0.5, 0, 1);
-    return { kind, t: x.t, i, entry, sl, tp1: entry + 1.5 * R, tp2: entry + 3 * R, R, rsi: g.rsi, vr, dd: g.dd, score: Math.round(clamp(score, 0, 100)) };
+  /* worth holding: long trend from the 200-day line and the past year, against BTC for other coins */
+  const holdAt = (I, i, ret1yBtc) => {
+    const s = I.s200[i], s0 = I.s200[i - 60]; if (s == null || s0 == null) return null;
+    const c = I.c[i], slope = s / s0 - 1, ret1y = i >= 365 ? c / I.c[i - 365] - 1 : null;
+    const rel = ret1y != null && ret1yBtc != null ? (1 + ret1y) / (1 + ret1yBtc) - 1 : null;
+    let h = 'ok';
+    if (c > s && slope > 0) h = 'good';
+    else if (c < s && slope < 0 && (rel == null || rel < -0.2)) h = 'weak';
+    return { h, slope, ret1y, rel };
   };
-
-  /* thirds: 1/3 at TP1 (+1.5R) then stop to entry, 1/3 at TP2 (+3R), last third rides until a close below the 50-day. */
-  const followIdx = (b, I, s, maxBars = 365) => {
-    let stage = 0, r = 0, n = 0;
-    for (let k = s.i + 1; k < b.length; k++) {
-      const x = b[k]; n++;
-      if (stage === 0) {
-        if (x.l <= s.sl) return { done: true, res: 'sl', r: -1, bars: n, k };
-        if (x.h >= s.tp1) { r += 0.5; stage = 1; if (x.h >= s.tp2) { r += 1; stage = 2; } continue; }
-      }
-      if (stage === 1) {
-        if (x.l <= s.entry) return { done: true, res: 'be', r, bars: n, k };
-        if (x.h >= s.tp2) { r += 1; stage = 2; continue; }
-      }
-      if (stage === 2) {
-        if (x.l <= s.entry) return { done: true, res: 'tp2', r, bars: n, k };
-        if (I.s50[k] != null && x.c < I.s50[k]) return { done: true, res: 'trail', r: r + (x.c - s.entry) / s.R / 3, bars: n, k };
-      }
-      if (n >= maxBars) return { done: true, res: 'time', r: r + (x.c - s.entry) / s.R * (stage === 0 ? 1 : stage === 1 ? 2 / 3 : 1 / 3), bars: n, k };
-    }
-    return { done: false, stage, r, bars: n };
+  const status = (b, live, gold, btcRet1y) => {
+    if (!b || b.length < 270) return null;
+    const I = ind(b), n = b.length - 1; const t = gradeAt(b, I, n, gold, live); const h = holdAt(I, n, gold ? null : btcRet1y);
+    const px = live ?? I.c[n];
+    const score = (t.g === 'buy' ? 3 : t.g === 'knife' ? 2 : t.g === 'dca' ? 1.5 : t.g === 'wait' ? 0 : -1) + (h.h === 'good' ? 2 : h.h === 'ok' ? 1 : -2) + Math.max(-1, Math.min(1, (1.2 - t.mm) * 2));
+    /* a better price to wait for: the 200-day line, or the 50-day line in an uptrend */
+    const better = t.g === 'hot' || t.g === 'wait' ? (t.s50 > t.s200 && t.s50 < px ? t.s50 : t.s200) : null;
+    return { ...t, ...h, px, score, better, ret1y: h.ret1y };
   };
+  const ret1y = (b) => (b && b.length > 366 ? b[b.length - 1].c / b[b.length - 366].c - 1 : null);
 
-  /* newest valid setup in the last 5 closed bars, judged against the live price */
-  const scan = (b, live, gold) => {
-    if (!b || b.length < 220) return null;
-    const I = ind(b); const n = b.length - 1; const px = live ?? b[n].c;
-    for (let i = n; i >= n - 4; i--) {
-      const s = setupAt(b, I, i, gold); if (!s) continue;
-      let hit = false; for (let k = i + 1; k <= n; k++) if (b[k].l <= s.sl || b[k].h >= s.tp1) hit = true;
-      if (hit || px <= s.sl || px >= s.tp1 || px > s.entry + 0.5 * s.R) return null;
-      const age = n - i;
-      return { ...s, age, price: px, score: Math.max(0, s.score - age * 3 - Math.round(Math.max(0, px - s.entry) / s.R * 20)) };
-    }
-    return null;
+  /* buying more on good days and less on hot days vs the same amount every day: how much cheaper is the average cost? */
+  const timingTest = (b, gold) => {
+    if (!b || b.length < 300) return null;
+    const I = ind(b); let A = 0, B = 0, Aw = 0, Bw = 0; const cnt = {};
+    for (let i = 210; i < b.length; i++) { const t = gradeAt(b, I, i, gold); const w = W[t.g]; cnt[t.g] = (cnt[t.g] || 0) + 1; A += 1; B += 1 / I.c[i]; Aw += w; Bw += w / I.c[i]; }
+    const dca = A / B, tim = Aw / Bw;
+    return { from: b[210].t, days: A, dca, tim, better: 1 - tim / dca, cnt, hold: I.c[I.c.length - 1] / I.c[210] - 1 };
   };
-
-  /* the rule replayed over all history: one trade at a time */
-  const backtest = (b, gold) => {
-    if (!b || b.length < 260) return null;
-    const I = ind(b); const out = []; let i = 210;
-    while (i < b.length - 1) {
-      const s = setupAt(b, I, i, gold);
-      if (!s) { i++; continue; }
-      const f = followIdx(b, I, s);
-      out.push({ t: s.t, kind: s.kind, entry: s.entry, ...f });
-      if (!f.done) break; i = f.k + 1;
-    }
-    const d = out.filter((x) => x.done);
-    const hold = b[b.length - 1].c / b[210].c - 1;
-    return { trades: out, n: d.length, open: out.length - d.length, win: d.length ? d.filter((x) => x.r > 0).length / d.length : null,
-      avg: d.length ? d.reduce((a, x) => a + x.r, 0) / d.length : null, sum: d.reduce((a, x) => a + x.r, 0), from: b[210].t, hold };
-  };
-
-  /* a plain label for any asset right now */
-  const status = (b, live, gold) => {
-    if (!b || b.length < 220) return null;
-    const I = ind(b); const n = b.length - 1; const g = regime(b, I, n, gold); const px = live ?? b[n].c;
-    let k = 'wait', t;
-    if (g.hot) { k = 'hot'; t = 'ร้อนแรง ราคาวิ่งเร็วเกินไป อย่าไล่ซื้อ รอย่อ'; }
-    else if (g.trend === 'bull') { k = px > g.zone[1] ? 'up' : px >= g.zone[0] ? 'zone' : 'deep'; t = k === 'up' ? 'ขาขึ้น รอราคาย่อลงมาในโซนซื้อ' : k === 'zone' ? 'ขาขึ้น ราคาอยู่ในโซนซื้อ รอแท่งวันปิดเด้งยืนยัน' : 'ขาขึ้นแต่ย่อลึกใกล้เส้น 200 วัน ถ้าหลุดเส้นนี้จะเสียทรง รอดูก่อน'; }
-    else if (g.trend === 'bear') { k = 'down'; t = g.dd >= (gold ? 0.15 : 0.55) ? 'ขาลง แต่ลงมาลึกแล้ว รอให้ราคาหยุดลงก่อน' : 'ขาลง ยังไม่ควรรับ'; }
-    else { k = 'turn'; t = 'ไซด์เวย์ กำลังเปลี่ยนทิศ รอให้ชัดก่อน'; }
-    return { k, t, ...g, px, s50: I.s50[n] };
-  };
-
-  /* advice for a holding with a plan {entry, sl, tp1, tp2, stage} */
-  const advise = (p, px, s50) => {
-    if (px == null) return { k: 'wait', t: 'รอราคา' };
-    const stage = p.stage || 0;
-    if (stage === 0 && px <= p.sl) return { k: 'out', t: 'หลุดจุดยอมรับว่าผิด ขายตัดขาดทุนทั้งหมด' };
-    if (stage >= 1 && px <= p.entry) return { k: 'out', t: 'ราคากลับมาที่ทุน ขายส่วนที่เหลือ ไม้นี้ยังมีกำไรจากที่ขายไปก่อน' };
-    if (stage < 2 && px >= p.tp2) return { k: 'tp', t: 'ถึงเป้าสองแล้ว ขายอีก 1/3 ที่เหลือถือจนราคาปิดหลุดเส้น 50 วัน' };
-    if (stage < 1 && px >= p.tp1) return { k: 'tp', t: 'ถึงเป้าแรก ขาย 1/3 แล้วจุดตัดขาดทุนจะเลื่อนมาที่ทุน' };
-    if (stage >= 2 && s50 != null && px < s50) return { k: 'out', t: 'ราคาหลุดเส้น 50 วัน ขายส่วนสุดท้าย' };
-    return { k: 'hold', t: stage === 0 ? 'ถือต่อ รอเป้าแรก ถ้าราคาปิดต่ำกว่าจุดตัดขาดทุนให้ขาย' : stage === 1 ? 'ถือต่อ จุดตัดขาดทุนอยู่ที่ทุนแล้ว รอเป้าสอง' : 'ถือส่วนสุดท้ายตามเทรนด์ ขายเมื่อปิดหลุดเส้น 50 วัน' };
-  };
-
-  return { sma, ema, rsi, atr, ind, regime, setupAt, followIdx, scan, backtest, status, advise };
+  return { sma, ema, rsi, ind, gradeAt, holdAt, status, ret1y, timingTest, W, LIM };
 })();
 if (typeof module !== 'undefined') module.exports = SPC;

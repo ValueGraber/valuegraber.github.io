@@ -966,7 +966,8 @@ tr.editing td { background: var(--accent-soft); }
 .sw-who b { display: block; font-size: 18px; } .sw-who small, .sw-now small { display: block; }
 .sw-adv { grid-column: 1 / -1; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--slate-soft); font-weight: 600; }
 .sw-adv.sw-out { background: var(--brick-soft); color: var(--brick); }
-.sw-adv.sw-tp1, .sw-adv.sw-win, .sw-adv.sw-tp { background: var(--jade-soft); color: var(--jade); }
+.sw-adv.sw-tp1, .sw-adv.sw-win, .sw-adv.sw-tp, .sw-adv.sw-buy { background: var(--jade-soft); color: var(--jade); }
+.sw-tags { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; } .sw-ast .sw-tags { margin-bottom: 4px; }
 .sw-adv.sw-slow { background: var(--ochre-soft); color: var(--ochre); }
 .sw-lvl { grid-column: 1 / -1; font-size: 14px; }
 .sw-ed { display: flex; gap: 10px; flex-wrap: wrap; } .sw-ed .inp { width: 8em; }
@@ -1098,21 +1099,20 @@ tr.editing td { background: var(--accent-soft); }
   </section>
 
   <section id="swing" data-sub="swing">
-    <div class="sec-head"><h2>จังหวะเข้าซื้อคริปโตและทอง</h2></div>
-    <p class="sec-note">สำหรับซื้อแบบ spot (ซื้อของจริง ไม่ใช้เงินกู้) แล้วถือเป็นสัปดาห์ถึงหลายเดือน ดูกราฟรายวันของคริปโตหลัก 12 ตัวและทองคำ แล้วยก 3 ตัวที่ถึงจังหวะดีที่สุดตอนนี้ มี 3 แบบ: <b>ย่อในขาขึ้น</b> (ขาขึ้นใหญ่แล้วย่อมาแถวเส้น 50 วัน), <b>กลับเป็นขาขึ้น</b> (ปิดกลับเหนือเส้น 200 วัน) และ <b>ทยอยสะสมช่วงถูก</b> (ลงมาลึกจากจุดสูงสุดแล้วเริ่มหยุดลง) แต่ละตัวบอกจุดเข้า จุดยอมรับว่าผิด และเป้าขายทีละ 1/3</p>
+    <div class="sec-head"><h2>ซื้อสะสมคริปโตและทอง</h2></div>
+    <p class="sec-note">สำหรับซื้อแบบ spot แล้วถือยาว ไม่ได้เทรดเข้าออก ดูกราฟรายวันของทองคำและคริปโตหลัก 12 ตัว แล้วตอบ 2 เรื่อง: <b>ตอนนี้ราคาน่าซื้อไหม</b> (เทียบกับเส้นเฉลี่ย 200 วัน และดูว่าร้อนแรงเกินไปหรือเปล่า) และ <b>ควรถือรอไหม</b> (เทรนด์ระยะยาวขึ้นหรือลง และสู้ BTC ได้ไหม) ยก 3 ตัวที่ควรซื้อสะสมที่สุดตอนนี้ พร้อมบอกว่าครั้งนี้ควรซื้อมากหรือน้อยกว่างบปกติ</p>
     <div class="controls sw-set">
-      <label class="mini">เงินลงทุนส่วนนี้ (บาท) <input class="inp" id="sw-cap" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label class="mini">ยอมเสียต่อไม้ (%) <input class="inp" id="sw-risk" type="number" step="0.1" min="0.1" max="10" inputmode="decimal"></label>
+      <label class="mini">งบซื้อสะสมปกติต่อครั้ง (บาท) <input class="inp" id="sw-week" type="number" step="any" min="0" inputmode="decimal"></label>
     </div>
     <p class="pf-hint" id="sw-status">กำลังโหลด…</p>
     <div id="sw-top"></div>
     <h3 class="sw-h3">ทุกตัวตอนนี้</h3>
     <div id="sw-all"></div>
-    <div class="alert sw-warn">เป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ไม่รับประกันกำไร คริปโตลงได้ 50–80% ในขาลง ทองนิ่งกว่ามาก ถ้าราคาปิดต่ำกว่าจุดยอมรับว่าผิดให้ขายตามแผน ใช้เงินที่ไม่ต้องใช้ในหลายปีข้างหน้า และดู "ผลย้อนหลังของกติกา" ประกอบ</div>
+    <div class="alert sw-warn">เป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน คริปโตลงได้ 50–80% ในขาลง ทองนิ่งกว่ามาก ซื้อตามจังหวะช่วยให้ต้นทุนถูกลงได้บ้าง แต่ไม่ได้กันขาดทุน ใช้เงินที่ไม่ต้องใช้ในหลายปีข้างหน้า และแบ่งกำไรเก็บเป็นเงินจริงเป็นระยะ</div>
   </section>
 
   <section id="tport" data-sub="tport">
-    <p class="sec-note">พอร์ตแยกสำหรับคริปโต (Binance TH คู่เงินบาท) และทองคำ 99.99% (Dime) คิดเป็นบาท คริปโตนับเป็นเหรียญ ทองนับเป็นออนซ์ (1 ออนซ์ = 31.1 กรัม) ทุนเฉลี่ยรวมค่าธรรมเนียมซื้อแล้ว กำไรหักค่าธรรมเนียมขายแล้ว ล็อกอินแล้วซิงค์ทุกเครื่องไปกับพอร์ตหลัก</p>
+    <p class="sec-note">พอร์ตแยกสำหรับคริปโต (Binance TH คู่เงินบาท) และทองคำ (Dime) คิดเป็นบาท แยก <b>กำไรบนกระดาษ</b> (ยังไม่ขาย) กับ <b>กำไรจริง</b> (ขายแล้ว) ให้เห็นชัด ตั้งสัดส่วนเป้าหมายไว้ แล้วระบบจะบอกว่าตัวไหนควรแบ่งขายเก็บกำไร ตัวไหนควรซื้อเติม ล็อกอินแล้วซิงค์ทุกเครื่อง</p>
     <div class="strip" id="tr-strip"></div>
     <h3 class="sw-h3">ที่ถืออยู่</h3>
     <div id="tr-hold"></div>
@@ -1121,33 +1121,39 @@ tr.editing td { background: var(--accent-soft); }
       <label>ประเภท <select class="sel" id="tr-type"><option value="buy">ซื้อ</option><option value="sell">ขาย</option><option value="dep">ฝากเงิน</option><option value="wd">ถอนเงิน</option></select></label>
       <label>วันเวลา (ว่าง = ตอนนี้) <input class="inp" id="tr-at" type="datetime-local"></label>
       <label id="tr-sym-l">สินทรัพย์ <select class="sel" id="tr-sym"></select></label>
-      <label id="tr-q-l"><span id="tr-q-lab">ซื้อเป็นเงิน (บาท)</span> <input class="inp" id="tr-q" type="number" step="any" min="0" inputmode="decimal"></label>
-      <label id="tr-px-l"><span id="tr-px-lab">ราคาที่ได้ (บาท)</span> <input class="inp" id="tr-px" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-q-l"><span id="tr-q-lab">จ่าย (บาท)</span> <input class="inp" id="tr-q" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-px-l"><span id="tr-px-lab">ราคาที่ได้</span> <input class="inp" id="tr-px" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-fx-l" hidden>อัตราแลกเปลี่ยน (บาทต่อ USD) <input class="inp" id="tr-fx" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label id="tr-n-l"><span id="tr-n-lab">จำนวนที่ได้</span> <input class="inp" id="tr-n" type="number" step="any" min="0" inputmode="decimal"></label>
       <label id="tr-fee-l">ค่าธรรมเนียม (บาท) <input class="inp" id="tr-fee" type="number" step="any" min="0" inputmode="decimal"></label>
       <label id="tr-thb-l" hidden>จำนวนเงิน (บาท) <input class="inp" id="tr-thb" type="number" step="any" min="0" inputmode="decimal"></label>
       <button class="btn" type="button" id="tr-add">บันทึก</button>
     </div>
     <p class="pf-hint" id="tr-prev"></p>
     <p class="pf-hint" id="tr-msg" role="status"></p>
+    <h3 class="sw-h3">สัดส่วนเป้าหมาย (%)</h3>
+    <p class="pf-hint" id="tr-tnote"></p>
+    <div class="pf-form f2" id="tr-targets"></div>
+    <div id="tr-tacts"></div>
     <h3 class="sw-h3" id="tr-tx-h" hidden>รายการล่าสุด</h3>
     <ul class="sw-hist" id="tr-tx"></ul>
     <details class="method tr-feebox">
       <summary>อัตราค่าธรรมเนียม</summary>
       <div class="body">
-        <p>Binance TH คู่เงินบาทคิด 0.25% ต่อครั้ง (รวม VAT แล้ว) ทองคำ 99.99% ใน Dime ไม่มีค่าธรรมเนียมบริการ แต่ราคาซื้อกับราคาขายต่างกันเล็กน้อย ให้ใส่ราคาที่ได้จริงในแอป ถ้าค่าธรรมเนียมในแอปไม่ตรง แก้ตรงนี้หรือพิมพ์ทับในช่องตอนบันทึก</p>
+        <p>Binance TH คู่เงินบาท 0.25% ต่อครั้ง (รวม VAT แล้ว) ซื้อแล้วค่าธรรมเนียมหักเป็นเหรียญ ทองใน Dime ไม่มีค่าคอม ใส่ราคา USD/oz น้ำหนัก และเรทตามสลิป เงินที่ปัดเศษคืนเข้า FCD จะกลับไปเป็นเงินสดในพอร์ต ถ้าค่าธรรมเนียมไม่ตรง แก้ตรงนี้หรือพิมพ์ทับตอนบันทึก</p>
         <div class="pf-form f2" id="tr-fees"></div>
       </div>
     </details>
   </section>
 
   <section id="tday" data-sub="tday">
-    <p class="sec-note">ผลแต่ละวันตามเวลาไทย กำไรหักค่าธรรมเนียมแล้ว มูลค่าพอร์ตจดอัตโนมัติวันที่เปิดหน้านี้ "เปลี่ยนจากวันก่อน" รวมของที่ยังไม่ขาย และไม่นับเงินฝากถอน</p>
+    <p class="sec-note">แต่ละวันตามเวลาไทย กำไรจริงนับเฉพาะที่ขายแล้ว กำไรบนกระดาษกับมูลค่าพอร์ตจดอัตโนมัติวันที่เปิดหน้านี้ "เปลี่ยนจากวันก่อน" ไม่นับเงินฝากถอน</p>
     <div id="tr-days"></div>
     <button class="btn ghost sm" type="button" id="tr-csv" style="margin-top:10px">ดาวน์โหลด CSV ทุกรายการ</button>
   </section>
 
   <section id="swlog" data-sub="swlog">
-    <p class="sec-note">ลองใช้กติกาเดียวกันกับราคาย้อนหลังราว 2.7 ปีของแต่ละตัว ซื้อทีละไม้ ขาย 1/3 ที่เป้าแรก (+1.5R) แล้วเลื่อนจุดตัดขาดทุนมาที่ทุน ขายอีก 1/3 ที่เป้าสอง (+3R) ส่วนสุดท้ายขายเมื่อราคาปิดหลุดเส้น 50 วัน R คือเงินที่ยอมเสียต่อไม้ เทียบกับซื้อแล้วถือเฉยๆ ช่วงเดียวกัน ยังไม่หักค่าธรรมเนียม ผลในอดีตไม่ได้บอกอนาคต</p>
+    <p class="sec-note">ลองย้อนหลังราว 2.7 ปี: ถ้าทุกวันซื้อเท่ากัน เทียบกับซื้อตามจังหวะ (ราคาดี ×2, ถูกแต่ยังร่วง ×1.5, ปกติ ×1, แพงขึ้น ×0.5, ร้อนแรงไม่ซื้อ) ต้นทุนเฉลี่ยต่อหน่วยต่างกันแค่ไหน ตัวเลขบวกคือซื้อตามจังหวะได้ของถูกกว่า ผลในอดีตไม่ได้บอกอนาคต</p>
     <div id="sw-log"></div>
   </section>
 
@@ -3422,7 +3428,7 @@ dash.calc('sectors', {
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาดและคริปโต', 'ตลาดตอนนี้ถูกหรือแพง และราคาคริปโตหลัก', false]]],
-      ['swing', 'คริปโตและทอง', 'scan', [['swing'], ['tport', 'พอร์ตคริปโตและทอง', 'ซื้อแบบ spot ถือยาว คิดค่าธรรมเนียม Binance TH และ Dime ให้', true], ['tday', 'กำไรรายวัน', 'ผลแต่ละวัน หักค่าธรรมเนียมแล้ว', true], ['swlog', 'ผลย้อนหลังของกติกา', 'ถ้าใช้กติกานี้ย้อนหลังราว 2.7 ปี ได้ผลยังไง', false]]],
+      ['swing', 'คริปโตและทอง', 'scan', [['swing'], ['tport', 'พอร์ตคริปโตและทอง', 'กำไรจริงกับกำไรบนกระดาษ แบ่งกำไร และปรับสัดส่วน', true], ['tday', 'บันทึกรายวัน', 'ซื้อขาย กำไรจริง และมูลค่าพอร์ตแต่ละวัน', true], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
@@ -4486,7 +4492,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '81d2620181';
+  const BUILD = 'cddac9704c';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -4498,11 +4504,12 @@ dash.calc('sectors', {
   check(); let last = Date.now();
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - last > 60e3) { last = Date.now(); check(); } });
 })();
-/* spot core: long-term entry timing for crypto majors and gold on daily bars (spot, no leverage).
-   bars: [{t, o, h, l, c, v}] oldest first, closed bars only. opt.gold = true uses gold thresholds. */
+/* spot core: buy-and-hold timing for crypto majors and gold on daily bars (no stop-loss / take-profit trading).
+   Two questions per asset: is it worth holding (long trend), and is now a good price to add (timing).
+   bars: [{t, o, h, l, c, v}] oldest first, closed bars only. gold = true uses gold thresholds. */
 const SPC = (() => {
   const sma = (a, n) => { const o = new Array(a.length).fill(null); let s = 0; a.forEach((x, i) => { s += x; if (i >= n) s -= a[i - n]; if (i >= n - 1) o[i] = s / n; }); return o; };
-  const ema = (a, n) => { const k = 2 / (n + 1); const o = []; let e = null; a.forEach((x, i) => { e = i === 0 ? x : x * k + e * (1 - k); o.push(e); }); return o; };
+  const ema = (a, n) => { const k = 2 / (n + 1); let e = null; return a.map((x, i) => (e = i ? x * k + e * (1 - k) : x)); };
   const rsi = (c, n = 14) => {
     const o = new Array(c.length).fill(null); let g = 0, l = 0;
     for (let i = 1; i < c.length; i++) {
@@ -4512,159 +4519,80 @@ const SPC = (() => {
     }
     return o;
   };
-  const atr = (b, n = 14) => {
-    const o = new Array(b.length).fill(null); let a = 0;
-    for (let i = 1; i < b.length; i++) {
-      const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c));
-      if (i <= n) { a += tr / n; if (i === n) o[i] = a; } else { a = (a * (n - 1) + tr) / n; o[i] = a; }
-    }
-    return o;
-  };
-  const ind = (b) => {
-    const c = b.map((x) => x.c); const ath = []; let m = -Infinity; b.forEach((x) => { m = Math.max(m, x.h); ath.push(m); });
-    return { s50: sma(c, 50), s200: sma(c, 200), e20: ema(c, 20), rsi: rsi(c), atr: atr(b), vol: sma(b.map((x) => x.v), 20), ath };
-  };
-  const clamp = (x, a, z) => Math.max(a, Math.min(z, x));
-  const lowest = (b, a, z) => { let m = Infinity; for (let k = Math.max(0, a); k <= z; k++) m = Math.min(m, b[k].l); return m; };
-  const highest = (b, a, z) => { let m = -Infinity; for (let k = Math.max(0, a); k <= z; k++) m = Math.max(m, b[k].h); return m; };
+  const ind = (b) => { const c = b.map((x) => x.c); const ath = []; let m = -Infinity; b.forEach((x) => { m = Math.max(m, x.h); ath.push(m); }); return { c, s50: sma(c, 50), s200: sma(c, 200), e20: ema(c, 20), rsi: rsi(c), ath }; };
+  /* price ÷ 200-day average: normal top and "too hot" line */
+  const LIM = (gold) => (gold ? { norm: 1.08, hot: 1.15 } : { norm: 1.35, hot: 1.6 });
+  const W = { buy: 2, knife: 1.5, dca: 1, wait: 0.5, hot: 0 };
 
-  /* what the market looks like at closed bar i (no setup needed) */
-  const regime = (b, I, i, gold) => {
-    const x = b[i], s50 = I.s50[i], s200 = I.s200[i], A = I.atr[i], r = I.rsi[i];
-    if (s200 == null) return null;
-    const dd = 1 - x.c / I.ath[i];
-    const hot = r >= 72 || x.c - s50 > 3 * A || x.c > s200 * (gold ? 1.25 : 1.7);
-    const trend = x.c > s200 && s50 > s200 ? 'bull' : x.c < s200 && s50 < s200 ? 'bear' : 'turn';
-    return { trend, hot, dd, rsi: r, s50, s200, atr: A, zone: [Math.max(s200, s50 - A), s50 + 0.5 * A] };
+  /* timing grade at bar i (px = live price for the last bar) */
+  const gradeAt = (b, I, i, gold, px) => {
+    const c = px ?? I.c[i], s50 = I.s50[i], s200 = I.s200[i], r = I.rsi[i]; if (s200 == null) return null;
+    const mm = c / s200, L = LIM(gold); let lo5 = Infinity; for (let k = i - 4; k <= i; k++) lo5 = Math.min(lo5, b[k].l);
+    let g;
+    if (mm > L.hot || r >= 72) g = 'hot';
+    else if (mm <= 1) g = c > I.e20[i] ? 'buy' : 'knife';
+    else if (c > s200 && s50 > s200 && lo5 <= s50 * 1.02 && r <= 50) g = 'buy';
+    else if (mm <= L.norm && r < 65) g = 'dca';
+    else g = 'wait';
+    return { g, mm, rsi: r, dd: 1 - c / I.ath[i], s50, s200 };
   };
-
-  /* buy setup at closed bar i, or null. kinds: pb = pullback in an uptrend, rc = back above the 200-day, dv = deep discount and steadying */
-  const setupAt = (b, I, i, gold) => {
-    if (i < 210) return null;
-    const g = regime(b, I, i, gold); if (!g || g.hot) return null;
-    const x = b[i], A = g.atr; const maxStop = gold ? 0.12 : 0.25;
-    let kind = null;
-    if (g.trend === 'bull' && lowest(b, i - 4, i) <= g.s50 + 0.5 * A && x.c >= g.s50 - 1.5 * A && g.rsi <= 55 && x.c > x.o && x.c > b[i - 1].h) kind = 'pb';
-    else if (x.c > g.s200 && x.c > g.s50 && I.s200[i] >= I.s200[i - 10] * 0.995 && [...Array(10).keys()].some((k) => b[i - 1 - k].c < I.s200[i - 1 - k])) kind = 'rc';
-    else if (x.c < g.s200 && g.dd >= (gold ? 0.15 : 0.55) && x.c > I.e20[i] && g.rsi >= 40 && g.rsi <= 60) kind = 'dv';
-    if (!kind) return null;
-    const base = kind === 'dv' ? lowest(b, i - 60, i) : kind === 'rc' ? Math.min(lowest(b, i - 20, i), g.s200) : lowest(b, i - 20, i);
-    const entry = x.c;
-    const sl = Math.min(entry - A, Math.max(base - 1.0 * A, entry * (1 - maxStop)));
-    const R = entry - sl;
-    const vr = I.vol[i] ? x.v / I.vol[i] : 1;
-    const score = (kind === 'pb' ? 60 : kind === 'rc' ? 55 : 42) + 15 * clamp((g.s50 / g.s200 - 1) / 0.2, 0, 1) * (kind === 'dv' ? 0 : 1)
-      + 15 * (1 - clamp(Math.abs(g.rsi - 47) / 20, 0, 1)) + 10 * clamp((vr - 0.8) / 1.2, 0, 1) - 10 * clamp((R / entry) / maxStop - 0.5, 0, 1);
-    return { kind, t: x.t, i, entry, sl, tp1: entry + 1.5 * R, tp2: entry + 3 * R, R, rsi: g.rsi, vr, dd: g.dd, score: Math.round(clamp(score, 0, 100)) };
+  /* worth holding: long trend from the 200-day line and the past year, against BTC for other coins */
+  const holdAt = (I, i, ret1yBtc) => {
+    const s = I.s200[i], s0 = I.s200[i - 60]; if (s == null || s0 == null) return null;
+    const c = I.c[i], slope = s / s0 - 1, ret1y = i >= 365 ? c / I.c[i - 365] - 1 : null;
+    const rel = ret1y != null && ret1yBtc != null ? (1 + ret1y) / (1 + ret1yBtc) - 1 : null;
+    let h = 'ok';
+    if (c > s && slope > 0) h = 'good';
+    else if (c < s && slope < 0 && (rel == null || rel < -0.2)) h = 'weak';
+    return { h, slope, ret1y, rel };
   };
-
-  /* thirds: 1/3 at TP1 (+1.5R) then stop to entry, 1/3 at TP2 (+3R), last third rides until a close below the 50-day. */
-  const followIdx = (b, I, s, maxBars = 365) => {
-    let stage = 0, r = 0, n = 0;
-    for (let k = s.i + 1; k < b.length; k++) {
-      const x = b[k]; n++;
-      if (stage === 0) {
-        if (x.l <= s.sl) return { done: true, res: 'sl', r: -1, bars: n, k };
-        if (x.h >= s.tp1) { r += 0.5; stage = 1; if (x.h >= s.tp2) { r += 1; stage = 2; } continue; }
-      }
-      if (stage === 1) {
-        if (x.l <= s.entry) return { done: true, res: 'be', r, bars: n, k };
-        if (x.h >= s.tp2) { r += 1; stage = 2; continue; }
-      }
-      if (stage === 2) {
-        if (x.l <= s.entry) return { done: true, res: 'tp2', r, bars: n, k };
-        if (I.s50[k] != null && x.c < I.s50[k]) return { done: true, res: 'trail', r: r + (x.c - s.entry) / s.R / 3, bars: n, k };
-      }
-      if (n >= maxBars) return { done: true, res: 'time', r: r + (x.c - s.entry) / s.R * (stage === 0 ? 1 : stage === 1 ? 2 / 3 : 1 / 3), bars: n, k };
-    }
-    return { done: false, stage, r, bars: n };
+  const status = (b, live, gold, btcRet1y) => {
+    if (!b || b.length < 270) return null;
+    const I = ind(b), n = b.length - 1; const t = gradeAt(b, I, n, gold, live); const h = holdAt(I, n, gold ? null : btcRet1y);
+    const px = live ?? I.c[n];
+    const score = (t.g === 'buy' ? 3 : t.g === 'knife' ? 2 : t.g === 'dca' ? 1.5 : t.g === 'wait' ? 0 : -1) + (h.h === 'good' ? 2 : h.h === 'ok' ? 1 : -2) + Math.max(-1, Math.min(1, (1.2 - t.mm) * 2));
+    /* a better price to wait for: the 200-day line, or the 50-day line in an uptrend */
+    const better = t.g === 'hot' || t.g === 'wait' ? (t.s50 > t.s200 && t.s50 < px ? t.s50 : t.s200) : null;
+    return { ...t, ...h, px, score, better, ret1y: h.ret1y };
   };
+  const ret1y = (b) => (b && b.length > 366 ? b[b.length - 1].c / b[b.length - 366].c - 1 : null);
 
-  /* newest valid setup in the last 5 closed bars, judged against the live price */
-  const scan = (b, live, gold) => {
-    if (!b || b.length < 220) return null;
-    const I = ind(b); const n = b.length - 1; const px = live ?? b[n].c;
-    for (let i = n; i >= n - 4; i--) {
-      const s = setupAt(b, I, i, gold); if (!s) continue;
-      let hit = false; for (let k = i + 1; k <= n; k++) if (b[k].l <= s.sl || b[k].h >= s.tp1) hit = true;
-      if (hit || px <= s.sl || px >= s.tp1 || px > s.entry + 0.5 * s.R) return null;
-      const age = n - i;
-      return { ...s, age, price: px, score: Math.max(0, s.score - age * 3 - Math.round(Math.max(0, px - s.entry) / s.R * 20)) };
-    }
-    return null;
+  /* buying more on good days and less on hot days vs the same amount every day: how much cheaper is the average cost? */
+  const timingTest = (b, gold) => {
+    if (!b || b.length < 300) return null;
+    const I = ind(b); let A = 0, B = 0, Aw = 0, Bw = 0; const cnt = {};
+    for (let i = 210; i < b.length; i++) { const t = gradeAt(b, I, i, gold); const w = W[t.g]; cnt[t.g] = (cnt[t.g] || 0) + 1; A += 1; B += 1 / I.c[i]; Aw += w; Bw += w / I.c[i]; }
+    const dca = A / B, tim = Aw / Bw;
+    return { from: b[210].t, days: A, dca, tim, better: 1 - tim / dca, cnt, hold: I.c[I.c.length - 1] / I.c[210] - 1 };
   };
-
-  /* the rule replayed over all history: one trade at a time */
-  const backtest = (b, gold) => {
-    if (!b || b.length < 260) return null;
-    const I = ind(b); const out = []; let i = 210;
-    while (i < b.length - 1) {
-      const s = setupAt(b, I, i, gold);
-      if (!s) { i++; continue; }
-      const f = followIdx(b, I, s);
-      out.push({ t: s.t, kind: s.kind, entry: s.entry, ...f });
-      if (!f.done) break; i = f.k + 1;
-    }
-    const d = out.filter((x) => x.done);
-    const hold = b[b.length - 1].c / b[210].c - 1;
-    return { trades: out, n: d.length, open: out.length - d.length, win: d.length ? d.filter((x) => x.r > 0).length / d.length : null,
-      avg: d.length ? d.reduce((a, x) => a + x.r, 0) / d.length : null, sum: d.reduce((a, x) => a + x.r, 0), from: b[210].t, hold };
-  };
-
-  /* a plain label for any asset right now */
-  const status = (b, live, gold) => {
-    if (!b || b.length < 220) return null;
-    const I = ind(b); const n = b.length - 1; const g = regime(b, I, n, gold); const px = live ?? b[n].c;
-    let k = 'wait', t;
-    if (g.hot) { k = 'hot'; t = 'ร้อนแรง ราคาวิ่งเร็วเกินไป อย่าไล่ซื้อ รอย่อ'; }
-    else if (g.trend === 'bull') { k = px > g.zone[1] ? 'up' : px >= g.zone[0] ? 'zone' : 'deep'; t = k === 'up' ? 'ขาขึ้น รอราคาย่อลงมาในโซนซื้อ' : k === 'zone' ? 'ขาขึ้น ราคาอยู่ในโซนซื้อ รอแท่งวันปิดเด้งยืนยัน' : 'ขาขึ้นแต่ย่อลึกใกล้เส้น 200 วัน ถ้าหลุดเส้นนี้จะเสียทรง รอดูก่อน'; }
-    else if (g.trend === 'bear') { k = 'down'; t = g.dd >= (gold ? 0.15 : 0.55) ? 'ขาลง แต่ลงมาลึกแล้ว รอให้ราคาหยุดลงก่อน' : 'ขาลง ยังไม่ควรรับ'; }
-    else { k = 'turn'; t = 'ไซด์เวย์ กำลังเปลี่ยนทิศ รอให้ชัดก่อน'; }
-    return { k, t, ...g, px, s50: I.s50[n] };
-  };
-
-  /* advice for a holding with a plan {entry, sl, tp1, tp2, stage} */
-  const advise = (p, px, s50) => {
-    if (px == null) return { k: 'wait', t: 'รอราคา' };
-    const stage = p.stage || 0;
-    if (stage === 0 && px <= p.sl) return { k: 'out', t: 'หลุดจุดยอมรับว่าผิด ขายตัดขาดทุนทั้งหมด' };
-    if (stage >= 1 && px <= p.entry) return { k: 'out', t: 'ราคากลับมาที่ทุน ขายส่วนที่เหลือ ไม้นี้ยังมีกำไรจากที่ขายไปก่อน' };
-    if (stage < 2 && px >= p.tp2) return { k: 'tp', t: 'ถึงเป้าสองแล้ว ขายอีก 1/3 ที่เหลือถือจนราคาปิดหลุดเส้น 50 วัน' };
-    if (stage < 1 && px >= p.tp1) return { k: 'tp', t: 'ถึงเป้าแรก ขาย 1/3 แล้วจุดตัดขาดทุนจะเลื่อนมาที่ทุน' };
-    if (stage >= 2 && s50 != null && px < s50) return { k: 'out', t: 'ราคาหลุดเส้น 50 วัน ขายส่วนสุดท้าย' };
-    return { k: 'hold', t: stage === 0 ? 'ถือต่อ รอเป้าแรก ถ้าราคาปิดต่ำกว่าจุดตัดขาดทุนให้ขาย' : stage === 1 ? 'ถือต่อ จุดตัดขาดทุนอยู่ที่ทุนแล้ว รอเป้าสอง' : 'ถือส่วนสุดท้ายตามเทรนด์ ขายเมื่อปิดหลุดเส้น 50 วัน' };
-  };
-
-  return { sma, ema, rsi, atr, ind, regime, setupAt, followIdx, scan, backtest, status, advise };
+  return { sma, ema, rsi, ind, gradeAt, holdAt, status, ret1y, timingTest, W, LIM };
 })();
 
 
-/* invest → คริปโตและทอง: long-term entry timing for crypto majors + gold (PAXG as the gold price), spot only.
+/* invest → คริปโตและทอง: buy-and-hold timing for 12 crypto majors + gold (PAXG price = gold USD/oz), spot only.
    Daily bars from Binance public market data (data-api.binance.vision), live price by WebSocket with a REST poll fallback;
-   runs only while the page is visible. Prices shown in baht = USDT price × VG.fx. Gold shown in USD per troy ounce (money()); portfolio keeps baht, gold counted in ounces. */
+   runs only while one of its sub-pages is visible. Crypto shown in baht (USDT × VG.fx), gold in USD per ounce. */
 (() => {
   const $ = (id) => document.getElementById(id);
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const API = 'https://data-api.binance.vision/api/v3/', WS = 'wss://data-stream.binance.vision/stream?streams=';
-  const ASSETS = [['BTC', 'บิตคอยน์'], ['ETH', 'อีเธอเรียม'], ['BNB', 'BNB'], ['SOL', 'โซลานา'], ['XRP', 'XRP'], ['ADA', 'คาร์ดาโน'], ['DOGE', 'ดอจคอยน์'],
-    ['TRX', 'ทรอน'], ['LINK', 'เชนลิงก์'], ['AVAX', 'อวาแลนช์'], ['DOT', 'โพลคาดอต'], ['LTC', 'ไลต์คอยน์'], ['GOLD', 'ทองคำ']];
+  const ASSETS = [['GOLD', 'ทองคำ'], ['BTC', 'บิตคอยน์'], ['ETH', 'อีเธอเรียม'], ['BNB', 'BNB'], ['SOL', 'โซลานา'], ['XRP', 'XRP'], ['ADA', 'คาร์ดาโน'], ['DOGE', 'ดอจคอยน์'],
+    ['TRX', 'ทรอน'], ['LINK', 'เชนลิงก์'], ['AVAX', 'อวาแลนช์'], ['DOT', 'โพลคาดอต'], ['LTC', 'ไลต์คอยน์']];
   const KEY = 'valuegrab-spotset-v1';
   const pair = (a) => (a === 'GOLD' ? 'PAXGUSDT' : a + 'USDT');
   const isGold = (a) => a === 'GOLD';
   const unit = (a) => (isGold(a) ? 'ออนซ์' : 'เหรียญ');
-  const KIND = { pb: 'ย่อในขาขึ้น', rc: 'กลับเป็นขาขึ้น', dv: 'ทยอยสะสมช่วงถูก' };
-  const ST = { hot: ['trap', 'ร้อนแรง'], up: ['watch', 'ขาขึ้น รอย่อ'], zone: ['buy', 'ในโซนซื้อ'], deep: ['watch', 'ย่อลึก'], down: ['trap', 'ขาลง'], turn: ['', 'ไซด์เวย์'] };
-  let set = { cap: 50000, risk: 2 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
+  const G = { buy: ['buy', 'ราคาดี ทยอยซื้อได้'], knife: ['watch', 'ถูกแต่ยังร่วง แบ่งซื้อทีละน้อย'], dca: ['', 'ราคาปกติ ซื้อสะสมตามแผน'], wait: ['watch', 'แพงขึ้นมาแล้ว ซื้อน้อยลง รอย่อ'], hot: ['trap', 'ร้อนแรง ไม่ควรซื้อเพิ่ม'] };
+  const H = { good: ['buy', 'ควรถือรอ'], ok: ['', 'ถือได้ ยังไม่ชัด'], weak: ['trap', 'ไม่ควรถือรอ'] };
+  let set = { week: 1000 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) { /* ignore */ } };
 
-  const bars = {}, live = {}, bt = {}; let ws = null, on = false, lastTick = 0, lastPoll = 0, err = '', loaded = false;
+  const bars = {}, live = {}, tt = {}; let ws = null, on = false, lastTick = 0, lastPoll = 0, err = '', loaded = false;
   const fx = () => (window.VG && window.VG.fx) || 33;
-  const toTHB = (a, usd) => (usd == null ? null : usd * fx());
-  /* gold is shown in USD per troy ounce, crypto in baht */
-  const money = (a, v) => (isGold(a) ? (v == null || !isFinite(v) ? '–' : '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : thb(toTHB(a, v)));
   const thb = (v) => (v == null || !isFinite(v) ? '–' : '฿' + v.toLocaleString('en-US', { maximumFractionDigits: v < 1 ? 4 : v < 100 ? 2 : 0 }));
-  const usd = (v) => (v == null || !isFinite(v) ? '–' : '$' + v.toLocaleString('en-US', { maximumFractionDigits: v < 1 ? 5 : v < 100 ? 3 : 0 }));
-  const pct = (v, d = 1) => (v == null || !isFinite(v) ? '–' : (v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%');
+  const usd = (v, d) => (v == null || !isFinite(v) ? '–' : '$' + v.toLocaleString('en-US', d != null ? { minimumFractionDigits: d, maximumFractionDigits: d } : { maximumFractionDigits: v < 1 ? 5 : v < 100 ? 3 : 0 }));
+  const money = (a, v) => (isGold(a) ? usd(v, 2) : thb(v == null ? null : v * fx()));
+  const pct = (v, d = 0) => (v == null || !isFinite(v) ? '–' : (v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%');
   const day = (t) => new Date(t).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
   const get = (u) => fetch(API + u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
   const kl = (a) => ({ t: a[0], o: +a[1], h: +a[2], l: +a[3], c: +a[4], v: +a[5] });
@@ -4672,25 +4600,21 @@ const SPC = (() => {
   const nameOf = (a) => { const x = ASSETS.find((y) => y[0] === a); return x ? (isGold(a) ? x[1] : `${a} · ${x[1]}`) : a; };
 
   /* ---------- data ---------- */
-  const loadBars = async (a) => {
-    const k = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000`)).map(kl);
-    const f = k.pop(); bars[a] = k; live[a] = f ? f.c : k[k.length - 1].c; bt[a] = SPC.backtest(k, isGold(a));
-  };
+  const loadBars = async (a) => { const k = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000`)).map(kl); const f = k.pop(); bars[a] = k; live[a] = f ? f.c : k[k.length - 1].c; tt[a] = SPC.timingTest(k, isGold(a)); };
   const loadAll = async () => { for (let i = 0; i < ASSETS.length; i += 5) await Promise.all(ASSETS.slice(i, i + 5).map(([a]) => loadBars(a).catch(() => {}))); loaded = true; };
   const start = async () => {
     on = true; err = '';
     try {
-      await loadAll(); draw(); drawBt();
+      await loadAll(); draw(); drawTest();
       if (!Object.keys(bars).length) throw new Error('no data');
       if (!on) return;
       ws = new WebSocket(WS + ASSETS.map(([a]) => pair(a).toLowerCase() + '@kline_1d').join('/'));
       ws.onmessage = (m) => {
         let d; try { d = JSON.parse(m.data).data; } catch (e) { return; }
         if (!d || !d.k) return; const a = d.s === 'PAXGUSDT' ? 'GOLD' : d.s.replace(/USDT$/, ''); const k = d.k; live[a] = +k.c; lastTick = Date.now();
-        if (k.x && bars[a]) { const b = bars[a]; if (k.t > b[b.length - 1].t) { b.push(kl([k.t, k.o, k.h, k.l, k.c, k.v])); b.shift(); bt[a] = SPC.backtest(b, isGold(a)); drawBt(); } }
+        if (k.x && bars[a]) { const b = bars[a]; if (k.t > b[b.length - 1].t) { b.push(kl([k.t, k.o, k.h, k.l, k.c, k.v])); b.shift(); tt[a] = SPC.timingTest(b, isGold(a)); drawTest(); } }
         later();
       };
-      ws.onerror = () => { /* the poll below takes over */ };
       ws.onclose = () => { ws = null; };
     } catch (e) { err = 'โหลดราคาไม่สำเร็จ (ต้องต่ออินเทอร์เน็ต)'; draw(); }
   };
@@ -4709,207 +4633,245 @@ const SPC = (() => {
   let tm = null; const later = () => { if (!tm) tm = setTimeout(() => { tm = null; draw(); }, 1500); };
 
   /* ---------- view ---------- */
-  const signals = () => ASSETS.map(([a]) => { const s = SPC.scan(bars[a], live[a], isGold(a)); return s ? { a, ...s } : null; }).filter(Boolean).sort((x, y) => y.score - x.score);
-  const cap = () => (window.VGTrade && window.VGTrade.equityTHB()) || set.cap;
-  const size = (g) => {
-    const c = cap(), R = toTHB(g.a, g.R), px = toTHB(g.a, g.price); if (!(R > 0)) return null;
-    let q = c * set.risk / 100 / R; if (q * px > c * 0.3) q = c * 0.3 / px;
-    return { q, cost: q * px, loss: q * R };
+  const stat = (a) => SPC.status(bars[a], live[a], isGold(a), SPC.ret1y(bars.BTC));
+  const amountFor = (s) => Math.round(set.week * SPC.W[s.g] / 10) * 10;
+  const timingWhy = (a, s) => {
+    const mm = `ราคาอยู่ ${s.mm.toFixed(2)} เท่าของเส้นเฉลี่ย 200 วัน`;
+    return { buy: s.mm <= 1 ? `${mm} (ต่ำกว่าค่าเฉลี่ยระยะยาว) และเริ่มยืนเหนือเส้น 20 วันได้` : `ขาขึ้นใหญ่ ราคาย่อมาแถวเส้น 50 วัน RSI ${Math.round(s.rsi)} เป็นจังหวะย่อที่ดีในขาขึ้น`,
+      knife: `${mm} ถูกกว่าค่าเฉลี่ยระยะยาว แต่ราคายังร่วงอยู่ ซื้อทีละน้อยแล้วซื้อเพิ่มเมื่อหยุดลง`,
+      dca: `${mm} อยู่ในช่วงปกติ ไม่ถูกไม่แพง ซื้อสะสมตามงบปกติได้`,
+      wait: `${mm} แพงขึ้นมากกว่าปกติ หรือ RSI ${Math.round(s.rsi)} สูง ซื้อน้อยลงแล้วรอให้ย่อ`,
+      hot: `${mm} หรือ RSI ${Math.round(s.rsi)} สูงมาก ราคาวิ่งเร็วเกินไป ไม่ควรซื้อเพิ่ม ถ้ามีกำไรเยอะพิจารณาแบ่งขายบางส่วน` }[s.g];
   };
-  const why = (g) => (g.kind === 'pb' ? `กราฟรายวันเป็นขาขึ้น (เส้น 50 วันอยู่เหนือ 200 วัน) ราคาย่อมาแถวเส้น 50 วันแล้วปิดเด้งเหนือแท่งก่อนหน้า RSI ${Math.round(g.rsi)}`
-    : g.kind === 'rc' ? `ราคาปิดกลับขึ้นเหนือเส้น 200 วันหลังจากอยู่ใต้เส้นมา เส้น 200 วันเริ่มหยุดลง เป็นสัญญาณเปลี่ยนเป็นขาขึ้นช่วงแรก RSI ${Math.round(g.rsi)}`
-      : `ราคาต่ำกว่าจุดสูงสุดเดิม ${Math.round(g.dd * 100)}% และเริ่มยืนเหนือเส้น 20 วันได้ เหมาะทยอยสะสมทีละน้อย ความเสี่ยงสูงกว่าแบบอื่นเพราะยังเป็นขาลง`);
-  const level = (k, v, sub, cls) => { const d = el('div', 'sw-lv' + (cls ? ' ' + cls : '')); d.append(el('small', null, k), el('b', null, v), el('small', null, sub)); return d; };
-  const btLine = (a) => { const r = bt[a]; if (!r || !r.n) return ''; return `กติกานี้ย้อนหลังตั้งแต่ ${day(r.from)}: ${r.n} ไม้ ชนะ ${Math.round(r.win * 100)}% เฉลี่ย ${r.avg >= 0 ? '+' : ''}${r.avg.toFixed(2)}R ต่อไม้ (ซื้อถือเฉยๆ ช่วงเดียวกัน ${pct(r.hold, 0)})`; };
-  const card = (g, i) => {
-    const c = el('div', 'panel sw-card'); const P = (v) => toTHB(g.a, v);
-    const h = el('div', 'sw-h'); h.append(el('span', 'sw-rank', '#' + (i + 1)), el('b', 'sw-sym', nameOf(g.a)), el('span', 'tag ' + (g.kind === 'dv' ? 'watch' : 'buy'), KIND[g.kind]), el('span', 'sw-score', 'คะแนน ' + g.score));
-    const px = el('div', 'sw-px'); px.append(el('b', null, money(g.a, g.price)), el('small', null, `${isGold(g.a) ? 'USD ต่อออนซ์' : usd(g.price)} · สัญญาณจากแท่งวันที่ ${day(g.t)}`));
-    const lv = el('div', 'sw-lvs');
-    lv.append(level('เข้าซื้อแถว', money(g.a, g.entry), 'ไม่ไล่ซื้อเกิน ' + money(g.a, g.entry + 0.5 * g.R)), level('จุดยอมรับว่าผิด', money(g.a, g.sl), pct(g.sl / g.entry - 1) + ' ปิดต่ำกว่านี้ขาย', 'neg'),
-      level('เป้าแรก ขาย 1/3', money(g.a, g.tp1), pct(g.tp1 / g.entry - 1), 'pos'), level('เป้าสอง ขายอีก 1/3', money(g.a, g.tp2), pct(g.tp2 / g.entry - 1) + ' ที่เหลือถือตามเทรนด์', 'pos'));
-    const z = size(g);
-    const sz = el('p', 'sw-size', z ? `${window.VGTrade && window.VGTrade.equityTHB() ? 'จากพอร์ต: ' : ''}ซื้อประมาณ ${z.q < 1 ? +z.q.toPrecision(3) : z.q.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${unit(g.a)} ≈ ${thb(z.cost)} ถ้าผิดทางจะเสียราว ${thb(z.loss)} (${set.risk}% ของเงินลงทุน) ยังไม่รวมค่าธรรมเนียม` : '');
+  const holdWhy = (a, s) => {
+    const y = s.ret1y != null ? `ปีที่ผ่านมา ${pct(s.ret1y)}` : '';
+    const rel = !isGold(a) && a !== 'BTC' && s.rel != null ? ` (เทียบ BTC ${pct(s.rel)})` : '';
+    return { good: `ราคาอยู่เหนือเส้น 200 วัน และเส้นยังชี้ขึ้น เทรนด์ระยะยาวเป็นขาขึ้น ${y}${rel}`,
+      ok: `เทรนด์ระยะยาวยังไม่ชัด ${y}${rel}`,
+      weak: `ราคาต่ำกว่าเส้น 200 วัน เส้นชี้ลง และแพ้ BTC ชัดเจน ถือรอแล้วมักไม่กลับ ${y}${rel}` }[s.h];
+  };
+  const card = (a, s, i) => {
+    const c = el('div', 'panel sw-card');
+    const h = el('div', 'sw-h'); h.append(el('span', 'sw-rank', '#' + (i + 1)), el('b', 'sw-sym', nameOf(a)), el('span', 'tag ' + G[s.g][0], G[s.g][1]), el('span', 'tag ' + H[s.h][0], H[s.h][1]));
+    const px = el('div', 'sw-px'); px.append(el('b', null, money(a, s.px)), el('small', null, isGold(a) ? `USD ต่อออนซ์ · ≈ ${thb(s.px * fx())}` : usd(s.px)));
+    const amt = amountFor(s);
+    c.append(h, px, el('p', 'sw-why', 'จังหวะ: ' + timingWhy(a, s)), el('p', 'sw-why', 'ถือยาว: ' + holdWhy(a, s)),
+      el('p', 'sw-size', amt ? `ครั้งนี้ซื้อได้ราว ${thb(amt)} (งบปกติ ${thb(set.week)} × ${SPC.W[s.g]})` : 'ครั้งนี้ยังไม่ต้องซื้อ'));
+    const t = tt[a]; if (t) c.append(el('p', 'pf-hint', `ตั้งแต่ ${day(t.from)} ถ้าซื้อตามจังหวะนี้ ต้นทุนเฉลี่ย${t.better >= 0 ? 'ถูกกว่า' : 'แพงกว่า'}ซื้อเท่ากันทุกวัน ${Math.abs(t.better * 100).toFixed(1)}%`));
     const act = el('div', 'sw-act');
-    const a = el('a', 'btn ghost sm', 'กราฟ'); a.href = chart(g.a); a.target = '_blank'; a.rel = 'noopener noreferrer';
+    const l = el('a', 'btn ghost sm', 'กราฟ'); l.href = chart(a); l.target = '_blank'; l.rel = 'noopener noreferrer';
     const b = el('button', 'btn-line sm', 'ซื้อแล้ว'); b.type = 'button';
-    b.addEventListener('click', () => { if (window.VGTrade) window.VGTrade.prefill({ type: 'buy', s: g.a, q: z ? z.q : null, px: P(g.price), plan: { s: g.a, sl: P(g.sl), kind: g.kind } }); });
-    act.append(a, b);
-    c.append(h, px, el('p', 'sw-why', why(g)), lv, sz, el('p', 'pf-hint', btLine(g.a)), act); return c;
+    b.addEventListener('click', () => { if (window.VGTrade) window.VGTrade.prefill({ type: 'buy', s: a, amt: amt || set.week, pxUsd: s.px }); });
+    act.append(l, b); c.append(act); return c;
   };
   const draw = () => {
-    const box = $('sw-top'); if (!box) return;
-    const sigs = signals(); box.replaceChildren();
-    if (!sigs.length) box.append(el('div', 'empty', loaded ? 'ตอนนี้ยังไม่มีตัวไหนถึงจังหวะเข้าซื้อตามกติกา ไม่ต้องรีบ ดูสถานะแต่ละตัวด้านล่าง (คำนวณใหม่ทุกวันตอน 07:00 น. เมื่อแท่งวันปิด)' : err || 'กำลังโหลดราคา…'));
-    sigs.slice(0, 3).forEach((g, i) => box.append(card(g, i)));
-    /* every asset right now */
+    const box = $('sw-top'); if (!box) return; box.replaceChildren();
+    const all = ASSETS.map(([a]) => [a, stat(a)]).filter((x) => x[1]);
+    const top = all.filter(([, s]) => ['buy', 'knife', 'dca'].includes(s.g) && s.h !== 'weak').sort((x, y) => y[1].score - x[1].score).slice(0, 3);
+    if (!top.length) box.append(el('div', 'empty', loaded ? 'ตอนนี้ไม่มีตัวไหนราคาน่าซื้อเพิ่ม เก็บงบไว้ก่อน ดูสถานะแต่ละตัวด้านล่าง' : err || 'กำลังโหลดราคา…'));
+    top.forEach(([a, s], i) => box.append(card(a, s, i)));
     const list = $('sw-all'); list.replaceChildren();
     ASSETS.forEach(([a]) => {
-      const s = SPC.status(bars[a], live[a], isGold(a)); const sig = sigs.find((x) => x.a === a);
-      const r = el('div', 'sw-arow');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(a)), el('small', null, s ? (isGold(a) ? `${money(a, s.px)} ต่อออนซ์ · ≈ ${thb(toTHB(a, s.px))}` : `${thb(toTHB(a, s.px))} · ${usd(s.px)}`) : 'กำลังโหลด'));
+      const s = all.find((x) => x[0] === a); const r = el('div', 'sw-arow');
+      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(a)), el('small', null, s ? (isGold(a) ? `${money(a, s[1].px)} ต่อออนซ์` : `${money(a, s[1].px)} · ${usd(s[1].px)}`) : 'กำลังโหลด'));
       const st = el('div', 'sw-ast');
       if (s) {
-        const [cls, lab] = sig ? ['buy', 'ถึงจังหวะ: ' + KIND[sig.kind]] : ST[s.k];
-        st.append(el('span', 'tag ' + cls, lab), el('small', null, sig ? `อันดับ ${sigs.indexOf(sig) + 1} ดูด้านบน` : s.t));
-        const zone = s.trend === 'bull' && !sig ? ` · โซนซื้อ ${money(a, s.zone[0])}–${money(a, s.zone[1])}` : '';
-        st.append(el('small', 'sw-meta', `RSI ${Math.round(s.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(s.dd * 100)}%${zone}`));
+        const x = s[1]; const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + G[x.g][0], G[x.g][1]), el('span', 'tag ' + H[x.h][0], H[x.h][1])); st.append(tags);
+        st.append(el('small', 'sw-meta', `ราคา ÷ เส้น 200 วัน ${x.mm.toFixed(2)} · RSI ${Math.round(x.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(x.dd * 100)}%${x.ret1y != null ? ' · 1 ปี ' + pct(x.ret1y) : ''}${x.better ? ' · ราคาที่น่ารอ ≈ ' + money(a, x.better) : ''}`));
       }
       r.append(who, st); list.append(r);
     });
-    $('sw-status').textContent = loaded ? `${ASSETS.length} ตัว: ${Date.now() - lastTick < 60000 ? 'ราคาสด' : on && Date.now() - lastPoll < 120000 ? 'ราคาอัปเดตทุก 1 นาที' : on ? 'กำลังเชื่อมต่อ' : 'หยุดอัปเดต (เปิดหน้านี้เพื่อดูสด)'} · ราคาบาทคิดจากราคาดอลลาร์ × ${fx().toFixed(2)} ราคาในแอปจะต่างเล็กน้อย` : err || 'กำลังโหลด…';
+    $('sw-status').textContent = loaded ? `${ASSETS.length} ตัว: ${Date.now() - lastTick < 60000 ? 'ราคาสด' : on && Date.now() - lastPoll < 120000 ? 'ราคาอัปเดตทุก 1 นาที' : on ? 'กำลังเชื่อมต่อ' : 'หยุดอัปเดต (เปิดหน้านี้เพื่อดูสด)'} · คริปโตเป็นบาท (ดอลลาร์ × ${fx().toFixed(2)}) ทองเป็น USD ต่อออนซ์ ราคาในแอปจะต่างเล็กน้อย` : err || 'กำลังโหลด…';
     document.dispatchEvent(new Event('vg:spot'));
   };
-  const RES = { sl: 'ตัดขาดทุน', be: 'ได้เป้าแรกแล้วกลับมาที่ทุน', tp2: 'ได้เป้าสองแล้วกลับมาที่ทุน', trail: 'ขายส่วนสุดท้ายตอนหลุดเส้น 50 วัน', time: 'ครบ 1 ปี' };
-  const drawBt = () => {
+  const drawTest = () => {
     const box = $('sw-log'); if (!box) return; box.replaceChildren();
-    if (!Object.keys(bt).length) { box.append(el('div', 'empty', 'จะคำนวณเมื่อเปิดหน้า "คริปโตและทอง" และโหลดราคาได้')); return; }
+    if (!Object.keys(tt).length) { box.append(el('div', 'empty', 'จะคำนวณเมื่อเปิดหน้า "คริปโตและทอง" และโหลดราคาได้')); return; }
     const tb = el('table', 'tr-table'); const hd = el('tr');
-    ['ตัว', 'ไม้', 'ชนะ', 'เฉลี่ยต่อไม้', 'รวม', 'ซื้อถือเฉยๆ', 'ตั้งแต่'].forEach((x) => hd.append(el('th', null, x)));
-    const th = el('thead'); th.append(hd); tb.append(th); const bd = el('tbody'); let N = 0, W = 0, SUM = 0;
-    ASSETS.forEach(([a]) => {
-      const r = bt[a]; if (!r) return; const tr = el('tr'); const td = (v, c) => tr.append(el('td', c, v));
-      N += r.n; W += r.win != null ? r.win * r.n : 0; SUM += r.sum;
-      td(nameOf(a)); td(String(r.n) + (r.open ? ` (+${r.open} ค้าง)` : '')); td(r.win != null ? Math.round(r.win * 100) + '%' : '–'); td(r.avg != null ? (r.avg >= 0 ? '+' : '') + r.avg.toFixed(2) + 'R' : '–', r.avg > 0 ? 'pos' : r.avg < 0 ? 'neg' : null);
-      td((r.sum >= 0 ? '+' : '') + r.sum.toFixed(1) + 'R', r.sum > 0 ? 'pos' : r.sum < 0 ? 'neg' : null); td(pct(r.hold, 0)); td(day(r.from)); bd.append(tr);
-    });
+    ['ตัว', 'ซื้อเท่ากันทุกวัน', 'ซื้อตามจังหวะ', 'ต้นทุนถูกกว่า', 'ถือเฉยๆ ได้', 'ตั้งแต่'].forEach((x) => hd.append(el('th', null, x)));
+    const th = el('thead'); th.append(hd); tb.append(th); const bd = el('tbody');
+    ASSETS.forEach(([a]) => { const t = tt[a]; if (!t) return; const tr = el('tr'); const td = (v, c) => tr.append(el('td', c || null, v));
+      td(nameOf(a)); td(money(a, t.dca)); td(money(a, t.tim)); td(pct(t.better, 1), t.better > 0 ? 'pos' : t.better < 0 ? 'neg' : null); td(pct(t.hold)); td(day(t.from)); bd.append(tr); });
     tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); box.append(w);
-    box.append(el('p', 'pf-hint', `รวมทุกตัว ${N} ไม้ ชนะ ${N ? Math.round(W / N * 100) : 0}% รวม ${SUM >= 0 ? '+' : ''}${SUM.toFixed(1)}R · ถ้าเสี่ยงไม้ละ ${set.risk}% ของ ${thb(cap())} 1R ≈ ${thb(cap() * set.risk / 100)}`));
-    const recent = []; ASSETS.forEach(([a]) => (bt[a] ? bt[a].trades : []).forEach((x) => recent.push({ a, ...x })));
-    const ul = el('ul', 'sw-hist');
-    recent.sort((x, y) => y.t - x.t).slice(0, 12).forEach((x) => { const li = el('li'); li.append(el('b', null, nameOf(x.a)), el('span', null, ` ${day(x.t)} · ${KIND[x.kind]} · ${x.done ? RES[x.res] : 'ยังถืออยู่'} `), el('b', x.r > 0 ? 'pos' : x.r < 0 ? 'neg' : null, (x.r >= 0 ? '+' : '') + x.r.toFixed(2) + 'R')); ul.append(li); });
-    box.append(el('h3', 'sw-h3', 'ไม้ล่าสุดตามกติกา'), ul);
   };
 
   /* ---------- wiring ---------- */
   const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && ['swing', 'tport', 'tday', 'swlog'].some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const setup = () => {
-    const c = $('sw-cap'), r = $('sw-risk'); if (!c) return;
-    c.value = set.cap; r.value = set.risk;
-    c.addEventListener('change', () => { const v = +c.value; if (v > 0) { set.cap = v; keep(); draw(); drawBt(); } else c.value = set.cap; });
-    r.addEventListener('change', () => { const v = +r.value; if (v > 0 && v <= 10) { set.risk = v; keep(); draw(); drawBt(); } else r.value = set.risk; });
+    const w = $('sw-week'); if (!w) return; w.value = set.week;
+    w.addEventListener('change', () => { const v = +w.value; if (v >= 0) { set.week = v; keep(); draw(); } else w.value = set.week; });
     document.addEventListener('vg:ready', draw);
     setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) poll(); }, 2000);
-    draw(); drawBt();
+    draw(); drawTest();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
   window.VGSpot = {
-    assets: ASSETS, unit, nameOf, isGold,
-    price: (a) => toTHB(a, live[a] ?? null),
-    s50: (a) => { const b = bars[a]; if (!b || b.length < 50) return null; return toTHB(a, SPC.sma(b.map((x) => x.c), 50).pop()); },
-    status: (a) => SPC.status(bars[a], live[a], isGold(a)),
+    assets: ASSETS, unit, nameOf, isGold, G, H,
+    usd: (a) => live[a] ?? null,
+    price: (a) => (live[a] == null ? null : live[a] * fx()), /* baht per coin or per ounce */
+    status: (a) => stat(a), fx,
   };
 })();
 
-/* spot portfolio (invest → คริปโตและทอง → พอร์ต): a separate baht ledger for crypto (Binance TH, THB pairs) and gold (Dime 99.99%).
-   Data { tx, snaps, fees } syncs inside the portfolios doc as field `spot` (no new Firestore rule). Local key 'valuegrab-spot-v1'.
-   Units: coins for crypto, grams for gold; prices in baht per unit. Days are Bangkok dates. */
+/* spot portfolio (invest → คริปโตและทอง → พอร์ต): baht ledger for crypto (Binance TH, THB pairs) and gold (Dime, USD/oz).
+   Buy-and-hold: target weights per asset, rebalancing within a band, and profit-taking when an asset runs hot,
+   so paper gains become real ones. Data { tx, snaps, fees, targets, band } syncs inside the portfolios doc as `spot`.
+   tx: dep/wd {thb}; buy {s, amt, q, px, fx?, fee, cost}; sell {s, amt, q, px, fx?, fee, net}.
+   Crypto px is baht per coin; gold px is USD per ounce with fx baht per USD (as on the Dime slip). */
 (() => {
   const $ = (id) => document.getElementById(id);
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const KEY = 'valuegrab-spot-v1';
   const FEES = { crypto: 0.25, gold: 0 };
-  let T = { tx: [], snaps: {}, fees: { ...FEES } };
-  try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) T = { tx: j.tx || [], snaps: j.snaps || {}, fees: { ...FEES, ...(j.fees || {}) } }; } catch (e) { /* defaults */ }
+  const blank = () => ({ tx: [], snaps: {}, fees: { ...FEES }, targets: {}, band: 5 });
+  const norm = (j) => ({ ...blank(), ...(j || {}), fees: { ...FEES, ...((j && j.fees) || {}) }, targets: { ...((j && j.targets) || {}) } });
+  let T = blank(); try { T = norm(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { /* defaults */ }
   const save = (sync = true) => { try { localStorage.setItem(KEY, JSON.stringify(T)); } catch (e) { /* ignore */ } if (sync && window.VGSync) window.VGSync.push('portfolios'); };
 
   const SP = () => window.VGSpot;
   const isGold = (s) => s === 'GOLD';
   const unit = (s) => (isGold(s) ? 'ออนซ์' : 'เหรียญ');
   const nameOf = (s) => (SP() ? SP().nameOf(s) : s);
+  const fxNow = () => (SP() ? SP().fx() : (window.VG && window.VG.fx) || 33);
   const r2 = (x) => Math.round(x * 100) / 100;
   const sgn = (v) => (v > 0 ? '+' : v < 0 ? '−' : '');
-  const thb = (v) => (v == null || !isFinite(v) ? '–' : (v < 0 ? '−' : '') + '฿' + Math.abs(v).toLocaleString('en-US', { maximumFractionDigits: Math.abs(v) < 100 ? 2 : 0 }));
-  const pthb = (v) => (v == null || !isFinite(v) ? '–' : sgn(v) + '฿' + Math.abs(v).toLocaleString('en-US', { maximumFractionDigits: Math.abs(v) < 100 ? 2 : 0 }));
-  const pct = (v) => (v == null || !isFinite(v) ? '–' : sgn(v) + Math.abs(v * 100).toFixed(1) + '%');
+  const fmt = (v) => Math.abs(v).toLocaleString('en-US', { maximumFractionDigits: Math.abs(v) < 100 ? 2 : 0 });
+  const thb = (v) => (v == null || !isFinite(v) ? '–' : (v < 0 ? '−' : '') + '฿' + fmt(v));
+  const pthb = (v) => (v == null || !isFinite(v) ? '–' : sgn(v) + '฿' + fmt(v));
+  const pct = (v, d = 1) => (v == null || !isFinite(v) ? '–' : sgn(v) + Math.abs(v * 100).toFixed(d) + '%');
   const qty = (q) => (+q.toPrecision(8)).toLocaleString('en-US', { maximumFractionDigits: 8 });
+  const tone = (v) => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
   const bkDay = (t) => new Date(t).toLocaleDateString('sv-SE', { timeZone: 'Asia/Bangkok' });
   const thDay = (d) => new Date(d + 'T12:00:00').toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: '2-digit' });
   const hm = (t) => new Date(t).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const sorted = () => T.tx.map((x, i) => [x, i]).sort((a, b) => a[0].at - b[0].at || a[1] - b[1]).map((x) => x[0]);
-  const feeOf = (s, q, px) => r2(q * px * (isGold(s) ? T.fees.gold : T.fees.crypto) / 100);
+  const rate = (s) => (isGold(s) ? T.fees.gold : T.fees.crypto) / 100;
+  const costOf = (x) => (x.cost != null ? x.cost : x.q * x.px + (x.fee || 0));
+  const netOf = (x) => (x.net != null ? x.net : x.q * x.px - (x.fee || 0));
 
-  /* replay the ledger: cash, holdings (average cost incl. buy fees), realized P/L per sell */
+  /* replay the ledger: cash, holdings (average cost incl. fees), realized P/L per sell */
   const book = () => {
-    let cash = 0, dep = 0; const h = {}; const real = {};
+    let cash = 0, dep = 0; const h = {}, real = {};
     sorted().forEach((x) => {
       if (x.type === 'dep') { cash += x.thb; dep += x.thb; }
       else if (x.type === 'wd') { cash -= x.thb; dep -= x.thb; }
-      else if (x.type === 'buy') {
-        const p = h[x.s] || (h[x.s] = { q: 0, cost: 0, plan: null, at: x.at });
-        cash -= x.q * x.px + x.fee; p.q += x.q; p.cost += x.q * x.px + x.fee; if (x.plan) { p.plan = { ...x.plan, stage: 0 }; p.at = x.at; }
-      } else if (x.type === 'sell') {
-        const p = h[x.s] || { q: 0, cost: 0 }; const avg = p.q > 0 ? p.cost / p.q : x.px; const q = Math.min(x.q, p.q || x.q);
-        const pl = x.q * x.px - x.fee - avg * q; cash += x.q * x.px - x.fee; real[x.id] = { pl, avg };
-        if (h[x.s]) { p.q -= q; p.cost -= avg * q; if (p.plan && x.stage) p.plan.stage = Math.max(p.plan.stage || 0, x.stage); if (p.q <= 1e-12) delete h[x.s]; }
+      else if (x.type === 'buy') { const p = h[x.s] || (h[x.s] = { q: 0, cost: 0 }); const c = costOf(x); cash -= c; p.q += x.q; p.cost += c; }
+      else if (x.type === 'sell') {
+        const p = h[x.s] || { q: 0, cost: 0 }; const avg = p.q > 0 ? p.cost / p.q : 0; const q = Math.min(x.q, p.q); const n = netOf(x);
+        cash += n; real[x.id] = { pl: n - avg * q, avg };
+        if (h[x.s]) { p.q -= q; p.cost -= avg * q; if (p.q <= 1e-12) delete h[x.s]; }
       }
     });
     return { cash, dep, h, real };
   };
   const priceOf = (s) => (SP() ? SP().price(s) : null);
+  const sellFee = (s, v) => v * rate(s);
   const value = (B) => {
-    let mv = 0, unreal = 0, miss = 0;
-    Object.entries(B.h).forEach(([s, p]) => { const px = priceOf(s); if (px == null) { miss++; mv += p.cost; return; } mv += p.q * px; unreal += p.q * px - feeOf(s, p.q, px) - p.cost; });
-    return { mv, unreal, eq: B.cash + mv, miss };
+    let mv = 0, unreal = 0, miss = 0; const rows = {};
+    Object.entries(B.h).forEach(([s, p]) => { const px = priceOf(s); const v = px == null ? p.cost : p.q * px; if (px == null) miss++; const u = px == null ? 0 : v - sellFee(s, v) - p.cost; mv += v; unreal += u; rows[s] = { v, u, px }; });
+    return { mv, unreal, eq: B.cash + mv, miss, rows };
   };
 
   /* ---------- form ---------- */
-  let plan = null, feeTouched = false;
-  const F = () => ({ type: $('tr-type').value, at: (() => { const v = $('tr-at').value ? new Date($('tr-at').value).getTime() : NaN; return isFinite(v) && Math.abs(v - Date.now()) > 120e3 ? v : Date.now(); })(),
-    s: $('tr-sym').value, amt: +$('tr-q').value, px: +$('tr-px').value, thb: +$('tr-thb').value });
-  const qOf = (f) => { if (!(f.amt > 0 && f.px > 0)) return 0; let q = f.amt / f.px; if (f.type === 'sell') { const p = book().h[f.s]; if (p && Math.abs(q - p.q) <= p.q * 0.005) q = p.q; } return q; };
+  let nTouched = false, feeTouched = false;
+  const F = () => ({ type: $('tr-type').value, s: $('tr-sym').value, amt: +$('tr-q').value, px: +$('tr-px').value, fx: +$('tr-fx').value, n: +$('tr-n').value, thb: +$('tr-thb').value,
+    at: (() => { const v = $('tr-at').value ? new Date($('tr-at').value).getTime() : NaN; return isFinite(v) && Math.abs(v - Date.now()) > 120e3 ? v : Date.now(); })() });
+  /* fills auto values and returns the record to save (or null) */
+  const calc = (f) => {
+    if (!(f.type === 'buy' || f.type === 'sell') || !(f.amt > 0 && f.px > 0)) return null;
+    const g = isGold(f.s), fx = g ? f.fx : 1; if (g && !(fx > 0)) return null;
+    let q, fee;
+    if (g) { q = f.type === 'buy' ? Math.floor(f.amt / fx / f.px * 1e4) / 1e4 : f.amt / fx / f.px; fee = r2(q * f.px * fx * rate(f.s)); }
+    else { fee = r2(f.amt * rate(f.s)); q = f.type === 'buy' ? f.amt / f.px * (1 - rate(f.s)) : f.amt / f.px; }
+    if (f.type === 'sell') { const p = book().h[f.s]; if (p && Math.abs(q - p.q) <= p.q * 0.005) q = p.q; }
+    if (!nTouched) $('tr-n').value = q > 0 ? +q.toPrecision(8) : ''; else if (f.n > 0) q = f.n;
+    if (!feeTouched) $('tr-fee').value = fee.toFixed(2); else fee = +$('tr-fee').value || 0;
+    if (!(q > 0)) return null;
+    const x = { s: f.s, amt: f.amt, q, px: f.px, fee };
+    if (g) { x.fx = fx; const v = q * f.px * fx; if (f.type === 'buy') x.cost = r2(v + fee); else x.net = r2(v - fee); }
+    else if (f.type === 'buy') x.cost = f.amt; else x.net = r2(f.amt - fee);
+    return x;
+  };
+  const labels = (f) => {
+    const g = isGold(f.s), trade = f.type === 'buy' || f.type === 'sell';
+    ['tr-sym-l', 'tr-q-l', 'tr-px-l', 'tr-fee-l', 'tr-n-l'].forEach((k) => { $(k).hidden = !trade; });
+    $('tr-fx-l').hidden = !trade || !g; $('tr-thb-l').hidden = trade;
+    $('tr-q-lab').textContent = f.type === 'sell' ? 'ขายเป็นเงิน (บาท)' : 'จ่าย (บาท)';
+    $('tr-px-lab').textContent = g ? 'ราคาที่ได้จริง (USD/oz)' : 'ราคาที่ได้ (บาทต่อเหรียญ)';
+    $('tr-n-lab').textContent = g ? 'น้ำหนัก (oz) ตามสลิป' : 'จำนวนเหรียญที่ได้';
+  };
   const preview = () => {
-    const f = F(); const trade = f.type === 'buy' || f.type === 'sell';
-    ['tr-sym-l', 'tr-q-l', 'tr-px-l', 'tr-fee-l'].forEach((k) => { $(k).hidden = !trade; }); $('tr-thb-l').hidden = trade;
-    $('tr-q-lab').textContent = f.type === 'sell' ? 'ขายเป็นเงิน (บาท)' : 'ซื้อเป็นเงิน (บาท)'; $('tr-px-lab').textContent = `ราคาที่ได้ (บาทต่อ${unit(f.s)})`;
-    const out = $('tr-prev');
-    if (!trade) { out.textContent = f.type === 'dep' ? 'เงินบาทที่โอนเข้า Binance TH หรือ Dime เพื่อลงทุนส่วนนี้' : 'เงินบาทที่ถอนออก'; return; }
-    f.q = qOf(f);
-    if (!(f.q > 0 && f.px > 0)) { out.textContent = `ค่าธรรมเนียมคิดให้อัตโนมัติ: ${isGold(f.s) ? `ทอง Dime ${T.fees.gold}%` : `Binance TH ${T.fees.crypto}%`} · ใส่จำนวนกับราคาก่อน`; return; }
-    if (!feeTouched) $('tr-fee').value = feeOf(f.s, f.q, f.px).toFixed(2);
-    const fee = +$('tr-fee').value || 0, v = f.q * f.px; let tail = '';
-    if (f.type === 'sell') { const p = book().h[f.s]; if (p) { const avg = p.cost / p.q, pl = v - fee - avg * Math.min(f.q, p.q); tail = ` · กำไรไม้นี้ ${pthb(pl)} (${pct(pl / (avg * Math.min(f.q, p.q)))}) จากทุนเฉลี่ย ${thb(avg)}`; } }
-    out.textContent = `ได้ ${qty(f.q)} ${unit(f.s)} · มูลค่า ${thb(v)} ค่าธรรมเนียม ${thb(fee)} · ${f.type === 'buy' ? 'จ่ายรวม ' + thb(v + fee) : 'ได้รับ ' + thb(v - fee)}${tail}`;
+    const f = F(); labels(f); const out = $('tr-prev');
+    if (f.type === 'dep' || f.type === 'wd') { out.textContent = f.type === 'dep' ? 'เงินบาทที่ใส่เข้าไปลงทุนส่วนนี้ (Binance TH หรือ Dime)' : 'เงินบาทที่ถอนออก'; return; }
+    if (isGold(f.s) && !$('tr-fx').value) $('tr-fx').value = fxNow().toFixed(2);
+    const x = calc(F());
+    if (!x) { out.textContent = isGold(f.s) ? 'ใส่ยอดบาท ราคา USD/oz และอัตราแลกเปลี่ยนจากสลิป Dime น้ำหนักจะคำนวณให้ (แก้ให้ตรงสลิปได้)' : `ใส่ยอดบาทกับราคา ค่าธรรมเนียม Binance TH ${T.fees.crypto}% คิดให้อัตโนมัติ`; return; }
+    let t = `ได้ ${qty(x.q)} ${unit(x.s)} · ค่าธรรมเนียม ${thb(x.fee)}`;
+    if (isGold(x.s) && f.type === 'buy') { const v = x.q * x.px * x.fx; t += ` · มูลค่าทอง $${(x.q * x.px).toFixed(2)} = ${thb(v)} · เงินที่เหลือ ${thb(f.amt - x.cost)} กลับเข้าเงินสด`; }
+    else if (f.type === 'buy') t += ` · ทุน ${thb(x.cost)}`;
+    if (f.type === 'sell') { const p = book().h[x.s]; t += ` · ได้รับสุทธิ ${thb(x.net)}`; if (p) { const avg = p.cost / p.q, pl = x.net - avg * Math.min(x.q, p.q); t += ` · กำไรจริงไม้นี้ ${pthb(pl)} (${pct(pl / (avg * Math.min(x.q, p.q)))})`; } }
+    out.textContent = t;
   };
   const add = () => {
-    const f = F(); const trade = f.type === 'buy' || f.type === 'sell'; const msg = $('tr-msg');
-    f.q = qOf(f);
-    if (trade && !(f.q > 0 && f.px > 0)) { msg.textContent = 'ใส่จำนวนเงินและราคาให้ครบ'; return; }
-    if (!trade && !(f.thb > 0)) { msg.textContent = 'ใส่จำนวนเงินบาท'; return; }
-    const x = { id: uid(), type: f.type, at: f.at };
+    const f = F(), msg = $('tr-msg'); const trade = f.type === 'buy' || f.type === 'sell';
+    let x;
     if (trade) {
-      if (f.type === 'sell') { const p = book().h[f.s]; if (!(p && p.q >= f.q - 1e-12)) { msg.textContent = `ในพอร์ตมี ${nameOf(f.s)} ไม่ถึง ${qty(f.q)} ${unit(f.s)}`; return; } }
-      Object.assign(x, { s: f.s, q: f.q, px: f.px, fee: +$('tr-fee').value || 0 });
-      if (f.type === 'buy' && plan && plan.s === f.s && plan.sl < f.px) { const R = f.px - plan.sl; x.plan = { sl: plan.sl, tp1: f.px + 1.5 * R, tp2: f.px + 3 * R, kind: plan.kind }; }
-      if (f.type === 'sell' && plan && plan.s === f.s && plan.stage) x.stage = plan.stage;
-    } else x.thb = f.thb;
-    T.tx.push(x); plan = null; feeTouched = false; save();
-    ['tr-q', 'tr-px', 'tr-fee', 'tr-thb', 'tr-at'].forEach((k) => { $(k).value = ''; }); preview();
+      x = calc(f); if (!x) { msg.textContent = isGold(f.s) ? 'ใส่ยอดบาท ราคา USD/oz และอัตราแลกเปลี่ยนให้ครบ' : 'ใส่ยอดบาทและราคาให้ครบ'; return; }
+      if (f.type === 'sell') { const p = book().h[f.s]; if (!(p && p.q >= x.q - 1e-12)) { msg.textContent = `ในพอร์ตมี ${nameOf(f.s)} ไม่ถึง ${qty(x.q)} ${unit(f.s)}`; return; } }
+    } else { if (!(f.thb > 0)) { msg.textContent = 'ใส่จำนวนเงินบาท'; return; } x = { thb: f.thb }; }
+    T.tx.push({ id: uid(), type: f.type, at: f.at, ...x }); save();
+    nTouched = false; feeTouched = false; ['tr-q', 'tr-px', 'tr-fee', 'tr-n', 'tr-thb', 'tr-at'].forEach((k) => { $(k).value = ''; }); preview();
     msg.textContent = 'บันทึกแล้ว'; setTimeout(() => { msg.textContent = ''; }, 2500); draw();
   };
   const prefill = (o) => {
     $('tr-type').value = o.type; if (o.s) $('tr-sym').value = o.s;
-    $('tr-q').value = o.q != null && o.px != null ? Math.round(o.q * o.px * 100) / 100 : ''; $('tr-px').value = o.px != null ? +(+o.px).toPrecision(7) : ''; $('tr-at').value = '';
-    feeTouched = false; plan = o.plan || null; preview();
+    const g = isGold(o.s); const fx = fxNow();
+    $('tr-q').value = o.amt != null ? Math.round(o.amt) : ''; $('tr-fx').value = g ? fx.toFixed(2) : '';
+    $('tr-px').value = o.pxUsd != null ? (g ? o.pxUsd.toFixed(2) : +(o.pxUsd * fx).toPrecision(7)) : '';
+    $('tr-at').value = ''; $('tr-n').value = ''; nTouched = false; feeTouched = false; preview();
     if (window.VGNav) window.VGNav.go('scan', 'tport');
     setTimeout(() => { $('tr-form').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('tr-q').focus({ preventScroll: true }); }, 80);
+  };
+  const sellBtn = (lab, s, amt) => { const b = el('button', 'btn-line sm', lab); b.type = 'button'; b.addEventListener('click', () => prefill({ type: 'sell', s, amt, pxUsd: SP() ? SP().usd(s) : null })); return b; };
+  const buyBtn = (lab, s, amt) => { const b = el('button', 'btn-line sm', lab); b.type = 'button'; b.addEventListener('click', () => prefill({ type: 'buy', s, amt, pxUsd: SP() ? SP().usd(s) : null })); return b; };
+
+  /* ---------- advice: hold, take profit, rebalance ---------- */
+  const plan = (B, V) => {
+    const eq = V.eq, band = T.band / 100; const tg = T.targets; const hasT = Object.values(tg).some((v) => v > 0);
+    const out = {};
+    const keys = new Set([...Object.keys(B.h), ...Object.keys(tg).filter((k) => tg[k] > 0)]);
+    keys.forEach((s) => {
+      const p = B.h[s], r = V.rows[s] || { v: 0, u: 0 }, st = SP() ? SP().status(s) : null;
+      const w = eq > 0 ? r.v / eq : 0, t = (tg[s] || 0) / 100, gain = p && p.cost > 0 ? r.u / p.cost : 0;
+      const a = { w, t, gain, st, acts: [] };
+      if (st && st.h === 'weak' && p) a.acts.push(['out', 'เทรนด์ระยะยาวเป็นขาลงและแพ้ BTC ไม่ควรถือรอ พิจารณาลดสัดส่วนแล้วย้ายไปตัวที่แข็งแรงกว่า', 'sell', r.v / 2, 'ขายครึ่งหนึ่ง']);
+      if (st && st.g === 'hot' && gain >= 0.3 && p) a.acts.push(['tp', `ร้อนแรงและมีกำไร ${pct(gain, 0)} แบ่งขาย 1/4 เก็บกำไรจริงไว้เป็นเงินสด`, 'sell', r.v / 4, 'แบ่งขาย 1/4']);
+      if (hasT && w > t + band && p) a.acts.push(['tp', `สัดส่วน ${Math.round(w * 100)}% เกินเป้า ${Math.round(t * 100)}% ขายส่วนเกินให้กลับมาที่เป้า`, 'sell', (w - t) * eq, 'ขายส่วนเกิน']);
+      if (hasT && w < t - band) {
+        const need = (t - w) * eq;
+        if (st && ['hot', 'wait'].includes(st.g)) a.acts.push(['slow', `สัดส่วน ${Math.round(w * 100)}% ต่ำกว่าเป้า ${Math.round(t * 100)}% แต่ราคายังแพง ทยอยเติมช้าๆ หรือรอย่อ`, null]);
+        else a.acts.push(['buy', `สัดส่วน ${Math.round(w * 100)}% ต่ำกว่าเป้า ${Math.round(t * 100)}% และราคาเข้าได้ ซื้อเพิ่มให้ถึงเป้า`, 'buy', Math.min(need, B.cash > 0 ? B.cash : need), 'ซื้อเติม']);
+      }
+      if (!a.acts.length && p) a.acts.push(['hold', st && st.h === 'good' ? 'ถือต่อ เทรนด์ระยะยาวยังดี' : 'ถือต่อ', null]);
+      out[s] = a;
+    });
+    return out;
   };
 
   /* ---------- views ---------- */
   const card = (k, v, h, cls) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v' + (cls ? ' ' + cls : ''), v), el('div', 'h', h || '')); return d; };
-  const tone = (v) => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
   const daily = (B) => {
-    const days = {}; const D = (d) => days[d] || (days[d] = { d, n: 0, win: 0, loss: 0, pl: 0, fee: 0, flow: 0 });
+    const days = {}; const D = (d) => days[d] || (days[d] = { d, n: 0, pl: 0, fee: 0, flow: 0, buy: 0, sell: 0 });
     sorted().forEach((x) => {
       const r = D(bkDay(x.at));
-      if (x.type === 'buy' || x.type === 'sell') { r.n++; r.fee += x.fee; }
-      if (x.type === 'sell' && B.real[x.id]) { const pl = B.real[x.id].pl; r.pl += pl; if (pl >= 0) r.win++; else r.loss++; }
+      if (x.type === 'buy') { r.n++; r.fee += x.fee || 0; r.buy += costOf(x); }
+      if (x.type === 'sell') { r.n++; r.fee += x.fee || 0; r.sell += netOf(x); if (B.real[x.id]) r.pl += B.real[x.id].pl; }
       if (x.type === 'dep') r.flow += x.thb; if (x.type === 'wd') r.flow -= x.thb;
     });
     Object.keys(T.snaps).forEach((d) => D(d));
     const list = Object.values(days).sort((a, b) => a.d.localeCompare(b.d)); let prev = null, cum = 0;
-    list.forEach((r) => { cum += r.pl; r.cum = cum; const s = T.snaps[r.d]; r.eq = s ? s.eq : null; r.chg = s && prev != null ? s.eq - prev - r.flow : null; if (s) prev = s.eq; });
+    list.forEach((r) => { cum += r.pl; r.cum = cum; const s = T.snaps[r.d]; r.eq = s ? s.eq : null; r.unreal = s ? s.unreal : null; r.chg = s && prev != null ? s.eq - prev - r.flow : null; if (s) prev = s.eq; });
     return list;
   };
   const draw = () => {
@@ -4917,64 +4879,76 @@ const SPC = (() => {
     const B = book(), V = value(B), today = bkDay(Date.now());
     if (T.tx.length && V.miss === 0) { const s = T.snaps[today], snap = { eq: Math.round(V.eq), cash: Math.round(B.cash), unreal: Math.round(V.unreal) }; if (!s || s.eq !== snap.eq || s.unreal !== snap.unreal) { T.snaps[today] = snap; save(false); } }
     const realAll = Object.values(B.real).reduce((a, x) => a + x.pl, 0), feeAll = T.tx.reduce((a, x) => a + (x.fee || 0), 0);
-    const td = daily(B).find((r) => r.d === today);
+    const tot = realAll + V.unreal, locked = tot > 0 && realAll > 0 ? realAll / Math.max(tot, realAll) : 0;
     $('tr-strip').replaceChildren(
-      card('มูลค่าพอร์ต', thb(V.eq), `เงินสด ${thb(B.cash)} · ${V.miss ? 'ราคาบางตัวยังไม่มา ใช้ทุนแทน' : 'ราคาโดยประมาณ'}`),
-      card('ยังไม่ได้ขาย', pthb(V.unreal), 'ถ้าขายตอนนี้ หักค่าธรรมเนียมแล้ว', tone(V.unreal)),
-      card('กำไรที่ขายแล้วรวม', pthb(realAll), `วันนี้ ${pthb(td ? td.pl : 0)} · ค่าธรรมเนียมรวม ${thb(feeAll)}`, tone(realAll)),
+      card('มูลค่าพอร์ต', thb(V.eq), `เงินสด ${thb(B.cash)}${V.miss ? ' · ราคาบางตัวยังไม่มา ใช้ทุนแทน' : ''}`),
+      card('กำไรบนกระดาษ', pthb(V.unreal), 'ยังไม่ได้ขาย ราคาลงก็หายได้ (หักค่าธรรมเนียมขายแล้ว)', tone(V.unreal)),
+      card('กำไรจริง (ขายแล้ว)', pthb(realAll), `ล็อกไว้แล้ว ${Math.round(locked * 100)}% ของกำไรทั้งหมด · ค่าธรรมเนียมรวม ${thb(feeAll)}`, tone(realAll)),
       card('เทียบเงินที่ใส่', B.dep > 0 ? pthb(V.eq - B.dep) : '–', B.dep > 0 ? `ใส่สุทธิ ${thb(B.dep)} · ${pct(V.eq / B.dep - 1)}` : 'บันทึก "ฝากเงิน" ก่อน', B.dep > 0 ? tone(V.eq - B.dep) : ''));
+    const P = plan(B, V);
     /* holdings */
     const hb = $('tr-hold'); hb.replaceChildren(); const hs = Object.entries(B.h);
-    if (!hs.length) hb.append(el('div', 'empty', T.tx.length ? 'ตอนนี้ไม่ได้ถืออะไร' : 'เริ่มจากบันทึก "ฝากเงิน" ที่ใส่เข้าไปลงทุนส่วนนี้ แล้วกด "ซื้อแล้ว" ที่สัญญาณด้านบน ระบบจะกรอกให้'));
+    if (!hs.length) hb.append(el('div', 'empty', T.tx.length ? 'ตอนนี้ไม่ได้ถืออะไร' : 'เริ่มจากบันทึก "ฝากเงิน" แล้วกด "ซื้อแล้ว" ที่ตัวที่ราคาน่าซื้อด้านบน หรือบันทึกจากสลิปเอง'));
     hs.forEach(([s, p]) => {
-      const px = priceOf(s), avg = p.cost / p.q, pl = px != null ? p.q * px - feeOf(s, p.q, px) - p.cost : null;
-      const r = el('div', 'sw-row');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(s)), el('small', null, `${qty(p.q)} ${unit(s)} · ทุนเฉลี่ย ${thb(avg)} (รวมค่าธรรมเนียม)`));
-      const now = el('div', 'sw-now'); now.append(el('b', null, thb(px)), px == null ? el('small', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('small', tone(pl), `${pct(px / avg - 1)} · ${pthb(pl)} ถ้าขายตอนนี้`));
-      r.append(who, now);
-      if (p.plan) {
-        const a = SPC.advise({ ...p.plan, entry: avg }, px, SP() ? SP().s50(s) : null);
-        const st = p.plan.stage || 0;
-        r.append(el('div', 'sw-adv sw-' + (a.k === 'tp' ? 'tp1' : a.k), a.t), el('small', 'sw-lvl', `จุดตัดขาดทุน ${thb(st ? avg : p.plan.sl)} · เป้าแรก ${thb(p.plan.tp1)}${st >= 1 ? ' ✓' : ''} · เป้าสอง ${thb(p.plan.tp2)}${st >= 2 ? ' ✓' : ''}`));
-      } else { const ss = SP() && SP().status(s); r.append(el('small', 'sw-lvl', ss ? 'ไม่ได้ซื้อจากสัญญาณ สถานะตอนนี้: ' + ss.t : 'ไม่ได้ซื้อจากสัญญาณ จึงไม่มีจุดขายที่แนะนำ')); }
+      const r = V.rows[s], avg = p.cost / p.q, a = P[s];
+      const row = el('div', 'sw-row');
+      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(s)), el('small', null, `${qty(p.q)} ${unit(s)} · ทุน ${thb(p.cost)} (เฉลี่ย ${thb(avg)}${isGold(s) ? '/oz' : ''})`));
+      const now = el('div', 'sw-now'); now.append(el('b', null, thb(r.v)), r.px == null ? el('small', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('small', tone(r.u), `บนกระดาษ ${pthb(r.u)} (${pct(r.u / p.cost)}) · ${Math.round(a.w * 100)}% ของพอร์ต${a.t ? ' เป้า ' + Math.round(a.t * 100) + '%' : ''}`));
+      row.append(who, now);
+      if (a.st) { const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + SP().G[a.st.g][0], SP().G[a.st.g][1]), el('span', 'tag ' + SP().H[a.st.h][0], SP().H[a.st.h][1])); row.append(tags); }
       const act = el('div', 'sw-act');
-      const sell = (lab, q, stage) => { const b = el('button', 'btn-line sm', lab); b.type = 'button'; b.addEventListener('click', () => prefill({ type: 'sell', s, q, px, plan: stage ? { s, stage } : null })); return b; };
-      const st = p.plan ? p.plan.stage || 0 : 0;
-      if (p.plan && st < 2) act.append(sell(st === 0 ? 'ขาย 1/3 (เป้าแรก)' : 'ขายอีกครึ่งที่เหลือ (เป้าสอง)', st === 0 ? p.q / 3 : p.q / 2, st + 1));
-      act.append(sell('ขายทั้งหมด', p.q, 0)); r.append(act); hb.append(r);
+      a.acts.forEach(([k, t, kind, amt, lab]) => { row.append(el('div', 'sw-adv sw-' + k, t + (amt ? ` ≈ ${thb(amt)}` : ''))); if (kind === 'sell') act.append(sellBtn(lab, s, amt)); if (kind === 'buy') act.append(buyBtn(lab, s, amt)); });
+      act.append(sellBtn('ขายทั้งหมด', s, r.v)); row.append(act); hb.append(row);
     });
-    /* ledger */
+    drawTargets(B, V, P); drawLedger(B); drawDays(B);
+  };
+  const drawTargets = (B, V, P) => {
+    const box = $('tr-targets'); if (!box) return;
+    if (!box.dataset.built) {
+      box.dataset.built = '1';
+      (SP() ? SP().assets : []).forEach(([a]) => { const l = el('label', null, nameOf(a)); const x = el('input', 'inp'); x.type = 'number'; x.step = '1'; x.min = '0'; x.max = '100'; x.inputMode = 'numeric'; x.placeholder = '0'; x.dataset.a = a; if (T.targets[a]) x.value = T.targets[a];
+        x.addEventListener('change', () => { const v = +x.value; if (v > 0) T.targets[a] = Math.min(100, v); else delete T.targets[a]; save(); draw(); }); l.append(x); box.append(l); });
+      const l = el('label', null, 'ยอมให้คลาดจากเป้า (± จุด)'); const b = el('input', 'inp'); b.type = 'number'; b.min = '1'; b.max = '30'; b.step = '1'; b.id = 'tr-band'; b.value = T.band;
+      b.addEventListener('change', () => { const v = +b.value; if (v >= 1 && v <= 30) { T.band = v; save(); draw(); } else b.value = T.band; }); l.append(b); box.append(l);
+    } else box.querySelectorAll('input[data-a]').forEach((x) => { if (document.activeElement !== x) x.value = T.targets[x.dataset.a] || ''; });
+    const sum = Object.values(T.targets).reduce((a, v) => a + v, 0);
+    const note = $('tr-tnote');
+    const miss = $('tr-tacts'); miss.replaceChildren();
+    Object.entries(P).filter(([k, x]) => !B.h[k] && x.acts.length).forEach(([k, x]) => x.acts.forEach(([c, t, kind, amt, lab]) => { const d = el('div', 'sw-row'); d.append(el('div', 'sw-who', nameOf(k)), el('div', 'sw-adv sw-' + c, t + (amt ? ` ≈ ${thb(amt)}` : ''))); if (kind === 'buy') { const ac = el('div', 'sw-act'); ac.append(buyBtn(lab, k, amt)); d.append(ac); } miss.append(d); }));
+    note.textContent = sum ? `รวม ${sum}% ที่เหลือ ${Math.max(0, 100 - sum)}% เป็นเงินสด (ตอนนี้เงินสด ${V.eq > 0 ? Math.round(B.cash / V.eq * 100) : 0}%)${sum > 100 ? ' · เกิน 100% ลดลงก่อน' : ''}` : 'ยังไม่ได้ตั้งเป้า ตั้งไว้แล้วระบบจะบอกว่าตัวไหนควรขายส่วนเกินหรือซื้อเติม เช่น ทอง 40 BTC 30 ETH 10 ที่เหลือเป็นเงินสด';
+  };
+  const drawLedger = (B) => {
     const lb = $('tr-tx'); lb.replaceChildren(); const TY = { buy: 'ซื้อ', sell: 'ขาย', dep: 'ฝากเงิน', wd: 'ถอนเงิน' };
     sorted().reverse().slice(0, 30).forEach((x) => {
       const li = el('li'); const rl = B.real[x.id];
-      li.append(el('b', null, TY[x.type] + (x.s ? ' ' + nameOf(x.s) : '')), el('span', null, x.s ? ` ${qty(x.q)} ${unit(x.s)} × ${thb(x.px)} · ค่าธรรมเนียม ${thb(x.fee)} · ${hm(x.at)} ` : ` ${thb(x.thb)} · ${hm(x.at)} `));
+      const px = x.s ? (isGold(x.s) && x.fx ? `$${(+x.px).toFixed(2)}/oz เรท ${x.fx}` : thb(x.px)) : '';
+      li.append(el('b', null, TY[x.type] + (x.s ? ' ' + nameOf(x.s) : '')), el('span', null, x.s ? ` ${qty(x.q)} ${unit(x.s)} @ ${px} · ${x.type === 'buy' ? 'ทุน ' + thb(costOf(x)) : 'ได้ ' + thb(netOf(x))} · ${hm(x.at)} ` : ` ${thb(x.thb)} · ${hm(x.at)} `));
       if (rl) li.append(el('b', tone(rl.pl), pthb(rl.pl)));
       const del = el('button', 'tr-del', '×'); del.type = 'button'; del.setAttribute('aria-label', 'ลบรายการนี้');
       del.addEventListener('click', () => { if (del.dataset.ok) { T.tx = T.tx.filter((y) => y.id !== x.id); save(); draw(); } else { del.dataset.ok = '1'; del.textContent = 'ลบ?'; setTimeout(() => { if (del.isConnected) { delete del.dataset.ok; del.textContent = '×'; } }, 3000); } });
       li.append(del); lb.append(li);
     });
     $('tr-tx-h').hidden = !T.tx.length;
-    drawDays(B);
   };
   const drawDays = (B) => {
     const box = $('tr-days'); if (!box) return; box.replaceChildren();
     const rows = daily(B).reverse();
     if (!rows.length) { box.append(el('div', 'empty', 'ยังไม่มีรายการในพอร์ตนี้')); return; }
     const tb = el('table', 'tr-table'); const hd = el('tr');
-    ['วันที่', 'ซื้อขาย', 'ชนะ/แพ้', 'กำไรที่ขาย', 'ค่าธรรมเนียม', 'สะสม', 'มูลค่าพอร์ต', 'เปลี่ยนจากวันก่อน'].forEach((h) => hd.append(el('th', null, h)));
+    ['วันที่', 'ซื้อ', 'ขาย', 'กำไรจริง', 'ค่าธรรมเนียม', 'กำไรจริงสะสม', 'กำไรบนกระดาษ', 'มูลค่าพอร์ต', 'เปลี่ยนจากวันก่อน'].forEach((h) => hd.append(el('th', null, h)));
     const th = el('thead'); th.append(hd); tb.append(th); const bd = el('tbody');
     rows.forEach((r) => {
       const tr = el('tr'); const td = (v, c) => tr.append(el('td', c || null, v));
-      td(thDay(r.d)); td(String(r.n)); td(r.win + r.loss ? `${r.win}/${r.loss}` : '–'); td(r.win + r.loss ? pthb(r.pl) : '–', tone(r.pl));
-      td(r.fee ? thb(r.fee) : '–'); td(pthb(r.cum)); td(r.eq != null ? thb(r.eq) : '–'); td(r.chg != null ? pthb(r.chg) : '–', tone(r.chg)); bd.append(tr);
+      td(thDay(r.d)); td(r.buy ? thb(r.buy) : '–'); td(r.sell ? thb(r.sell) : '–'); td(r.sell ? pthb(r.pl) : '–', tone(r.pl)); td(r.fee ? thb(r.fee) : '–'); td(pthb(r.cum));
+      td(r.unreal != null ? pthb(r.unreal) : '–', tone(r.unreal)); td(r.eq != null ? thb(r.eq) : '–'); td(r.chg != null ? pthb(r.chg) : '–', tone(r.chg)); bd.append(tr);
     });
     tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); box.append(w);
-    const done = rows.reduce((a, r) => a + r.win + r.loss, 0), wins = rows.reduce((a, r) => a + r.win, 0), tot = rows.reduce((a, r) => a + r.pl, 0);
-    box.append(el('p', 'pf-hint', `ขายไปแล้ว ${done} ครั้ง ชนะ ${done ? Math.round(wins / done * 100) : 0}% · กำไรที่ขายแล้วรวม ${pthb(tot)} · มูลค่าพอร์ตจดอัตโนมัติวันที่เปิดหน้านี้`));
+    box.append(el('p', 'pf-hint', 'กำไรบนกระดาษกับมูลค่าพอร์ตจดอัตโนมัติวันที่เปิดหน้านี้ กำไรจริงนับเฉพาะที่ขายแล้ว'));
   };
   const csv = () => {
-    const B = book(); const rows = [['date', 'time', 'type', 'asset', 'qty', 'unit', 'price_thb', 'fee_thb', 'realized_thb', 'amount_thb']];
-    sorted().forEach((x) => rows.push([bkDay(x.at), new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' }), x.type, x.s || '', x.q ?? '', x.s ? (isGold(x.s) ? 'ounce' : 'coin') : '', x.px ?? '', x.fee ?? '', B.real[x.id] ? r2(B.real[x.id].pl) : '', x.thb ?? '']));
+    const B = book(); const rows = [['date', 'time', 'type', 'asset', 'amount_thb', 'qty', 'unit', 'price', 'price_unit', 'fx', 'fee_thb', 'cost_or_net_thb', 'realized_thb']];
+    sorted().forEach((x) => rows.push([bkDay(x.at), new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' }), x.type, x.s || '', x.amt ?? x.thb ?? '', x.q ?? '', x.s ? (isGold(x.s) ? 'oz' : 'coin') : '', x.px ?? '', x.s ? (isGold(x.s) && x.fx ? 'USD/oz' : 'THB') : '', x.fx ?? '', x.fee ?? '',
+      x.type === 'buy' ? r2(costOf(x)) : x.type === 'sell' ? r2(netOf(x)) : '', B.real[x.id] ? r2(B.real[x.id].pl) : '']));
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' })); a.download = 'valuegrab-crypto-gold.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   const setupFees = () => {
@@ -4985,11 +4959,12 @@ const SPC = (() => {
 
   const setup = () => {
     if (!$('tr-form')) return;
-    const sel = $('tr-sym'); (SP() ? SP().assets : [['BTC', ''], ['GOLD', 'ทองคำ']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
-    ['tr-type', 'tr-sym', 'tr-q', 'tr-px', 'tr-at', 'tr-thb'].forEach((k) => $(k).addEventListener('input', preview));
-    $('tr-sym').addEventListener('change', () => { feeTouched = false; plan = null; preview(); });
+    const sel = $('tr-sym'); (SP() ? SP().assets : [['GOLD'], ['BTC']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
+    ['tr-type', 'tr-sym', 'tr-q', 'tr-px', 'tr-fx', 'tr-at', 'tr-thb'].forEach((k) => $(k).addEventListener('input', preview));
+    $('tr-sym').addEventListener('change', () => { nTouched = false; feeTouched = false; $('tr-fx').value = ''; preview(); });
+    $('tr-type').addEventListener('change', () => { nTouched = false; feeTouched = false; preview(); });
+    $('tr-n').addEventListener('input', () => { nTouched = !!$('tr-n').value; preview(); });
     $('tr-fee').addEventListener('input', () => { feeTouched = true; preview(); });
-    $('tr-type').addEventListener('change', () => { feeTouched = false; plan = null; preview(); });
     $('tr-add').addEventListener('click', add); $('tr-csv').addEventListener('click', csv);
     document.addEventListener('vg:spot', draw); document.addEventListener('vg:ready', draw);
     setupFees(); preview(); draw();
@@ -4999,9 +4974,9 @@ const SPC = (() => {
   window.VGTrade = {
     trade: () => T, prefill,
     equityTHB: () => { if (!T.tx.some((x) => x.type === 'dep')) return 0; return value(book()).eq; },
-    replace: (c) => { T = { tx: (c && c.tx) || [], snaps: (c && c.snaps) || {}, fees: { ...FEES, ...((c && c.fees) || {}) } }; save(false); setupFees(); draw(); },
+    replace: (c) => { T = norm(c); save(false); setupFees(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
     merge: (c) => { const ids = new Set((c.tx || []).map((x) => x.id)); const tx = [...(c.tx || []), ...T.tx.filter((x) => !ids.has(x.id))];
-      return { extra: tx.length - (c.tx || []).length, doc: { tx, snaps: { ...T.snaps, ...(c.snaps || {}) }, fees: { ...T.fees, ...(c.fees || {}) } } }; },
+      return { extra: tx.length - (c.tx || []).length, doc: { tx, snaps: { ...T.snaps, ...(c.snaps || {}) }, fees: { ...T.fees, ...(c.fees || {}) }, targets: { ...T.targets, ...(c.targets || {}) }, band: c.band || T.band } }; },
   };
 })();
 
