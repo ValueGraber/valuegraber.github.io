@@ -38,6 +38,7 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Expense categories: housing + water/electricity = `ที่พักและค่าน้ำไฟ`, internet/phone = `ค่าเน็ตและโทรศัพท์`; old names are mapped in `norm` (`mapCat`).
 - Sync: `push` remembers what it sent (`s.last`, key-sorted JSON); the snapshot that echoes our own write is skipped, so typing is never interrupted by a redraw. Lists that rebuild should also skip rebuilding while one of their inputs has focus (see `drawPL`).
 - Editing pattern: Python `rep(old, new)` with `assert count == 1`, then `python3 tools/build.py && node tools/smoke.js`, then commit and push. The remote may print "repository moved": that is harmless.
+- Auto-update: `tools/build.py` puts a short hash of the page into `/*BUILD*/` and `docs/version.json`; the page checks it on load and when it becomes visible, and reloads once via `?v=<hash>` when they differ (Pages caches ~10 min).
 - Commit message trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Open ideas (not built)

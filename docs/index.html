@@ -4483,6 +4483,21 @@ dash.calc('sectors', {
 })();
 </script>
 <script>
+/* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
+   when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
+(() => {
+  const BUILD = '42c524e584';
+  try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
+  const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+    if (!j || !j.v || j.v === BUILD) return;
+    let seen = ''; try { seen = sessionStorage.getItem('vg-reload') || ''; } catch (e) { /* ignore */ }
+    if (seen === j.v) return;
+    try { sessionStorage.setItem('vg-reload', j.v); } catch (e) { /* ignore */ }
+    location.replace(location.pathname + '?v=' + j.v + location.hash);
+  }).catch(() => {});
+  check(); let last = Date.now();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - last > 60e3) { last = Date.now(); check(); } });
+})();
 /* spot core: long-term entry timing for crypto majors and gold on daily bars (spot, no leverage).
    bars: [{t, o, h, l, c, v}] oldest first, closed bars only. opt.gold = true uses gold thresholds. */
 const SPC = (() => {
