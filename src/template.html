@@ -309,11 +309,13 @@ details.method h4 { font-size: 17px; }
 .alert { background: var(--ochre-soft); color: var(--ochre); border-radius: var(--radius-lg); padding: 14px 18px; margin: 0 0 16px; font-size: 16px; }
 .alert b { color: var(--ink); }
 .alert ul { margin: 6px 0 0; padding-left: 1.2rem; color: var(--ink); }
-.g-key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); margin: 6px 0 4px; }
+.g-key { display: flex; gap: 8px 10px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); margin: 6px 0 4px; }
+.g-key button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+.g-key button[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
 .g-key i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
 .g-key .k1 { background: var(--jade); }
 .g-key .k2 { background: var(--ink-3); }
-.g-key .k3 { background: #5b6f8f; }
+.g-key .k3 { background: var(--ochre); }
 .g-empty { padding: 36px 12px; text-align: center; color: var(--ink-2); }
 details.log { margin-top: 12px; }
 details.log summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
@@ -1304,13 +1306,13 @@ tr.editing td { background: var(--accent-soft); }
   </section>
 
 <section class="panel" style="margin-top:16px" id="pf-growth" data-sub="grow">
-    <div class="ph"><div><h3>การเติบโตของพอร์ต</h3><p>มูลค่าหุ้นรายสัปดาห์ เทียบกับเงินที่ลงไป และเทียบกับถ้าเอาเงินก้อนเดียวกันซื้อกองทุน S&amp;P 500 (SPY) ในวันเดียวกัน</p></div>
+    <div class="ph"><div><h3>การเติบโตของพอร์ต</h3><p>ดู 3 เส้นแยกกัน: <b>ต้นทุน</b> (เงินที่ลงไปซื้อหุ้น), <b>กำไร+ต้นทุน</b> (มูลค่าพอร์ตจริง) และ <b>SPY ณ ขณะนั้น</b> (ถ้าเอาเงินก้อนเดียวกันซื้อ SPY ในวันเดียวกัน) กดชื่อเส้นเพื่อซ่อนหรือแสดง</p></div>
       <span class="seg" id="g-range"><button type="button" data-v="13" aria-pressed="false">3 เดือน</button><button type="button" data-v="26" aria-pressed="false">6 เดือน</button><button type="button" data-v="52" aria-pressed="false">1 ปี</button><button type="button" data-v="0" aria-pressed="true">ทั้งหมด</button></span></div>
-    <div class="g-key"><span><i class="k1"></i>มูลค่าพอร์ต</span><span><i class="k2"></i>เงินที่ลงไป</span><span><i class="k3"></i>ถ้าซื้อ SPY แทน</span></div>
+    <div class="g-key" id="g-key"><button type="button" data-k="invested" aria-pressed="true"><i class="k2"></i>1. ต้นทุน</button><button type="button" data-k="value" aria-pressed="true"><i class="k1"></i>2. กำไร+ต้นทุน</button><button type="button" data-k="spy" aria-pressed="true"><i class="k3"></i>3. SPY ณ ขณะนั้น</button></div>
     <div class="chart" id="g-chart"></div>
-    <details class="log">
+    <details class="log" open>
       <summary>บันทึกผลรายเดือน</summary>
-      <div class="scroll"><table class="tbl" id="g-log"><thead><tr><th class="l">สิ้นเดือน</th><th>มูลค่าพอร์ต</th><th>เงินที่ลงไป</th><th>กำไร/ขาดทุน</th><th>ผลตอบแทน</th><th>ถ้าซื้อ SPY</th><th>ชนะ/แพ้ SPY</th></tr></thead><tbody></tbody></table></div>
+      <div class="scroll"><table class="tbl" id="g-log"><thead><tr><th class="l" rowspan="2">สิ้นเดือน</th><th>1. ต้นทุน</th><th colspan="3">2. กำไร+ต้นทุน</th><th colspan="4">3. SPY ณ ขณะนั้น</th></tr><tr><th>เงินที่ลงไป</th><th>มูลค่าพอร์ต</th><th>กำไร</th><th>%</th><th>ราคา SPY</th><th>ถ้าซื้อ SPY</th><th>%</th><th>พอร์ตเทียบ SPY</th></tr></thead><tbody></tbody></table></div>
     </details>
   </section>
   <section class="panel" style="margin-top:16px" id="pf-goal" data-sub="grow">
@@ -3552,7 +3554,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const spyAt = (i) => { for (let k = i; k >= 0; k--) if (hist.spy[k] != null) return hist.spy[k]; return null; };
     const out = []; const sh = {}; const lastPx = {}; let invested = 0, spyUnits = 0, ti = 0;
     const apply = (t, spyPx) => {
-      const amt = -cashDelta(t);
+      const amt = t.type === 'buy' ? t.shares * t.price + (t.fee || 0) : -(t.shares * t.price - (t.fee || 0));
       sh[t.sym] = (sh[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares);
       lastPx[t.sym] = t.price; invested += amt; if (spyPx) spyUnits += amt / spyPx;
     };
@@ -3563,11 +3565,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       if (ti === 0) continue;
       let value = 0; Object.entries(sh).forEach(([s, n]) => { if (n > 1e-9) { const p = closeAt(s, i) ?? lastPx[s]; value += n * p; } });
       const sp = spyAt(i);
-      out.push({ d: dates[i], value, invested, spy: sp ? spyUnits * sp : null });
+      out.push({ d: dates[i], value, invested, spy: sp ? spyUnits * sp : null, spyPx: sp });
     }
     while (ti < tx.length) { apply(tx[ti], spyAt(dates.length - 1)); ti++; }
     const { total } = holdings(); const spyNow = window.VG && window.VG.spyNow;
-    const today = new Date(); if (!out.length || today - out[out.length - 1].d > 86400000) out.push({ d: today, value: total, invested, spy: spyNow ? spyUnits * spyNow : (out.length ? out[out.length - 1].spy : null) });
+    const today = new Date(); if (!out.length || today - out[out.length - 1].d > 86400000) out.push({ d: today, value: total, invested, spy: spyNow ? spyUnits * spyNow : (out.length ? out[out.length - 1].spy : null), spyPx: spyNow || (out.length ? out[out.length - 1].spyPx : null) });
     else Object.assign(out[out.length - 1], { value: total, invested });
     return out;
   };
@@ -3576,6 +3578,10 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', M.l - 6).attr('y', (v) => y(v) + 4).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', css('--ink-3')).text(fmt);
   };
   const xAxis = (svg, x, H, W) => svg.append('g').selectAll('text').data(x.ticks(Math.max(3, Math.floor(W / 120)))).join('text').attr('x', x).attr('y', H - 6).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', css('--ink-3')).text((d) => d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' }));
+  let gShow = { invested: true, value: true, spy: true }; try { gShow = { ...gShow, ...(JSON.parse(localStorage.getItem('vg-gshow') || '{}') || {}) }; } catch (e) { /* ignore */ }
+  document.querySelectorAll('#g-key button').forEach((b) => { b.setAttribute('aria-pressed', String(gShow[b.dataset.k] !== false)); b.addEventListener('click', () => {
+    const on = Object.values(gShow).filter(Boolean).length; if (gShow[b.dataset.k] && on === 1) return; gShow[b.dataset.k] = !gShow[b.dataset.k];
+    b.setAttribute('aria-pressed', String(gShow[b.dataset.k])); try { localStorage.setItem('vg-gshow', JSON.stringify(gShow)); } catch (e) { /* ignore */ } drawGrowth(); }); });
   const drawGrowth = () => {
     const box = $('g-chart'); box.replaceChildren(); const tb = $('g-log').tBodies[0]; tb.replaceChildren();
     if (!db.tx.some(isTrade)) { box.append(el('div', 'g-empty', 'บันทึกการซื้อหุ้นก่อน แล้วกราฟการเติบโตจะขึ้นที่นี่')); return; }
@@ -3585,27 +3591,27 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const all = rows; if (gRange) rows = rows.slice(-gRange - 1);
     const W = box.clientWidth || 600, H = 260, M = { t: 10, r: 10, b: 26, l: 56 };
     const x = d3.scaleUtc(d3.extent(rows, (r) => r.d), [M.l, W - M.r]);
-    const ys = rows.flatMap((r) => [r.value, r.invested, r.spy].filter((v) => v != null));
+    const ys = rows.flatMap((r) => ['value', 'invested', 'spy'].filter((k) => gShow[k]).map((k) => r[k]).filter((v) => v != null));
     const y = d3.scaleLinear([Math.min(...ys) * 0.95, Math.max(...ys) * 1.03], [H - M.b, M.t]).nice();
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
     yAxis(svg, y, M, W, (v) => '$' + d3.format(',')(v)); xAxis(svg, x, H, W);
     const line = (k) => d3.line((r) => x(r.d), (r) => y(r[k])).defined((r) => r[k] != null);
-    svg.append('path').attr('d', d3.line((r) => x(r.d), (r) => y(r.invested)).curve(d3.curveStepAfter)(rows)).attr('fill', 'none').attr('stroke', css('--ink-3')).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 4');
-    svg.append('path').attr('d', line('spy')(rows)).attr('fill', 'none').attr('stroke', '#c49a45').attr('stroke-width', 1.8);
-    svg.append('path').attr('d', line('value')(rows)).attr('fill', 'none').attr('stroke', css('--jade')).attr('stroke-width', 2.6).attr('stroke-linejoin', 'round');
+    if (gShow.invested) svg.append('path').attr('d', d3.line((r) => x(r.d), (r) => y(r.invested)).curve(d3.curveStepAfter)(rows)).attr('fill', 'none').attr('stroke', css('--ink-3')).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 4');
+    if (gShow.spy) svg.append('path').attr('d', line('spy')(rows)).attr('fill', 'none').attr('stroke', css('--ochre')).attr('stroke-width', 1.8);
+    if (gShow.value) svg.append('path').attr('d', line('value')(rows)).attr('fill', 'none').attr('stroke', css('--jade')).attr('stroke-width', 2.6).attr('stroke-linejoin', 'round');
     const tp = el('div', 'tip'); box.append(tp); const dot = svg.append('circle').attr('r', 4.5).attr('fill', css('--jade')).style('display', 'none');
     svg.append('rect').attr('x', M.l).attr('y', 0).attr('width', W - M.l - M.r).attr('height', H - M.b).attr('fill', 'transparent')
       .on('pointermove', (ev) => {
         const [mx] = d3.pointer(ev); const r = rows[d3.bisector((q) => q.d).center(rows, x.invert(mx))];
-        dot.style('display', null).attr('cx', x(r.d)).attr('cy', y(r.value));
-        tp.replaceChildren(el('div', null, r.d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })), el('div', null, 'พอร์ต ' + usd0(r.value) + ' (' + pc(r.invested ? (r.value - r.invested) / r.invested : null) + ')'), el('div', null, 'ลงไป ' + usd0(r.invested)), el('div', null, 'ถ้าซื้อ SPY ' + usd0(r.spy)));
+        const k = gShow.value ? 'value' : gShow.spy ? 'spy' : 'invested'; dot.style('display', null).attr('cx', x(r.d)).attr('cy', y(r[k]));
+        tp.replaceChildren(el('div', null, r.d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })), el('div', null, '1. ต้นทุน ' + usd0(r.invested)), el('div', null, '2. กำไร+ต้นทุน ' + usd0(r.value) + ' (' + pc(r.invested ? (r.value - r.invested) / r.invested : null) + ')'), el('div', null, '3. SPY ณ ขณะนั้น ' + usd0(r.spy) + (r.spyPx ? ' (SPY $' + r.spyPx.toFixed(2) + ')' : '')));
         tp.style.display = 'block'; const px = (x(r.d) / W) * box.clientWidth; tp.style.left = Math.min(box.clientWidth - 190, Math.max(0, px - 90)) + 'px'; tp.style.top = '-8px';
       }).on('pointerleave', () => { dot.style('display', 'none'); tp.style.display = 'none'; });
     const months = []; all.forEach((r, i) => { const n = all[i + 1]; if (!n || n.d.getUTCMonth() !== r.d.getUTCMonth()) months.push(r); });
     months.reverse().forEach((r) => {
       const gain = r.value - r.invested; const ret = r.invested ? gain / r.invested : null; const sret = r.invested && r.spy != null ? (r.spy - r.invested) / r.invested : null;
       const tr = el('tr');
-      [[r.d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }), 'l'], [usd0(r.value)], [usd0(r.invested)], [usd0(gain), gain >= 0 ? 'pos' : 'neg'], [pc(ret), ret >= 0 ? 'pos' : 'neg'], [usd0(r.spy)],
+      [[r.d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }), 'l'], [usd0(r.invested)], [usd0(r.value)], [usd0(gain), gain >= 0 ? 'pos' : 'neg'], [pc(ret), ret >= 0 ? 'pos' : 'neg'], [r.spyPx ? '$' + r.spyPx.toFixed(2) : '–'], [usd0(r.spy)], [pc(sret), sret >= 0 ? 'pos' : 'neg'],
         [ret != null && sret != null ? (ret >= sret ? 'ชนะ ' : 'แพ้ ') + Math.abs((ret - sret) * 100).toFixed(1) + ' จุด' : '–', ret != null && sret != null ? (ret >= sret ? 'pos' : 'neg') : '']]
         .forEach(([v, c]) => tr.append(el('td', c || null, v)));
       tb.append(tr);
