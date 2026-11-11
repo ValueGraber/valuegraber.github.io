@@ -657,6 +657,15 @@ h2 { font-size: 22px; font-weight: 600; letter-spacing: 0; }
 .p-open { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: -18px 0 18px; justify-content: center; }
 .p-open .inp { width: 180px; padding: 6px 10px; font-size: 15px; }
 .v.sav { color: var(--ink); }
+.tag.pay { background: var(--bg); color: var(--ink-2); font-size: 12px; padding: 1px 8px; margin-left: 6px; white-space: nowrap; }
+.wal { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.wal > div { border: 1px solid var(--line, #ddd); border-radius: 8px; padding: 12px 14px; }
+.wal .k { color: var(--ink-2); font-size: 14px; } .wal .v { font-size: 22px; font-weight: 600; margin: 2px 0 6px; }
+.wal .h { color: var(--ink-2); font-size: 13px; line-height: 1.5; }
+.wal-set { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; } .wal-set .inp { width: 130px; padding: 5px 8px; font-size: 14px; }
+.wal-mv { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; } .wal-mv .inp { width: 140px; }
+.wal-log { margin-top: 8px; font-size: 14px; color: var(--ink-2); } .wal-log div { display: flex; gap: 10px; align-items: center; padding: 3px 0; }
+@media (max-width: 560px) { .wal { grid-template-columns: 1fr; } }
 .tag.sav { background: var(--bg); color: var(--ink-2); font-size: 12px; padding: 1px 8px; border-radius: 8px; margin-left: 6px; white-space: nowrap; }
 .grp-list { display: grid; gap: 14px; margin-top: 8px; }
 .grp-row { display: grid; grid-template-columns: 1fr auto auto; gap: 2px 12px; align-items: center; }
@@ -1523,10 +1532,17 @@ tr.editing td { background: var(--accent-soft); }
     <div><div class="k">เก็บเงิน/ลงทุน</div><div class="v sav" id="p-sv">0 บาท</div><div class="h" id="p-sv-h"></div></div>
     <div><div class="k">เงินที่ยังใช้ได้</div><div class="v" id="p-left">0 บาท</div><div class="h" id="p-left-h"></div></div>
   </div>
+  <section class="panel" id="p-wal" data-sub="budget" style="margin-bottom:16px">
+    <div class="ph"><div><h3>เงินสด กับ เงินในบัญชี</h3><p>แยกเป็นสองกระเป๋า ใส่ยอดตั้งต้นของแต่ละกระเป๋าครั้งเดียว แล้วทุกรายการที่จดจะหักหรือบวกเข้ากระเป๋าที่เลือกไว้ (เงินโอนหรือเงินสด) ถอนเงินสดจากตู้หรือเอาเงินสดไปฝาก ให้จดด้านล่าง ไม่นับเป็นรายจ่าย</p></div></div>
+    <div class="wal" id="wal-box"></div>
+    <div class="wal-mv"><input class="inp" id="wal-amt" type="number" step="any" min="0" inputmode="decimal" placeholder="จำนวนเงิน"><input class="inp" id="wal-date" type="date"><button class="btn-line" type="button" id="wal-wd">ถอนเงินสด (บัญชี → เงินสด)</button><button class="btn-line" type="button" id="wal-dep">ฝากเงินสด (เงินสด → บัญชี)</button><span class="pf-hint" id="wal-hint"></span></div>
+    <div class="wal-log" id="wal-log"></div>
+  </section>
   <section class="panel" id="p-add" data-sub="budget">
     <h3 id="p-title">จดรายรับรายจ่ายส่วนตัว</h3>
     <p id="p-sub">แยกจากเงินธุรกิจ เงินที่โอนจากร้านมาใช้เองให้ลงเป็นรายรับหมวด "โอนจากธุรกิจ" เงินที่โอนไปเก็บหรือลงทุนให้ลงเป็น "เก็บเงิน/ลงทุน" ยอดนี้จะไม่นับเป็นรายจ่าย</p>
     <div class="f-types"><span class="seg" id="p-kind"><button type="button" data-v="out" aria-pressed="true">รายจ่าย</button><button type="button" data-v="in" aria-pressed="false">รายรับ</button><button type="button" data-v="sav" aria-pressed="false">เก็บเงิน/ลงทุน</button></span></div>
+    <div class="f-types"><span class="mini" style="margin-right:8px">จ่าย/รับเป็น</span><span class="seg" id="p-pay"><button type="button" data-v="bank" aria-pressed="true">เงินโอน</button><button type="button" data-v="cash" aria-pressed="false">เงินสด</button></span></div>
     <form class="pf-form f2" id="p-form" autocomplete="off">
       <label>จำนวนเงิน (บาท)<input class="inp" id="p-amt" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 120"></label>
       <label>หมวด<input class="inp" id="p-cat" list="p-cats" placeholder="เช่น อาหาร"></label>
@@ -2665,19 +2681,21 @@ dash.calc('sectors', {
   const mapCat = (c, note) => (c === 'ที่พัก/ค่าเช่า' ? HOUSE : c === 'ค่าน้ำไฟเน็ตโทรศัพท์' ? (NET_RE.test(note || '') ? NET : HOUSE) : c);
   const billCat = (b) => b.cat || (NET_RE.test(b.name || '') ? NET : HOUSE);
 
-  const blank = () => ({ accounts: [], entries: [], budgets: {}, debts: [], extra: '', bills: [], snaps: {}, settings: {}, goals: [], open: {}, incomes: [] });
+  const blank = () => ({ accounts: [], entries: [], budgets: {}, debts: [], extra: '', bills: [], snaps: {}, settings: {}, goals: [], open: {}, incomes: [], wal: {}, moves: [] });
   let M = blank();
   const norm = (d) => {
     const o = blank(); if (!d || typeof d !== 'object') return o;
     const arr = (x) => (Array.isArray(x) ? x.filter((y) => y && typeof y === 'object') : []);
     o.accounts = arr(d.accounts).map((a) => ({ id: String(a.id || newId()), name: String(a.name || '').slice(0, 60), type: TYPES[a.type] ? a.type : 'other', value: a.value === '' ? '' : +a.value || '', gold: a.gold === '' ? '' : +a.gold || '', emerg: !!a.emerg, upd: /^\d{4}-\d{2}-\d{2}$/.test(a.upd || '') ? a.upd : '',
       cur: CURS[a.cur] ? a.cur : 'THB', pl: !!a.pl, inv: a.inv === '' || a.inv == null || !isFinite(+a.inv) ? '' : +a.inv, invAt: /^\d{4}-\d{2}$/.test(a.invAt || '') ? a.invAt : '', log: (() => { const o = {}; if (a.log && typeof a.log === 'object') Object.entries(a.log).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v && typeof v === 'object') o[k] = { v: v.v === '' || v.v == null || !isFinite(+v.v) ? '' : +v.v, f: v.f === '' || v.f == null || !isFinite(+v.f) ? '' : +v.f }; }); return o; })() }));
-    o.entries = arr(d.entries).filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out' || e.kind === 'sav') && +e.amount > 0).map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.ref ? { ref: String(e.ref).slice(0, 40) } : {}), ...(e.goal ? { goal: String(e.goal).slice(0, 40) } : {}), ...(e.sal && typeof e.sal === 'object' ? { sal: { g: +e.sal.g || 0, t: +e.sal.t || 0, s: +e.sal.s || 0, p: +e.sal.p || 0, o: +e.sal.o || 0 } } : {}) }));
+    o.entries = arr(d.entries).filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && (e.kind === 'in' || e.kind === 'out' || e.kind === 'sav') && +e.amount > 0).map((e) => ({ id: String(e.id || newId()), date: e.date, kind: e.kind, amount: +e.amount, cat: String(e.cat || '').slice(0, 40), note: String(e.note || '').slice(0, 120), ...(e.ref ? { ref: String(e.ref).slice(0, 40) } : {}), ...(e.goal ? { goal: String(e.goal).slice(0, 40) } : {}), ...(e.pay === 'cash' ? { pay: 'cash' } : {}), ...(e.sal && typeof e.sal === 'object' ? { sal: { g: +e.sal.g || 0, t: +e.sal.t || 0, s: +e.sal.s || 0, p: +e.sal.p || 0, o: +e.sal.o || 0 } } : {}) }));
     const nz = (x) => (x === '' || x == null ? '' : +x || '');
     o.incomes = arr(d.incomes).map((b) => ({ id: String(b.id || newId()), name: String(b.name || '').slice(0, 60), type: b.type === 'other' ? 'other' : 'sal', amount: nz(b.amount), wht: nz(b.wht), sso: nz(b.sso), pvd: nz(b.pvd), oth: nz(b.oth),
       day: Math.min(31, Math.max(1, +b.day || 1)), freq: b.freq === 'y' ? 'y' : 'm', month: Math.min(12, Math.max(1, +b.month || 1)), got: Array.isArray(b.got) ? b.got.filter((x) => typeof x === 'string').slice(-36) : [] }));
     o.goals = arr(d.goals).map((g) => ({ id: String(g.id || newId()), name: String(g.name || '').slice(0, 40), target: g.target === '' ? '' : +g.target || '', start: g.start === '' ? '' : +g.start || '', due: /^\d{4}-\d{2}$/.test(g.due || '') ? g.due : '' }));
     o.open = {}; if (d.open && typeof d.open === 'object') Object.entries(d.open).forEach(([k, v]) => { if (/^\d{4}-\d{2}$/.test(k) && v !== '' && v != null && isFinite(+v)) o.open[k] = +v; });
+    o.wal = {}; if (d.wal && typeof d.wal === 'object') ['cash', 'bank'].forEach((k) => { const w = d.wal[k]; if (w && isFinite(+w.v) && w.v !== '' && /^\d{4}-\d{2}-\d{2}$/.test(w.at || '')) o.wal[k] = { v: +w.v, at: w.at }; });
+    o.moves = arr(d.moves).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date) && +x.amount > 0).map((x) => ({ id: String(x.id || newId()), date: x.date, amount: +x.amount, dir: x.dir === 'dep' ? 'dep' : 'wd' }));
     o.budgets = {}; if (d.budgets && typeof d.budgets === 'object') Object.entries(d.budgets).forEach(([k, v]) => { if (+v > 0) o.budgets[String(k).slice(0, 40)] = +v; });
     o.debts = arr(d.debts).map((x) => ({ id: String(x.id || newId()), name: String(x.name || '').slice(0, 60), bal: x.bal === '' ? '' : +x.bal || '', apr: x.apr === '' ? '' : +x.apr || '', min: x.min === '' ? '' : +x.min || '', day: +x.day >= 1 && +x.day <= 31 ? +x.day : '', paid: Array.isArray(x.paid) ? x.paid.filter((y) => typeof y === 'string').slice(-36) : [] }));
     o.extra = d.extra === '' || d.extra == null ? '' : +d.extra || '';
@@ -2937,6 +2955,44 @@ dash.calc('sectors', {
     list.slice(0, 8).forEach((c) => { const b = el('button', 'chip', c); b.type = 'button'; b.setAttribute('aria-pressed', String($('p-cat').value === c)); b.addEventListener('click', () => { $('p-cat').value = c; drawChips(); }); box.append(b); });
   };
   const setKind = (k) => { kind = k; setSeg('p-kind', k); drawChips(); };
+  let pay = (() => { try { return localStorage.getItem('vg-ppay') === 'cash' ? 'cash' : 'bank'; } catch (e) { return 'bank'; } })();
+  const setPay = (v) => { pay = v; setSeg('p-pay', v); };
+  document.querySelectorAll('#p-pay button').forEach((b) => b.addEventListener('click', () => { setPay(b.dataset.v); try { localStorage.setItem('vg-ppay', pay); } catch (e) { /* ignore */ } }));
+  setPay(pay);
+  const payOf = (e) => (e.pay === 'cash' ? 'cash' : 'bank');
+  const WNAME = { cash: 'เงินสด', bank: 'เงินในบัญชี (โอน)' };
+  /* wallet balance at the end of a day: start + in − out − saved after the start date, plus/minus cash moves */
+  const walBal = (k, end) => {
+    const w = M.wal[k]; if (!w) return null; let v = w.v;
+    M.entries.forEach((e) => { if (payOf(e) === k && e.date >= w.at && e.date <= end) v += e.kind === 'in' ? e.amount : -e.amount; });
+    M.moves.forEach((x) => { if (x.date >= w.at && x.date <= end) v += (x.dir === 'wd') === (k === 'cash') ? x.amount : -x.amount; });
+    return v;
+  };
+  const drawWal = () => {
+    const end = ym === ymOf(today()) ? today() : ym + '-31'; const box = $('wal-box'); box.replaceChildren();
+    const focus = document.activeElement && box.contains(document.activeElement) ? document.activeElement.id : null;
+    ['bank', 'cash'].forEach((k) => {
+      let i = 0, o = 0; M.entries.forEach((e) => { if (payOf(e) === k && ymOf(e.date) === ym) { if (e.kind === 'in') i += e.amount; else o += e.amount; } });
+      let mi = 0, mo = 0; M.moves.forEach((x) => { if (ymOf(x.date) === ym) { if ((x.dir === 'wd') === (k === 'cash')) mi += x.amount; else mo += x.amount; } });
+      const b = walBal(k, end); const c = el('div');
+      c.append(el('div', 'k', WNAME[k] + (ym === ymOf(today()) ? ' ตอนนี้' : ' ณ สิ้นเดือน')), el('div', 'v ' + (b == null ? '' : b < 0 ? 'neg' : 'pos'), b == null ? 'ยังไม่ตั้งยอด' : baht(b)),
+        el('div', 'h', ['เดือนนี้ รับ ' + baht(i), 'จ่าย/เก็บ ' + baht(o), mi ? (k === 'cash' ? 'ถอนมา ' : 'ฝากเข้า ') + baht(mi) : '', mo ? (k === 'cash' ? 'ฝากออก ' : 'ถอนออก ') + baht(mo) : ''].filter(Boolean).join(' · ')));
+      const set = el('div', 'wal-set'); const w = M.wal[k] || {};
+      const vi = el('input', 'inp'); vi.type = 'number'; vi.step = 'any'; vi.inputMode = 'decimal'; vi.id = 'wal-v-' + k; vi.placeholder = 'ยอดตั้งต้น'; vi.value = w.v != null ? w.v : ''; vi.setAttribute('aria-label', 'ยอดตั้งต้น ' + WNAME[k]);
+      const di = el('input', 'inp'); di.type = 'date'; di.id = 'wal-d-' + k; di.value = w.at || today(); di.setAttribute('aria-label', 'นับตั้งแต่วันที่');
+      const upd = () => { if (vi.value === '' || !isFinite(+vi.value)) delete M.wal[k]; else M.wal[k] = { v: +vi.value, at: di.value || today() }; save(); drawWal(); };
+      vi.addEventListener('change', upd); di.addEventListener('change', () => { if (M.wal[k]) upd(); });
+      set.append(el('span', 'mini', 'ยอดตั้งต้น ณ เช้าวันที่'), di, vi); c.append(set); box.append(c);
+    });
+    if (focus && $(focus)) $(focus).focus();
+    const lg = $('wal-log'); lg.replaceChildren();
+    M.moves.filter((x) => ymOf(x.date) === ym).sort((a, b) => b.date.localeCompare(a.date)).forEach((x) => {
+      const r = el('div'); r.append(el('span', '', dTH(x.date)), el('span', '', `${x.dir === 'wd' ? 'ถอนเงินสด' : 'ฝากเงินสด'} ${baht(x.amount)}`), delBtn('ลบรายการนี้', () => { M.moves = M.moves.filter((y) => y.id !== x.id); save(); drawWal(); })); lg.append(r);
+    });
+    if (!$('wal-date').value) $('wal-date').value = today();
+  };
+  const addMove = (dir) => { const a = Number($('wal-amt').value), d = $('wal-date').value || today(); if (!(a > 0)) { $('wal-hint').textContent = 'ใส่จำนวนเงินก่อน'; return; } M.moves.push({ id: newId(), date: d, amount: a, dir }); $('wal-amt').value = ''; $('wal-hint').textContent = `${dir === 'wd' ? 'ถอนเงินสด' : 'ฝากเงินสด'} ${baht(a)} แล้ว`; save(); drawWal(); };
+  $('wal-wd').addEventListener('click', () => addMove('wd')); $('wal-dep').addEventListener('click', () => addMove('dep'));
   document.querySelectorAll('#p-kind button').forEach((b) => b.addEventListener('click', () => { setKind(b.dataset.v); if (!editId) $('p-cat').value = ''; drawChips(); }));
   $('p-cat').addEventListener('input', drawChips);
   const drawBudget = () => {
@@ -2952,7 +3008,7 @@ dash.calc('sectors', {
     $('p-left-h').textContent = dLeft && left > 0 ? `ใช้ได้วันละ ${baht(left / dLeft)} ถึงสิ้นเดือน` : 'เงินต้นเดือน บวกรายรับ หักรายจ่ายและเงินเก็บ';
     const oi = $('p-open'); if (document.activeElement !== oi) { oi.value = op.set ? op.v : ''; oi.placeholder = op.carry ? String(Math.round(op.v)) : 'เช่น 5000'; }
     $('p-open-h').textContent = op.set ? '' : op.carry ? 'ใช้ยอดที่เหลือจากเดือนก่อนให้ แก้ได้' : 'ใส่ครั้งแรกครั้งเดียว เดือนต่อไประบบใช้ยอดที่เหลือจากเดือนก่อนให้เอง';
-    drawGroups(s); drawWeek(); drawCal();
+    drawGroups(s); drawWeek(); drawCal(); drawWal();
     const spent = {}; M.entries.forEach((e) => { if (e.kind === 'out' && ymOf(e.date) === ym) spent[e.cat || 'อื่นๆ'] = (spent[e.cat || 'อื่นๆ'] || 0) + e.amount; });
     const list = [...new Set([...Object.keys(M.budgets), ...Object.keys(spent), ...DEF.out])];
     list.sort((a, b) => (spent[b] || 0) - (spent[a] || 0) || (M.budgets[b] || 0) - (M.budgets[a] || 0));
@@ -2971,22 +3027,22 @@ dash.calc('sectors', {
     if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการในเดือนนี้'); td.colSpan = 6; tr.append(td); tb.append(tr); }
     rows.forEach((e) => {
       const tr = el('tr', e.id === editId ? 'editing' : null);
-      [[dTH(e.date), 'l'], [e.cat || '–', 'l'], [e.note || '', 'l det'], [e.kind === 'in' ? baht(e.amount) : '', 'pos'], [e.kind !== 'in' ? baht(e.amount) : '']].forEach(([v, c], k) => { const td = el('td', c, v); if (k === 1 && e.kind === 'sav') td.append(el('span', 'tag sav', 'เก็บเงิน/ลงทุน')); tr.append(td); });
+      [[dTH(e.date), 'l'], [e.cat || '–', 'l'], [e.note || '', 'l det'], [e.kind === 'in' ? baht(e.amount) : '', 'pos'], [e.kind !== 'in' ? baht(e.amount) : '']].forEach(([v, c], k) => { const td = el('td', c, v); if (k === 1 && e.kind === 'sav') td.append(el('span', 'tag sav', 'เก็บเงิน/ลงทุน')); if (k === 1) td.append(el('span', 'tag pay', e.pay === 'cash' ? 'เงินสด' : 'โอน')); tr.append(td); });
       const ed = el('button', 'edit', '✎'); ed.type = 'button'; ed.setAttribute('aria-label', 'แก้ไขรายการ'); ed.addEventListener('click', () => startEdit(e));
       const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(ed, delBtn('ลบรายการ', () => { if (confirm(`ลบรายการ${KLABEL[e.kind]} ${baht(e.amount)} (${e.cat})?`)) { M.entries = M.entries.filter((x) => x.id !== e.id); if (editId === e.id) endEdit(); save(); refresh(); } })); tr.append(c); tb.append(tr);
     });
   };
   const clearForm = () => { ['p-amt', 'p-cat', 'p-note'].forEach((id) => { $(id).value = ''; }); $('p-date').value = ym === ymOf(today()) ? today() : ym + '-01'; drawChips(); };
-  const startEdit = (e) => { editId = e.id; setKind(e.kind); $('p-amt').value = e.amount; $('p-cat').value = e.cat; $('p-date').value = e.date; $('p-note').value = e.note; $('p-title').textContent = 'แก้ไขรายการ'; $('p-save-btn').textContent = 'บันทึกการแก้ไข'; $('p-cancel').hidden = false; drawChips(); drawBudget(); $('p-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
-  const endEdit = () => { editId = null; $('p-title').textContent = 'จดรายรับรายจ่ายส่วนตัว'; $('p-save-btn').textContent = 'บันทึก'; $('p-cancel').hidden = true; clearForm(); };
+  const startEdit = (e) => { editId = e.id; setKind(e.kind); setPay(payOf(e)); $('p-amt').value = e.amount; $('p-cat').value = e.cat; $('p-date').value = e.date; $('p-note').value = e.note; $('p-title').textContent = 'แก้ไขรายการ'; $('p-save-btn').textContent = 'บันทึกการแก้ไข'; $('p-cancel').hidden = false; drawChips(); drawBudget(); $('p-add').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const endEdit = () => { editId = null; try { setPay(localStorage.getItem('vg-ppay') === 'cash' ? 'cash' : 'bank'); } catch (e) { /* ignore */ } $('p-title').textContent = 'จดรายรับรายจ่ายส่วนตัว'; $('p-save-btn').textContent = 'บันทึก'; $('p-cancel').hidden = true; clearForm(); };
   $('p-cancel').addEventListener('click', () => { endEdit(); hint(''); drawBudget(); });
   $('p-save-btn').addEventListener('click', () => {
     const amt = Number($('p-amt').value), date = $('p-date').value, cat = $('p-cat').value.trim().slice(0, 40), note = $('p-note').value.trim().slice(0, 120);
     const err = !(amt > 0) ? 'ใส่จำนวนเงินมากกว่า 0' : !date ? 'เลือกวันที่' : !cat ? 'เลือกหรือพิมพ์หมวดก่อน' : null; if (err) return hint(err, true);
-    const rec = { id: editId || newId(), date, kind, amount: amt, cat, note }; const was = editId; const gl = kind === 'sav' ? goalByName(cat) : null; if (gl) rec.goal = gl.id;
+    const rec = { id: editId || newId(), date, kind, amount: amt, cat, note }; if (pay === 'cash') rec.pay = 'cash'; const was = editId; const gl = kind === 'sav' ? goalByName(cat) : null; if (gl) rec.goal = gl.id;
     const orig = was ? M.entries.find((e) => e.id === was) : null; if (orig && orig.ref) rec.ref = orig.ref; if (orig && orig.sal && kind === 'in') rec.sal = orig.sal;
     M.entries = was ? M.entries.map((e) => (e.id === was ? rec : e)) : [...M.entries, rec]; save(); ym = ymOf(date);
-    hint(`${was ? 'แก้ไข' : 'บันทึก'}${KLABEL[kind]} ${baht(amt)} (${cat}) แล้ว${gl ? ' นับเข้าเป้า ' + gl.name : ''}`); if (was) endEdit(); else { const d = $('p-date').value; clearForm(); $('p-date').value = d; }
+    hint(`${was ? 'แก้ไข' : 'บันทึก'}${KLABEL[kind]} ${baht(amt)} (${cat}) ${pay === 'cash' ? 'เงินสด' : 'เงินโอน'} แล้ว${gl ? ' นับเข้าเป้า ' + gl.name : ''}`); if (was) endEdit(); else { const d = $('p-date').value; clearForm(); $('p-date').value = d; }
     refresh();
   });
   $('p-prev').addEventListener('click', () => { ym = ymShift(ym, -1); drawBudget(); });
@@ -4554,7 +4610,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '4ce3a14f9d';
+  const BUILD = '54b59dc4d5';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
