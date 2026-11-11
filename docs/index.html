@@ -1001,6 +1001,36 @@ tr.editing td { background: var(--accent-soft); }
 .tr-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; color: var(--ink-2); margin-top: 2px; }
 .tr-notel { grid-column: 1 / -1; }
 #tr-cancel[hidden] { display: none; }
+/* spot portfolio layout: panels, holding rows, compact targets */
+#tport .strip { margin-bottom: 10px; }
+.tr-fxline { margin: 0 4px 18px; font-size: 13px; }
+.tr-panel { margin-top: 16px; }
+.tr-panel .ph { margin-bottom: 6px; } .tr-panel .ph h3 { margin: 0; } .tr-panel .ph p { margin: 4px 0 0; }
+.tr-h { padding: 14px 0; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+.tr-h:last-child { border-bottom: 0; padding-bottom: 4px; } .tr-h:first-child { padding-top: 6px; }
+.tr-h-top, .tr-h-sub { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 14px; flex-wrap: wrap; }
+.tr-h-top b:first-child { font-size: 18px; } .tr-h-top b:last-child { font-family: var(--num); font-size: 22px; font-weight: 500; }
+.tr-h-sub { font-size: 14px; color: var(--ink-2); margin-top: -6px; } .tr-h-sub .pos { color: var(--jade); } .tr-h-sub .neg { color: var(--brick); }
+.tr-h-sub span:last-child { font-family: var(--num); }
+.tr-w { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; font-size: 13px; color: var(--ink-2); }
+.tr-w-bar { position: relative; height: 6px; border-radius: 3px; background: var(--line); }
+.tr-w-bar i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--accent); }
+.tr-w-bar s { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; }
+.tr-gold { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+.tr-h .sw-tags { gap: 6px; } .tr-h .sw-tags .tag { margin: 0; }
+.tr-h .sw-adv { font-size: 14px; font-weight: 500; padding: 7px 10px; line-height: 1.5; }
+.tr-h .sw-act { justify-content: flex-start; gap: 8px; }
+.tr-tg { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0 20px; margin-top: 6px; }
+.tr-tg label { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; min-width: 0; }
+.tr-tg label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-tg .inp { width: 70px; flex: none; padding: 6px 8px; text-align: right; font-family: var(--num); }
+.tr-tg label.tr-band { grid-column: 1 / -1; border-bottom: 0; justify-content: flex-start; padding-top: 12px; color: var(--ink-2); }
+#tr-tacts:not(:empty) { margin-top: 10px; }
+.tr-log { margin-top: 0; } .tr-log .tr-month:first-child { margin-top: 4px; }
+.tr-log .tr-entry { border-bottom: 1px solid var(--line); line-height: 1.55; }
+.tr-meta .tr-del { margin-left: 0; padding: 4px 6px; color: var(--accent); }
+#tr-form label { min-width: 0; } #tr-form .sel, #tr-form .inp { width: 100%; min-width: 0; box-sizing: border-box; }
+@media (max-width: 640px) { .tr-tg { grid-template-columns: 1fr; } .tr-tg label { padding: 3px 0; } .tr-tg .inp { width: 64px; padding: 4px 8px; } .tr-panel { padding: 16px; } }
 .fxbox { margin: 0 0 18px; } .fx-row { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: flex-end; }
 .fx-row small { display: block; color: var(--ink-2); font-size: 13px; } .fx-row b { display: block; font-family: var(--num); font-size: 22px; }
 .fx-row small.pos { color: var(--jade); } .fx-row small.neg { color: var(--brick); }
@@ -1142,10 +1172,13 @@ tr.editing td { background: var(--accent-soft); }
   <section id="tport" data-sub="tport">
     <p class="sec-note">บันทึกการลงทุนคริปโต (Binance TH คู่เงินบาท) และทองคำ (Dime) คิดเป็นบาท จดทุกครั้งที่ซื้อหรือขายพร้อมเหตุผล แยก <b>กำไรบนกระดาษ</b> (ยังไม่ขาย) กับ <b>กำไรจริง</b> (ขายแล้ว) ตั้งสัดส่วนเป้าหมายไว้ แล้วระบบจะบอกว่าตัวไหนควรแบ่งขายเก็บกำไร ตัวไหนควรซื้อเติม ไม่ต้องบันทึกฝากเงินก็ได้ ล็อกอินแล้วซิงค์ทุกเครื่อง</p>
     <div class="strip" id="tr-strip"></div>
-    <p class="pf-hint" id="tr-fx-now"></p>
-    <h3 class="sw-h3">ที่ถืออยู่</h3>
-    <div id="tr-hold"></div>
-    <h3 class="sw-h3">บันทึกรายการ</h3>
+    <p class="pf-hint tr-fxline" id="tr-fx-now"></p>
+    <section class="panel tr-panel">
+      <div class="ph"><h3>ที่ถืออยู่</h3></div>
+      <div id="tr-hold"></div>
+    </section>
+    <section class="panel tr-panel">
+      <div class="ph"><h3>บันทึกรายการ</h3></div>
     <div class="pf-form f2" id="tr-form">
       <label>ประเภท <select class="sel" id="tr-type"><option value="buy">ซื้อ</option><option value="sell">ขาย</option><option value="dep">ฝากเงิน</option><option value="wd">ถอนเงิน</option></select></label>
       <label>วันเวลา (ว่าง = ตอนนี้) <input class="inp" id="tr-at" type="datetime-local"></label>
@@ -1157,19 +1190,19 @@ tr.editing td { background: var(--accent-soft); }
       <label id="tr-fee-l">ค่าธรรมเนียม (บาท) <input class="inp" id="tr-fee" type="number" step="any" min="0" inputmode="decimal"></label>
       <label id="tr-thb-l" hidden>จำนวนเงิน (บาท) <input class="inp" id="tr-thb" type="number" step="any" min="0" inputmode="decimal"></label>
       <label class="wide tr-notel">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="tr-note" maxlength="300" placeholder="เช่น ราคาย่อมาแถวเส้น 50 วัน ซื้อตามแผนเดือนนี้"></label>
-      <button class="btn" type="button" id="tr-add">บันทึก</button>
-      <button class="btn ghost" type="button" id="tr-cancel" hidden>ยกเลิกการแก้ไข</button>
     </div>
     <p class="pf-hint" id="tr-prev"></p>
-    <p class="pf-hint" id="tr-msg" role="status"></p>
-    <h3 class="sw-h3">สัดส่วนเป้าหมาย (%)</h3>
-    <p class="pf-hint" id="tr-tnote"></p>
-    <div class="pf-form f2" id="tr-targets"></div>
-    <div id="tr-tacts"></div>
-    <h3 class="sw-h3">บันทึกการลงทุน</h3>
-    <p class="pf-hint">ทุกรายการเรียงจากล่าสุด กด "แก้" เพื่อแก้ไข ตัวเลขจะคำนวณใหม่ทั้งหมด</p>
-    <ul class="sw-hist tr-log" id="tr-tx"></ul>
-    <button class="btn ghost sm" type="button" id="tr-csv" style="margin-top:10px">ดาวน์โหลด CSV ทุกรายการ</button>
+    <div class="pf-actions"><button class="btn-solid" type="button" id="tr-add">บันทึก</button><button class="btn-line" type="button" id="tr-cancel" hidden>ยกเลิกการแก้ไข</button><span class="pf-hint" id="tr-msg" role="status"></span></div>
+    </section>
+    <section class="panel tr-panel">
+      <div class="ph"><div><h3>สัดส่วนเป้าหมาย (%)</h3><p class="pf-hint" id="tr-tnote"></p></div></div>
+      <div class="tr-tg" id="tr-targets"></div>
+      <div id="tr-tacts"></div>
+    </section>
+    <section class="panel tr-panel">
+      <div class="ph"><div><h3>บันทึกการลงทุน</h3><p class="pf-hint">เรียงจากล่าสุด กด "แก้" เพื่อแก้ไข ตัวเลขจะคำนวณใหม่ทั้งหมด</p></div><button class="btn-line sm" type="button" id="tr-csv">ดาวน์โหลด CSV</button></div>
+      <ul class="sw-hist tr-log" id="tr-tx"></ul>
+    </section>
     <details class="method tr-feebox">
       <summary>อัตราค่าธรรมเนียม</summary>
       <div class="body">
@@ -4610,7 +4643,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '54b59dc4d5';
+  const BUILD = 'c0aff23f14';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -5034,14 +5067,20 @@ const SPC = (() => {
     if (!hs.length) hb.append(el('div', 'empty', T.tx.length ? 'ตอนนี้ไม่ได้ถืออะไร' : 'เริ่มจากบันทึก "ฝากเงิน" แล้วกด "ซื้อแล้ว" ที่ตัวที่ราคาน่าซื้อด้านบน หรือบันทึกจากสลิปเอง'));
     hs.forEach(([s, p]) => {
       const r = V.rows[s], avg = p.cost / p.q, a = P[s];
-      const row = el('div', 'sw-row');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(s)), el('small', null, `${qty(p.q)} ${unit(s)} · ทุน ${thb(p.cost)} (เฉลี่ย ${thb(avg)}${isGold(s) ? '/oz' : ''})`));
-      const now = el('div', 'sw-now'); now.append(el('b', null, thb(r.v)), r.px == null ? el('small', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('small', tone(r.u), `บนกระดาษ ${pthb(r.u)} (${pct(r.u / p.cost)}) · ${Math.round(a.w * 100)}% ของพอร์ต${a.t ? ' เป้า ' + Math.round(a.t * 100) + '%' : ''}`));
-      row.append(who, now);
+      const row = el('div', 'tr-h');
+      const top = el('div', 'tr-h-top'); top.append(el('b', null, nameOf(s)), el('b', null, thb(r.v)));
+      const sub = el('div', 'tr-h-sub'); sub.append(el('span', null, `${qty(p.q)} ${unit(s)} · ทุน ${thb(p.cost)} · เฉลี่ย ${thb(avg)}${isGold(s) ? '/oz' : ''}`),
+        r.px == null ? el('span', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('span', tone(r.u), `${pthb(r.u)} (${pct(r.u / p.cost)})`));
+      row.append(top, sub);
+      if (r.px != null) {
+        const w = el('div', 'tr-w'); const bar = el('div', 'tr-w-bar'); const i = el('i'); i.style.width = Math.min(100, a.w * 100) + '%'; bar.append(i);
+        if (a.t) { const t = el('s'); t.style.left = Math.min(100, a.t * 100) + '%'; bar.append(t); }
+        w.append(bar, el('span', null, `${Math.round(a.w * 100)}% ของพอร์ต${a.t ? ' · เป้า ' + Math.round(a.t * 100) + '%' : ''}`)); row.append(w);
+      }
       if (isGold(s) && p.usd > 0 && SP() && SP().usd(s) != null) {
         const fx = fxNow(), avgFx = p.cost / p.usd, vUsd = p.q * SP().usd(s);
         const fromGold = (vUsd - p.usd) * avgFx, fromFx = vUsd * (fx - avgFx);
-        row.append(el('small', 'sw-lvl', `ต้นทุน $${p.usd.toFixed(2)} ที่เรทเฉลี่ย ${avgFx.toFixed(2)} บาท/$ · ตอนนี้ $${vUsd.toFixed(2)} เรท ${fx.toFixed(2)} → กำไรจากราคาทอง ${pthb(fromGold)} · จากค่าเงินบาท ${pthb(fromFx)}`));
+        row.append(el('small', 'tr-gold', `กำไรจากราคาทอง ${pthb(fromGold)} · จากค่าเงินบาท ${pthb(fromFx)} (ทุน $${p.usd.toFixed(2)} เรทเฉลี่ย ${avgFx.toFixed(2)} → ตอนนี้ $${vUsd.toFixed(2)} เรท ${fx.toFixed(2)})`));
       }
       if (a.st) { const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + SP().G[a.st.g][0], SP().G[a.st.g][1]), el('span', 'tag ' + SP().H[a.st.h][0], SP().H[a.st.h][1])); row.append(tags); }
       const act = el('div', 'sw-act');
@@ -5054,9 +5093,9 @@ const SPC = (() => {
     const box = $('tr-targets'); if (!box) return;
     if (!box.dataset.built) {
       box.dataset.built = '1';
-      (SP() ? SP().assets : []).forEach(([a]) => { const l = el('label', null, nameOf(a)); const x = el('input', 'inp'); x.type = 'number'; x.step = '1'; x.min = '0'; x.max = '100'; x.inputMode = 'numeric'; x.placeholder = '0'; x.dataset.a = a; if (T.targets[a]) x.value = T.targets[a];
+      (SP() ? SP().assets : []).forEach(([a]) => { const l = el('label'); l.append(el('span', null, nameOf(a))); const x = el('input', 'inp'); x.type = 'number'; x.step = '1'; x.min = '0'; x.max = '100'; x.inputMode = 'numeric'; x.placeholder = '0'; x.dataset.a = a; if (T.targets[a]) x.value = T.targets[a];
         x.addEventListener('change', () => { const v = +x.value; if (v > 0) T.targets[a] = Math.min(100, v); else delete T.targets[a]; save(); draw(); }); l.append(x); box.append(l); });
-      const l = el('label', null, 'ยอมให้คลาดจากเป้า (± จุด)'); const b = el('input', 'inp'); b.type = 'number'; b.min = '1'; b.max = '30'; b.step = '1'; b.id = 'tr-band'; b.value = T.band;
+      const l = el('label', 'tr-band', 'ยอมให้คลาดจากเป้า (± จุด)'); const b = el('input', 'inp'); b.type = 'number'; b.min = '1'; b.max = '30'; b.step = '1'; b.id = 'tr-band'; b.value = T.band;
       b.addEventListener('change', () => { const v = +b.value; if (v >= 1 && v <= 30) { T.band = v; save(); draw(); } else b.value = T.band; }); l.append(b); box.append(l);
     } else box.querySelectorAll('input[data-a]').forEach((x) => { if (document.activeElement !== x) x.value = T.targets[x.dataset.a] || ''; });
     const sum = Object.values(T.targets).reduce((a, v) => a + v, 0);

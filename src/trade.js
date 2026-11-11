@@ -201,14 +201,20 @@
     if (!hs.length) hb.append(el('div', 'empty', T.tx.length ? 'ตอนนี้ไม่ได้ถืออะไร' : 'เริ่มจากบันทึก "ฝากเงิน" แล้วกด "ซื้อแล้ว" ที่ตัวที่ราคาน่าซื้อด้านบน หรือบันทึกจากสลิปเอง'));
     hs.forEach(([s, p]) => {
       const r = V.rows[s], avg = p.cost / p.q, a = P[s];
-      const row = el('div', 'sw-row');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(s)), el('small', null, `${qty(p.q)} ${unit(s)} · ทุน ${thb(p.cost)} (เฉลี่ย ${thb(avg)}${isGold(s) ? '/oz' : ''})`));
-      const now = el('div', 'sw-now'); now.append(el('b', null, thb(r.v)), r.px == null ? el('small', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('small', tone(r.u), `บนกระดาษ ${pthb(r.u)} (${pct(r.u / p.cost)}) · ${Math.round(a.w * 100)}% ของพอร์ต${a.t ? ' เป้า ' + Math.round(a.t * 100) + '%' : ''}`));
-      row.append(who, now);
+      const row = el('div', 'tr-h');
+      const top = el('div', 'tr-h-top'); top.append(el('b', null, nameOf(s)), el('b', null, thb(r.v)));
+      const sub = el('div', 'tr-h-sub'); sub.append(el('span', null, `${qty(p.q)} ${unit(s)} · ทุน ${thb(p.cost)} · เฉลี่ย ${thb(avg)}${isGold(s) ? '/oz' : ''}`),
+        r.px == null ? el('span', null, 'ราคาจะมาเมื่อโหลดเสร็จ') : el('span', tone(r.u), `${pthb(r.u)} (${pct(r.u / p.cost)})`));
+      row.append(top, sub);
+      if (r.px != null) {
+        const w = el('div', 'tr-w'); const bar = el('div', 'tr-w-bar'); const i = el('i'); i.style.width = Math.min(100, a.w * 100) + '%'; bar.append(i);
+        if (a.t) { const t = el('s'); t.style.left = Math.min(100, a.t * 100) + '%'; bar.append(t); }
+        w.append(bar, el('span', null, `${Math.round(a.w * 100)}% ของพอร์ต${a.t ? ' · เป้า ' + Math.round(a.t * 100) + '%' : ''}`)); row.append(w);
+      }
       if (isGold(s) && p.usd > 0 && SP() && SP().usd(s) != null) {
         const fx = fxNow(), avgFx = p.cost / p.usd, vUsd = p.q * SP().usd(s);
         const fromGold = (vUsd - p.usd) * avgFx, fromFx = vUsd * (fx - avgFx);
-        row.append(el('small', 'sw-lvl', `ต้นทุน $${p.usd.toFixed(2)} ที่เรทเฉลี่ย ${avgFx.toFixed(2)} บาท/$ · ตอนนี้ $${vUsd.toFixed(2)} เรท ${fx.toFixed(2)} → กำไรจากราคาทอง ${pthb(fromGold)} · จากค่าเงินบาท ${pthb(fromFx)}`));
+        row.append(el('small', 'tr-gold', `กำไรจากราคาทอง ${pthb(fromGold)} · จากค่าเงินบาท ${pthb(fromFx)} (ทุน $${p.usd.toFixed(2)} เรทเฉลี่ย ${avgFx.toFixed(2)} → ตอนนี้ $${vUsd.toFixed(2)} เรท ${fx.toFixed(2)})`));
       }
       if (a.st) { const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + SP().G[a.st.g][0], SP().G[a.st.g][1]), el('span', 'tag ' + SP().H[a.st.h][0], SP().H[a.st.h][1])); row.append(tags); }
       const act = el('div', 'sw-act');
@@ -221,9 +227,9 @@
     const box = $('tr-targets'); if (!box) return;
     if (!box.dataset.built) {
       box.dataset.built = '1';
-      (SP() ? SP().assets : []).forEach(([a]) => { const l = el('label', null, nameOf(a)); const x = el('input', 'inp'); x.type = 'number'; x.step = '1'; x.min = '0'; x.max = '100'; x.inputMode = 'numeric'; x.placeholder = '0'; x.dataset.a = a; if (T.targets[a]) x.value = T.targets[a];
+      (SP() ? SP().assets : []).forEach(([a]) => { const l = el('label'); l.append(el('span', null, nameOf(a))); const x = el('input', 'inp'); x.type = 'number'; x.step = '1'; x.min = '0'; x.max = '100'; x.inputMode = 'numeric'; x.placeholder = '0'; x.dataset.a = a; if (T.targets[a]) x.value = T.targets[a];
         x.addEventListener('change', () => { const v = +x.value; if (v > 0) T.targets[a] = Math.min(100, v); else delete T.targets[a]; save(); draw(); }); l.append(x); box.append(l); });
-      const l = el('label', null, 'ยอมให้คลาดจากเป้า (± จุด)'); const b = el('input', 'inp'); b.type = 'number'; b.min = '1'; b.max = '30'; b.step = '1'; b.id = 'tr-band'; b.value = T.band;
+      const l = el('label', 'tr-band', 'ยอมให้คลาดจากเป้า (± จุด)'); const b = el('input', 'inp'); b.type = 'number'; b.min = '1'; b.max = '30'; b.step = '1'; b.id = 'tr-band'; b.value = T.band;
       b.addEventListener('change', () => { const v = +b.value; if (v >= 1 && v <= 30) { T.band = v; save(); draw(); } else b.value = T.band; }); l.append(b); box.append(l);
     } else box.querySelectorAll('input[data-a]').forEach((x) => { if (document.activeElement !== x) x.value = T.targets[x.dataset.a] || ''; });
     const sum = Object.values(T.targets).reduce((a, v) => a + v, 0);
