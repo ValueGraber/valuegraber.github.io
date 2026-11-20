@@ -259,7 +259,25 @@ dialog.sheet::backdrop{background:rgba(14,32,24,.45)}
 .who-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--rail-dim)}
 .rail .foot button,.mob-top button{background:none;border:1px solid rgba(255,255,255,.25);color:var(--rail-ink);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;margin-top:6px}
 .mob-top button{margin:0 0 0 auto}
+.pl-anc{padding:16px 18px}.pl-anc .fld{margin-bottom:10px}
+.pl-list>li{grid-template-columns:96px 1fr auto}
+.pl-b{display:flex;flex-direction:column;gap:6px;align-items:stretch}.pl-b .btn{min-height:38px;padding:6px 12px;justify-content:center}
+.pl-why{font-size:13.5px;color:var(--ink-3)}
+.wx4{grid-template-columns:repeat(4,1fr)}
+.rbar{position:relative;height:8px;background:var(--sunk);border-radius:4px;margin:2px 0 3px}
+.rbar .val{position:absolute;left:0;top:0;bottom:0;background:#3d7fb8;border-radius:4px}
+.rbar .rng{position:absolute;top:-2px;bottom:-2px;background:rgba(40,60,80,.18);border-radius:3px}
+.wx-t tr{cursor:default}
+.guide{max-width:820px}.guide .lead{margin:0 0 14px;color:var(--ink-2)}
+.guide details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:0 18px}
+.guide summary{cursor:pointer;font-weight:700;font-size:17px;padding:14px 0}
+.guide details[open]{padding-bottom:14px}.guide ul,.guide ol{padding-left:22px;margin:0 0 10px}.guide li{margin-bottom:6px}
+.guide table{margin:8px 0 10px;font-size:14.5px}.guide table tr{cursor:default}.guide p{margin:0 0 10px}
 @media (max-width:899px){
+  .pl-list>li{grid-template-columns:78px 1fr}.pl-b{grid-column:1/-1;flex-direction:row}.pl-b .btn{flex:1}
+  .wx4{grid-template-columns:1fr 1fr}.wx4>div:nth-child(2){border-right:0}.wx4>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .guide details{padding:0 14px}.guide table td,.guide table th{padding:8px}
+  .tabbar a{font-size:11px}
   .app{display:block}
   .rail{display:none}
   main{padding:16px 14px 120px}
@@ -267,7 +285,7 @@ dialog.sheet::backdrop{background:rgba(14,32,24,.45)}
   .mob-top .mark{width:30px;height:30px;border-radius:8px;background:var(--yellow);display:grid;place-items:center;color:var(--rail)}
   .mob-top b{font-size:16px}
   h1{font-size:24px}
-  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:6;padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar{display:grid;grid-template-columns:repeat(7,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:6;padding-bottom:env(safe-area-inset-bottom)}
   .tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 9px;font-size:11.5px;white-space:nowrap;font-weight:600;color:var(--ink-3);text-decoration:none}
   .tabbar a[aria-current=page]{color:var(--rail)}
   .tabbar a[aria-current=page] svg{color:var(--rail);stroke-width:2.2}
@@ -336,6 +354,7 @@ const P={
  flask:'<path d="M9 3h6M10 3v6l-5.2 9.2A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-2.8L14 9V3"/><path d="M7.4 15h9.2"/>',
  sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'
 };
+P.cal='<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3"/>';
 const ic=(n)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
 
 /* ---------- vocab ---------- */
@@ -546,6 +565,173 @@ const dueTxt=l=>l<0?'เลย '+(-l)+' วัน':l===0?'วันนี้':'�
 const unitOf=p=>{const o=stockLevels().find(o=>o.item===(p||'').trim());return o?o.unit||'':''};
 function years(){const ys=new Set([yearOf(today())]);['works','flowers','sales','money'].forEach(c=>list(c).forEach(x=>x.date&&ys.add(yearOf(x.date))));return [...ys].sort().reverse()}
 
+/* ---------- plan: spray calendar, weather, guide ---------- */
+const planMeta=()=>Object.assign({lat:null,lon:null,place:'',H:'',B:'',canopy:6,done:{}},S.data.meta.plan||{});
+async function savePlan(patch){const p={...planMeta(),...patch};return put('meta','plan',p)}
+// [offset days, title, what to use, type, why]
+const PLAN_A=[
+ [0,'ตัดแต่งกิ่งหลังเก็บเกี่ยว','ตัดกิ่งแห้ง กิ่งกระโดง กิ่งซ้อน · ทาแผลด้วยสารกลุ่มทองแดง (FRAC M01)','ตัดแต่งกิ่ง','เปิดทรงให้แสงเข้ากลางพุ่ม ลดราสีชมพู'],
+ [0,'ปุ๋ยฟื้นต้น','N สูง เช่น 25-7-7 หรือ 15-15-15 + 46-0-0 · ปุ๋ยอินทรีย์ 20–30 กก./ต้น','ปุ๋ยทางดิน','N กับ GA ในต้นเร่งให้แตกใบอ่อน'],
+ [7,'หว่านไตรโคเดอร์มา','ผสมปุ๋ยหมักหว่านใต้ทรงพุ่ม รดน้ำตาม','อื่นๆ','เชื้อดีแย่งพื้นที่รากกับไฟทอฟธอรา'],
+ [14,'ใบชุด 1: กันเพลี้ยไก่แจ้','กลุ่ม IRAC 4A (นีโอนิโคตินอยด์ เช่น อิมิดาโคลพริด)','ฉีดยา/สารเคมี','พ่นตอนใบเพิ่งแทง ก่อนใบบิด · ดูก่อนว่าใบแตกจริง'],
+ [21,'ใบชุด 1: กันราใบอ่อน','แมนโคเซบ (FRAC M03)','ฉีดยา/สารเคมี','ใบอ่อนเป็นโรงงานไปทั้งปี ต้องรักษาให้ครบ'],
+ [30,'ปุ๋ยรอบ 2','สูตรเสมอ 15-15-15 ตามขนาดทรงพุ่ม','ปุ๋ยทางดิน','เร่งใบชุด 2 ให้แตกพร้อมกันทั้งต้น'],
+ [45,'ใบชุด 2: กันเพลี้ยไก่แจ้ (สลับกลุ่ม)','กลุ่ม IRAC 3A (ไพรีทรอยด์ เช่น แลมบ์ดาไซฮาโลทริน)','ฉีดยา/สารเคมี','สลับกลุ่มกลไกกันแมลงดื้อยา'],
+ [52,'ใบชุด 2: กันราใบอ่อน (สลับกลุ่ม)','อะซอกซีสโตรบิน (FRAC 11)','ฉีดยา/สารเคมี','สลับกับ M03 ลดเชื้อดื้อยา'],
+ [60,'กันรากเน่าช่วงฝนชุก','ฟอสโฟเนต/ฟอสอีทิล-อะลูมิเนียม (FRAC P07) พ่นหรือฉีดต้น','ฉีดยา/สารเคมี','กระตุ้นภูมิต้านทานของต้นเอง'],
+ [75,'พ่น PBZ ทำดอก','พาโคลบิวทราโซล 750–1,500 ppm ทางใบ (PBZ 10% = 150–300 ก./น้ำ 20 ล.)','ราดสารทำดอก','ทำเมื่อใบชุด 2 เพสลาดแล้วเท่านั้น · PBZ ยับยั้ง GA ต้นหยุดแตกใบ'],
+ [80,'สะสมอาหาร','8-24-24 ทางดิน · งดปุ๋ย N','ปุ๋ยทางดิน','เพิ่ม C/N ให้ตาพร้อมเป็นดอก'],
+ [85,'กดใบอ่อน ครั้งที่ 1','0-52-34 ทางใบ','ปุ๋ยทางใบ/ฮอร์โมน','กดใบอ่อน เร่งใบให้แก่'],
+ [95,'กดใบอ่อน ครั้งที่ 2','0-52-34 ทางใบ','ปุ๋ยทางใบ/ฮอร์โมน','ทำซ้ำถ้ามีฝนหรือเห็นใบเริ่มผลิ'],
+ [100,'งดน้ำเปิดตาดอก','งดน้ำ 14–21 วันเมื่อฝนหยุด ดูหน้าอากาศ','ให้น้ำ','ต้นสร้าง ABA ระงับการแตกใบ ตาดอกจึงออก · เห็นตาดอกแล้วค่อยให้น้ำทีละน้อย']];
+const PLAN_B=[
+ [-21,'ตัดแต่งช่อดอก','เก็บช่อบนกิ่งใหญ่แนวนอน กลุ่มละ 3–5 ช่อ ห่าง 30–50 ซม.','ตัดแต่งกิ่ง','กิ่งใหญ่ส่งน้ำและแคลเซียมได้พอ'],
+ [-14,'แคลเซียม-โบรอน ก่อนดอกบาน','แคลเซียม-โบรอนทางใบ ตามฉลาก','ปุ๋ยทางใบ/ฮอร์โมน','โบรอนช่วยหลอดเกสรงอก ดอกร่วงน้อยลง'],
+ [-10,'กันเพลี้ยไฟช่วงดอก','สปิโนแซด/สปิโนทอแรม (IRAC 5)','ฉีดยา/สารเคมี','เพลี้ยไฟทำให้ผลผิวกร้าน หนามแดง'],
+ [0,'ช่วยผสมเกสร','19:00–21:00 น. ใช้เกสรพันธุ์อื่น เช่น จันทบุรี 3 หรือก้านยาว','อื่นๆ','ผสมครบ 5 พู ผลจึงไม่เบี้ยว'],
+ [7,'แคลเซียม-โบรอน (ระยะไข่ปลา)','แคลเซียม-โบรอนทางใบ','ปุ๋ยทางใบ/ฮอร์โมน','ช่วงแบ่งเซลล์ Ca สร้างผนังเซลล์เนื้อ'],
+ [10,'กันเพลี้ยไฟ (สลับกลุ่ม)','กลุ่มอื่นที่ไม่ใช่ IRAC 5 เช่น 4A','ฉีดยา/สารเคมี','สลับกลุ่มกลไก'],
+ [21,'แคลเซียม-โบรอน (มะเขือพวง)','แคลเซียม-โบรอนทางใบ','ปุ๋ยทางใบ/ฮอร์โมน','ป้องกันไส้ซึม เต่าเผา'],
+ [25,'ตัดแต่งผล รอบ 1','ตัดผลเล็ก ผิดรูป ผลบนกิ่งเล็ก เหลือ 2–3 ผล/ช่อ','ตัดแต่งกิ่ง','ลดคู่แข่งแย่งอาหาร'],
+ [35,'แคลเซียม-โบรอน (หัวกำไล)','แคลเซียม-โบรอนทางใบ','ปุ๋ยทางใบ/ฮอร์โมน',''],
+ [40,'ตัดแต่งผล รอบ 2','ตัดผลเบี้ยว พูไม่เต็ม หนามแดง เหลือ 1–2 ผล/ช่อ','ตัดแต่งกิ่ง','ผลที่พูไม่เต็มจะบิดเบี้ยวตลอด'],
+ [42,'กันหนอนเจาะผล','กลุ่ม diamide (IRAC 28)','ฉีดยา/สารเคมี','ตรวจรอยขี้หนอนระหว่างผลที่ชิดกัน'],
+ [45,'แคลเซียม-โบรอน (45 วัน)','แคลเซียม-โบรอนทางใบ','ปุ๋ยทางใบ/ฮอร์โมน',''],
+ [49,'ตัดแต่งผล รอบ 3 + โยงกิ่ง','เหลือผลตามกำลังต้น โยงกิ่งที่มีผลดก','ตัดแต่งกิ่ง',''],
+ [49,'ปุ๋ยหลังตัดแต่งผล + คุมใบอ่อน','สูตรเสมอทางดิน · พ่น 13-0-46','ปุ๋ยทางดิน','ใบอ่อนตอนผลอายุ 3–8 สัปดาห์ทำให้ผลร่วงหรือเบี้ยว'],
+ [56,'กันหนอนเจาะผล (สลับกลุ่ม)','กลุ่มอื่นที่ไม่ใช่ IRAC 28','ฉีดยา/สารเคมี','สลับกลุ่มกลไก'],
+ [60,'แคลเซียม-โบรอน (60 วัน)','แคลเซียม-โบรอนทางใบ','ปุ๋ยทางใบ/ฮอร์โมน',''],
+ [63,'ปุ๋ย K สูง','13-13-21 หรือ 0-0-60','ปุ๋ยทางดิน','K พาน้ำตาลเข้าเนื้อ เนื้อแห้งเพิ่ม'],
+ [80,'แคลเซียม-โบรอน (80 วัน)','แคลเซียม-โบรอนทางใบ ครั้งสุดท้าย','ปุ๋ยทางใบ/ฮอร์โมน',''],
+ [84,'ลดน้ำ งด N','ลดน้ำลงทีละน้อย ไม่ใส่ปุ๋ย N','ให้น้ำ','เนื้อแห้งขึ้น ลดเนื้อแฉะ']];
+const PLAN_END=[ // offsets before cut day (D)
+ [-25,'กันผลเน่า','เมทาแลกซิล 25% WP 30–50 ก./น้ำ 20 ล. (FRAC 4)','ฉีดยา/สารเคมี','ดูระยะเว้นก่อนตัดบนฉลาก'],
+ [-16,'กันผลเน่า ครั้งสุดท้าย','ฟอสอีทิล-อะลูมิเนียม 80% WP 30–50 ก./น้ำ 20 ล. (P07)','ฉีดยา/สารเคมี','หยุดพ่นก่อนตัดอย่างน้อย 15 วัน'],
+ [-7,'ตรวจความแก่','สุ่มตัด 1 ผล ตรวจเนื้อแห้ง (หมอนทอง ≥ 32%)','อื่นๆ','ผูกป้ายสีตามวันดอกบานทุกรุ่น'],
+ [0,'ถึงวันตัด','ไม่ให้ผลสัมผัสดิน','อื่นๆ','']];
+function bloomRounds(st){const ds=trees().filter(t=>!isMg(t)).map(t=>({t,s:st[t.id]})).filter(o=>o.s.bloom&&['bloom','fruit','bud'].includes(o.s.stage)).sort((a,b)=>a.s.bloom<b.s.bloom?-1:1);
+  const R=[];ds.forEach(o=>{const r=R[R.length-1];if(r&&daysBetween(r.b,o.s.bloom)<=10)r.ids.push(o.t.id);else R.push({b:o.s.bloom,ids:[o.t.id],v:o.t.variety})});return R}
+function planTasks(st){const p=planMeta(),T=[];
+  if(p.H)PLAN_A.forEach((x,i)=>T.push({k:'A:'+p.H+':'+i,date:addDays(p.H,x[0]),ph:'บำรุงต้น/ทำดอก',x}));
+  let R=bloomRounds(st);if(!R.length&&p.B)R=[{b:p.B,ids:[],v:'หมอนทอง',plan:true}];
+  R.forEach((r,ri)=>{const lbl=(R.length>1?'รุ่น '+(ri+1)+' · ':'')+'ดอกบาน '+fd(r.b,{day:'numeric',month:'short'})+(r.plan?' (คาด)':'');const D=daysFor(r.v||'หมอนทอง');
+    PLAN_B.forEach((x,i)=>T.push({k:'B:'+r.b+':'+i,date:addDays(r.b,x[0]),ph:lbl,x,ids:r.ids}));
+    PLAN_END.forEach((x,i)=>T.push({k:'E:'+r.b+':'+i,date:addDays(r.b,D+x[0]),ph:lbl,x,ids:r.ids}))});
+  const t0=today();return T.map(t=>({...t,done:p.done[t.k],left:daysBetween(t0,t.date)})).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0)}
+const isSpray=t=>/ฉีดยา|ทางใบ|ราดสาร/.test(t.x[3]);
+
+/* weather (Open-Meteo, free, no key) */
+const WX={d:null,m:null,at:0,loading:false,err:''};
+try{const c=JSON.parse(localStorage.getItem('durian-wx-v1')||'null');if(c){WX.d=c.d;WX.m=c.m;WX.at=c.at;WX.key=c.key}}catch(_){}
+const wxKey=p=>p.lat!=null?(+p.lat).toFixed(3)+','+(+p.lon).toFixed(3):'';
+async function fetchWx(force){const p=planMeta();if(p.lat==null||WX.loading)return;const key=wxKey(p);
+  if(!force&&WX.key===key&&WX.d&&Date.now()-WX.at<36e5)return;
+  if(!force&&Date.now()-(WX.tried||0)<6e4)return;WX.tried=Date.now();
+  WX.loading=true;WX.err='';
+  const base='https://api.open-meteo.com/v1/forecast?latitude='+p.lat+'&longitude='+p.lon+'&timezone=Asia%2FBangkok';
+  try{const [a,b]=await Promise.all([
+      fetch(base+'&past_days=30&forecast_days=16&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,wind_speed_10m,wind_gusts_10m,soil_moisture_3_to_9cm,soil_moisture_9_to_27cm&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,et0_fao_evapotranspiration,relative_humidity_2m_min').then(r=>{if(!r.ok)throw 0;return r.json()}),
+      fetch(base+'&forecast_days=10&daily=precipitation_sum&models=ecmwf_ifs025,gfs_seamless,icon_seamless').then(r=>r.ok?r.json():null).catch(()=>null)]);
+    WX.d=a;WX.m=b;WX.at=Date.now();WX.key=key;try{localStorage.setItem('durian-wx-v1',JSON.stringify({d:a,m:b,at:WX.at,key}))}catch(_){}}
+  catch(_){WX.err='ดึงข้อมูลอากาศไม่ได้ ลองใหม่อีกครั้ง'}
+  WX.loading=false;if(ui.view==='plan'||ui.view==='home')render()}
+function wxAnalyze(st){const d=WX.d;if(!d||!d.daily)return null;const D=d.daily,Hh=d.hourly,t0=today();
+  const iT=D.time.indexOf(t0);if(iT<0)return null;
+  const days=D.time.map((t,i)=>({t,mx:D.temperature_2m_max[i],mn:D.temperature_2m_min[i],r:+D.precipitation_sum[i]||0,pp:D.precipitation_probability_max[i],w:D.wind_speed_10m_max[i],g:D.wind_gusts_10m_max[i],et:+D.et0_fao_evapotranspiration[i]||0,rh:D.relative_humidity_2m_min[i]}));
+  const past=days.slice(0,iT),fut=days.slice(iT);
+  const M=WX.m&&WX.m.daily;if(M)fut.forEach(x=>{const j=M.time.indexOf(x.t);if(j<0)return;const v=['ecmwf_ifs025','gfs_seamless','icon_seamless'].map(m=>M['precipitation_sum_'+m]&&M['precipitation_sum_'+m][j]).filter(v=>v!=null);if(v.length>1){x.lo=Math.min(...v);x.hi=Math.max(...v)}});
+  // spray windows: next 48h, 06-18h, no rain prob>30 in this + next 3h, wind<12, temp<=33
+  const now=new Date();const hk=t0+'T'+String(now.getHours()).padStart(2,'0')+':00';let h0=Hh.time.indexOf(hk);if(h0<0)h0=Hh.time.findIndex(t=>t>=hk);
+  const good=[];for(let i=Math.max(h0,0);i<Math.min(Hh.time.length,h0+48);i++){const hr=+Hh.time[i].slice(11,13);if(hr<6||hr>17)continue;
+    let ok=Hh.wind_speed_10m[i]<12&&Hh.temperature_2m[i]<=33;for(let k=0;k<4&&ok;k++){const j=i+k;if(j>=Hh.time.length)break;if((Hh.precipitation_probability[j]??0)>30||(Hh.precipitation[j]||0)>0.2)ok=false}
+    if(ok)good.push(i)}
+  const win=[];good.forEach(i=>{const w=win[win.length-1];if(w&&w.e===i-1)w.e=i;else win.push({s:i,e:i})});
+  const windows=win.filter(w=>w.e>w.s).map(w=>({day:Hh.time[w.s].slice(0,10),from:Hh.time[w.s].slice(11,16),to:String(+Hh.time[w.e].slice(11,13)+1).padStart(2,'0')+':00',wind:Math.max(...Hh.wind_speed_10m.slice(w.s,w.e+1))}));
+  const cur=h0>=0?{t:Hh.temperature_2m[h0],rh:Hh.relative_humidity_2m[h0],pp:Hh.precipitation_probability[h0],w:Hh.wind_speed_10m[h0],sm1:Hh.soil_moisture_3_to_9cm[h0],sm2:Hh.soil_moisture_9_to_27cm[h0]}:null;
+  // water balance
+  const p=planMeta();const area=Math.PI*Math.pow((+p.canopy||6)/2,2);
+  const r30=past.reduce((a,x)=>a+x.r,0),et30=past.reduce((a,x)=>a+x.et,0);
+  let dry=0;for(let i=past.length-1;i>=0;i--){if(past[i].r>=5)break;dry++}
+  const n7=fut.slice(0,7),r7=n7.reduce((a,x)=>a+x.r,0),et7=n7.reduce((a,x)=>a+x.et,0);
+  const need7=Math.max(0,et7*0.8-r7*0.8),L7=Math.round(need7*area);
+  // stage of orchard (durian only)
+  const cnt={};trees().filter(t=>!isMg(t)).forEach(t=>{const s=st[t.id].stage;cnt[s]=(cnt[s]||0)+1});const stg=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];const stage=stg?stg[0]:'rest';
+  const A=[];const f10=fut.slice(0,10);
+  const big=f10.find(x=>x.r>=50);let roll=null;for(let i=0;i+2<f10.length;i++){const s=f10[i].r+f10[i+1].r+f10[i+2].r;if(s>=100){roll={t:f10[i].t,s};break}}
+  if(big||roll)A.push(['bad','เสี่ยงน้ำท่วมขัง',`${big?'ฝน '+Math.round(big.r)+' มม. วันที่ '+fd(big.t,{day:'numeric',month:'short'}):''}${big&&roll?' · ':''}${roll?'ฝนรวม 3 วัน '+Math.round(roll.s)+' มม. เริ่ม '+fd(roll.t,{day:'numeric',month:'short'}):''} · เปิดร่องระบาย เตรียมเครื่องสูบ หลังน้ำลดหว่านไตรโคเดอร์มาและพ่นฟอสโฟเนต ห้ามเหยียบดินโคนต้นตอนดินแฉะ`]);
+  const g=f10.find(x=>x.g>=40);if(g)A.push(['warn','ลมกระโชกแรง',`${Math.round(g.g)} กม./ชม. วันที่ ${fd(g.t,{day:'numeric',month:'short'})} · โยงกิ่งที่มีผล ค้ำกิ่งดก`]);
+  const rainDays7=n7.filter(x=>x.r>=5).length;
+  if(stage==='induce'){if(rainDays7>=3)A.push(['warn','ฝนช่วงทำดอก',`7 วันข้างหน้ามีฝน ≥5 มม. ${rainDays7} วัน ตาดอกอาจกลายเป็นใบ · พ่น 0-52-34 ซ้ำ เปิดร่องให้ดินแห้งเร็ว`]);
+    else if(n7.every(x=>x.r<2))A.push(['ok','ช่วงแล้งเหมาะเปิดตาดอก','7 วันข้างหน้าแทบไม่มีฝน ถ้าทำ PBZ และสะสมอาหารครบแล้ว เริ่มงดน้ำได้'])}
+  if(['bud','bloom'].includes(stage)){const c=f10.find(x=>x.mn<20);if(c)A.push(['warn','กลางคืนหนาวช่วงดอกบาน',`ต่ำสุด ${Math.round(c.mn)}°C วันที่ ${fd(c.t,{day:'numeric',month:'short'})} · ต่ำกว่า 15°C แทบไม่ติดผล เลือกผสมเกสรคืนที่อุ่นกว่า`]);
+    const hot=f10.find(x=>x.mx>=35);if(hot)A.push(['warn','ร้อนจัดช่วงดอก',`สูงสุด ${Math.round(hot.mx)}°C วันที่ ${fd(hot.t,{day:'numeric',month:'short'})} · ให้น้ำเช้า-เย็น พ่นน้ำฝอยเพิ่มความชื้น`])}
+  if(stage==='fruit'&&dry>=10&&f10.slice(0,5).some(x=>x.r>=20))A.push(['warn','ฝนหนักหลังแล้ง ช่วงมีผล',`แล้งมา ${dry} วันแล้วจะมีฝนหนัก เสี่ยงไส้ซึม · ให้น้ำสม่ำเสมอก่อนฝนมา พ่นแคลเซียม-โบรอน เปิดร่องระบาย`]);
+  if(['rest','young'].includes(stage)&&rainDays7>=4)A.push(['warn','ฝนชุก เสี่ยงรากเน่าโคนเน่า','ตรวจโคนต้น พ่นฟอสโฟเนต หว่านไตรโคเดอร์มา ไม่ให้น้ำขังโคน']);
+  if(dry>=14&&r7<10&&stage!=='induce')A.push(['warn','ดินเริ่มแล้ง',`ไม่มีฝน ≥5 มม. มา ${dry} วัน · ควรให้น้ำราว ${nf.format(L7)} ลิตร/ต้น/สัปดาห์`]);
+  return {days:fut,past,cur,windows,r30,et30,dry,r7,et7,L7,area,stage,A}}
+const wxAge=()=>WX.at?Math.round((Date.now()-WX.at)/6e4):null;
+const winTxt=w=>(w.day===today()?'วันนี้':w.day===addDays(today(),1)?'พรุ่งนี้':fd(w.day,{weekday:'short',day:'numeric'}))+' '+w.from+'–'+w.to+' น.';
+
+function vPlan(st){const tab=ui.planTab||'plan';
+  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · คู่มือ</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศของสวน และคู่มือทำสวน</p></div></div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
+  if(tab==='wx')return h+vWx(st);if(tab==='guide')return h+GUIDE_HTML;return h+vPlanList(st)}
+function vPlanList(st){const p=planMeta(),T=planTasks(st),R=bloomRounds(st);
+  const ro=S.canWrite?'':' disabled';
+  let h=`<div class="panel pl-anc"><div class="grid2"><div class="fld"><label class="l" for="pH">วันเริ่มรอบใหม่ (หลังเก็บเกี่ยว/ตัดแต่งกิ่ง)</label><input class="f" id="pH" type="date" value="${esc(p.H)}"${ro}></div>
+   <div class="fld"><label class="l" for="pB">วันดอกบาน ${R.length?'<small>ใช้จากที่จดในหน้าทำดอกแล้ว ('+R.length+' รุ่น)</small>':'<small>ยังไม่ได้จด ใส่วันที่คาดไว้ก่อนได้</small>'}</label><input class="f" id="pB" type="date" value="${esc(p.B)}"${R.length?' disabled':ro}></div></div>
+   ${S.canWrite?`<button class="btn pri" data-act="plansave">บันทึกวันเริ่ม</button>`:''}<p class="muted" style="margin:10px 0 0;font-size:14px">วันในตารางนับจากวันเริ่ม แต่ให้ดูสภาพต้นจริงเป็นหลัก เช่น พ่น PBZ เมื่อใบชุด 2 เพสลาด ถ้าต้นช้าหรือเร็วกว่ากำหนด ให้เลื่อนวันเริ่มตาม</p></div>`;
+  if(!T.length)return h+`<div class="panel empty"><h3>ยังไม่มีตาราง</h3><p>ใส่วันเริ่มรอบใหม่ (วันที่ตัดแต่งกิ่งหลังเก็บเกี่ยว) หรือจดดอกบานในหน้า "ทำดอก/ติดผล" แอปจะสร้างตารางฉีดยา ใส่ปุ๋ย สลับกลุ่มยาให้</p></div>`;
+  const wx=wxAnalyze(st);const sprayHint=wx&&wx.windows.length?wx.windows[0]:null;
+  const open=T.filter(t=>!t.done),late=open.filter(t=>t.left<0&&t.left>=-30),soon=open.filter(t=>t.left>=0&&t.left<=7),later=open.filter(t=>t.left>7&&t.left<=60),done=T.filter(t=>t.done);
+  const row=t=>`<li><div class="d"><span class="badge ${t.done?'ok':t.left<0?'bad':t.left<=3?'warn':''}">${t.done?'ทำแล้ว':dueTxt(t.left)}</span><div style="margin-top:4px">${fd(t.date,{day:'numeric',month:'short'})}</div></div><div><div class="t">${esc(t.x[1])}</div><div class="s">${esc(t.x[2])}</div>${t.x[4]?`<div class="s pl-why">${esc(t.x[4])}</div>`:''}<div class="s"><span class="kind">${esc(t.ph)}</span>${!t.done&&isSpray(t)&&t.left<=3&&sprayHint?`<span class="badge ok">ช่วงพ่นดี ${winTxt(sprayHint)}</span>`:''}</div>${t.ids&&t.ids.length?tagList(t.ids,st):''}</div><div class="pl-b">${S.canWrite?(t.done?`<button class="btn" data-act="planundo" data-k="${esc(t.k)}">ยกเลิก</button>`:`<button class="btn pri" data-act="plandone" data-k="${esc(t.k)}">จดว่าทำแล้ว</button><button class="btn" data-act="planskip" data-k="${esc(t.k)}">ข้าม</button>`):''}</div></li>`;
+  const sec=(t,a)=>a.length?`<section class="sec"><div class="sec-h"><h2>${t}</h2><span class="muted">${a.length} งาน</span></div><div class="panel"><ul class="list pl-list">${a.map(row).join('')}</ul></div></section>`:'';
+  h+=sec('เลยกำหนด',late)+sec('7 วันนี้',soon)+sec('ถัดไป (ภายใน 60 วัน)',later);
+  if(!late.length&&!soon.length&&!later.length)h+=`<div class="panel empty" style="margin-top:16px"><h3>ไม่มีงานใน 60 วันข้างหน้า</h3><p>ตั้งวันเริ่มรอบใหม่หลังเก็บเกี่ยว เพื่อสร้างตารางรอบถัดไป</p></div>`;
+  if(done.length)h+=`<details class="sec"><summary class="muted" style="cursor:pointer">ทำแล้ว/ข้าม ${done.length} งาน</summary><div class="panel" style="margin-top:10px"><ul class="list pl-list">${done.slice(-30).reverse().map(row).join('')}</ul></div></details>`;
+  h+=`<p class="muted" style="font-size:13px;margin-top:16px">ชื่อสารเป็นตัวอย่างตามกลุ่มกลไก (FRAC/IRAC บนฉลาก) ใช้ยี่ห้อไหนก็ได้ที่อยู่กลุ่มเดียวกัน อัตราและระยะเว้นก่อนตัดให้ยึดฉลาก</p>`;
+  return h}
+function vWx(st){const p=planMeta();
+  let h=`<div class="panel pl-anc"><div class="grid2"><div class="fld"><label class="l" for="pLoc">ตำแหน่งสวน <small>วางพิกัด เช่น 12.68, 101.28 หรือลิงก์ Google Maps</small></label><input class="f" id="pLoc" value="${p.lat!=null?esc(p.lat+', '+p.lon):''}" placeholder="12.68, 101.28"></div>
+   <div class="fld"><label class="l" for="pCan">ขนาดทรงพุ่มเฉลี่ย (เมตร) <small>ใช้คำนวณน้ำต่อต้น</small></label><input class="f num" id="pCan" type="number" min="1" step="0.5" value="${esc(p.canopy)}"></div></div>
+   <div class="row">${S.canWrite?`<button class="btn pri" data-act="locsave">บันทึกตำแหน่ง</button><button class="btn" data-act="locgps">ใช้ตำแหน่งตอนนี้</button>`:''}${p.lat!=null?`<button class="btn" data-act="wxre">โหลดใหม่</button>`:''}</div></div>`;
+  if(p.lat==null)return h+`<div class="panel empty" style="margin-top:16px"><h3>ยังไม่ได้ใส่ตำแหน่งสวน</h3><p>ใส่พิกัดสวน หรือยืนอยู่ในสวนแล้วกด "ใช้ตำแหน่งตอนนี้" แอปจะดึงพยากรณ์ 16 วันของจุดนั้น</p></div>`;
+  if(!WX.d||WX.key!==wxKey(p)){fetchWx();return h+(WX.err?`<div class="note" style="margin-top:16px">${WX.err}</div>`:`<div class="skel" style="margin-top:16px"></div><div class="skel" style="height:240px"></div>`)}
+  if(Date.now()-WX.at>36e5)fetchWx();
+  const w=wxAnalyze(st);if(!w)return h+`<div class="note" style="margin-top:16px">ข้อมูลอากาศเก่าเกินไป กด "โหลดใหม่"</div>`;
+  if(WX.err)h+=`<div class="note" style="margin-top:16px">${WX.err} (แสดงข้อมูลเมื่อ ${wxAge()} นาทีก่อน)</div>`;
+  const c=w.cur;
+  h+=`<div class="panel sum3 wx4" style="margin-top:16px"><div><span>ตอนนี้</span><b>${c?Math.round(c.t)+'°':'–'}</b><span>ชื้น ${c?Math.round(c.rh):'–'}% · ลม ${c?Math.round(c.w):'–'} กม./ชม.</span></div><div><span>โอกาสฝนชั่วโมงนี้</span><b>${c?c.pp??0:'–'}%</b><span>ฝน 7 วันข้างหน้า ${nf.format(Math.round(w.r7))} มม.</span></div><div><span>ฝน 30 วันที่ผ่านมา</span><b>${nf.format(Math.round(w.r30))}</b><span>มม. · ไม่มีฝน ≥5 มม. ${w.dry} วัน</span></div><div><span>ความชื้นดิน 9–27 ซม.</span><b>${c&&c.sm2!=null?Math.round(c.sm2*100):'–'}%</b><span>ผิวดิน 3–9 ซม. ${c&&c.sm1!=null?Math.round(c.sm1*100)+'%':'–'}</span></div></div>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>เตือนตามระยะต้น</h2><span class="muted">ระยะส่วนใหญ่: ${ST[w.stage]?ST[w.stage].t:''}</span></div><div class="panel"><ul class="list">${w.A.length?w.A.map(a=>`<li><div class="d"><span class="badge ${a[0]}">${a[0]==='bad'?'ด่วน':a[0]==='ok'?'โอกาส':'ระวัง'}</span></div><div><div class="t">${a[1]}</div><div class="s">${a[2]}</div></div><div></div></li>`).join(''):'<li><div></div><div class="muted">10 วันข้างหน้าไม่มีอะไรน่าห่วง</div><div></div></li>'}</ul></div></section>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>ช่วงฉีดพ่นที่ดี 48 ชม.</h2></div><div class="panel" style="padding:14px 18px">${w.windows.length?`<div class="tags">${w.windows.slice(0,6).map(x=>`<span class="badge ok" style="font-size:14px;padding:4px 10px">${winTxt(x)} · ลม ≤${Math.round(x.wind)}</span>`).join('')}</div>`:'<span class="muted">ไม่มีช่วงที่ฝนไม่ตก 4 ชม. ต่อเนื่องและลมสงบ ถ้าจำเป็นให้ผสมสารจับใบ</span>'}<p class="muted" style="margin:8px 0 0;font-size:13px">เกณฑ์: 06–18 น. โอกาสฝน ≤30% ตลอด 4 ชม. หลังพ่น ลม &lt;12 กม./ชม. อุณหภูมิ ≤33°C</p></div></section>`;
+  const mxR=Math.max(10,...w.days.map(x=>Math.max(x.r,x.hi||0)));
+  h+=`<section class="sec"><div class="sec-h"><h2>พยากรณ์ 16 วัน</h2><span class="muted">แถบเทา = ช่วงที่ 3 โมเดล (ECMWF, GFS, ICON) ไม่ตรงกัน</span></div><div class="panel"><table class="fl-table wx-t"><thead><tr><th>วัน</th><th class="r">ต่ำ–สูง °C</th><th>ฝน มม.</th><th class="r">โอกาส</th><th class="r hide-m">ลมกระโชก</th><th class="r hide-m">ระเหย มม.</th></tr></thead><tbody>${w.days.map(x=>`<tr><td><b>${x.t===today()?'วันนี้':fd(x.t,{weekday:'short',day:'numeric',month:'short'})}</b></td><td class="r num">${Math.round(x.mn)}–${Math.round(x.mx)}</td><td style="min-width:120px"><div class="rbar">${x.hi!=null?`<i class="rng" style="left:${x.lo/mxR*100}%;width:${Math.max(1,(x.hi-x.lo)/mxR*100)}%"></i>`:''}<i class="val" style="width:${x.r/mxR*100}%"></i></div><span class="num">${nf.format(Math.round(x.r*10)/10)}</span>${x.hi!=null&&x.hi-x.lo>=5?` <small class="muted">(${Math.round(x.lo)}–${Math.round(x.hi)})</small>`:''}</td><td class="r num">${x.pp??'–'}%</td><td class="r num hide-m">${Math.round(x.g)}</td><td class="r num hide-m">${nf.format(Math.round(x.et*10)/10)}</td></tr>`).join('')}</tbody></table></div></section>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>น้ำที่ต้นต้องการ</h2></div><div class="panel" style="padding:14px 18px"><p style="margin:0">7 วันข้างหน้า น้ำระเหยจากทรงพุ่ม ~${nf.format(Math.round(w.et7*0.8))} มม. ฝน ~${nf.format(Math.round(w.r7))} มม. ${w.L7>0?`ควรให้น้ำเพิ่มราว <b>${nf.format(w.L7)} ลิตร/ต้น</b> ในสัปดาห์นี้ (ทรงพุ่ม ${esc(p.canopy)} ม. ≈ ${Math.round(w.area)} ตร.ม.)`:'ฝนพอ ไม่ต้องให้น้ำเพิ่ม'}</p><p class="muted" style="margin:6px 0 0;font-size:13px">ช่วงทำดอกที่ต้องงดน้ำ และช่วงผลใกล้แก่ที่ต้องลดน้ำ ให้ทำตามตารางงานแทนตัวเลขนี้ · 30 วันที่ผ่านมา ฝน ${nf.format(Math.round(w.r30))} มม. ระเหย ${nf.format(Math.round(w.et30))} มม.</p></div></section>`;
+  h+=`<p class="muted" style="font-size:13px">ข้อมูลจาก Open-Meteo อัปเดต ${wxAge()} นาทีก่อน · พิกัด ${esc(wxKey(p))}</p>`;
+  return h}
+function homePlanHTML(st){const p=planMeta();let h='';const T=planTasks(st).filter(t=>!t.done&&t.left<=7&&t.left>=-30).slice(0,6);
+  let w=null;if(p.lat!=null){if(!WX.d||WX.key!==wxKey(p)||Date.now()-WX.at>36e5)fetchWx();w=wxAnalyze(st)}
+  if(!T.length&&!w)return '';
+  h+=`<section class="sec"><div class="sec-h"><h2>แผนงานและอากาศ</h2><a href="#plan">ดูตาราง</a></div><div class="panel"><ul class="list">`;
+  if(w){const td=w.days[0],tm=w.days[1];h+=`<li class="click" data-act="gowx"><div class="d"><span class="badge ${w.A.some(a=>a[0]==='bad')?'bad':w.A.length?'warn':'ok'}">อากาศ</span></div><div><div class="t">วันนี้ ${Math.round(td.mn)}–${Math.round(td.mx)}°C ฝน ${td.pp??0}% · พรุ่งนี้ฝน ${tm?tm.pp??0:'–'}%</div><div class="s">${w.windows.length?'ช่วงพ่นยาดี: '+winTxt(w.windows[0]):'48 ชม. นี้ไม่มีช่วงพ่นยาที่ดี'}${w.A.length?' · '+w.A.map(a=>a[1]).join(', '):''}</div></div><div></div></li>`}
+  h+=T.map(t=>`<li class="click" data-act="goplan"><div class="d"><span class="badge ${t.left<0?'bad':t.left<=3?'warn':''}">${dueTxt(t.left)}</span></div><div><div class="t">${esc(t.x[1])}</div><div class="s">${esc(t.x[2])}</div></div><div></div></li>`).join('');
+  return h+`</ul></div></section>`}
+function parseLoc(s){s=String(s||'');let m=s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)||s.match(/[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/)||s.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)||s.match(/(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{2,3}\.\d+)/);
+  if(!m)return null;const lat=+m[1],lon=+m[2];if(Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat:Math.round(lat*1e5)/1e5,lon:Math.round(lon*1e5)/1e5}}
+async function planAct(a,el){
+  if(a==='pt'){ui.planTab=el.dataset.v;render();return true}
+  if(a==='gowx'){ui.planTab='wx';if(location.hash==='#plan')render();else location.hash='plan';return true}
+  if(a==='goplan'){ui.planTab='plan';if(location.hash==='#plan')render();else location.hash='plan';return true}
+  if(a==='wxre'){fetchWx(true);toast('กำลังโหลดอากาศ…');return true}
+  if(a==='plansave'){const H=($('#pH')||{}).value||'',Bi=$('#pB');const B=Bi&&!Bi.disabled?Bi.value:planMeta().B;if(await savePlan({H,B}))toast('บันทึกแล้ว ตารางอัปเดตแล้ว');return true}
+  if(a==='locsave'){const ll=parseLoc(($('#pLoc')||{}).value);const can=+(($('#pCan')||{}).value)||6;if(!ll)return toast('อ่านพิกัดไม่ได้ ลองวางแบบ 12.68, 101.28'),true;if(await savePlan({...ll,canopy:can})){toast('บันทึกตำแหน่งแล้ว');fetchWx(true)}return true}
+  if(a==='locgps'){if(!navigator.geolocation)return toast('เครื่องนี้หาตำแหน่งไม่ได้'),true;toast('กำลังหาตำแหน่ง…');navigator.geolocation.getCurrentPosition(async pos=>{const ll={lat:Math.round(pos.coords.latitude*1e5)/1e5,lon:Math.round(pos.coords.longitude*1e5)/1e5};const can=+(($('#pCan')||{}).value)||6;if(await savePlan({...ll,canopy:can})){toast('บันทึกตำแหน่งแล้ว');fetchWx(true)}},()=>toast('ไม่ได้รับอนุญาตให้ใช้ตำแหน่ง'),{enableHighAccuracy:true,timeout:15000});return true}
+  if(a==='plandone'||a==='planskip'||a==='planundo'){const k=el.dataset.k;const p=planMeta();const done={...p.done};if(a==='planundo')delete done[k];else done[k]=a==='planskip'?'skip':today();
+    await savePlan({done});if(a==='plandone'){const t=planTasks(treeState()).find(t=>t.k===k);if(t)forms.works(null,{type:t.x[3],product:'',rate:'',note:t.x[1]+' — '+t.x[2],trees:t.ids&&t.ids.length?t.ids:undefined})}return true}
+  return false}
+
+const GUIDE_HTML="<div class=\"guide\">\n<p class=\"lead\">คู่มือทุเรียนหมอนทอง พื้นที่ราว 2 ไร่ (40–45 ต้น ระยะ 8×8 ม.) ภาคตะวันออก ทุกขั้นบอกทั้ง \"ทำอะไร\" และ \"ทำไม\" เพื่อให้ปรับเองได้เมื่ออากาศไม่ตรงตำรา อัตราสารให้ยึดฉลากจริงเป็นหลัก<\/p>\n<details open><summary>1. หลักคิดชีวเคมี 5 ข้อ<\/summary>\n<ul>\n<li><b>C/N ratio<\/b> ใบแก่สร้างแป้ง-น้ำตาล (C) ถ้า N สูง ต้นจะแตกใบ ถ้า C สูงกว่า N ตาจะพร้อมเป็นดอก → ช่วงสะสมอาหาร ลด N เพิ่ม P, K<\/li>\n<li><b>GA กับ PBZ<\/b> GA สั่งให้แตกใบ PBZ ยับยั้งการสร้าง GA ต้นจึงหยุดแตกใบและหันไปสร้างตาดอก → พ่นตอนใบชุดสุดท้ายเพสลาด<\/li>\n<li><b>ABA และความเครียดน้ำ<\/b> ดินแห้งระยะสั้นทำให้ต้นสร้าง ABA ระงับการเจริญทางใบ → งดน้ำช่วงเปิดตาดอก ต้องมีอากาศแล้งช่วย<\/li>\n<li><b>แหล่งสร้าง-แหล่งใช้<\/b> ใบอ่อนแย่งอาหารจากผล ถ้าแตกตอนผลอายุ 3–8 สัปดาห์ ผลร่วงหรือเบี้ยว → คุมด้วย 0-52-34 หรือ 13-0-46<\/li>\n<li><b>แคลเซียม + โบรอน<\/b> Ca เป็นตัวยึดผนังเซลล์ B ช่วยลำเลียง Ca ขาดแล้วเนื้อแฉะ ไส้ซึม → ให้ตั้งแต่ก่อนดอกบานจนผลอายุ ~80 วัน<\/li>\n<\/ul>\n<p class=\"muted\">PBZ อย่างเดียวไม่รับประกันดอก มีงานวิจัยปี 2024 พ่น 1,000–1,500 ppm แล้วไม่ออกดอก แปลว่าความสมบูรณ์ของต้นและอากาศแล้งสำคัญพอ ๆ กับสาร<\/p>\n<\/details>\n<details><summary>2. เตรียมพื้นที่และผังปลูก<\/summary>\n<ul>\n<li>ระยะ 8×8 หรือ 9×9 ม. (16–25 ต้น/ไร่) ปลูกบนเนินสูง 30–50 ซม. วางแถวเหนือ-ใต้<\/li>\n<li>ที่ลุ่มน้ำท่วมนาน: ยกร่อง สันร่องกว้าง ≥6 ม. ร่องกว้าง 1.5 ม. ลึก 1 ม. มีประตูน้ำเข้า-ออก<\/li>\n<li>ตรวจดิน 10–20 จุด ลึก 0–15 และ 15–30 ซม. ปรับ pH ให้ได้ 5.5–6.5 ด้วยโดโลไมท์<\/li>\n<li>บ่อน้ำ 600–800 ลบ.ม./ไร่/ปี สปริงเกอร์ 1 หัว/ต้น (โตแล้ว 2–4 หัว) แยกวาล์วเป็นโซน<\/li>\n<li>ต้นพันธุ์เสียบบนตอทนรากเน่า หรือเสียบ 2 ราก แทรกพันธุ์ผสมเกสร (ก้านยาว/ชะนี/จันทบุรี 3) 2–3 ต้น ปลูกไม้บังลมด้านมรสุม<\/li>\n<\/ul><\/details>\n<details><summary>3. ปีที่ 1–3 ต้นเล็ก<\/summary>\n<ul>\n<li>พรางแสง 50% ปีแรก ค่อย ๆ เอาออกปีที่ 2<\/li>\n<li>ปุ๋ยสูตรเสมอ 50–100 ก./ต้น ทุก 3–4 สัปดาห์ (ปีที่ 2–3: 200–500 ก. ทุก 1–2 เดือน) ใส่น้อยแต่บ่อย ปุ๋ยคอก 5–20 กก./ต้น ปีละ 2 ครั้ง<\/li>\n<li>จัดทรง: ลำต้นเดียวตรง ตัดกิ่งต่ำกว่า 80–100 ซม. เลือกกิ่งมุมกว้างห่างกัน 20–30 ซม. เวียนรอบต้น<\/li>\n<li>ไตรโคเดอร์มาทุก 3–4 เดือน ฟอสโฟเนตช่วงฝนชุก<\/li>\n<li>ทุกครั้งที่แตกใบอ่อน ตรวจเพลี้ยไก่แจ้และหนอนกินใบตอนใบเพิ่งแทง<\/li>\n<li>ดอกที่ออกก่อนปีที่ 4 ปลิดทิ้ง<\/li>\n<\/ul><\/details>\n<details><summary>4. ปฏิทินรอบปีต้นให้ผล<\/summary>\n<table class=\"fl-table\"><thead><tr><th>ระยะ<\/th><th>เดือน<\/th><th>งานหลัก<\/th><\/tr><\/thead><tbody>\n<tr><td>ฟื้นต้น<\/td><td>มิ.ย.–ก.ค.<\/td><td>ตัดแต่งกิ่ง ปุ๋ย N สูง + อินทรีย์<\/td><\/tr>\n<tr><td>ใบ 2 ชุด<\/td><td>ก.ค.–ก.ย.<\/td><td>กันเพลี้ยไก่แจ้ คุมรากเน่า<\/td><\/tr>\n<tr><td>สะสมอาหาร + PBZ<\/td><td>ก.ย.–ต.ค.<\/td><td>PBZ ตอนใบชุด 2 เพสลาด 8-24-24 พ่น 0-52-34<\/td><\/tr>\n<tr><td>เปิดตาดอก<\/td><td>ปลาย ต.ค.–พ.ย.<\/td><td>งดน้ำ 14–21 วันเมื่อฝนหยุด<\/td><\/tr>\n<tr><td>ดอก-ติดผล<\/td><td>ธ.ค.–ก.พ.<\/td><td>ตัดแต่งช่อ ผสมเกสร คุมเพลี้ยไฟ<\/td><\/tr>\n<tr><td>พัฒนาผล<\/td><td>ก.พ.–พ.ค.<\/td><td>ตัดแต่งผล 3 รอบ คุมใบอ่อน น้ำสม่ำเสมอ<\/td><\/tr>\n<\/tbody><\/table>\n<p class=\"muted\">ใช้สภาพต้นเป็นตัวกำหนด ไม่ใช่วันที่ในปฏิทิน หน้า \"ตารางงาน\" จะคำนวณวันให้จากวันเริ่มรอบและวันดอกบานที่จดไว้<\/p>\n<\/details>\n<details><summary>5. สะสมอาหารและทำดอก<\/summary>\n<p>ผล 1 ตันดึงธาตุออกจากสวน N 2.19 กก. P 0.42 กก. K 5.37 กก. Ca 0.62 กก. Mg 0.40 กก. K สูงกว่า N เกือบ 2.5 เท่า ปีไหนไม่คืน K ปีหน้าเนื้อจะไม่แน่น กรมวิชาการเกษตรใช้ 1.3-1-1.2 กก. N-P₂O₅-K₂O/ต้นเตรียมต้น และ 1-0.5-2 กก./ต้นหลังติดผล<\/p>\n<p><b>แปลงเป็นปุ๋ย:<\/b> น้ำหนักปุ๋ย = ธาตุที่ต้องการ × 100 ÷ เลขสูตร เช่น K₂O 2 กก. จาก 0-0-60 = 3.3 กก./ต้น/ปี แบ่ง 3–4 ครั้ง<\/p>\n<p><b>คำนวณ PBZ:<\/b> กรัม = ppm × ลิตรน้ำ ÷ (10 × %สาร) เช่น 1,000 ppm น้ำ 20 ล. จาก PBZ 10% = 200 ก. พ่นทางใบเท่านั้น ไม่ราดดิน (ค้างในดินหลายปี)<\/p>\n<ol><li>หลังเก็บเกี่ยว: ตัดแต่งกิ่ง ปุ๋ย N สูง + อินทรีย์ 20–30 กก./ต้น<\/li><li>ใบชุด 1 และ 2 แตกพร้อมกันทั้งต้น<\/li><li>พ่น PBZ 750–1,500 ppm เมื่อใบชุด 2 เพสลาด (ดอกออกเร็วขึ้น 14–45 วัน)<\/li><li>8-24-24 ทางดิน + 0-52-34 ทางใบทุก 7–10 วัน 2–3 ครั้ง งด N<\/li><li>ฝนหยุด งดน้ำจนใบห่อเล็กน้อยตอนบ่าย เห็นตาดอกแล้วให้น้ำทีละน้อย<\/li><\/ol>\n<p class=\"muted\">PBZ ทำให้ก้านผลสั้นลง ต้นอายุน้อยมีแนวโน้มผลเล็ก ต้นอายุ 4–5 ปีใช้อัตราต่ำ<\/p>\n<\/details>\n<details><summary>6. ดอก ติดผล ทำลูกให้สวย<\/summary>\n<p>ลูกเบี้ยวมาจากผสมเกสรไม่ทั่ว พูที่มีเมล็ดสร้างฮอร์โมนดึงอาหาร พูที่ไม่มีเมล็ดจะลีบ<\/p>\n<ul><li><b>ตัดแต่งช่อ<\/b> (2–3 สัปดาห์ก่อนบาน) เก็บช่อบนกิ่งใหญ่แนวนอน กลุ่มละ 3–5 ช่อ ห่าง 30–50 ซม.<\/li>\n<li><b>ผสมเกสร<\/b> 19:00–21:00 น. ใช้เกสรพันธุ์อื่น จันทบุรี 3 ช่วยให้ติดผลมากขึ้นโดยลักษณะยังเป็นหมอนทอง ที่ 30°C ติดผล 18.7% ที่ 15°C ไม่ติดเลย<\/li>\n<li>พ่นแคลเซียม-โบรอนก่อนดอกบาน<\/li><\/ul>\n<table class=\"fl-table\"><thead><tr><th>รอบ<\/th><th>อายุผล<\/th><th>ตัดออก<\/th><th>เก็บไว้<\/th><\/tr><\/thead><tbody>\n<tr><td>1<\/td><td>3–4 สัปดาห์<\/td><td>ผลเล็ก ผิดรูป บนกิ่งเล็ก<\/td><td>2–3 ผล/ช่อ<\/td><\/tr>\n<tr><td>2<\/td><td>5–6 สัปดาห์<\/td><td>ผลเบี้ยว พูไม่เต็ม หนามแดง<\/td><td>1–2 ผล/ช่อ<\/td><\/tr>\n<tr><td>3<\/td><td>7–8 สัปดาห์<\/td><td>ผลเกินกำลังต้น<\/td><td>ตามทรงพุ่ม<\/td><\/tr><\/tbody><\/table>\n<p>หลังติดผล 1 สัปดาห์ค่อย ๆ เพิ่มน้ำ ปกติหลัง 3 สัปดาห์ ใส่ปุ๋ยหลังตัดแต่งผลครั้งสุดท้าย (ผลอายุ 7 สัปดาห์) พร้อมพ่น 13-0-46 และโยงกิ่ง<\/p>\n<\/details>\n<details><summary>7. บำรุงผลและคุณภาพเนื้อ<\/summary>\n<table class=\"fl-table\"><thead><tr><th>อายุผล<\/th><th>ให้อะไร<\/th><th>เหตุผล<\/th><\/tr><\/thead><tbody>\n<tr><td>0–8 สัปดาห์<\/td><td>แคลเซียม-โบรอนทางใบทุก 10–14 วัน<\/td><td>ช่วงแบ่งเซลล์ Ca ไปตามน้ำคาย ผลใหญ่แล้วดึง Ca ได้น้อย<\/td><\/tr>\n<tr><td>8–12 สัปดาห์<\/td><td>K สูง (13-13-21, 0-0-60) น้ำสม่ำเสมอ<\/td><td>K พาน้ำตาลเข้าเนื้อ เนื้อแห้งเพิ่ม<\/td><\/tr>\n<tr><td>12 สัปดาห์–ตัด<\/td><td>ลดน้ำทีละน้อย ไม่ใส่ N<\/td><td>เนื้อแห้งขึ้น N ช่วงนี้ทำให้เนื้อแฉะ<\/td><\/tr><\/tbody><\/table>\n<p>มาตรฐาน มกษ. 3-2556: หมอนทองเนื้อแห้ง ≥32% ชะนี/พวงมณี 30% กระดุม 27% หมอนทอง 110–125 วันหลังดอกบาน ผูกป้ายสีทุกรุ่น สุ่มตัดตรวจก่อนตัดทั้งรุ่น ไม่ให้ผลสัมผัสดิน<\/p>\n<\/details>\n<details><summary>8. โรคแมลงและกลุ่มสาร<\/summary>\n<p>หมุนตามกลุ่มกลไก (FRAC/IRAC บนฉลาก) กลุ่มเดียวกันไม่ใช้ติดกันเกิน 2 ครั้ง<\/p>\n<table class=\"fl-table\"><thead><tr><th>ปัญหา<\/th><th>สาร (กลุ่ม)<\/th><th>หมายเหตุ<\/th><\/tr><\/thead><tbody>\n<tr><td>รากเน่าโคนเน่า<\/td><td>เมทาแลกซิล (4), ฟอสโฟเนต/ฟอสอีทิล-อะลูมิเนียม (P07), ไตรโคเดอร์มา<\/td><td>เมทาแลกซิลดื้อยาเร็ว ใช้ตอนระบาด<\/td><\/tr>\n<tr><td>ผลเน่า<\/td><td>เมทาแลกซิล 25% หรือฟอสอีทิล-อะลูมิเนียม 80% 30–50 ก./น้ำ 20 ล.<\/td><td>หยุดพ่น ≥15 วันก่อนตัด<\/td><\/tr>\n<tr><td>ราสีชมพู<\/td><td>ทองแดง (M01)<\/td><td>ตัดแต่งให้โปร่งคือการป้องกันหลัก<\/td><\/tr>\n<tr><td>แอนแทรคโนส/ใบจุด<\/td><td>แมนโคเซบ (M03) สลับ strobilurin (11)<\/td><td><\/td><\/tr>\n<tr><td>เพลี้ยไก่แจ้<\/td><td>4A สลับ 3A<\/td><td>พ่นตอนใบเพิ่งแทง<\/td><\/tr>\n<tr><td>เพลี้ยไฟ<\/td><td>spinosyn (5) สลับกลุ่มอื่น<\/td><td>ทำให้ผิวกร้าน หนามแดง<\/td><\/tr>\n<tr><td>หนอนเจาะผล<\/td><td>diamide (28)<\/td><td>ดูรอยขี้หนอนระหว่างผลชิดกัน<\/td><\/tr>\n<tr><td>ไรแดง<\/td><td>อะบาเมกติน (6) หรือกำมะถันผง<\/td><td>หน้าแล้ง<\/td><\/tr><\/tbody><\/table>\n<p>ต้นเป็นโคนเน่า: ถากส่วนเน่าออกบาง ๆ ทาสารดูดซึม หรืออัดฉีดฟอสฟอรัสแอซิดเข้าลำต้น ล้างเครื่องมือก่อนใช้กับต้นอื่น<\/p>\n<\/details>\n<details><summary>9. รับมือสภาพอากาศ<\/summary>\n<table class=\"fl-table\"><thead><tr><th>เหตุการณ์<\/th><th>ทำทันที<\/th><th>ป้องกันปีหน้า<\/th><\/tr><\/thead><tbody>\n<tr><td>น้ำท่วมขัง<\/td><td>สูบน้ำออกเร็วที่สุด ห้ามเหยียบดินโคนต้น/ใช้เครื่องจักรหนัก พรวนเบา ๆ ไตรโคเดอร์มา + ฟอสโฟเนต งดปุ๋ยทางดินจนเห็นรากใหม่ ใช้ปุ๋ยทางใบแทน<\/td><td>ยกเนิน/ยกร่อง ร่องระบาย เครื่องสูบสำรอง<\/td><\/tr>\n<tr><td>ฝนช่วงทำดอก<\/td><td>พ่น 0-52-34 ซ้ำ เปิดร่องระบาย ถ้าใบอ่อนออกแล้ว รอเพสลาดแล้วทำรอบใหม่<\/td><td>คลุมพลาสติกใต้ทรงพุ่มช่วงทำดอก<\/td><\/tr>\n<tr><td>ฝนหนักหลังแล้ง ช่วงผลใกล้แก่<\/td><td>เปิดร่อง งดน้ำ พ่นแคลเซียม-โบรอน กันผลเน่า<\/td><td>ให้น้ำสม่ำเสมอตลอดช่วงผล<\/td><\/tr>\n<tr><td>แล้ง/ร้อนจัด<\/td><td>ให้น้ำเช้า-เย็น คลุมโคน พ่นน้ำฝอยช่วงดอกบาน<\/td><td>บ่อน้ำพอ ไม้บังลม-แดด<\/td><\/tr>\n<tr><td>หนาวจัดช่วงดอกบาน<\/td><td>เลือกผสมเกสรคืนที่อุ่นกว่า<\/td><td>ดูพยากรณ์ก่อนกำหนดวันทำดอก<\/td><\/tr>\n<tr><td>ลมแรง/พายุ<\/td><td>โยงกิ่ง ค้ำกิ่ง หลังพายุตัดแต่งแผล ทาสารกันรา<\/td><td>คุมทรงสูง ≤6–7 ม. ไม้บังลม<\/td><\/tr><\/tbody><\/table>\n<\/details>\n<details><summary>10. จดบันทึกเพื่อทำซ้ำ<\/summary>\n<ul><li>ต่อต้น: วันแตกใบแต่ละชุด วันพ่น PBZ (ppm) วันเห็นตาดอก วันดอกบาน จำนวนผลที่เก็บ น้ำหนัก % เกรด A ปัญหาที่พบ<\/li>\n<li>ต่อสวน: ฝนรายวัน อุณหภูมิต่ำสุดช่วงดอกบาน ปุ๋ยและสารทุกครั้ง (กลุ่ม FRAC/IRAC อัตรา)<\/li>\n<li>ต่อปี: ตรวจใบปีละครั้ง (ใบอายุ 4–7 เดือนก่อนทำดอก) ตรวจดินทุก 2–3 ปี<\/li><\/ul>\n<table class=\"fl-table\"><thead><tr><th>ธาตุในใบหมอนทอง<\/th><th>ค่าอ้างอิง<\/th><\/tr><\/thead><tbody>\n<tr><td>N<\/td><td>2.32%<\/td><\/tr><tr><td>P<\/td><td>0.21%<\/td><\/tr><tr><td>K<\/td><td>1.98%<\/td><\/tr><tr><td>Ca<\/td><td>1.71%<\/td><\/tr><tr><td>Mg<\/td><td>0.30%<\/td><\/tr><tr><td>B<\/td><td>35.6 มก./กก.<\/td><\/tr><\/tbody><\/table>\n<p>ทุกสิ้นฤดู เทียบต้นที่ได้เกรด A มากที่สุดกับต้นที่แย่ที่สุด ดูว่าต่างกันที่ขั้นไหน แล้วเปลี่ยนทีละ 1 ตัวแปรในปีถัดไป<\/p>\n<\/details>\n<p class=\"muted\" style=\"font-size:13px\">อ้างอิงหลัก: กรมวิชาการเกษตร (การปลูกและการผลิตทุเรียน, ธาตุอาหารหมอนทอง, การใช้ปุ๋ย, โรคทุเรียน), ศูนย์วิจัยพืชสวนจันทบุรี (PBZ, เกสรจันทบุรี 3), JARQ 2024, มกษ. 3-2556 · ตัวเลขปุ๋ยต้นเล็ก ความสูงเนิน และสารบางกลุ่มเป็นแนวปฏิบัติทั่วไปของชาวสวน ให้เทียบกับผลตรวจดินและฉลากจริง<\/p>\n<\/div>";
+
 /* ---------- tag ---------- */
 function tagHTML(t,st,opts={}){
   if(!t)return '';
@@ -561,8 +747,8 @@ function tagList(ids,st,size='sm'){if(!ids||!ids.length)return '';const all=tree
 
 /* ---------- views ---------- */
 const VIEWS=[
- {k:'home',t:'ภาพรวม',i:'home'},{k:'trees',t:'ต้นไม้ในสวน',i:'tag',tm:'ต้นไม้'},{k:'work',t:'ฉีดยา/ปุ๋ย',i:'drop',tm:'งานสวน'},{k:'lab',t:'ห้องผสมยา',i:'flask',tm:'ผสมยา'},{k:'flower',t:'ทำดอก/ติดผล',i:'flower',tm:'ทำดอก'},{k:'money',t:'ขาย/บัญชี',i:'wallet',tm:'เงิน'}];
-const ui={view:'home',stageFilter:null,workFilter:'all',moneyTab:'sales',year:yearOf(today()),rowFilter:'all',labTab:'mix',chemToMix:false,workTab:'log',treeTab:'rows',mapEdit:false,mapSel:null};
+ {k:'home',t:'ภาพรวม',i:'home'},{k:'trees',t:'ต้นไม้ในสวน',i:'tag',tm:'ต้นไม้'},{k:'work',t:'ฉีดยา/ปุ๋ย',i:'drop',tm:'งานสวน'},{k:'plan',t:'แผนงาน/อากาศ',i:'cal',tm:'แผน'},{k:'lab',t:'ห้องผสมยา',i:'flask',tm:'ผสมยา'},{k:'flower',t:'ทำดอก/ติดผล',i:'flower',tm:'ทำดอก'},{k:'money',t:'ขาย/บัญชี',i:'wallet',tm:'เงิน'}];
+const ui={view:'home',planTab:'plan',stageFilter:null,workFilter:'all',moneyTab:'sales',year:yearOf(today()),rowFilter:'all',labTab:'mix',chemToMix:false,workTab:'log',treeTab:'rows',mapEdit:false,mapSel:null};
 function route(){const h=(location.hash||'').slice(1);ui.view=VIEWS.some(v=>v.k===h)?h:'home'}
 window.addEventListener('hashchange',()=>{route();render();$('#main').focus({preventScroll:true});window.scrollTo(0,0)});
 
@@ -584,7 +770,7 @@ function render(){
   if(!S.canWrite)h+=`<div class="note">คุณดูข้อมูลได้อย่างเดียว ขอสิทธิ์ "ผู้ร่วมแก้ไข (Contributor)" จากเจ้าของสวนเพื่อจดบันทึก</div>`;
   if(S.mode==='local')h+=`<div class="note"><span>ตอนนี้ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น ถ้าอยากให้คนในบ้านจดร่วมกัน ให้ออกแล้วเข้าสวนด้วยชื่อกับรหัสสวน</span><button class="btn" data-act="logout">เข้าสวนบน cloud</button></div>`;
   if(hasDemo())h+=`<div class="note"><span>กำลังแสดง <b>ข้อมูลตัวอย่าง</b> ไว้ลองใช้ — ตัวเลขไม่ใช่ของจริง</span><button class="btn" data-act="clearDemo">ลบข้อมูลตัวอย่างทั้งหมด</button></div>`;
-  h+=({home:vHome,trees:vTrees,work:vWork,lab:vLab,flower:vFlower,money:vMoney})[ui.view](st);
+  h+=({home:vHome,trees:vTrees,work:vWork,plan:vPlan,lab:vLab,flower:vFlower,money:vMoney})[ui.view](st);
   m.innerHTML=h;
   const ids=[];['works','flowers','sales','money'].forEach(c=>list(c).forEach(x=>x.by&&ids.push(x.by)));resolveNames(ids);
 }
@@ -602,6 +788,7 @@ function vHome(st){
    phi.map(t=>{const s=st[t.id],w=s.safeW;return `<li class="click" data-act="tree" data-id="${t.id}"><div class="d"><span class="badge bad">ระวังสารตกค้าง</span></div><div><div class="t">ต้น ${esc(t.no)} ถึงวันตัด ${fd(s.cutDate,{day:'numeric',month:'short'})} ก่อนพ้นระยะเว้นยา</div><div class="s">${esc(w.type)}${w.product?' · '+esc(w.product):''} เมื่อ ${fd(w.date,{day:'numeric',month:'short'})} ต้องเว้น ${w.phi} วัน · ตัดได้ตั้งแต่ ${fd(s.safe,{day:'numeric',month:'short'})}</div></div><div>${tagHTML(t,st,{open:false,size:'sm'})}</div></li>`}).join('')+
    due.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':'warn'}">${dueTxt(x.left)}</span></div><div><div class="t">ถึงรอบ ${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทำทุก ${x.w.every} วัน · ครั้งล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')+
    low.map(o=>`<li class="click" data-act="gostock"><div class="d"><span class="badge warn">ใกล้หมด</span></div><div><div class="t">${esc(o.item)}</div><div class="s">เหลือ ${nf.format(o.left)} ${esc(o.unit||'')} จากที่ซื้อ ${nf.format(o.inQ)}</div></div><div></div></li>`).join('')+`</ul></div></section>`}
+  h+=homePlanHTML(st);
   const soon=ts.filter(t=>st[t.id].cutDate).sort((a,b)=>st[a.id].left-st[b.id].left);
   h+=`<section class="sec"><div class="sec-h"><h2>ใกล้ตัด</h2><a href="#flower">ดูรอบทำดอกทั้งหมด</a></div>`;
   h+=soon.length?`<div class="soon">${soon.slice(0,8).map(t=>{const s=st[t.id];return `<div class="panel it ${s.left<0?'late':''}" data-act="tree" data-id="${t.id}">${tagHTML(t,st,{open:false})}<div><b>${s.left<0?'เลย '+(-s.left):s.left} วัน</b><span>${s.left<0?'เลยกำหนดตัด':'ตัด '+fd(s.cutDate,{day:'numeric',month:'short'})}</span></div></div>`}).join('')}</div>`
@@ -1066,6 +1253,7 @@ sheet.addEventListener('submit',async e=>{
 /* ---------- clicks ---------- */
 document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
+  if(await planAct(a,el))return;
   if(a==='quick')return quick();
   if(a==='logout')return logout();
   if(a==='localmode'){const sess={local:true,name:'สวนในเครื่องนี้',who:''};saveSession(sess);S.loginErr='';return enter(sess)}
