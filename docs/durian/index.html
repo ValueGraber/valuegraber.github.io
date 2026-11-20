@@ -831,10 +831,11 @@ function vTrees(st){
 function vWork(st){
   const W=list('works').sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.updated||0)-(a.updated||0));
   const y=yearOf(today());const costY=ledger().filter(r=>r.dir==='out'&&yearOf(r.date)===y&&(r.src==='works'||r.src==='stock')).reduce((a,r)=>a+r.amount,0);
-  const stockTab=ui.workTab==='stock';
-  let h=`<div class="top"><div><h1>ฉีดยา / ใส่ปุ๋ย</h1><p>${W.length} ครั้ง · ค่าปุ๋ยค่ายาปีนี้ ${baht(costY)} บาท</p></div>${S.canWrite?(stockTab?`<button class="btn pri" data-act="new" data-kind="stock">${ic('plus')}ซื้อเข้าสต็อก</button>`:`<button class="btn pri" data-act="new" data-kind="works">${ic('plus')}จดงานสวน</button>`):''}</div>`;
-  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="wt" data-v="log" aria-pressed="${!stockTab}">บันทึกงาน</button><button data-act="wt" data-v="stock" aria-pressed="${stockTab}">สต็อกปุ๋ย/ยา</button></div>`;
+  const stockTab=ui.workTab==='stock',blendTab=ui.workTab==='blend';
+  let h=`<div class="top"><div><h1>ฉีดยา / ใส่ปุ๋ย</h1><p>${W.length} ครั้ง · ค่าปุ๋ยค่ายาปีนี้ ${baht(costY)} บาท</p></div>${S.canWrite&&!blendTab?(stockTab?`<button class="btn pri" data-act="new" data-kind="stock">${ic('plus')}ซื้อเข้าสต็อก</button>`:`<button class="btn pri" data-act="new" data-kind="works">${ic('plus')}จดงานสวน</button>`):''}</div>`;
+  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="wt" data-v="log" aria-pressed="${!stockTab&&!blendTab}">บันทึกงาน</button><button data-act="wt" data-v="stock" aria-pressed="${stockTab}">สต็อกปุ๋ย/ยา</button><button data-act="wt" data-v="blend" aria-pressed="${blendTab}">ผสมปุ๋ยเอง</button></div>`;
   if(stockTab)return h+vStock();
+  if(blendTab)return h+vCalc('fert');
   const sch=schedules();
   if(sch.length)h+=`<section style="margin-bottom:22px"><div class="sec-h"><h2>รอบถัดไป</h2></div><div class="panel"><ul class="list">${sch.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':x.left<=3?'warn':'ok'}">${dueTxt(x.left)}</span></div><div><div class="t">${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทุก ${x.w.every} วัน · ล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})} · ครั้งถัดไป ${fd(x.next,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')}</ul></div></section>`;
   const types=['all',...new Set(W.map(w=>w.type))];
@@ -914,9 +915,9 @@ function mixCalc(m){
 }
 function A_same(rows){const n=rows.map(r=>r.c.id);return new Set(n).size!==n.length}
 function vLab(){
-  let h=`<div class="top"><div><h1>ห้องผสมยา</h1><p>เลือกสารที่จะใส่ แอปจะเรียงลำดับการเติม เช็คสารที่ไม่ควรผสมกัน และคิดต้นทุนต่อถังให้</p></div>${S.canWrite&&ui.labTab==='chems'?`<button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button>`:''}</div>`;
-  h+=`<div class="seg" style="margin-bottom:16px">${[['mix','ผสม / คำนวณ'],['calc','ผสมปุ๋ย / เทียบ %'],['recipes','สูตรที่บันทึก ('+Object.keys(S.data.recipes).length+')'],['chems','คลังสาร ('+Object.keys(S.data.chems).length+')']].map(([k,t])=>`<button data-act="labtab" data-v="${k}" aria-pressed="${ui.labTab===k}">${t}</button>`).join('')}</div>`;
-  return h+(ui.labTab==='calc'?vCalc():ui.labTab==='recipes'?vRecipes():ui.labTab==='chems'?vChems():vMixer());
+  let h=`<div class="top"><div><h1>ห้องผสมยา</h1><p>สำหรับผสมยาฉีดพ่นในถัง เลือกสารที่จะใส่ แอปจะเรียงลำดับการเติม เช็คสารที่ไม่ควรผสมกัน และคิดต้นทุนต่อถังให้</p></div>${S.canWrite&&ui.labTab==='chems'?`<button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button>`:''}</div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['mix','ผสม / คำนวณ'],['calc','เทียบ % ยา'],['recipes','สูตรที่บันทึก ('+Object.keys(S.data.recipes).length+')'],['chems','คลังสาร ('+Object.keys(S.data.chems).length+')']].map(([k,t])=>`<button data-act="labtab" data-v="${k}" aria-pressed="${ui.labTab===k}">${t}</button>`).join('')}</div>`;
+  return h+(ui.labTab==='calc'?vCalc('ai'):ui.labTab==='recipes'?vRecipes():ui.labTab==='chems'?vChems():vMixer());
 }
 function emptyChems(){return `<div class="panel empty"><h3>ยังไม่มีสารในคลัง</h3><p>เพิ่มยา ปุ๋ยทางใบ สารจับใบที่ใช้ บอกชนิดสูตร (ผง เม็ด น้ำข้น น้ำมัน) และราคาต่อขวด/ถุง แอปจะใช้ข้อมูลนี้เรียงลำดับและคิดต้นทุน</p>${S.canWrite?`<div class="row" style="justify-content:center"><button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button><button class="btn" data-act="starter">ใส่รายชื่อสารที่ใช้บ่อย</button></div>`:''}</div>`}
 function vMixer(){
@@ -986,7 +987,7 @@ function solveBlend(c){
   const cost=kg.reduce((a,v,i)=>a+v*pr[i]/50,0);const allPriced=kg.every((v,i)=>!v||pr[i]);
   return {kg,filler:Math.max(0,filler),W,cost,allPriced,per50:W?cost/W*50:0};
 }
-function vCalc(){
+function vCalc(mode){
   const c=ui.calc,ro=rawOptions(),b=solveBlend(c);
   const sel=i=>`<select class="f" data-calc-src="${i}" aria-label="แม่ปุ๋ยตัวที่ ${i+1}">${ro.map(o=>`<option value="${o.f}" ${o.f===c.src[i]?'selected':''}>${o.f} · ${esc(o.n)}</option>`).join('')}</select>`;
   let L=`<div class="panel pad"><h2 style="margin-bottom:4px">ผสมแม่ปุ๋ยใช้เอง</h2><p class="muted" style="margin:0 0 14px;font-size:14px">ใส่สูตรที่ต้องการ แอปบอกว่าต้องใช้แม่ปุ๋ยแต่ละตัวกี่กิโล ที่เหลือเป็นตัวเติม (เช่น ดินขาว ทราย) ให้ครบน้ำหนัก</p>
@@ -999,7 +1000,8 @@ function vCalc(){
    <div class="grid3"><div class="fld"><label class="l" for="ai1">ยาเดิม %</label><input class="f num" style="font-size:20px" id="ai1" data-calc="aiOld" type="number" inputmode="decimal" min="0" value="${esc(c.aiOld)}"></div><div class="fld"><label class="l" for="ai2">ใช้อยู่ (กรัม/ซีซี)</label><input class="f num" style="font-size:20px" id="ai2" data-calc="rateOld" type="number" inputmode="decimal" min="0" value="${esc(c.rateOld)}"></div><div class="fld"><label class="l" for="ai3">ยาใหม่ %</label><input class="f num" style="font-size:20px" id="ai3" data-calc="aiNew" type="number" inputmode="decimal" min="0" value="${esc(c.aiNew)}"></div></div>
    <div id="aires">${aiHTML()}</div>
    ${aiGroupsHTML()}</div>`;
-  return `<div class="calc">${L}${R}</div><p class="muted" style="font-size:13px">คำนวณคร่าวๆ ปุ๋ยผสมเองคลุกให้ทั่วก่อนใช้ เม็ดขนาดต่างกันอาจแยกชั้นตอนขนย้าย · อัตรายายึดตามฉลากของยี่ห้อที่ใช้</p>`;
+  if(mode==='fert')return `<div style="max-width:640px">${L}</div><p class="muted" style="font-size:13px">คำนวณคร่าวๆ ปุ๋ยผสมเองคลุกให้ทั่วก่อนใช้ เม็ดขนาดต่างกันอาจแยกชั้นตอนขนย้าย</p>`;
+  return `<div style="max-width:640px">${R}</div><p class="muted" style="font-size:13px">อัตรายายึดตามฉลากของยี่ห้อที่ใช้</p>`;
 }
 function blendHTML(b){
   if(b.err)return `<div class="warns" style="margin-top:12px"><li class="warn" style="list-style:none">${esc(b.err)}</li></div>`;
