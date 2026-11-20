@@ -50,3 +50,9 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Storage: localStorage `wl-profile`, `wl-day-YYYY-MM-DD`, `wl-week-<monday>`; signed in → Firestore `diet/{uid}` (profile), `diet/{uid}/days/{date}`, `diet/{uid}/weeks/{monday}`. Same Firebase project/auth as ValueGrab. First sign-in uploads local data if the account has no profile yet.
 - Features: exercise demos (`EX` steps + `POSES` stick figures, `openEx`), lift log (`profile.lifts`, `logLift`, `hintFor`), rest `Timer`, `profile.recent` foods + `copyMeal`, 7-day `renderSummary` + CSV `exportCsv`, waist/hip in `profile.weights`.
 - Needs rule: `match /diet/{uid}/{rest=**} { allow read, write: if request.auth != null && request.auth.uid == uid; }`
+
+## Durian orchard book (`/durian/`)
+- Thai per-tree record book for Mon's durian/mangosteen orchard at https://valuegraber.github.io/durian/. Self-contained `docs/durian/index.html` (same body as Mon's Claude artifact "สมุดสวนทุเรียน", ported to Firebase); no build step, edit it directly. Config in `docs/durian/firebase-config.js` (same `valuegrab` Firebase project).
+- Sign-in: Firebase Anonymous auth + "ชื่อสวน + รหัสสวน". Garden id = SHA-256 of `lower(trim(name)) + '|' + code`; data at `gardens/{gid}` and subcollections trees, works, flowers, sales, money, stock, chems, recipes, meta, photos (photos are JPEG data URLs ≤230 KB). Session in localStorage `durian-session-v1`; local-only mode uses `durian-book-v1`.
+- Needs Anonymous enabled in Firebase Auth and this rule:
+  `match /gardens/{gid} { allow get, create, update: if request.auth != null; allow list, delete: if false; match /{coll}/{doc} { allow read, write: if request.auth != null; } }`

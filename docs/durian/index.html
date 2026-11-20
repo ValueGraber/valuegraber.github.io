@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สมุดสวนทุเรียน</title>
+<meta name="theme-color" content="#16342a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="สวนทุเรียน">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rail:#16342a; --rail-2:#1f4537; --rail-ink:#e4eee6; --rail-dim:#9fb8a8;
+  --ground:#edf1eb; --surface:#fbfcf9; --sunk:#e3e9e1;
+  --ink:#18231d; --ink-2:#47574d; --ink-3:#6b7a70; --line:#d3dcd2;
+  --yellow:#f2bf35; --yellow-2:#e2ab1c; --yellow-ink:#3a2a00;
+  --in:#2b7a47; --out:#b2412d;
+  --st-young:#8aa7b8; --st-rest:#4e8a5a; --st-induce:#b5773a; --st-bud:#d9b540; --st-bloom:#e9d48e; --st-fruit:#93a336; --st-cut:#8b918c;
+  --r:10px; --font:"Sarabun",system-ui,sans-serif; --num:"Barlow Condensed","Sarabun",sans-serif;
+  --shadow:0 1px 2px rgba(20,40,28,.08),0 4px 14px rgba(20,40,28,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);font-size:16px;line-height:1.55;color:var(--ink);background:var(--ground);-webkit-font-smoothing:antialiased}
+::selection{background:var(--yellow);color:var(--yellow-ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:6px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* shell */
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.rail{background:var(--rail);color:var(--rail-ink);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:var(--yellow);display:grid;place-items:center;color:var(--rail)}
+.brand b{display:block;font-size:17px;line-height:1.2}
+.brand small{display:block;color:var(--rail-dim);font-size:13px}
+.add-main{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--yellow);color:var(--yellow-ink);border:0;border-radius:var(--r);padding:12px;font-weight:700;font-size:16px;cursor:pointer;margin:0 0 14px;box-shadow:0 2px 0 var(--yellow-2)}
+.add-main:hover{background:#f6ca4f}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:9px;color:var(--rail-ink);text-decoration:none;font-weight:500}
+.nav a:hover{background:var(--rail-2)}
+.nav a[aria-current=page]{background:var(--rail-2);box-shadow:inset 3px 0 0 var(--yellow)}
+.nav a[aria-current=page] svg{color:var(--yellow)}
+.rail .foot{margin-top:auto;font-size:13px;color:var(--rail-dim);padding:8px}
+.rail .foot a{color:var(--rail-ink)}
+main{padding:28px 36px 60px;max-width:1120px;width:100%}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+h1{font-size:28px;line-height:1.2;margin:0;font-weight:700}
+.top p{margin:4px 0 0;color:var(--ink-2)}
+h2{font-size:19px;margin:0;font-weight:700}
+.sec{margin-top:30px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sec-h a,.link{color:var(--rail);font-weight:600;text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:0;cursor:pointer}
+.mob-top,.tabbar,.fab{display:none}
+
+/* surfaces */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.money{display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden}
+.money>div{padding:18px 22px;border-right:1px solid var(--line)}
+.money>div:last-child{border-right:0;background:var(--rail);color:var(--rail-ink)}
+.money span{display:block;font-size:14px;color:var(--ink-2)}
+.money>div:last-child span{color:var(--rail-dim)}
+.money b{font-family:var(--num);font-size:38px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+.money .in b{color:var(--in)} .money .out b{color:var(--out)}
+.money small{display:block;color:var(--ink-3);font-size:13px}
+.money>div:last-child small{color:var(--rail-dim)}
+
+/* tree tag: the signature */
+.tag{--st:var(--st-rest);position:relative;display:inline-flex;align-items:center;gap:6px;min-width:58px;height:36px;padding:0 10px 4px 22px;border-radius:7px 7px 7px 7px;
+  background:linear-gradient(180deg,#f1f3f1 0%,#d9ddd9 55%,#cdd2cd 100%);border:1px solid #b9c0b9;color:#1e2722;font-family:var(--num);font-weight:700;font-size:20px;line-height:1;
+  box-shadow:0 1px 1px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.8);overflow:hidden;cursor:pointer;user-select:none;justify-content:center}
+.tag::before{content:"";position:absolute;left:8px;top:calc(50% - 2px);transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--ground);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.tag::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--st)}
+.tag small{font-family:var(--font);font-size:12px;font-weight:500;color:var(--ink-2)}
+.tag.sm{height:26px;min-width:44px;font-size:16px;padding:0 7px 3px 18px;border-radius:6px}
+.tag.sm::before{left:6px;width:5px;height:5px}
+.tag.sm::after{height:3px}
+.tag.lg{height:84px;min-width:120px;font-size:52px;padding:0 20px 10px 40px;border-radius:12px}
+.tag.lg::before{left:14px;width:13px;height:13px}
+.tag.lg::after{height:10px}
+.tag[aria-pressed=true]{background:linear-gradient(180deg,#ffe58f,#f2bf35);border-color:#c9970f;color:var(--yellow-ink)}
+.tag:hover{border-color:#8f988f}
+.tag.mg{color:#5a1f45;background:linear-gradient(180deg,#f3eff2 0%,#ddd5db 55%,#d1c7cf 100%);border-color:#bba9b6}
+.tag.mg[aria-pressed=true]{background:linear-gradient(180deg,#ffe58f,#f2bf35);color:var(--yellow-ink)}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.st-young{--st:var(--st-young)} .st-rest{--st:var(--st-rest)} .st-induce{--st:var(--st-induce)} .st-bud{--st:var(--st-bud)} .st-bloom{--st:var(--st-bloom)} .st-fruit{--st:var(--st-fruit)} .st-cut{--st:var(--st-cut)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--st);vertical-align:middle;margin-right:6px}
+
+/* soon to cut */
+.soon{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.soon .it{padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer}
+.soon .it:hover{border-color:#a9b5a9}
+.soon .it>div>b{font-family:var(--num);font-size:26px;line-height:1;display:block;font-variant-numeric:tabular-nums}
+.soon .it>div>span{font-size:13px;color:var(--ink-2)}
+.late b{color:var(--out)}
+
+/* lists */
+.list{list-style:none;margin:0;padding:0}
+.list>li{display:grid;grid-template-columns:92px 1fr auto;gap:14px;align-items:start;padding:14px 18px;border-bottom:1px solid var(--line)}
+.list>li:last-child{border-bottom:0}
+.list .d{color:var(--ink-2);font-size:14px;padding-top:2px}
+.list .t{font-weight:600}
+.list .s{color:var(--ink-2);font-size:14px;margin-top:2px}
+.list .tags{margin-top:8px;gap:5px}
+.list .amt{font-family:var(--num);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.list .amt.in{color:var(--in)} .list .amt.out{color:var(--out)}
+.list li.click{cursor:pointer}.list li.click:hover{background:#f3f6f1}
+.kind{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-2);background:var(--sunk);border-radius:6px;padding:1px 8px;margin-right:6px}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer;min-height:44px}
+.btn:hover{border-color:#a9b5a9;background:#fff}
+.btn.pri{background:var(--rail);color:#fff;border-color:var(--rail)}
+.btn.pri:hover{background:var(--rail-2)}
+.btn.yel{background:var(--yellow);border-color:var(--yellow-2);color:var(--yellow-ink)}
+.btn.danger{color:var(--out)}
+.btn.danger.arm{background:var(--out);color:#fff;border-color:var(--out)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.seg{display:inline-flex;background:var(--sunk);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:8px;padding:7px 14px;font-weight:600;color:var(--ink-2);cursor:pointer;min-height:38px}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select.f,input.f,textarea.f{width:100%;border:1px solid #c3cdc2;background:#fff;border-radius:9px;padding:10px 12px;min-height:46px}
+textarea.f{min-height:70px;resize:vertical}
+input.f:focus,select.f:focus,textarea.f:focus{outline:none;border-color:var(--rail);box-shadow:0 0 0 3px rgba(242,191,53,.5)}
+label.l{display:block;font-weight:600;font-size:15px;margin:0 0 6px}
+label.l small{font-weight:400;color:var(--ink-3)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fld{margin-bottom:16px}
+
+/* stage board */
+.stages{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.stages button{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;text-align:left;cursor:pointer;position:relative;overflow:hidden}
+.stages button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--st)}
+.stages button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.stages b{display:block;font-family:var(--num);font-size:30px;line-height:1}
+.stages span{font-size:13px;color:var(--ink-2)}
+.prog{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--st-fruit)}
+.fl-table{width:100%;border-collapse:collapse}
+.fl-table th{font-size:13px;color:var(--ink-3);font-weight:600;text-align:left;padding:10px 16px;border-bottom:1px solid var(--line)}
+.fl-table td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.fl-table tr:last-child td{border-bottom:0}
+.fl-table tr{cursor:pointer}.fl-table tbody tr:hover{background:#f3f6f1}
+.fl-table .r{text-align:right}
+
+/* tree grid */
+.rowblock{padding:16px 18px;border-bottom:1px solid var(--line)}
+.rowblock:last-child{border-bottom:0}
+.rowblock h3{font-size:14px;margin:0 0 10px;color:var(--ink-2);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--ink-2)}
+
+/* sheet */
+dialog.sheet{border:0;padding:0;border-radius:16px;width:min(640px,96vw);max-height:92vh;background:var(--surface);color:var(--ink);box-shadow:0 24px 60px rgba(10,30,20,.35)}
+dialog.sheet::backdrop{background:rgba(14,32,24,.45)}
+.sh-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+.sh-b{padding:20px 22px;overflow:auto}
+.sh-f{display:flex;gap:10px;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface)}
+.ib{border:0;background:var(--sunk);width:40px;height:40px;border-radius:10px;display:grid;place-items:center;cursor:pointer}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:7px;max-height:250px;overflow:auto;padding:10px;background:var(--sunk);border-radius:10px}
+.pick .tag{width:100%}
+.choose{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choose button{display:flex;align-items:center;gap:12px;text-align:left;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;min-height:72px}
+.choose button:hover{border-color:var(--rail);background:#f5f8f3}
+.choose button .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:var(--sunk);color:var(--rail);flex:none}
+.choose b{display:block}.choose small{color:var(--ink-2);font-size:13px;line-height:1.35;display:block}
+.lines{width:100%;border-collapse:collapse}
+.lines td,.lines th{padding:4px 4px;text-align:left;font-size:14px}
+.lines th{color:var(--ink-3);font-weight:600}
+.total{display:flex;justify-content:space-between;align-items:baseline;background:var(--rail);color:var(--rail-ink);padding:12px 16px;border-radius:10px;margin-top:6px}
+.total b{font-family:var(--num);font-size:30px;font-variant-numeric:tabular-nums}
+
+.empty{padding:30px 24px;text-align:center;color:var(--ink-2)}
+.empty h3{color:var(--ink);font-size:18px;margin:0 0 6px}
+.empty p{margin:0 auto 16px;max-width:46ch}
+.note{background:#fff7dc;border:1px solid #ecd58a;border-radius:10px;padding:10px 14px;font-size:14px;color:#5a4508;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;transition:.22s cubic-bezier(.2,.8,.2,1);pointer-events:none;z-index:50;font-weight:500}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.muted{color:var(--ink-3)}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.sum3>div{padding:14px 18px;border-right:1px solid var(--line)}.sum3>div:last-child{border:0}
+.sum3 span{font-size:13px;color:var(--ink-2);display:block}.sum3 b{font-family:var(--num);font-size:28px;font-variant-numeric:tabular-nums}
+.lastw{grid-template-columns:repeat(var(--n),1fr)}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.lab #mixres{position:sticky;top:16px}
+.pad{padding:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) 84px 92px 40px;gap:6px;margin-bottom:8px;align-items:center}
+.mrow .f{min-height:44px;padding:8px 10px}
+.steps{list-style:none;counter-reset:st;margin:0 0 6px;padding:0}
+.steps>li{counter-increment:st;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:start;padding:11px 0;border-bottom:1px dashed var(--line)}
+.steps>li:last-child{border-bottom:0}
+.steps>li::before{content:counter(st);width:28px;height:28px;border-radius:50%;background:var(--rail);color:#fff;display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:16px}
+.steps>li.water::before{background:#4f86a8}
+.steps .s{color:var(--ink-2);font-size:14px}
+.steps .q{font-family:var(--num);font-size:22px;font-weight:700;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.res-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:var(--rail);color:var(--rail-ink);padding:14px 18px;border-radius:12px 12px 0 0}
+.res-top b{font-family:var(--num);font-size:32px}
+.res-top span{color:var(--rail-dim);font-size:14px}
+.costs{display:grid;grid-template-columns:repeat(var(--n,3),1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+.costs>div{padding:10px 12px;border-right:1px solid var(--line)}.costs>div:last-child{border-right:0}
+.costs span{display:block;font-size:13px;color:var(--ink-2)}.costs b{font-family:var(--num);font-size:24px;font-variant-numeric:tabular-nums}
+.costs .hl{background:#fff7dc}
+.warns{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+.warns li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#fbeae6;color:#6e2414;font-size:14.5px}
+.warns li.warn{background:#fdf3d4;color:#5a4508}
+.warns li .badge{flex:none}
+.scale{display:grid;grid-template-columns:1fr 28px 1fr;gap:6px;align-items:start}
+.scale .arrow{font-size:24px;color:var(--ink-3);padding-top:38px;text-align:center}
+.uin{position:relative}.uin span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:14px;pointer-events:none}.uin input{padding-right:46px}
+.qk{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.qkb{border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 9px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;min-height:30px}
+.qkb[aria-pressed=true]{background:var(--rail);color:#fff;border-color:var(--rail)}
+.ratio{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;background:#fff7dc;border:1px solid #ecd58a;border-radius:10px;padding:10px 14px;margin:0 0 16px}
+.ratio b{font-size:18px;color:#5a4508}.ratio span{font-size:14px;color:#5a4508}
+.nut{display:grid;grid-template-columns:auto repeat(3,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0 4px;font-size:14px}
+.nut>div{padding:8px 10px;border-bottom:1px solid var(--line)}.nut>div:nth-last-child(-n+4){border-bottom:0}
+.nut .h{background:var(--sunk);font-weight:700;color:var(--ink-2);font-size:13px}
+.nut .v{font-family:var(--num);font-size:20px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.blend li{grid-template-columns:1fr auto auto!important;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;cursor:pointer;font-size:14px}
+.chips label:has(input:checked){background:#e3eee4;border-color:var(--rail)}
+.chips input{accent-color:var(--rail);width:16px;height:16px;margin:0}
+.badge{display:inline-block;font-size:12.5px;font-weight:700;line-height:1.5;border-radius:6px;padding:1px 8px;background:var(--sunk);color:var(--ink-2);white-space:nowrap}
+.badge.bad{background:#f6dcd6;color:#8f2a17}.badge.warn{background:#fbedc0;color:#6b4d00}.badge.ok{background:#dcefe0;color:#1d5c33}
+.stk tbody tr{cursor:default}.stk tbody tr:hover{background:none}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.photos figure{margin:0}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:zoom-in;display:block;background:var(--sunk)}
+.photos figure.big{grid-column:1/-1}.photos figure.big img{aspect-ratio:auto;object-fit:contain;cursor:zoom-out;max-height:70vh}
+.photos figcaption{font-size:13px;color:var(--ink-3);margin-top:2px}
+.mapwrap{overflow:auto;border-radius:12px;border:1px solid var(--line);background:var(--sunk);-webkit-overflow-scrolling:touch}
+.map{position:relative;min-width:880px}.map.edit{cursor:crosshair}
+.map img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.pin{position:absolute;transform:translate(-50%,-50%);cursor:pointer;line-height:0}
+.pin .tag{box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.pin.sel .tag,.pinpick.sel .tag{outline:3px solid var(--yellow);outline-offset:2px}
+.pinpick{cursor:pointer;line-height:0}
+.yb{display:block;height:8px;border-radius:3px;background:var(--st-fruit)}
+.skel{height:64px;border-radius:12px;background:linear-gradient(90deg,var(--sunk),#eef2ec,var(--sunk));background-size:200% 100%;animation:sk 1.2s infinite linear;margin-bottom:10px}
+@keyframes sk{to{background-position:-200% 0}}
+.cat-bars{padding:6px 18px 14px}
+.cat-bars div{display:grid;grid-template-columns:110px 1fr 90px;gap:10px;align-items:center;font-size:14px;padding:5px 0}
+.cat-bars i{display:block;height:10px;border-radius:3px;background:var(--out);opacity:.75}
+.cat-bars em{font-style:normal;text-align:right;font-family:var(--num);font-size:17px;font-weight:600}
+
+.gate .rail,.gate .tabbar,.gate .fab,.gate .mob-top{display:none!important}
+.gate .app{display:block}
+.gate main{max-width:460px;margin:0 auto;padding:48px 18px}
+.login .mark{width:56px;height:56px;border-radius:14px;background:var(--rail);display:grid;place-items:center;color:var(--yellow);margin-bottom:14px}
+.login .mark svg{width:30px;height:30px}
+.login .err{background:#fbeae6;color:#6e2414;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:15px}
+.who-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--rail-dim)}
+.rail .foot button,.mob-top button{background:none;border:1px solid rgba(255,255,255,.25);color:var(--rail-ink);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;margin-top:6px}
+.mob-top button{margin:0 0 0 auto}
+@media (max-width:899px){
+  .app{display:block}
+  .rail{display:none}
+  main{padding:16px 14px 120px}
+  .mob-top{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--rail);color:var(--rail-ink);position:sticky;top:0;z-index:5}
+  .mob-top .mark{width:30px;height:30px;border-radius:8px;background:var(--yellow);display:grid;place-items:center;color:var(--rail)}
+  .mob-top b{font-size:16px}
+  h1{font-size:24px}
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:6;padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 9px;font-size:11.5px;white-space:nowrap;font-weight:600;color:var(--ink-3);text-decoration:none}
+  .tabbar a[aria-current=page]{color:var(--rail)}
+  .tabbar a[aria-current=page] svg{color:var(--rail);stroke-width:2.2}
+  .fab{display:flex;align-items:center;gap:8px;position:fixed;right:16px;bottom:76px;z-index:7;background:var(--yellow);color:var(--yellow-ink);border:0;border-radius:28px;padding:14px 20px;font-weight:700;font-size:17px;box-shadow:0 2px 0 var(--yellow-2),0 8px 20px rgba(0,0,0,.18)}
+  .money{grid-template-columns:1fr 1fr}
+  .money>div:last-child{grid-column:1/-1;border-top:1px solid var(--line)}
+  .money>div:nth-child(2){border-right:0}
+  .money b{font-size:30px}
+  .stages{grid-template-columns:repeat(4,1fr)}
+  .list>li{grid-template-columns:1fr auto;padding:12px 14px}
+  .list .d{grid-column:1/-1;padding:0;font-size:13px}
+  .grid2{grid-template-columns:1fr}
+  .choose{grid-template-columns:1fr}
+  dialog.sheet{width:100vw;max-width:100vw;max-height:94vh;margin:auto auto 0;border-radius:16px 16px 0 0}
+  .fl-table .hide-m{display:none}
+  .fl-table td,.fl-table th{padding:10px 12px}
+  .sum3 b{font-size:22px}
+  .lab,.calc{grid-template-columns:1fr}
+  .scale{grid-template-columns:1fr 20px 1fr}.scale .arrow{font-size:18px}.lab #mixres{position:static}
+  .mrow{grid-template-columns:minmax(0,1fr) 70px 78px 40px}
+  .costs{--n:2!important;grid-template-columns:1fr 1fr}.costs>div{border-bottom:1px solid var(--line)}
+  .lastw{grid-template-columns:1fr}.lastw>div{border-right:0;border-bottom:1px solid var(--line)}.lastw>div:last-child{border-bottom:0}
+  .toast{bottom:150px;width:max-content;max-width:90vw;text-align:center}
+  .cat-bars div{grid-template-columns:84px 1fr 76px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="เมนูหลัก">
+    <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24"><path d="M3 7v5l8 8 9-9-8-8H7a4 4 0 0 0-4 4z"/><circle cx="8" cy="8" r="1.5"/></svg></span><div><b id="orchName">สวนทุเรียน</b><small>สมุดบันทึกสวน</small></div></div>
+    <button class="add-main" data-act="quick"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>จดบันทึก</button>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot" id="railFoot"></div>
+  </aside>
+  <div>
+    <header class="mob-top"><span class="mark"><svg class="i" viewBox="0 0 24 24"><path d="M3 7v5l8 8 9-9-8-8H7a4 4 0 0 0-4 4z"/><circle cx="8" cy="8" r="1.5"/></svg></span><b id="orchNameM">สวนทุเรียน</b><button data-act="logout" id="mobOut">ออก</button></header>
+    <main id="main" tabindex="-1"></main>
+  </div>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="เมนูหลัก"></nav>
+<button class="fab" data-act="quick"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>จด</button>
+<dialog class="sheet" id="sheet"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+(()=>{
+/* ---------- icons ---------- */
+const P={
+ home:'<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+ tag:'<path d="M3 7v5l8 8 9-9-8-8H7a4 4 0 0 0-4 4z"/><circle cx="8" cy="8" r="1.5"/>',
+ drop:'<path d="M12 3c3.2 4 5 7 5 10a5 5 0 0 1-10 0c0-3 1.8-6 5-10z"/><path d="M10 14a2 2 0 0 0 2 2"/>',
+ flower:'<circle cx="12" cy="12" r="2.4"/><path d="M12 9.6a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM12 14.4a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM9.6 12a3 3 0 1 0-6 0 3 3 0 0 0 6 0zM14.4 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>',
+ wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14.5h2"/>',
+ basket:'<path d="M4 9h16l-2 10H6z"/><path d="M8 9l4-5 4 5M9 13v3M15 13v3"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ out:'<path d="M12 5v14M6 13l6 6 6-6"/>', in:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+ camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ box:'<path d="M3 8l9-4 9 4v9l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v9"/>',
+ flask:'<path d="M9 3h6M10 3v6l-5.2 9.2A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-2.8L14 9V3"/><path d="M7.4 15h9.2"/>',
+ sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'
+};
+const ic=(n)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+
+/* ---------- vocab ---------- */
+const STAGES=[
+ {k:'young',t:'ต้นเล็ก',d:'ยังไม่ให้ผล'},
+ {k:'rest',t:'บำรุงต้น',d:'พักต้น/แตกใบ'},
+ {k:'induce',t:'ทำดอก',d:'ราดสาร/สะสมอาหาร'},
+ {k:'bud',t:'ดอกออก',d:'ตาปู/หางแย้'},
+ {k:'bloom',t:'ดอกบาน',d:'เริ่มนับวันตัด'},
+ {k:'fruit',t:'ติดผล',d:'ไว้ลูก/ตัดแต่งผล'},
+ {k:'cut',t:'ตัดแล้ว',d:'จบรอบปีนี้'}];
+const ST=Object.fromEntries(STAGES.map(s=>[s.k,s]));
+const EVENT_STAGES=['induce','bud','bloom','fruit','cut','rest'];
+const WORK_TYPES=['ฉีดยา/สารเคมี','ปุ๋ยทางดิน','ปุ๋ยทางใบ/ฮอร์โมน','ราดสารทำดอก','ตัดแต่งกิ่ง','ให้น้ำ','อื่นๆ'];
+const OUT_CATS=['ปุ๋ย','ยา/สารเคมี','ค่าแรง','น้ำ/ไฟ','น้ำมัน','อุปกรณ์','ต้นพันธุ์','ค่าส่ง','อื่นๆ'];
+const IN_CATS=['ขายทุเรียน','ขายผลผลิตอื่น','อื่นๆ'];
+const VARIETIES=['หมอนทอง','ชะนี','ก้านยาว','พวงมณี','กระดุม','นกหยิบ','มังคุด','อื่นๆ'];
+const isMg=t=>t&&t.variety==='มังคุด';
+const DEF_DAYS={'หมอนทอง':120,'ชะนี':105,'ก้านยาว':125,'พวงมณี':100,'กระดุม':90,'นกหยิบ':110,'มังคุด':80,'อื่นๆ':110};
+const GRADES=['A','B','C','ตกไซซ์'];
+const CHANNELS=['Facebook','LINE','TikTok','Shopee/Lazada','ขายหน้าสวน','อื่นๆ'];
+const COLLS=['trees','works','flowers','sales','money','stock','chems','recipes','meta'];
+/* tank-mix lab: rough rules, label always wins */
+const FORMS=[
+ {k:'WSP',t:'ถุงละลายน้ำ (WSP)',sh:'ถุงละลาย',r:1,tip:'ใส่ทั้งถุง รอให้ถุงละลายหมดก่อน'},
+ {k:'WG',t:'เม็ด/แกรนูล (WG, WDG, DF)',sh:'เม็ด',r:2,tip:'รอให้เม็ดแตกตัวหมดก่อนใส่ตัวถัดไป'},
+ {k:'WP',t:'ผง (WP, SP)',sh:'ผง',r:3,tip:'ละลายในถังเล็กก่อน แล้วค่อยเทลงถัง'},
+ {k:'SC',t:'น้ำข้น/ครีม (SC, FL, CS, SE)',sh:'น้ำข้น',r:4,tip:'เขย่าขวดก่อนเท'},
+ {k:'EC',t:'น้ำมัน/อีมัลชั่น (EC, EW, ME, OD)',sh:'น้ำมัน',r:5,tip:'เทช้าๆ ขณะกวน'},
+ {k:'SL',t:'น้ำใส ละลายน้ำ (SL, AS)',sh:'น้ำใส',r:6,tip:'เทแล้วกวนต่อ'},
+ {k:'OTHER',t:'อื่นๆ / ไม่แน่ใจ',sh:'ไม่ทราบ',r:6.5,tip:'ดูลำดับบนฉลาก'},
+ {k:'FERT',t:'ปุ๋ยทางใบ/ธาตุอาหาร/ฮอร์โมน',sh:'ปุ๋ยทางใบ',r:7,tip:'ละลายให้หมดก่อนเท'},
+ {k:'ADJ',t:'สารจับใบ/สารเสริม',sh:'สารจับใบ',r:8,tip:'ใส่ท้ายสุด จะได้ไม่เกิดฟอง'}];
+const FORM=Object.fromEntries(FORMS.map(f=>[f.k,f]));
+const TAGS=[{k:'cu',t:'มีทองแดง (คอปเปอร์)'},{k:'phos',t:'ฟอสฟอรัสแอซิด/ฟอสอีทิล'},{k:'ca',t:'มีแคลเซียม'},{k:'sp',t:'มีซัลเฟต/ฟอสเฟต'},{k:'alk',t:'เป็นด่าง (ปูน/บอร์โดซ์)'},{k:'s',t:'กำมะถัน'},{k:'oil',t:'น้ำมัน (ไวท์ออยล์)'},{k:'bio',t:'ชีวภัณฑ์ (เชื้อดี)'},{k:'fung',t:'ยากำจัดเชื้อรา'},{k:'ins',t:'ยากำจัดแมลง/ไร'}];
+const TAG=Object.fromEntries(TAGS.map(t=>[t.k,t.t]));
+const MIXRULES=[
+ ['cu','phos','bad','ทองแดง + ฟอสฟอรัสแอซิด/ฟอสอีทิล เสี่ยงใบไหม้ ควรฉีดแยกวัน'],
+ ['ca','sp','bad','แคลเซียม + ซัลเฟต/ฟอสเฟต จับกันเป็นตะกอน อุดหัวฉีด'],
+ ['s','oil','bad','กำมะถัน + น้ำมัน ทำใบไหม้ ควรเว้นห่างกันหลายสัปดาห์'],
+ ['bio','fung','bad','ยาเชื้อราฆ่าเชื้อดีในชีวภัณฑ์ ใช้แยกกัน'],
+ ['bio','cu','bad','ทองแดงฆ่าเชื้อดีในชีวภัณฑ์ ใช้แยกกัน'],
+ ['alk','ins','bad','สารที่เป็นด่างทำให้ยาฆ่าแมลงหลายชนิดเสื่อมเร็ว'],
+ ['alk','fung','warn','สารที่เป็นด่างอาจทำให้ยาเชื้อราบางตัวเสื่อม ดูฉลาก'],
+ ['bio','alk','warn','ด่างแรงทำให้ชีวภัณฑ์เสื่อม'],
+ ['oil','cu','warn','น้ำมัน + ทองแดง เพิ่มโอกาสใบไหม้ ช่วงแดดแรง']];
+const MIXU=['ซีซี','ลิตร','กรัม','กก.'];
+const UB={'ซีซี':['v',1],'ลิตร':['v',1000],'กรัม':['m',1],'กก.':['m',1000]};
+const toBase=(q,u)=>UB[u]?{d:UB[u][0],v:q*UB[u][1]}:{d:u,v:q};
+const parseNPK=t=>{const m=String(t||'').match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);return m?[+m[1],+m[2],+m[3]]:null};
+const parseAI=c=>+c.ai>0?+c.ai:(()=>{const m=String(c.name||'').match(/(\d+(?:\.\d+)?)\s*%/);return m?+m[1]:0})();
+const npkOf=c=>parseNPK(c.npk)||parseNPK(c.name);
+const RAW=[['46-0-0','ยูเรีย'],['18-46-0','DAP'],['0-0-60','โพแทสเซียมคลอไรด์ (MOP)'],['21-0-0','แอมโมเนียมซัลเฟต'],['0-46-0','ทริปเปิลซูเปอร์ฟอสเฟต (TSP)'],['12-61-0','MAP'],['0-0-50','โพแทสเซียมซัลเฟต (SOP)'],['13-0-46','โพแทสเซียมไนเตรต'],['0-52-34','MKP'],['16-20-0','16-20-0']];
+const STARTER=[['แมนโคเซบ','WP',['fung']],['คอปเปอร์ไฮดรอกไซด์','WP',['cu','fung']],['ฟอสอีทิล-อะลูมิเนียม','WG',['phos','fung']],['เมทาแลกซิล','WP',['fung']],['อะซอกซีสโตรบิน','SC',['fung']],['ไซเพอร์เมทริน','EC',['ins']],['อิมิดาโคลพริด','SL',['ins']],['อะบาเมกติน','EC',['ins']],['กำมะถันผง','WG',['s','fung']],['ไวท์ออยล์','EC',['oil','ins']],['ปุ๋ยทางใบ 0-52-34','FERT',['sp']],['แคลเซียม-โบรอน','FERT',['ca']],['ไตรโคเดอร์มา','WP',['bio']],['สารจับใบ','ADJ',[]]];
+const UNITS=['กก.','ลิตร','ซีซี','กรัม','ถุง','ขวด','ซอง'];
+const STOCK_KINDS=['ปุ๋ย','ยา/สารเคมี','อื่นๆ'];
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf=new Intl.NumberFormat('th-TH',{maximumFractionDigits:2});
+const baht=n=>nf.format(Math.round((+n||0)*100)/100);
+const today=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const pd=s=>{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,(m||1)-1,d||1)};
+const fd=(s,o={day:'numeric',month:'short',year:'2-digit'})=>s?pd(s).toLocaleDateString('th-TH',o):'';
+const daysBetween=(a,b)=>Math.round((pd(b)-pd(a))/864e5);
+const addDays=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const yearOf=s=>String(s||'').slice(0,4);
+const be=y=>(+y)+543;
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* ---------- store: shared db when available, this-device storage otherwise ---------- */
+const S={mode:'loading',data:Object.fromEntries(COLLS.map(c=>[c,{}])),loaded:new Set(),canWrite:true,me:null,user:null,db:null,stale:false};
+const LKEY='durian-book-v1';
+function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LKEY)||'null');if(j)COLLS.forEach(c=>S.data[c]=j[c]||{})}catch(e){}}
+function saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(S.data))}catch(e){}}
+async function put(c,id,obj){
+  if(!S.canWrite){toast('บัญชีนี้ดูได้อย่างเดียว');return false}
+  obj={...obj,updated:Date.now()};
+  if(!obj.by&&S.me)obj.by=S.me;
+  if(S.mode==='cloud'){
+    try{const pr=S.db.collection(c).doc(id).set(obj);await Promise.race([pr,new Promise(r=>setTimeout(r,1500))]);pr.catch(()=>toast('บันทึกขึ้น cloud ไม่สำเร็จ'));return true}
+    catch(e){
+      if(e&&e.code==='invalid_argument'&&!S.writeProven){S.canWrite=false;render();toast('บัญชีนี้ดูได้อย่างเดียว');return false}
+      if(e&&e.code==='quota_exceeded'){toast('พื้นที่เก็บข้อมูลเต็ม ลองลบรายการเก่าที่ไม่ใช้');return false}
+      if(e&&e.code==='unavailable'){await new Promise(r=>setTimeout(r,600+Math.random()*600));try{await S.db.collection(c).doc(id).set(obj);return true}catch(_){}}
+      toast('บันทึกไม่สำเร็จ ลองอีกครั้ง');return false}
+  }
+  S.data[c][id]=obj;saveLocal();render();return true;
+}
+async function del(c,id){
+  if(!S.canWrite)return false;
+  if(S.mode==='cloud'){try{const pr=S.db.collection(c).doc(id).delete();await Promise.race([pr,new Promise(r=>setTimeout(r,1500))]);return true}catch(e){toast('ลบไม่สำเร็จ');return false}}
+  delete S.data[c][id];saveLocal();render();return true;
+}
+const SKEY='durian-session-v1';let FS=null,UNSUBS=[];
+const loadSession=()=>{try{return JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){return null}};
+const saveSession=x=>{try{x?localStorage.setItem(SKEY,JSON.stringify(x)):localStorage.removeItem(SKEY)}catch(e){}};
+const normName=n=>String(n||'').trim().replace(/\s+/g,' ').toLowerCase();
+async function gardenId(name,code){const t=normName(name)+'|'+String(code).trim();
+  if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  let h1=0x811c9dc5,h2=0;for(const ch of t){h1=Math.imul(h1^ch.charCodeAt(0),16777619)>>>0;h2=(h2*31+ch.charCodeAt(0))>>>0}return 'f'+h1.toString(16)+h2.toString(16)}
+const fbMsg=e=>{const c=e&&e.code||'';if(c==='auth/operation-not-allowed'||c==='auth/admin-restricted-operation')return 'ยังไม่ได้เปิดการเข้าแบบไม่ระบุตัวตน (Anonymous) ใน Firebase';if(c==='permission-denied')return 'Firebase ยังไม่อนุญาตให้เข้าสวน (ต้องเพิ่มกฎ gardens ใน Firestore Rules)';if(c==='auth/unauthorized-domain')return 'เว็บนี้ยังไม่ได้รับอนุญาตใน Firebase';return 'เชื่อมต่อ cloud ไม่ได้ ลองใหม่อีกครั้ง'};
+const hasCloud=()=>!!(window.firebase&&window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.apiKey);
+async function initFB(){if(FS)return FS;if(!hasCloud())throw new Error('noconfig');
+  if(!firebase.apps.length)firebase.initializeApp(window.FIREBASE_CONFIG);
+  if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();
+  FS=firebase.firestore();try{FS.settings({ignoreUndefinedProperties:true})}catch(e){}try{await FS.enablePersistence({synchronizeTabs:true})}catch(e){}
+  return FS}
+async function boot(){
+  const sess=loadSession();
+  if(!sess){S.mode='login';render();return}
+  await enter(sess);
+}
+async function enter(sess){
+  S.session=sess;S.me=sess.who||'';S.canWrite=true;
+  if(sess.local){S.mode='local';loadLocal();render();return}
+  S.mode='loading';render();
+  try{await initFB()}catch(e){S.mode='login';S.loginErr=e.message==='noconfig'?'ยังไม่ได้ตั้งค่า cloud ของเว็บนี้':fbMsg(e);render();return}
+  const root=FS.collection('gardens').doc(sess.gid);
+  S.db={collection:c=>root.collection(c)};S.mode='cloud';S.loaded=new Set();
+  const timer=setTimeout(()=>{S.stale=true;if(S.loaded.size<COLLS.length){S.loaded=new Set(COLLS)};render()},10000);
+  COLLS.forEach(c=>{
+    UNSUBS.push(S.db.collection(c).onSnapshot({includeMetadataChanges:false},snap=>{
+      const o={};snap.docs.forEach(d=>{if(d.exists)o[d.id]=d.data()});S.data[c]=o;
+      S.loaded.add(c);if(!snap.metadata.fromCache&&S.loaded.size===COLLS.length){clearTimeout(timer);S.stale=false}
+      scheduleRender();
+    },err=>{S.loaded.add(c);clearTimeout(timer);S.stale=true;scheduleRender()}));
+  });
+}
+function logout(){UNSUBS.forEach(u=>{try{u()}catch(e){}});UNSUBS=[];saveSession(null);location.hash='';location.reload()}
+function loginHTML(){
+  const cloud=hasCloud();
+  return `<div class="login"><span class="mark">${ic('tag')}</span><h1>สมุดสวนทุเรียน</h1><p class="muted" style="margin:6px 0 22px">เข้าสวนด้วยชื่อสวนกับรหัสสวน ทุกคนที่รู้ชื่อและรหัสเดียวกันจะเห็นและจดข้อมูลชุดเดียวกัน</p>
+  <div class="err" id="lgerr" role="alert" ${S.loginErr?'':'hidden'}>${esc(S.loginErr||'')}</div>
+  ${cloud?`<form id="loginf" novalidate><div class="fld"><label class="l" for="lg1">ชื่อสวน</label><input class="f" id="lg1" name="name" autocomplete="organization" placeholder="เช่น สวนบ้านมน" required></div>
+  <div class="fld"><label class="l" for="lg2">รหัสสวน <small>อย่างน้อย 6 ตัว ตั้งให้เดายาก</small></label><input class="f" id="lg2" name="code" type="password" autocomplete="current-password" required></div>
+  <div class="fld"><label class="l" for="lg3">ชื่อคนจด <small>จะแสดงว่าใครเป็นคนจด</small></label><input class="f" id="lg3" name="who" autocomplete="nickname" placeholder="เช่น มน, ลุงสม"></div>
+  <div class="row"><button class="btn pri" type="submit" name="go" value="enter" style="flex:1;justify-content:center">เข้าสวน</button><button class="btn" type="submit" name="go" value="create">สร้างสวนใหม่</button></div></form>`
+  :`<div class="note">เว็บนี้ยังไม่ได้ต่อ cloud (ไฟล์ firebase-config.js ยังว่าง) ตอนนี้ใช้ได้แบบเก็บข้อมูลในเครื่องนี้อย่างเดียว</div>`}
+  <p style="margin-top:22px"><button class="link" data-act="localmode">ใช้แบบเก็บในเครื่องนี้ (ไม่แชร์)</button></p></div>`;
+}
+document.addEventListener('submit',async e=>{if(e.target.id!=='loginf')return;e.preventDefault();
+  const f=e.target,go=(e.submitter&&e.submitter.value)||'enter',name=f.name.value.trim(),code=f.code.value,whoN=f.who.value.trim();
+  const bt=f.querySelectorAll('button');const done=m=>{const el=$('#lgerr');if(el){el.textContent=m;el.hidden=!m}};
+  if(!name||!code)return done('ใส่ชื่อสวนและรหัสสวน');
+  if(go==='create'&&code.length<6)return done('รหัสสวนต้องยาวอย่างน้อย 6 ตัว');
+  bt.forEach(b=>b.disabled=true);
+  try{await initFB();const gid=await gardenId(name,code);const ref=FS.collection('gardens').doc(gid);const snap=await ref.get();
+    if(go==='enter'&&!snap.exists){bt.forEach(b=>b.disabled=false);return done('ไม่พบสวนนี้ ตรวจชื่อสวนกับรหัสอีกครั้ง หรือกด "สร้างสวนใหม่"')}
+    if(go==='create'){if(snap.exists){bt.forEach(b=>b.disabled=false);return done('มีสวนชื่อและรหัสนี้อยู่แล้ว กด "เข้าสวน" ได้เลย')}
+      await ref.set({name,created:Date.now()});await ref.collection('meta').doc('settings').set({name,days:{},updated:Date.now()})}
+    S.loginErr='';const sess={gid,name,who:whoN};saveSession(sess);document.body.classList.remove('gate');await enter(sess);
+  }catch(err){bt.forEach(b=>b.disabled=false);done(fbMsg(err))}
+});
+let rq=false;function scheduleRender(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;render()})}
+
+/* who logged: the name typed at sign-in */
+function resolveNames(){}
+const who=n=>n&&typeof n==='string'&&n.length<40?`<span>โดย ${esc(n)}</span>`:'';
+
+/* ---------- derived ---------- */
+const settings=()=>Object.assign({name:'สวนทุเรียน',days:{}},S.data.meta.settings||{});
+const daysFor=v=>{const s=settings().days||{};return +(s[v]||DEF_DAYS[v]||110)};
+
+function trees(){return Object.entries(S.data.trees).map(([id,t])=>({id,...t})).sort((a,b)=>String(a.row||'').localeCompare(String(b.row||''),'th')||(parseFloat(a.no)||0)-(parseFloat(b.no)||0)||String(a.no).localeCompare(String(b.no)))}
+const treeById=id=>S.data.trees[id]?{id,...S.data.trees[id]}:null;
+function list(c){return Object.entries(S.data[c]).map(([id,x])=>({id,...x}))}
+function treeState(){
+  const st={};
+  trees().forEach(t=>st[t.id]={stage:t.kind==='young'?'young':'rest',date:null,bloom:null,fruits:null});
+  list('flowers').sort((a,b)=>(a.date>b.date?1:a.date<b.date?-1:(a.updated||0)-(b.updated||0))).forEach(f=>{
+    (f.trees||[]).forEach(id=>{const s=st[id];if(!s)return;
+      s.stage=f.stage;s.date=f.date;
+      if(f.stage==='induce'||f.stage==='rest'){s.bloom=null;s.fruits=null}
+      if(f.stage==='bloom')s.bloom=f.date;
+      if(f.stage==='fruit'&&f.fruits)s.fruits=f.fruits;
+    });
+  });
+  list('works').forEach(w=>{const p=+w.phi||0;if(!p)return;const until=addDays(w.date,p);(w.trees||[]).forEach(id=>{const s=st[id];if(s&&(!s.safe||until>s.safe)){s.safe=until;s.safeW=w}})});
+  const t0=today();
+  Object.entries(st).forEach(([id,s])=>{const t=S.data.trees[id];
+    if(s.bloom&&['bloom','fruit','bud'].includes(s.stage)){const d=daysFor(t.variety);s.cutDate=addDays(s.bloom,d);s.left=daysBetween(t0,s.cutDate);s.total=d;s.age=daysBetween(s.bloom,t0)}
+    if(s.safe&&s.safe>t0)s.inPhi=true;if(s.inPhi&&s.cutDate&&s.cutDate<s.safe)s.phiWarn=true;
+  });
+  return st;
+}
+function ledger(){
+  const rows=[];
+  list('money').forEach(m=>rows.push({src:'money',id:m.id,date:m.date,dir:m.dir,cat:m.cat,amount:+m.amount||0,title:m.note||m.cat,by:m.by,demo:m.demo}));
+  list('works').forEach(w=>{if(+w.cost>0)rows.push({src:'works',id:w.id,date:w.date,dir:'out',cat:/ปุ๋ย/.test(w.type)?'ปุ๋ย':/ยา|สาร/.test(w.type)?'ยา/สารเคมี':'อื่นๆ',amount:+w.cost,title:w.type+(w.product?' · '+w.product:''),by:w.by})});
+  list('sales').forEach(s=>{const g=saleGross(s);rows.push({src:'sales',id:s.id,date:s.date,dir:'in',cat:'ขายทุเรียน',amount:g,title:(s.mode==='online'?'ขายออนไลน์':'ขายรอบตัด')+(s.buyer?' · '+s.buyer:''),by:s.by});
+    if(+s.fee>0)rows.push({src:'sales',id:s.id,date:s.date,dir:'out',cat:s.mode==='online'?'ค่าส่ง':'อื่นๆ',amount:+s.fee,title:(s.mode==='online'?'ค่าส่ง/แพ็ก':'ค่าใช้จ่ายการขาย')+(s.buyer?' · '+s.buyer:''),by:s.by})});
+  list('stock').forEach(k=>{if(+k.cost>0)rows.push({src:'stock',id:k.id,date:k.date,dir:'out',cat:k.kind||'อื่นๆ',amount:+k.cost,title:'ซื้อ '+k.item+' '+nf.format(+k.qty||0)+' '+(k.unit||''),by:k.by})});
+  return rows.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+}
+const saleKg=s=>(s.lines||[]).reduce((a,l)=>a+(+l.kg||0),0);
+const saleGross=s=>(s.lines||[]).reduce((a,l)=>a+(+l.kg||0)*(+l.price||0),0);
+function schedules(){const last={};list('works').forEach(w=>{const k=w.type+'|'+(w.product||'').trim();if(!last[k]||w.date>last[k].date||(w.date===last[k].date&&(w.updated||0)>(last[k].updated||0)))last[k]=w});
+  const ev={};list('works').forEach(w=>{if(+w.every>0){const k=w.type+'|'+(w.product||'').trim();if(!ev[k]||w.date>ev[k].date)ev[k]=w}});
+  return Object.entries(ev).map(([k,e])=>{const w=last[k];const every=+(w.every||e.every);const next=addDays(w.date,every);return {w:{...w,every},next,left:daysBetween(today(),next)}}).sort((a,b)=>a.left-b.left)}
+function stockLevels(){const m={};list('stock').forEach(k=>{const n=(k.item||'').trim();if(!n)return;const o=m[n]=m[n]||{item:n,unit:k.unit,kind:k.kind,inQ:0,used:0};o.inQ+=+k.qty||0;o.unit=o.unit||k.unit});
+  list('works').forEach(w=>{const n=(w.product||'').trim();if(n&&m[n]&&+w.useQty)m[n].used+=+w.useQty;
+    (w.uses||[]).forEach(u=>{const o=m[(u.item||'').trim()];if(!o||!(+u.qty))return;const a=toBase(+u.qty,u.unit),b=toBase(1,o.unit);if(a.d===b.d)o.used+=a.v/b.v;else if(u.unit===o.unit)o.used+=+u.qty})});
+  return Object.values(m).map(o=>({...o,left:o.inQ-o.used,low:o.inQ-o.used<=o.inQ*0.15})).sort((a,b)=>a.left/(a.inQ||1)-b.left/(b.inQ||1))}
+const dueTxt=l=>l<0?'เลย '+(-l)+' วัน':l===0?'วันนี้':'อีก '+l+' วัน';
+const unitOf=p=>{const o=stockLevels().find(o=>o.item===(p||'').trim());return o?o.unit||'':''};
+function years(){const ys=new Set([yearOf(today())]);['works','flowers','sales','money'].forEach(c=>list(c).forEach(x=>x.date&&ys.add(yearOf(x.date))));return [...ys].sort().reverse()}
+
+/* ---------- tag ---------- */
+function tagHTML(t,st,opts={}){
+  if(!t)return '';
+  const s=st&&st[t.id]?st[t.id].stage:(t.kind==='young'?'young':'rest');
+  const size=opts.size?' '+opts.size:'';
+  const pressed=opts.pick?` aria-pressed="${opts.on?'true':'false'}" role="button" tabindex="0"`:'';
+  const act=opts.pick?`data-act="toggle" data-id="${t.id}"`:(opts.open===false?'':`data-act="tree" data-id="${t.id}" role="button" tabindex="0"`);
+  const label=`ต้น ${t.no} ${t.variety||''} ${ST[s]?ST[s].t:''}`;
+  return `<span class="tag st-${s}${size}${isMg(t)?' mg':''}" ${act}${pressed} aria-label="${esc(label)}" title="${esc(label)}">${esc(t.no)}${opts.extra||''}</span>`;
+}
+function tagList(ids,st,size='sm'){if(!ids||!ids.length)return '';const all=trees();if(ids.length>=all.length&&all.length>4)return `<span class="kind">ทุกต้น (${ids.length})</span>`;
+  const ts=ids.map(treeById).filter(Boolean);const max=14;return `<div class="tags">${ts.slice(0,max).map(t=>tagHTML(t,st,{size})).join('')}${ts.length>max?`<span class="muted">+${ts.length-max}</span>`:''}</div>`}
+
+/* ---------- views ---------- */
+const VIEWS=[
+ {k:'home',t:'ภาพรวม',i:'home'},{k:'trees',t:'ต้นไม้ในสวน',i:'tag',tm:'ต้นไม้'},{k:'work',t:'ฉีดยา/ปุ๋ย',i:'drop',tm:'งานสวน'},{k:'lab',t:'ห้องผสมยา',i:'flask',tm:'ผสมยา'},{k:'flower',t:'ทำดอก/ติดผล',i:'flower',tm:'ทำดอก'},{k:'money',t:'ขาย/บัญชี',i:'wallet',tm:'เงิน'}];
+const ui={view:'home',stageFilter:null,workFilter:'all',moneyTab:'sales',year:yearOf(today()),rowFilter:'all',labTab:'mix',chemToMix:false,workTab:'log',treeTab:'rows',mapEdit:false,mapSel:null};
+function route(){const h=(location.hash||'').slice(1);ui.view=VIEWS.some(v=>v.k===h)?h:'home'}
+window.addEventListener('hashchange',()=>{route();render();$('#main').focus({preventScroll:true});window.scrollTo(0,0)});
+
+function navHTML(mobile){return VIEWS.map(v=>`<a href="#${v.k}" ${ui.view===v.k?'aria-current="page"':''}>${ic(v.i)}<span>${mobile?(v.tm||v.t):v.t}</span></a>`).join('')}
+
+function render(){
+  const set=settings();
+  document.body.classList.toggle('gate',S.mode==='login');
+  if(S.mode==='login'){$('#main').innerHTML=loginHTML();return}
+  $('#orchName').textContent=set.name;$('#orchNameM').textContent=set.name;
+  $('#nav').innerHTML=navHTML(false);$('#tabbar').innerHTML=navHTML(true);
+  $('#railFoot').innerHTML=(S.mode==='cloud'?'ข้อมูลอยู่บน cloud ของสวน':S.mode==='local'?'ข้อมูลเก็บในเครื่องนี้':'')+(S.me?`<div class="who-chip">จดในชื่อ ${esc(S.me)}</div>`:'')+(S.session?`<div><button data-act="logout">ออกจากสวน</button></div>`:'');
+  document.querySelectorAll('[data-act=quick]').forEach(b=>b.hidden=!S.canWrite);
+  const m=$('#main');
+  if(S.mode==='loading'||(S.mode==='cloud'&&S.loaded.size<COLLS.length)){m.innerHTML=`<div class="top"><div><h1>${VIEWS.find(v=>v.k===ui.view).t}</h1><p>กำลังโหลดข้อมูลสวน…</p></div></div><div class="skel"></div><div class="skel"></div><div class="skel" style="height:200px"></div>`;return}
+  const st=treeState();
+  let h='';
+  if(S.stale)h+=`<div class="note">ตอนนี้ออฟไลน์หรือสัญญาณไม่ดี จดต่อได้ตามปกติ ข้อมูลจะส่งขึ้น cloud เองเมื่อกลับมาออนไลน์</div>`;
+  if(!S.canWrite)h+=`<div class="note">คุณดูข้อมูลได้อย่างเดียว ขอสิทธิ์ "ผู้ร่วมแก้ไข (Contributor)" จากเจ้าของสวนเพื่อจดบันทึก</div>`;
+  if(S.mode==='local')h+=`<div class="note"><span>ตอนนี้ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น ถ้าอยากให้คนในบ้านจดร่วมกัน ให้ออกแล้วเข้าสวนด้วยชื่อกับรหัสสวน</span><button class="btn" data-act="logout">เข้าสวนบน cloud</button></div>`;
+  if(hasDemo())h+=`<div class="note"><span>กำลังแสดง <b>ข้อมูลตัวอย่าง</b> ไว้ลองใช้ — ตัวเลขไม่ใช่ของจริง</span><button class="btn" data-act="clearDemo">ลบข้อมูลตัวอย่างทั้งหมด</button></div>`;
+  h+=({home:vHome,trees:vTrees,work:vWork,lab:vLab,flower:vFlower,money:vMoney})[ui.view](st);
+  m.innerHTML=h;
+  const ids=[];['works','flowers','sales','money'].forEach(c=>list(c).forEach(x=>x.by&&ids.push(x.by)));resolveNames(ids);
+}
+const hasDemo=()=>COLLS.some(c=>Object.values(S.data[c]).some(x=>x&&x.demo));
+
+function vHome(st){
+  const y=yearOf(today()),L=ledger().filter(r=>yearOf(r.date)===y);
+  const inc=L.filter(r=>r.dir==='in').reduce((a,r)=>a+r.amount,0),out=L.filter(r=>r.dir==='out').reduce((a,r)=>a+r.amount,0);
+  const ts=trees();
+  let h=`<div class="top"><div><h1>ภาพรวมสวน</h1><p>ปี ${be(y)} · ${countLine(ts)}</p></div></div>`;
+  if(!ts.length)return h+onboard();
+  h+=`<div class="panel money"><div class="in"><span>รายรับปีนี้</span><b>${baht(inc)}</b><small>บาท</small></div><div class="out"><span>รายจ่ายปีนี้</span><b>${baht(out)}</b><small>บาท</small></div><div><span>คงเหลือ (กำไร)</span><b>${inc-out<0?'−':''}${baht(Math.abs(inc-out))}</b><small>บาท · <a class="link" style="color:inherit" href="#money">ดูบัญชี</a></small></div></div>`;
+  const due=schedules().filter(x=>x.left<=7),phi=ts.filter(t=>st[t.id].phiWarn),low=stockLevels().filter(o=>o.low);
+  if(due.length||phi.length||low.length){h+=`<section class="sec"><div class="sec-h"><h2>ต้องดู</h2></div><div class="panel"><ul class="list">`+
+   phi.map(t=>{const s=st[t.id],w=s.safeW;return `<li class="click" data-act="tree" data-id="${t.id}"><div class="d"><span class="badge bad">ระวังสารตกค้าง</span></div><div><div class="t">ต้น ${esc(t.no)} ถึงวันตัด ${fd(s.cutDate,{day:'numeric',month:'short'})} ก่อนพ้นระยะเว้นยา</div><div class="s">${esc(w.type)}${w.product?' · '+esc(w.product):''} เมื่อ ${fd(w.date,{day:'numeric',month:'short'})} ต้องเว้น ${w.phi} วัน · ตัดได้ตั้งแต่ ${fd(s.safe,{day:'numeric',month:'short'})}</div></div><div>${tagHTML(t,st,{open:false,size:'sm'})}</div></li>`}).join('')+
+   due.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':'warn'}">${dueTxt(x.left)}</span></div><div><div class="t">ถึงรอบ ${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทำทุก ${x.w.every} วัน · ครั้งล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')+
+   low.map(o=>`<li class="click" data-act="gostock"><div class="d"><span class="badge warn">ใกล้หมด</span></div><div><div class="t">${esc(o.item)}</div><div class="s">เหลือ ${nf.format(o.left)} ${esc(o.unit||'')} จากที่ซื้อ ${nf.format(o.inQ)}</div></div><div></div></li>`).join('')+`</ul></div></section>`}
+  const soon=ts.filter(t=>st[t.id].cutDate).sort((a,b)=>st[a.id].left-st[b.id].left);
+  h+=`<section class="sec"><div class="sec-h"><h2>ใกล้ตัด</h2><a href="#flower">ดูรอบทำดอกทั้งหมด</a></div>`;
+  h+=soon.length?`<div class="soon">${soon.slice(0,8).map(t=>{const s=st[t.id];return `<div class="panel it ${s.left<0?'late':''}" data-act="tree" data-id="${t.id}">${tagHTML(t,st,{open:false})}<div><b>${s.left<0?'เลย '+(-s.left):s.left} วัน</b><span>${s.left<0?'เลยกำหนดตัด':'ตัด '+fd(s.cutDate,{day:'numeric',month:'short'})}</span></div></div>`}).join('')}</div>`
+   :`<div class="panel empty"><h3>ยังไม่มีต้นที่นับวันตัด</h3><p>เมื่อจดว่า "ดอกบาน" แอปจะนับวันถึงวันตัดให้อัตโนมัติ ตามพันธุ์ของแต่ละต้น</p>${S.canWrite?`<button class="btn" data-act="new" data-kind="flower">${ic('flower')}จดทำดอก/ดอกบาน</button>`:''}</div>`;
+  h+=`</section>`;
+  // last work by type
+  const W=list('works').sort((a,b)=>a.date<b.date?1:-1);const last={};W.forEach(w=>{if(!last[w.type])last[w.type]=w});
+  const lastKeys=Object.keys(last).slice(0,4);
+  if(lastKeys.length)h+=`<section class="sec"><div class="sec-h"><h2>งานล่าสุดแต่ละอย่าง</h2><a href="#work">ดูทั้งหมด</a></div><div class="panel sum3 lastw" style="--n:${Math.min(lastKeys.length,4)}">${lastKeys.map(k=>{const d=daysBetween(last[k].date,today());return `<div><span>${esc(k)}</span><b>${d<=0?'วันนี้':d+' วันก่อน'}</b><span>${fd(last[k].date)}${last[k].product?' · '+esc(last[k].product):''}</span></div>`}).join('')}</div></section>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>บันทึกล่าสุด</h2></div><div class="panel"><ul class="list">${recent(st).slice(0,8).join('')||'<li><div></div><div class="muted">ยังไม่มีบันทึก กดปุ่ม "จดบันทึก" เพื่อเริ่ม</div></li>'}</ul></div></section>`;
+  return h;
+}
+function countLine(ts){const d=ts.filter(t=>!isMg(t)),m=ts.filter(isMg);return `ทุเรียน ${d.length} ต้น (ให้ผล ${d.filter(t=>t.kind!=='young').length} · ต้นเล็ก ${d.filter(t=>t.kind==='young').length})`+(m.length?` · มังคุด ${m.length} ต้น`:'')}
+function recent(st){
+  const R=[];
+  list('works').forEach(w=>R.push({d:w.date,u:w.updated,html:`<li class="click" data-act="edit" data-c="works" data-id="${w.id}"><div class="d">${fd(w.date)}</div><div><div class="t"><span class="kind">${ic('drop')}งานสวน</span>${esc(w.type)}${w.product?' · '+esc(w.product):''}</div><div class="s">${esc(w.rate||'')} ${who(w.by)}</div>${tagList(w.trees,st)}</div><div class="amt out">${+w.cost?'−'+baht(w.cost):''}</div></li>`}));
+  list('flowers').forEach(f=>R.push({d:f.date,u:f.updated,html:`<li class="click" data-act="edit" data-c="flowers" data-id="${f.id}"><div class="d">${fd(f.date)}</div><div><div class="t"><span class="kind">${ic('flower')}ทำดอก</span><span class="dot st-${f.stage}"></span>${esc(ST[f.stage]?.t||'')}${f.fruits?' · '+f.fruits+' ลูก':''}${f.yieldKg?' · ได้ '+nf.format(f.yieldKg)+' กก./ต้น':''}${f.yieldN?' · '+f.yieldN+' ลูก/ต้น':''}</div><div class="s">${esc(f.note||'')} ${who(f.by)}</div>${tagList(f.trees,st)}</div><div></div></li>`}));
+  list('sales').forEach(s=>R.push({d:s.date,u:s.updated,html:`<li class="click" data-act="edit" data-c="sales" data-id="${s.id}"><div class="d">${fd(s.date)}</div><div><div class="t"><span class="kind">${ic('basket')}ขาย</span>${s.mode==='online'?'ขายออนไลน์':'ขายรอบตัด'}${s.buyer?' · '+esc(s.buyer):''}</div><div class="s">${nf.format(saleKg(s))} กก. ${who(s.by)}</div></div><div class="amt in">+${baht(saleGross(s))}</div></li>`}));
+  list('money').forEach(m=>R.push({d:m.date,u:m.updated,html:`<li class="click" data-act="edit" data-c="money" data-id="${m.id}"><div class="d">${fd(m.date)}</div><div><div class="t"><span class="kind">${ic(m.dir==='in'?'in':'out')}${m.dir==='in'?'รับเงิน':'จ่ายเงิน'}</span>${esc(m.cat)}</div><div class="s">${esc(m.note||'')} ${who(m.by)}</div></div><div class="amt ${m.dir}">${m.dir==='in'?'+':'−'}${baht(m.amount)}</div></li>`}));
+  return R.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.u||0)-(a.u||0)).map(r=>r.html);
+}
+function onboard(){
+  return `<div class="panel empty" style="padding:40px 24px"><div style="margin-bottom:16px">${tagHTML({id:'x',no:'1',kind:'bearing'},null,{size:'lg',open:false})}</div><h3>เริ่มจากติดเบอร์ต้นทุเรียน</h3><p>ใส่ต้นทุเรียนในสวนก่อน (เพิ่มทีละหลายต้นได้ เช่น ต้น 1–40 หมอนทอง) จากนั้นทุกการฉีดยา ใส่ปุ๋ย ทำดอก จะผูกกับเบอร์ต้นได้</p>
+  ${S.canWrite?`<div class="row" style="justify-content:center"><button class="btn pri" data-act="new" data-kind="trees">${ic('plus')}เพิ่มต้นทุเรียน</button><button class="btn" data-act="demo">ลองใส่ข้อมูลตัวอย่าง</button></div>`:''}</div>`;
+}
+
+function vTrees(st){
+  const ts=trees();
+  let h=`<div class="top"><div><h1>ต้นไม้ในสวน</h1><p>${countLine(ts)} · แตะป้ายเบอร์เพื่อดูประวัติของต้นนั้น</p></div>${S.canWrite?`<div class="row"><button class="btn" data-act="setup">${ic('sliders')}ตั้งค่าสวน</button><button class="btn pri" data-act="new" data-kind="trees">${ic('plus')}เพิ่มต้น</button></div>`:''}</div>`;
+  if(!ts.length)return h+onboard();
+  h+=`<div class="seg" style="margin-bottom:14px">${[['rows','รายแถว'],['map','ผังสวน'],['yield','ผลผลิตรายต้น']].map(([k,t])=>`<button data-act="tt" data-v="${k}" aria-pressed="${ui.treeTab===k}">${t}</button>`).join('')}</div>`;
+  if(ui.treeTab==='map')return h+vMap(st);
+  if(ui.treeTab==='yield')return h+vYield(st);
+  h+=`<div class="legend" style="margin-bottom:12px">${STAGES.map(s=>`<span><span class="dot st-${s.k}"></span>${s.t} (${ts.filter(t=>st[t.id].stage===s.k).length})</span>`).join('')}</div>`;
+  const rows={};ts.forEach(t=>{const r=t.row||'ไม่ระบุแถว';(rows[r]=rows[r]||[]).push(t)});
+  h+=`<div class="panel">${Object.entries(rows).map(([r,list])=>`<div class="rowblock"><h3>${/^\d/.test(r)?'แถว '+esc(r):esc(r)} · ${list.length} ต้น</h3><div class="tags">${list.map(t=>tagHTML(t,st)).join('')}</div></div>`).join('')}</div>`;
+  return h;
+}
+
+function vWork(st){
+  const W=list('works').sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.updated||0)-(a.updated||0));
+  const y=yearOf(today());const costY=ledger().filter(r=>r.dir==='out'&&yearOf(r.date)===y&&(r.src==='works'||r.src==='stock')).reduce((a,r)=>a+r.amount,0);
+  const stockTab=ui.workTab==='stock';
+  let h=`<div class="top"><div><h1>ฉีดยา / ใส่ปุ๋ย</h1><p>${W.length} ครั้ง · ค่าปุ๋ยค่ายาปีนี้ ${baht(costY)} บาท</p></div>${S.canWrite?(stockTab?`<button class="btn pri" data-act="new" data-kind="stock">${ic('plus')}ซื้อเข้าสต็อก</button>`:`<button class="btn pri" data-act="new" data-kind="works">${ic('plus')}จดงานสวน</button>`):''}</div>`;
+  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="wt" data-v="log" aria-pressed="${!stockTab}">บันทึกงาน</button><button data-act="wt" data-v="stock" aria-pressed="${stockTab}">สต็อกปุ๋ย/ยา</button></div>`;
+  if(stockTab)return h+vStock();
+  const sch=schedules();
+  if(sch.length)h+=`<section style="margin-bottom:22px"><div class="sec-h"><h2>รอบถัดไป</h2></div><div class="panel"><ul class="list">${sch.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':x.left<=3?'warn':'ok'}">${dueTxt(x.left)}</span></div><div><div class="t">${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทุก ${x.w.every} วัน · ล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})} · ครั้งถัดไป ${fd(x.next,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')}</ul></div></section>`;
+  const types=['all',...new Set(W.map(w=>w.type))];
+  const F=ui.workFilter==='all'?W:W.filter(w=>w.type===ui.workFilter);
+  if(types.length>2)h+=`<div class="seg" style="margin-bottom:14px">${types.map(t=>`<button data-act="wf" data-v="${esc(t)}" aria-pressed="${ui.workFilter===t}">${t==='all'?'ทั้งหมด':esc(t)}</button>`).join('')}</div>`;
+  if(!W.length)return h+`<div class="panel empty"><h3>ยังไม่มีบันทึกงานสวน</h3><p>จดทุกครั้งที่ฉีดยา ใส่ปุ๋ย ราดสาร: ใช้อะไร อัตราเท่าไหร่ ต้นไหนบ้าง ต้องเว้นกี่วันก่อนตัด และทำซ้ำทุกกี่วัน แอปจะเตือนให้</p>${S.canWrite?`<button class="btn pri" data-act="new" data-kind="works">${ic('plus')}จดงานสวนครั้งแรก</button>`:''}</div>`;
+  h+=`<div class="panel"><ul class="list">${F.map(w=>`<li class="click" data-act="edit" data-c="works" data-id="${w.id}"><div class="d">${fd(w.date)}</div><div><div class="t">${esc(w.type)}${w.product?' · '+esc(w.product):''}</div><div class="s">${+w.phi?'<span class="badge">เว้น '+w.phi+' วันก่อนตัด</span> ':''}${+w.every?'<span class="badge">ทุก '+w.every+' วัน</span> ':''}${[(w.uses||[]).length?'สูตร: '+w.uses.map(u=>esc(u.item)).join(', '):'',w.rate?'อัตรา '+esc(w.rate):'',+w.useQty?'ใช้ '+nf.format(w.useQty)+' '+esc(unitOf(w.product)):'',esc(w.note||'')].filter(Boolean).join(' · ')} ${who(w.by)}</div>${tagList(w.trees,st)}</div><div class="amt out">${+w.cost?'−'+baht(w.cost):''}</div></li>`).join('')}</ul></div>`;
+  return h;
+}
+function vStock(){
+  const L=stockLevels();
+  const add=S.canWrite?`<button class="btn pri" data-act="new" data-kind="stock">${ic('plus')}ซื้อเข้าสต็อก</button>`:'';
+  if(!L.length)return `<div class="panel empty"><h3>ยังไม่มีของในสต็อก</h3><p>จดตอนซื้อปุ๋ยหรือยาเข้ามา (จำนวนกับราคา) แล้วตอนจดงานสวนใส่ "ใช้ไปเท่าไหร่" แอปจะหักให้ว่าเหลือเท่าไหร่ ค่าซื้อลงบัญชีให้เอง</p>${add}</div>`;
+  let h=`<div class="panel"><table class="fl-table stk"><thead><tr><th>ของ</th><th class="hide-m">ประเภท</th><th class="r hide-m">ซื้อเข้า</th><th class="r hide-m">ใช้ไป</th><th>เหลือ</th></tr></thead><tbody>${L.map(o=>{const pct=o.inQ?Math.max(0,Math.min(100,o.left/o.inQ*100)):0;return `<tr><td><b>${esc(o.item)}</b></td><td class="hide-m">${esc(o.kind||'')}</td><td class="r hide-m num" style="font-size:18px">${nf.format(o.inQ)}</td><td class="r hide-m num" style="font-size:18px">${nf.format(o.used)}</td><td style="min-width:150px"><b class="num" style="font-size:22px;${o.low?'color:var(--out)':''}">${nf.format(o.left)}</b> ${esc(o.unit||'')} ${o.low?'<span class="badge bad">ใกล้หมด</span>':''}<div class="prog"><i style="width:${pct}%;background:${o.low?'var(--out)':'var(--st-rest)'}"></i></div></td></tr>`}).join('')}</tbody></table></div>`;
+  const B=list('stock').sort((a,b)=>a.date<b.date?1:-1);
+  h+=`<section class="sec"><div class="sec-h"><h2>ประวัติการซื้อ</h2></div><div class="panel"><ul class="list">${B.map(k=>`<li class="click" data-act="edit" data-c="stock" data-id="${k.id}"><div class="d">${fd(k.date)}</div><div><div class="t">${esc(k.item)} · ${nf.format(+k.qty||0)} ${esc(k.unit||'')}</div><div class="s"><span class="kind">${esc(k.kind||'')}</span>${esc(k.note||'')} ${who(k.by)}</div></div><div class="amt out">${+k.cost?'−'+baht(k.cost):''}</div></li>`).join('')}</ul></div></section>`;
+  return h;
+}
+function vMap(st){
+  const ts=trees();const mi=S.data.meta.mapimg;const img=mi&&typeof mi.img==='string'&&mi.img.startsWith('data:image/')?mi.img:'map.jpg';
+  const placed=ts.filter(t=>t.mx!=null&&t.my!=null),un=ts.filter(t=>t.mx==null||t.my==null);
+  let h='';
+  if(S.canWrite)h+=`<div class="row" style="margin-bottom:12px"><button class="btn ${ui.mapEdit?'yel':''}" data-act="mapedit">${ui.mapEdit?'เสร็จแล้ว':'วางต้นบนผัง'}</button><label class="btn">${ic('camera')}เปลี่ยนรูปผัง<input type="file" accept="image/*" data-mapfile hidden></label>${mi?`<button class="link" data-act="mapreset">ใช้รูปเดิม</button>`:''}</div>`;
+  if(ui.mapEdit){const sel=ui.mapSel&&S.data.trees[ui.mapSel]?treeById(ui.mapSel):null;
+    h+=`<div class="note" style="background:var(--surface);border-color:var(--line);color:var(--ink)"><span>${sel?`เลือกต้น <b>${esc(sel.no)}</b> แล้ว แตะบนรูปตรงตำแหน่งต้นจริง`:'แตะป้ายต้นด้านล่าง แล้วแตะบนรูปตรงตำแหน่งต้นจริง · แตะป้ายบนรูปเพื่อย้าย'}</span>${sel&&sel.mx!=null?`<button class="btn" data-act="mapremove">เอาต้น ${esc(sel.no)} ออกจากผัง</button>`:''}</div>`;
+    h+=un.length?`<div class="tags" style="margin-bottom:12px">${un.map(t=>`<span class="pinpick ${ui.mapSel===t.id?'sel':''}" data-act="mapsel" data-id="${t.id}">${tagHTML(t,st,{open:false,size:'sm'})}</span>`).join('')}</div>`:'<p class="muted">วางครบทุกต้นแล้ว</p>';}
+  h+=`<div class="mapwrap"><div class="map ${ui.mapEdit?'edit':''}" ${ui.mapEdit?'data-act="mapclick"':''}><img src="${esc(img)}" alt="ภาพถ่ายสวนจากมุมสูง" draggable="false">${placed.map(t=>`<span class="pin ${ui.mapSel===t.id&&ui.mapEdit?'sel':''}" style="left:${+t.mx}%;top:${+t.my}%" data-act="pin" data-id="${t.id}">${tagHTML(t,st,{open:false,size:'sm'})}</span>`).join('')}</div></div>`;
+  h+=`<p class="muted" style="font-size:14px">วางแล้ว ${placed.length} จาก ${ts.length} ต้น${placed.length?' · แตะป้ายบนรูปเพื่อดูประวัติต้น':''}</p>`;
+  return h;
+}
+function vYield(st){
+  const ys=years();if(!ys.includes(ui.year))ui.year=ys[0];
+  const rows={};list('flowers').filter(f=>f.stage==='cut'&&yearOf(f.date)===ui.year).forEach(f=>(f.trees||[]).forEach(id=>{const o=rows[id]=rows[id]||{n:0,kg:0};o.n+=+f.yieldN||0;o.kg+=+f.yieldKg||0}));
+  const R=Object.entries(rows).map(([id,o])=>({t:treeById(id),...o})).filter(r=>r.t&&(r.n||r.kg)).sort((a,b)=>b.kg-a.kg||b.n-a.n);
+  let h=`<div class="row" style="margin-bottom:12px"><select class="f" style="width:auto;min-height:44px" data-act="year" aria-label="เลือกปี">${ys.map(y=>`<option value="${y}" ${y===ui.year?'selected':''}>ปี ${be(y)}</option>`).join('')}</select></div>`;
+  if(!R.length)return h+`<div class="panel empty"><h3>ยังไม่มีผลผลิตรายต้นปี ${be(ui.year)}</h3><p>ตอนจดระยะ "ตัดแล้ว" ให้ใส่ว่าต้นนั้นได้กี่ลูก กี่กิโล แล้วจะเห็นว่าต้นไหนให้ผลดี ต้นไหนควรบำรุงเพิ่ม</p>${S.canWrite?`<button class="btn" data-act="new" data-kind="flowers" data-stage="cut">${ic('flower')}จดตัดผล</button>`:''}</div>`;
+  const mx=Math.max(...R.map(r=>r.kg||0),1),tk=R.reduce((a,r)=>a+r.kg,0),tn=R.reduce((a,r)=>a+r.n,0);
+  h+=`<div class="panel sum3" style="margin-bottom:14px"><div><span>รวมทั้งสวน</span><b>${nf.format(tk)}</b><span>กิโลกรัม</span></div><div><span>จำนวนลูก</span><b>${nf.format(tn)}</b><span>ลูก</span></div><div><span>เฉลี่ยต่อต้น</span><b>${nf.format(Math.round(tk/R.length*10)/10)}</b><span>กก./ต้น</span></div></div>`;
+  h+=`<div class="panel"><table class="fl-table"><thead><tr><th>ต้น</th><th class="hide-m">พันธุ์</th><th class="r">ลูก</th><th class="r">กก.</th><th style="width:35%" class="hide-m"></th></tr></thead><tbody>${R.map(r=>`<tr data-act="tree" data-id="${r.t.id}"><td>${tagHTML(r.t,st,{open:false,size:'sm'})}</td><td class="hide-m">${esc(r.t.variety||'')}</td><td class="r num" style="font-size:19px">${r.n?nf.format(r.n):'–'}</td><td class="r num" style="font-size:19px;font-weight:700">${r.kg?nf.format(r.kg):'–'}</td><td class="hide-m"><i class="yb" style="width:${(r.kg||0)/mx*100}%"></i></td></tr>`).join('')}</tbody></table></div>`;
+  return h;
+}
+/* ---------- lab: mixing ---------- */
+const MKEY='durian-mix-draft';
+const newMix=()=>({id:null,name:'',tank:200,tanks:1,base:20,perTree:'',items:[{pid:'',amt:'',unit:'ซีซี'}]});
+ui.mix=(()=>{try{const j=JSON.parse(localStorage.getItem(MKEY)||'null');if(j&&Array.isArray(j.items))return j}catch(e){}return newMix()})();
+function saveMix(){try{localStorage.setItem(MKEY,JSON.stringify(ui.mix))}catch(e){}}
+const chemList=()=>list('chems').sort((a,b)=>String(a.name).localeCompare(String(b.name),'th'));
+const r1=v=>Math.round(v*(v<10?100:10))/(v<10?100:10);
+const fmtAmt=(v,u)=>{if(u==='กก.'&&v>0&&v<1)return fmtAmt(v*1000,'กรัม');if(u==='ลิตร'&&v>0&&v<1)return fmtAmt(v*1000,'ซีซี');if(u==='ซีซี'&&v>=1000)return nf.format(r1(v/1000))+' ลิตร';if(u==='กรัม'&&v>=1000)return nf.format(r1(v/1000))+' กก.';return nf.format(r1(v))+' '+u};
+function pricePer(c){
+  if(+c.packPrice>0&&+c.packSize>0){const b=toBase(+c.packSize,c.packUnit);return {d:b.d,p:+c.packPrice/b.v}}
+  const k=list('stock').filter(k=>(k.item||'').trim()===String(c.name).trim()&&+k.cost>0&&+k.qty>0).sort((a,b)=>a.date<b.date?1:-1)[0];
+  if(k){const b=toBase(+k.qty,k.unit);return {d:b.d,p:+k.cost/b.v,stock:true}}
+  return null}
+const priceTxt=c=>{const p=pricePer(c);if(!p)return '';const per=p.d==='v'?[1000,'ลิตร']:p.d==='m'?[1000,'กก.']:[1,p.d];return baht(p.p*per[0])+' บาท/'+per[1]+(p.stock?' (จากสต็อก)':'')};
+function mixCalc(m){
+  const tank=Math.max(0,+m.tank||0),tanks=Math.max(1,Math.round(+m.tanks||1)),base=Math.max(1,+m.base||20),total=tank*tanks,perTree=+m.perTree||0;
+  const rows=(m.items||[]).map((it,i)=>{const c=it.pid&&S.data.chems[it.pid]?{id:it.pid,...S.data.chems[it.pid]}:null;if(!c)return null;
+    const amt=+it.amt||0,per=amt*tank/base,all=per*tanks;let cost=null;
+    if(amt){const pp=pricePer(c),b=toBase(all,it.unit);if(pp&&pp.d===b.d)cost=b.v*pp.p}
+    const g1=toBase(per,it.unit);const gPer=g1.d==='v'||g1.d==='m'?g1.v:0;
+    return {i,c,amt,unit:it.unit,per,all,cost,f:FORM[c.form]||FORM.OTHER,npk:npkOf(c),ai:parseAI(c),gPer}}).filter(Boolean);
+  const nut=[0,0,0];rows.forEach(r=>{if(r.npk&&r.gPer)r.npk.forEach((v,k)=>nut[k]+=r.gPer*v/100)});
+  const order=rows.slice().sort((a,b)=>a.f.r-b.f.r||a.i-b.i);
+  const warns=[],seen=new Set();
+  for(let x=0;x<rows.length;x++)for(let y=x+1;y<rows.length;y++){const A=rows[x].c,B=rows[y].c,ta=A.tags||[],tb=B.tags||[];
+    MIXRULES.forEach(([p,q,lv,msg])=>{if((ta.includes(p)&&tb.includes(q))||(ta.includes(q)&&tb.includes(p))){const k=[A.id,B.id,msg].join('|');if(!seen.has(k)){seen.add(k);warns.push({lv,a:A.name,b:B.name,msg})}}});
+    if((A.notMix||[]).includes(B.id)||(B.notMix||[]).includes(A.id))warns.push({lv:'bad',a:A.name,b:B.name,msg:'ตั้งไว้ในคลังว่าห้ามผสมกัน'});}
+  if(A_same(rows))warns.push({lv:'warn',a:'',b:'',msg:'มีสารชื่อซ้ำในสูตร'});
+  const act=rows.filter(r=>r.f.k!=='ADJ'&&r.f.k!=='FERT').length;
+  if(act>=4)warns.push({lv:'warn',a:'',b:'',msg:`ผสมยา ${act} ตัวในถังเดียว เสี่ยงตกตะกอนหรือใบไหม้ ลองผสมในขวดเล็กก่อน`});
+  if(rows.some(r=>r.f.k==='OTHER'))warns.push({lv:'warn',a:'',b:'',msg:'มีสารที่ยังไม่ระบุชนิดสูตร ลำดับการเติมอาจไม่ตรง ดูฉลาก'});
+  const known=rows.filter(r=>r.cost!=null),cost=known.reduce((a,r)=>a+r.cost,0),missing=rows.filter(r=>r.amt&&r.cost==null);
+  const phiRow=rows.filter(r=>+r.c.phi>0).sort((a,b)=>b.c.phi-a.c.phi)[0];
+  return {nut,hasNut:rows.some(r=>r.npk&&r.gPer),tank,tanks,base,total,perTree,rows,order,warns,cost,missing,phi:phiRow?+phiRow.c.phi:0,phiName:phiRow?phiRow.c.name:'',
+    perL:total?cost/total:0,per20:total?cost/total*20:0,perTank:tanks?cost/tanks:0,perTreeCost:total&&perTree?cost/total*perTree:0,treesPerTank:perTree?tank/perTree:0};
+}
+function A_same(rows){const n=rows.map(r=>r.c.id);return new Set(n).size!==n.length}
+function vLab(){
+  let h=`<div class="top"><div><h1>ห้องผสมยา</h1><p>เลือกสารที่จะใส่ แอปจะเรียงลำดับการเติม เช็คสารที่ไม่ควรผสมกัน และคิดต้นทุนต่อถังให้</p></div>${S.canWrite&&ui.labTab==='chems'?`<button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button>`:''}</div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['mix','ผสม / คำนวณ'],['calc','ผสมปุ๋ย / เทียบ %'],['recipes','สูตรที่บันทึก ('+Object.keys(S.data.recipes).length+')'],['chems','คลังสาร ('+Object.keys(S.data.chems).length+')']].map(([k,t])=>`<button data-act="labtab" data-v="${k}" aria-pressed="${ui.labTab===k}">${t}</button>`).join('')}</div>`;
+  return h+(ui.labTab==='calc'?vCalc():ui.labTab==='recipes'?vRecipes():ui.labTab==='chems'?vChems():vMixer());
+}
+function emptyChems(){return `<div class="panel empty"><h3>ยังไม่มีสารในคลัง</h3><p>เพิ่มยา ปุ๋ยทางใบ สารจับใบที่ใช้ บอกชนิดสูตร (ผง เม็ด น้ำข้น น้ำมัน) และราคาต่อขวด/ถุง แอปจะใช้ข้อมูลนี้เรียงลำดับและคิดต้นทุน</p>${S.canWrite?`<div class="row" style="justify-content:center"><button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button><button class="btn" data-act="starter">ใส่รายชื่อสารที่ใช้บ่อย</button></div>`:''}</div>`}
+function vMixer(){
+  const ch=chemList();if(!ch.length)return emptyChems();
+  const m=ui.mix;if(!m.items.length)m.items.push({pid:'',amt:'',unit:'ซีซี'});
+  const rows=m.items.map((it,i)=>`<div class="mrow"><select class="f" data-mi="${i}" data-mf="pid" aria-label="สารตัวที่ ${i+1}"><option value="">— เลือกสาร —</option>${ch.map(c=>`<option value="${c.id}" ${c.id===it.pid?'selected':''}>${esc(c.name)} · ${esc((FORM[c.form]||FORM.OTHER).sh)}</option>`).join('')}</select><input class="f num" style="font-size:18px" data-mi="${i}" data-mf="amt" type="number" inputmode="decimal" min="0" step="any" value="${esc(it.amt)}" placeholder="0" aria-label="อัตรา"><select class="f" data-mi="${i}" data-mf="unit" aria-label="หน่วย">${MIXU.map(u=>`<option ${u===it.unit?'selected':''}>${u}</option>`).join('')}</select><button class="ib" data-act="mixdel" data-i="${i}" aria-label="เอาออก">${ic('x')}</button></div>`).join('');
+  return `<div class="lab"><div class="panel pad">
+   ${m.id?`<div class="note" style="margin-bottom:14px;background:#e9f1e9;border-color:#c7d9c8;color:var(--ink)"><span>กำลังแก้สูตรที่บันทึกไว้</span><button class="link" data-act="mixclear">เริ่มสูตรใหม่</button></div>`:''}
+   <div class="fld"><label class="l" for="mx0">ชื่อสูตร</label><input class="f" id="mx0" data-mix="name" value="${esc(m.name)}" placeholder="เช่น สูตรกันราช่วงแตกใบอ่อน"></div>
+   <div class="scale"><div class="fld"><label class="l" for="mx3">สูตรนี้คิดจากน้ำ</label><div class="uin"><input class="f num" style="font-size:22px" id="mx3" data-mix="base" type="number" inputmode="decimal" min="1" value="${esc(m.base)}"><span>ลิตร</span></div><div class="qk">${[20,100,200,1000].map(v=>`<button class="qkb" data-act="mixq" data-k="base" data-v="${v}" aria-pressed="${+m.base===v}">${nf.format(v)}</button>`).join('')}</div></div>
+   <div class="arrow" aria-hidden="true">→</div>
+   <div class="fld"><label class="l" for="mx1">ผสมจริงถังละ</label><div class="uin"><input class="f num" style="font-size:22px" id="mx1" data-mix="tank" type="number" inputmode="decimal" min="1" value="${esc(m.tank)}"><span>ลิตร</span></div><div class="qk">${[20,100,200,1000].map(v=>`<button class="qkb" data-act="mixq" data-k="tank" data-v="${v}" aria-pressed="${+m.tank===v}">${nf.format(v)}</button>`).join('')}</div></div></div>
+   <div id="ratio">${ratioHTML()}</div>
+   <div class="grid2"><div class="fld"><label class="l" for="mx2">ผสมกี่ถัง</label><input class="f num" style="font-size:20px" id="mx2" data-mix="tanks" type="number" inputmode="numeric" min="1" value="${esc(m.tanks)}"></div>
+   <div class="fld"><label class="l" for="mx4">ฉีดต้นละกี่ลิตร <small>(ไม่ใส่ก็ได้)</small></label><input class="f num" style="font-size:20px" id="mx4" data-mix="perTree" type="number" inputmode="decimal" min="0" step="any" value="${esc(m.perTree)}" placeholder="เช่น 20"></div></div>
+   <label class="l">สารที่ใส่ <small>— ใส่ปริมาณตามสูตร (ต่อน้ำ <span id="mxb">${esc(m.base)}</span> ลิตร) แอปย่อ/ขยายให้เอง</small></label>
+   ${rows}
+   <div class="row" style="margin-top:6px"><button class="btn" data-act="mixadd">${ic('plus')}เพิ่มสาร</button>${S.canWrite?`<button class="link" data-act="new" data-kind="chems" data-tomix="1">+ สารใหม่ที่ยังไม่มีในคลัง</button>`:''}</div>
+  </div><div id="mixres">${mixResult()}</div></div>`;
+}
+function ratioTxt(f){if(!(f>0))return '';if(Math.abs(f-1)<1e-9)return 'เท่าสูตร';if(f<1){const n=1/f;return Math.abs(n-Math.round(n))<0.01?`1/${nf.format(Math.round(n))} ของสูตร`:`${nf.format(Math.round(f*1000)/10)}% ของสูตร`}return Math.abs(f-Math.round(f))<0.01?`${nf.format(Math.round(f))} เท่าของสูตร`:`${nf.format(Math.round(f*100)/100)} เท่าของสูตร`}
+function ratioHTML(){const b=+ui.mix.base,t=+ui.mix.tank;if(!(b>0&&t>0))return '';const f=t/b;
+  return `<div class="ratio"><b>${ratioTxt(f)}</b><span>สูตร ${nf.format(b)} ลิตร → ผสมจริง ${nf.format(t)} ลิตร · ยาทุกตัว × ${nf.format(Math.round(f*10000)/10000)}</span></div>`}
+function updMix(){const r=$('#mixres');if(r)r.innerHTML=mixResult();const b=$('#mxb');if(b)b.textContent=ui.mix.base;const q=$('#ratio');if(q)q.innerHTML=ratioHTML();
+  document.querySelectorAll('[data-act=mixq]').forEach(x=>x.setAttribute('aria-pressed',String(+ui.mix[x.dataset.k]===+x.dataset.v)))}
+function mixResult(){
+  const r=mixCalc(ui.mix);
+  if(!r.rows.length)return `<div class="panel empty"><h3>ผลการผสมจะขึ้นตรงนี้</h3><p>เลือกสารทางซ้าย ใส่อัตราตามฉลาก แล้วจะเห็นลำดับการเติม ปริมาณต่อถัง และต้นทุน</p></div>`;
+  const all=r.tanks>1;
+  let h=`<div class="panel"><div class="res-top"><div><span>น้ำรวม</span><br><b>${nf.format(r.total)} ลิตร</b></div><span style="text-align:right">${r.tanks} ถัง × ${nf.format(r.tank)} ลิตร<br>${esc(ratioTxt(r.tank/r.base))} (สูตร ${nf.format(r.base)} ลิตร)</span></div><div class="pad">`;
+  if(r.warns.length)h+=`<ul class="warns">${r.warns.map(w=>`<li class="${w.lv}"><span class="badge ${w.lv==='bad'?'bad':'warn'}">${w.lv==='bad'?'ไม่ควรผสม':'ระวัง'}</span><span>${w.a?`<b>${esc(w.a)}</b> + <b>${esc(w.b)}</b>: `:''}${esc(w.msg)}</span></li>`).join('')}</ul>`;
+  h+=`<h3 style="font-size:16px;margin:0 0 4px">ลำดับการเติม <span class="muted" style="font-weight:400">(ต่อ 1 ถัง${all?' · ตัวเลขเล็กคือรวมทุกถัง':''})</span></h3><ol class="steps">
+   <li class="water"><div><b>เติมน้ำประมาณครึ่งถัง</b><div class="s">แล้วเปิดเครื่องกวนหรือคนตลอดการผสม</div></div><div class="q">${nf.format(r1(r.tank/2))} ลิตร</div></li>
+   ${r.order.map(x=>`<li><div><b>${esc(x.c.name)}</b> <span class="badge">${esc(x.f.sh)}</span><div class="s">${esc(x.f.tip)}</div></div><div class="q">${x.amt&&Math.abs(r.tank-r.base)>1e-9?`<div class="s" style="font-family:var(--font);font-weight:400">สูตร ${fmtAmt(x.amt,x.unit)} →</div>`:''}${x.amt?fmtAmt(x.per,x.unit):'<span class="muted" style="font-size:15px">ใส่อัตรา</span>'}${all&&x.amt?`<div class="s" style="font-family:var(--font);font-weight:400">รวม ${fmtAmt(x.all,x.unit)}</div>`:''}</div></li>`).join('')}
+   <li class="water"><div><b>เติมน้ำจนครบถัง</b><div class="s">กวนต่ออีกสักครู่ ผสมแล้วควรฉีดให้หมดภายในวัน</div></div><div class="q">${nf.format(r.tank)} ลิตร</div></li></ol>`;
+  const cells=[['ต่อน้ำ 20 ลิตร',r.per20,true],['ต่อถัง',r.perTank],...(r.perTree?[['ต่อต้น ('+nf.format(r.perTree)+' ลิตร)',r.perTreeCost]]:[]),['รวมทั้งหมด',r.cost]];
+  if(!r.rows.some(x=>x.cost!=null))h+=`<h3 style="font-size:16px;margin:14px 0 2px">ต้นทุนค่ายา</h3><p class="muted" style="font-size:14px;margin:0 0 10px">ยังไม่มีราคาของสารในสูตรนี้ ใส่ราคาที่แท็บคลังสาร (ขนาดบรรจุกับราคา) แล้วจะคิดต้นทุนต่อถัง ต่อ 20 ลิตร และต่อต้นให้</p>`;
+  else h+=`<h3 style="font-size:16px;margin:14px 0 2px">ต้นทุนค่ายา (บาท)</h3><div class="costs" style="--n:${cells.length}">${cells.map(([t,v,hl])=>`<div class="${hl?'hl':''}"><span>${t}</span><b>${baht(v)}</b></div>`).join('')}</div>
+   <p class="muted" style="font-size:13.5px;margin:0 0 10px">ลิตรละ ${nf.format(Math.round(r.perL*100)/100)} บาท${r.perTree?` · ถังนี้ฉีดได้ประมาณ ${nf.format(Math.floor(r.treesPerTank))} ต้น`:''}${r.missing.length?` · <span style="color:var(--out)">ยังไม่รวม ${r.missing.map(x=>esc(x.c.name)).join(', ')} (ยังไม่มีราคาในคลัง/สต็อก หรือหน่วยไม่ตรง)</span>`:''}</p>`;
+  h+=`<details style="margin-bottom:10px"><summary class="muted" style="cursor:pointer;font-size:14px">ดูต้นทุนแยกแต่ละสาร</summary><ul class="list">${r.rows.map(x=>`<li style="grid-template-columns:1fr auto;padding:8px 0"><div>${esc(x.c.name)} <span class="muted">${x.amt?fmtAmt(x.all,x.unit):''} ${priceTxt(x.c)?'· '+priceTxt(x.c):''}</span></div><div class="num" style="font-size:18px">${x.cost!=null?baht(x.cost):'–'}</div></li>`).join('')}</ul></details>`;
+  if(r.hasNut){const pt=r.perTree?r.perTree/r.tank:0;const rowsN=[['ต่อถัง',1],['ต่อน้ำ 20 ลิตร',20/r.tank],...(pt?[['ต่อต้น',pt]]:[])];
+    h+=`<h3 style="font-size:16px;margin:14px 0 2px">ธาตุอาหารที่ได้ (กรัม)</h3><div class="nut"><div class="h"></div><div class="h" style="text-align:right">N ไนโตรเจน</div><div class="h" style="text-align:right">P ฟอสฟอรัส</div><div class="h" style="text-align:right">K โพแทสเซียม</div>${rowsN.map(([t,f])=>`<div>${t}</div>${r.nut.map(v=>`<div class="v">${nf.format(r1(v*f))}</div>`).join('')}`).join('')}</div>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">ความเข้มข้นในน้ำ ≈ N ${nf.format(Math.round(r.nut[0]/r.tank*1000))} · P ${nf.format(Math.round(r.nut[1]/r.tank*1000))} · K ${nf.format(Math.round(r.nut[2]/r.tank*1000))} ppm · P คิดเป็น P₂O₅ และ K เป็น K₂O ตามฉลากปุ๋ย · ปุ๋ยน้ำคิด 1 ซีซี ≈ 1 กรัม</p>`}
+  const aiR=r.rows.filter(x=>x.ai&&x.gPer);
+  if(aiR.length)h+=`<p class="muted" style="font-size:14px;margin:0 0 10px"><b style="color:var(--ink)">ตัวยาจริงต่อถัง:</b> ${aiR.map(x=>`${esc(x.c.aiName||x.c.name)} ${fmtAmt(x.gPer*x.ai/100,UB[x.unit][0]==='v'?'ซีซี':'กรัม')} (${x.ai}%)`).join(' · ')}</p>`;
+  if(r.phi)h+=`<p style="margin:0 0 12px"><span class="badge warn">เว้นก่อนตัดอย่างน้อย ${r.phi} วัน</span> <span class="muted" style="font-size:14px">ตาม ${esc(r.phiName)}</span></p>`;
+  if(S.canWrite)h+=`<div class="row"><button class="btn pri" data-act="mixsave">${ui.mix.id?'บันทึกทับสูตรเดิม':'บันทึกสูตร'}</button>${ui.mix.id?`<button class="btn" data-act="mixsave" data-asnew="1">บันทึกเป็นสูตรใหม่</button>`:''}<button class="btn" data-act="mixwork">${ic('drop')}จดเป็นงานสวน</button>${ui.mix.id?`<button class="btn danger" data-act="mixdelrec">ลบสูตรนี้</button>`:`<button class="link" data-act="mixclear">ล้าง</button>`}</div>`;
+  h+=`<p class="muted" style="font-size:13px;margin:12px 0 0">คำนวณคร่าวๆ ยึดฉลากยาเป็นหลัก ถ้าไม่แน่ใจให้ลองผสมในขวดใสเล็กๆ ก่อน ถ้าเป็นตะกอน แยกชั้น หรือเป็นก้อน อย่าผสมลงถัง</p></div></div>`;
+  return h;
+}
+const CKEY='durian-calc';
+ui.calc=Object.assign({target:'15-15-15',total:100,src:['18-46-0','0-0-60','46-0-0'],price:{},ready:'',aiOld:80,rateOld:40,aiNew:75},(()=>{try{return JSON.parse(localStorage.getItem(CKEY)||'{}')}catch(e){return {}}})());
+function saveCalc(){try{localStorage.setItem(CKEY,JSON.stringify(ui.calc))}catch(e){}}
+function rawOptions(){const o=RAW.map(([f,n])=>({f,n}));chemList().forEach(c=>{const v=npkOf(c);if(v){const f=v.join('-');if(!o.some(x=>x.f===f))o.push({f,n:c.name})}});return o}
+function solveBlend(c){
+  const t=parseNPK(c.target),W=+c.total||0;if(!t||!W)return {err:'ใส่สูตรที่ต้องการ (เช่น 8-24-24) และน้ำหนักรวม'};
+  const S_=c.src.map(parseNPK);if(S_.some(x=>!x))return {err:'เลือกแม่ปุ๋ยให้ครบ 3 ตัว'};
+  const A=[0,1,2].map(i=>[...[0,1,2].map(j=>S_[j][i]),W*t[i]]);
+  for(let col=0;col<3;col++){let piv=col;for(let r=col+1;r<3;r++)if(Math.abs(A[r][col])>Math.abs(A[piv][col]))piv=r;
+    if(Math.abs(A[piv][col])<1e-9)return {err:'แม่ปุ๋ย 3 ตัวนี้ให้ธาตุไม่ครบ N, P, K ลองเลือกให้มีตัวที่ให้ N, ตัวที่ให้ P และตัวที่ให้ K'};
+    [A[col],A[piv]]=[A[piv],A[col]];for(let r=0;r<3;r++)if(r!==col){const f=A[r][col]/A[col][col];for(let k=col;k<4;k++)A[r][k]-=f*A[col][k]}}
+  const x=[0,1,2].map(i=>A[i][3]/A[i][i]);
+  if(x.some(v=>v<-1e-6)){const bad=x.map((v,i)=>v<0?c.src[i]:null).filter(Boolean);return {err:`ผสมให้ได้สูตรนี้ไม่ได้ เพราะแม่ปุ๋ยตัวอื่นให้ธาตุเกินเป้าไปแล้ว (ต้องใช้ ${bad.join(', ')} ติดลบ) ลองเปลี่ยนแม่ปุ๋ย เช่น ใช้ 0-46-0 แทน 18-46-0`}}
+  const used=x.reduce((a,v)=>a+Math.max(0,v),0),filler=W-used;
+  if(filler<-1e-6)return {err:`สูตรนี้เข้มข้นเกินกว่าแม่ปุ๋ยชุดนี้จะทำได้ (ต้องใช้แม่ปุ๋ยรวม ${nf.format(r1(used))} กก. เกิน ${nf.format(W)} กก.)`};
+  const kg=x.map(v=>Math.max(0,v));const pr=c.src.map(f=>+c.price[f]||0);
+  const cost=kg.reduce((a,v,i)=>a+v*pr[i]/50,0);const allPriced=kg.every((v,i)=>!v||pr[i]);
+  return {kg,filler:Math.max(0,filler),W,cost,allPriced,per50:W?cost/W*50:0};
+}
+function vCalc(){
+  const c=ui.calc,ro=rawOptions(),b=solveBlend(c);
+  const sel=i=>`<select class="f" data-calc-src="${i}" aria-label="แม่ปุ๋ยตัวที่ ${i+1}">${ro.map(o=>`<option value="${o.f}" ${o.f===c.src[i]?'selected':''}>${o.f} · ${esc(o.n)}</option>`).join('')}</select>`;
+  let L=`<div class="panel pad"><h2 style="margin-bottom:4px">ผสมแม่ปุ๋ยใช้เอง</h2><p class="muted" style="margin:0 0 14px;font-size:14px">ใส่สูตรที่ต้องการ แอปบอกว่าต้องใช้แม่ปุ๋ยแต่ละตัวกี่กิโล ที่เหลือเป็นตัวเติม (เช่น ดินขาว ทราย) ให้ครบน้ำหนัก</p>
+   <div class="grid2"><div class="fld"><label class="l" for="bl1">สูตรที่ต้องการ</label><input class="f num" style="font-size:22px" id="bl1" data-calc="target" value="${esc(c.target)}" placeholder="เช่น 15-15-15"></div><div class="fld"><label class="l" for="bl2">ผสมทั้งหมด (กก.)</label><input class="f num" style="font-size:22px" id="bl2" data-calc="total" type="number" inputmode="decimal" min="1" value="${esc(c.total)}"></div></div>
+   <label class="l">แม่ปุ๋ยที่มี <small>และราคากระสอบ 50 กก. (บาท)</small></label>
+   ${[0,1,2].map(i=>`<div class="mrow" style="grid-template-columns:minmax(0,1fr) 110px"> ${sel(i)}<input class="f num" style="font-size:18px" data-calc-price="${esc(c.src[i])}" type="number" inputmode="decimal" min="0" value="${esc(c.price[c.src[i]]??'')}" placeholder="ราคา" aria-label="ราคากระสอบ"></div>`).join('')}
+   <div class="fld" style="margin-top:10px"><label class="l" for="bl3">ปุ๋ยสำเร็จสูตรนี้ ราคากระสอบละ <small>(ไว้เทียบว่าคุ้มไหม)</small></label><input class="f num" style="font-size:20px" id="bl3" data-calc="ready" type="number" inputmode="decimal" min="0" value="${esc(c.ready)}"></div>
+   <div id="blendres">${blendHTML(b)}</div></div>`;
+  let R=`<div class="panel pad"><h2 style="margin-bottom:4px">เทียบ % สารออกฤทธิ์</h2><p class="muted" style="margin:0 0 14px;font-size:14px">ยาตัวเดียวกันแต่ % ต่างกัน เช่น แมนโคเซบ 80% กับ 75% ต้องใช้ปริมาณต่างกันเพื่อให้ได้ตัวยาเท่ากัน</p>
+   <div class="grid3"><div class="fld"><label class="l" for="ai1">ยาเดิม %</label><input class="f num" style="font-size:20px" id="ai1" data-calc="aiOld" type="number" inputmode="decimal" min="0" value="${esc(c.aiOld)}"></div><div class="fld"><label class="l" for="ai2">ใช้อยู่ (กรัม/ซีซี)</label><input class="f num" style="font-size:20px" id="ai2" data-calc="rateOld" type="number" inputmode="decimal" min="0" value="${esc(c.rateOld)}"></div><div class="fld"><label class="l" for="ai3">ยาใหม่ %</label><input class="f num" style="font-size:20px" id="ai3" data-calc="aiNew" type="number" inputmode="decimal" min="0" value="${esc(c.aiNew)}"></div></div>
+   <div id="aires">${aiHTML()}</div>
+   ${aiGroupsHTML()}</div>`;
+  return `<div class="calc">${L}${R}</div><p class="muted" style="font-size:13px">คำนวณคร่าวๆ ปุ๋ยผสมเองคลุกให้ทั่วก่อนใช้ เม็ดขนาดต่างกันอาจแยกชั้นตอนขนย้าย · อัตรายายึดตามฉลากของยี่ห้อที่ใช้</p>`;
+}
+function blendHTML(b){
+  if(b.err)return `<div class="warns" style="margin-top:12px"><li class="warn" style="list-style:none">${esc(b.err)}</li></div>`;
+  const c=ui.calc;const ready=+c.ready||0;
+  let h=`<div class="res-top" style="border-radius:10px;margin-top:12px"><div><span>ผสมได้</span><br><b>${nf.format(b.W)} กก.</b></div><span>สูตร ${esc(parseNPK(c.target).join('-'))}</span></div>
+  <ul class="list blend">${c.src.map((f,i)=>`<li style="padding:10px 4px"><div><b>${f}</b> <span class="muted">${esc((rawOptions().find(o=>o.f===f)||{}).n||'')}</span></div><div class="num" style="font-size:22px;font-weight:700">${nf.format(r1(b.kg[i]))} กก.</div><div class="muted" style="min-width:70px;text-align:right">${+c.price[f]?baht(b.kg[i]*c.price[f]/50)+' บ.':''}</div></li>`).join('')}
+  <li style="padding:10px 4px"><div><b>ตัวเติม</b> <span class="muted">ดินขาว/ทราย/โดโลไมต์</span></div><div class="num" style="font-size:22px;font-weight:700">${nf.format(r1(b.filler))} กก.</div><div></div></li></ul>`;
+  if(b.allPriced&&b.cost)h+=`<div class="costs" style="--n:${ready?3:2}"><div><span>ค่าแม่ปุ๋ยรวม</span><b>${baht(b.cost)}</b></div><div class="hl"><span>ตกกระสอบ 50 กก.</span><b>${baht(b.per50)}</b></div>${ready?`<div><span>${b.per50<ready?'ถูกกว่าปุ๋ยสำเร็จ':'แพงกว่าปุ๋ยสำเร็จ'}</span><b style="color:${b.per50<ready?'var(--in)':'var(--out)'}">${baht(Math.abs(ready-b.per50))}</b></div>`:''}</div>`;
+  else h+=`<p class="muted" style="font-size:14px">ใส่ราคากระสอบของแม่ปุ๋ยที่ใช้ จะคิดต้นทุนต่อกระสอบให้</p>`;
+  return h;
+}
+function aiHTML(){const c=ui.calc,o=+c.aiOld,r=+c.rateOld,n=+c.aiNew;if(!(o>0&&r>0&&n>0))return '';
+  const v=r*o/n;return `<div class="res-top" style="border-radius:10px"><div><span>ยาใหม่ ${nf.format(n)}% ต้องใช้</span><br><b>${nf.format(r1(v))}</b></div><span>กรัมหรือซีซี เท่าหน่วยเดิม<br>ตัวยาจริงเท่ากันที่ ${nf.format(r1(r*o/100))}</span></div>`}
+function aiGroupsHTML(){const grp={};chemList().forEach(c=>{const k=(c.aiName||'').trim(),v=aiCost(c);if(k&&v!=null)(grp[k]=grp[k]||[]).push({c,v})});
+  const G=Object.entries(grp).filter(([k,a])=>a.length>1);
+  if(!G.length)return `<p class="muted" style="font-size:14px;margin:14px 0 0">ใส่ % สารออกฤทธิ์ ชื่อตัวยา และราคาในคลังสาร ถ้ามีหลายยี่ห้อตัวยาเดียวกัน จะเทียบให้ว่ายี่ห้อไหนคุ้มกว่า</p>`;
+  return G.map(([k,a])=>{a.sort((x,y)=>x.v-y.v);return `<h3 style="font-size:16px;margin:16px 0 4px">${esc(k)} · เทียบราคาตัวยาจริง</h3><ul class="list">${a.map((x,i)=>`<li style="grid-template-columns:1fr auto;padding:8px 0"><div>${esc(x.c.name)} <span class="muted">${parseAI(x.c)}%</span> ${i===0?'<span class="badge ok">คุ้มสุด</span>':''}</div><div class="num" style="font-size:18px">${baht(x.v)} บ./${pricePer(x.c).d==='v'?'ซีซี':'กรัม'}</div></li>`).join('')}</ul>`}).join('');}
+function vRecipes(){
+  const R=list('recipes').sort((a,b)=>String(a.name).localeCompare(String(b.name),'th'));
+  if(!R.length)return `<div class="panel empty"><h3>ยังไม่มีสูตรที่บันทึก</h3><p>ผสมในแท็บ "ผสม / คำนวณ" แล้วกด "บันทึกสูตร" ครั้งหน้าแตะสูตรเดียวก็ได้ปริมาณกับราคาเลย</p><button class="btn" data-act="labtab" data-v="mix">ไปที่ผสม / คำนวณ</button></div>`;
+  return `<div class="panel"><ul class="list">${R.map(rc=>{const r=mixCalc({...rc,tanks:1});return `<li class="click" data-act="loadrec" data-id="${rc.id}" style="grid-template-columns:1fr auto"><div><div class="t">${esc(rc.name)}</div><div class="s">${r.order.map(x=>esc(x.c.name)+(x.amt?' '+fmtAmt(x.amt,x.unit):'')).join(' · ')} <span class="muted">/ น้ำ ${nf.format(r.base)} ลิตร</span></div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${r.warns.some(w=>w.lv==='bad')?'<span class="badge bad">มีคู่ที่ไม่ควรผสม</span>':''}${r.phi?`<span class="badge">เว้น ${r.phi} วันก่อนตัด</span>`:''}<span class="badge">ถัง ${nf.format(r.tank)} ลิตร</span></div></div><div style="text-align:right"><div class="amt" style="color:var(--ink)">${baht(r.per20)}</div><div class="muted" style="font-size:13px">บาท/น้ำ 20 ลิตร${r.missing.length?' (ไม่ครบ)':''}</div></div></li>`}).join('')}</ul></div>`;
+}
+function aiCost(c){const ai=parseAI(c),pp=pricePer(c);if(!ai||!pp||(pp.d!=='v'&&pp.d!=='m'))return null;return pp.p/(ai/100)}
+function vChems(){
+  const ch=chemList();if(!ch.length)return emptyChems();
+  const grp={};ch.forEach(c=>{const k=(c.aiName||'').trim();const v=aiCost(c);if(k&&v!=null)(grp[k]=grp[k]||[]).push({id:c.id,v})});
+  const best=new Set(Object.values(grp).filter(a=>a.length>1).map(a=>a.sort((x,y)=>x.v-y.v)[0].id));
+  return `<div class="panel"><ul class="list">${ch.map(c=>`<li class="click" data-act="edit" data-c="chems" data-id="${c.id}" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.name)} <span class="badge">${esc((FORM[c.form]||FORM.OTHER).sh)}</span>${npkOf(c)?` <span class="badge">${npkOf(c).join('-')}</span>`:''}${parseAI(c)?` <span class="badge">${parseAI(c)}%${c.aiName?' '+esc(c.aiName):''}</span>`:''}${best.has(c.id)?' <span class="badge ok">คุ้มสุดในกลุ่มตัวยาเดียวกัน</span>':''}</div><div class="s">${(c.tags||[]).map(t=>esc(TAG[t]||t)).join(' · ')}${c.rate?' · อัตรา '+nf.format(c.rate)+' '+esc(c.rateUnit||'')+'/20 ลิตร':''}${+c.phi?' · เว้น '+c.phi+' วัน':''}${(c.notMix||[]).length?' · ห้ามผสมกับ '+c.notMix.map(i=>S.data.chems[i]?esc(S.data.chems[i].name):'').filter(Boolean).join(', '):''}</div></div><div class="muted" style="text-align:right;font-size:14px">${priceTxt(c)||'<span style="color:var(--out)">ยังไม่มีราคา</span>'}${aiCost(c)!=null?`<div>ตัวยาจริง ${baht(aiCost(c)*(pricePer(c).d==='v'?1:1))} บาท/${pricePer(c).d==='v'?'ซีซี':'กรัม'}</div>`:''}</div></li>`).join('')}</ul></div>
+  <p class="muted" style="font-size:13.5px">ชนิดสูตรดูได้จากฉลาก เช่น 80% WP = ผง, 25% SC = น้ำข้น, 2.5% EC = น้ำมัน · ราคาถ้าไม่ใส่ จะใช้ราคาล่าสุดจากสต็อกที่ชื่อตรงกัน</p>`;
+}
+function vFlower(st){
+  const ts=trees();
+  const bearing=ts.filter(t=>t.kind!=='young');
+  let h=`<div class="top"><div><h1>ทำดอก / ติดผล</h1><p>ติดตามแต่ละต้นตั้งแต่ทำดอกจนถึงวันตัด · นับวันตัดจากวันดอกบาน</p></div>${S.canWrite?`<button class="btn pri" data-act="new" data-kind="flowers">${ic('plus')}จดระยะดอก</button>`:''}</div>`;
+  if(!ts.length)return h+onboard();
+  const cnt=k=>ts.filter(t=>st[t.id].stage===k).length;
+  h+=`<div class="stages" role="group" aria-label="กรองตามระยะ">${STAGES.map(s=>`<button class="st-${s.k}" data-act="sf" data-v="${s.k}" aria-pressed="${ui.stageFilter===s.k}"><b>${cnt(s.k)}</b><span>${s.t}</span></button>`).join('')}</div>`;
+  let F=ui.stageFilter?ts.filter(t=>st[t.id].stage===ui.stageFilter):bearing;
+  F=F.slice().sort((a,b)=>{const A=st[a.id],B=st[b.id];if(A.left!=null&&B.left!=null)return A.left-B.left;if(A.left!=null)return -1;if(B.left!=null)return 1;return STAGES.findIndex(s=>s.k===B.stage)-STAGES.findIndex(s=>s.k===A.stage)});
+  h+=`<div class="sec-h" style="margin-top:22px"><h2>${ui.stageFilter?ST[ui.stageFilter].t:'ต้นที่ให้ผลแล้ว'} · ${F.length} ต้น</h2>${ui.stageFilter?`<button class="link" data-act="sf" data-v="">ดูทุกต้นที่ให้ผล</button>`:''}</div>`;
+  if(!F.length)return h+`<div class="panel empty"><h3>ไม่มีต้นในระยะนี้</h3><p>เลือกระยะอื่นด้านบน หรือจดระยะดอกให้ต้นที่ต้องการ</p></div>`;
+  h+=`<div class="panel"><table class="fl-table"><thead><tr><th>ต้น</th><th>ระยะ</th><th class="hide-m">พันธุ์</th><th class="hide-m">ลูก</th><th>วันตัด</th></tr></thead><tbody>${F.map(t=>{const s=st[t.id];
+    const pct=s.total?Math.max(0,Math.min(100,s.age/s.total*100)):0;
+    return `<tr data-act="tree" data-id="${t.id}"><td>${tagHTML(t,st,{open:false,size:'sm'})}</td><td><span class="dot st-${s.stage}"></span>${ST[s.stage].t}<div class="muted" style="font-size:13px">${s.date?'ตั้งแต่ '+fd(s.date,{day:'numeric',month:'short'}):'ยังไม่มีบันทึก'}</div></td><td class="hide-m">${esc(t.variety||'')}</td><td class="hide-m num" style="font-size:19px">${s.fruits||'–'}</td><td>${s.cutDate?`<b class="num" style="font-size:20px;${s.left<0?'color:var(--out)':''}">${s.left<0?'เลย '+(-s.left)+' วัน':'อีก '+s.left+' วัน'}</b><div class="muted" style="font-size:13px">${fd(s.cutDate,{day:'numeric',month:'short'})} · ${s.age} / ${s.total} วัน</div><div class="prog"><i style="width:${pct}%"></i></div>${s.phiWarn?'<span class="badge bad" style="margin-top:6px">ติดระยะเว้นยา ถึง '+fd(s.safe,{day:'numeric',month:'short'})+'</span>':''}`:'<span class="muted">–</span>'}</td></tr>`}).join('')}</tbody></table></div>
+  <p class="muted" style="font-size:14px">วันตัดเป็นค่าประมาณจากจำนวนวันหลังดอกบานของแต่ละพันธุ์ (หมอนทองตั้งไว้ ${daysFor('หมอนทอง')} วัน) แก้ได้ที่ ต้นไม้ในสวน › ตั้งค่าสวน</p>`;
+  return h;
+}
+
+function vMoney(st){
+  const ys=years();if(!ys.includes(ui.year))ui.year=ys[0];
+  let h=`<div class="top"><div><h1>ขาย / บัญชี</h1><p>รายรับ รายจ่าย และการขายทุเรียน ปี ${be(ui.year)}</p></div><div class="row"><select class="f" style="width:auto;min-height:44px" data-act="year" aria-label="เลือกปี">${ys.map(y=>`<option value="${y}" ${y===ui.year?'selected':''}>ปี ${be(y)}</option>`).join('')}</select>${S.canWrite?(ui.moneyTab==='sales'?`<button class="btn pri" data-act="new" data-kind="sales">${ic('plus')}จดการขาย</button>`:`<button class="btn" data-act="new" data-kind="money" data-dir="in">${ic('in')}รับเงิน</button><button class="btn pri" data-act="new" data-kind="money" data-dir="out">${ic('out')}จ่ายเงิน</button>`):''}</div></div>`;
+  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="mt" data-v="sales" aria-pressed="${ui.moneyTab==='sales'}">การขายทุเรียน</button><button data-act="mt" data-v="ledger" aria-pressed="${ui.moneyTab==='ledger'}">รายรับ-รายจ่าย</button></div>`;
+  return h+(ui.moneyTab==='sales'?vSales(st):vLedger());
+}
+function vSales(){
+  const Sx=list('sales').filter(s=>yearOf(s.date)===ui.year).sort((a,b)=>a.date<b.date?1:-1);
+  const kg=Sx.reduce((a,s)=>a+saleKg(s),0),g=Sx.reduce((a,s)=>a+saleGross(s),0);
+  const by=m=>Sx.filter(s=>s.mode===m);
+  let h=`<div class="panel sum3"><div><span>ขายได้รวม</span><b class="num">${baht(g)}</b><span>บาท</span></div><div><span>น้ำหนักรวม</span><b class="num">${nf.format(kg)}</b><span>กิโลกรัม</span></div><div><span>เฉลี่ย</span><b class="num">${kg?baht(g/kg):'–'}</b><span>บาท/กก.</span></div></div>`;
+  if(!Sx.length)return h+`<div class="panel empty" style="margin-top:14px"><h3>ยังไม่มีการขายในปีนี้</h3><p>จดได้ 2 แบบ: <b>ขายรอบตัด</b> ให้ล้ง/คนเหมา แยกเกรด A B C ตกไซซ์ หรือ <b>ขายออนไลน์</b> ทีละออเดอร์ พร้อมค่าส่ง</p>${S.canWrite?`<button class="btn pri" data-act="new" data-kind="sales">${ic('plus')}จดการขาย</button>`:''}</div>`;
+  h+=`<div class="grid2" style="margin-top:14px"><div class="panel" style="padding:14px 18px"><b>ขายรอบตัด</b> <span class="muted">${by('round').length} รอบ</span><div class="num" style="font-size:24px;font-weight:700">${baht(by('round').reduce((a,s)=>a+saleGross(s),0))} บาท</div></div><div class="panel" style="padding:14px 18px"><b>ขายออนไลน์</b> <span class="muted">${by('online').length} ออเดอร์</span><div class="num" style="font-size:24px;font-weight:700">${baht(by('online').reduce((a,s)=>a+saleGross(s),0))} บาท</div></div></div>`;
+  h+=`<div class="panel" style="margin-top:14px"><ul class="list">${Sx.map(s=>`<li class="click" data-act="edit" data-c="sales" data-id="${s.id}"><div class="d">${fd(s.date)}</div><div><div class="t">${s.mode==='online'?'ออนไลน์':'รอบตัด'}${s.buyer?' · '+esc(s.buyer):''}${s.channel?' <span class="kind">'+esc(s.channel)+'</span>':''}</div><div class="s">${(s.lines||[]).filter(l=>+l.kg).map(l=>`${esc(l.grade)} ${nf.format(l.kg)} กก. × ${baht(l.price)}`).join(' · ')}${+s.fee?' · ค่าส่ง/ค่าใช้จ่าย '+baht(s.fee):''} ${who(s.by)}</div></div><div class="amt in">+${baht(saleGross(s))}</div></li>`).join('')}</ul></div>`;
+  return h;
+}
+function vLedger(){
+  const L=ledger().filter(r=>yearOf(r.date)===ui.year);
+  const inc=L.filter(r=>r.dir==='in').reduce((a,r)=>a+r.amount,0),out=L.filter(r=>r.dir==='out').reduce((a,r)=>a+r.amount,0);
+  let h=`<div class="panel money"><div class="in"><span>รายรับ</span><b>${baht(inc)}</b><small>บาท</small></div><div class="out"><span>รายจ่าย</span><b>${baht(out)}</b><small>บาท</small></div><div><span>คงเหลือ</span><b>${inc-out<0?'−':''}${baht(Math.abs(inc-out))}</b><small>บาท</small></div></div>`;
+  if(!L.length)return h+`<div class="panel empty" style="margin-top:14px"><h3>ยังไม่มีรายการเงินในปีนี้</h3><p>ค่าปุ๋ยค่ายาจากหน้า "ฉีดยา/ปุ๋ย" และเงินจากการขายจะมาลงที่นี่เอง ส่วนค่าแรง ค่าไฟ ค่าน้ำมัน จดเพิ่มด้วยปุ่ม "จ่ายเงิน"</p></div>`;
+  const cats={};L.filter(r=>r.dir==='out').forEach(r=>cats[r.cat]=(cats[r.cat]||0)+r.amount);
+  const ce=Object.entries(cats).sort((a,b)=>b[1]-a[1]);const mx=ce[0]?ce[0][1]:1;
+  if(ce.length)h+=`<section class="sec" style="margin-top:20px"><div class="sec-h"><h2>รายจ่ายแยกหมวด</h2></div><div class="panel cat-bars">${ce.map(([c,v])=>`<div><span>${esc(c)}</span><i style="width:${Math.max(2,v/mx*100)}%"></i><em>${baht(v)}</em></div>`).join('')}</div></section>`;
+  // monthly
+  const months={};L.forEach(r=>{const k=r.date.slice(0,7);(months[k]=months[k]||[]).push(r)});
+  h+=`<section class="sec"><div class="sec-h"><h2>รายการทั้งหมด</h2><button class="link" data-act="csv">${''}คัดลอกไป Excel</button></div>`;
+  h+=Object.entries(months).sort((a,b)=>a[0]<b[0]?1:-1).map(([k,rs])=>{const i=rs.filter(r=>r.dir==='in').reduce((a,r)=>a+r.amount,0),o=rs.filter(r=>r.dir==='out').reduce((a,r)=>a+r.amount,0);
+    return `<div class="sec-h" style="margin-top:18px"><h3 style="margin:0;font-size:16px">${pd(k+'-01').toLocaleDateString('th-TH',{month:'long',year:'numeric'})}</h3><span class="muted" style="font-size:14px">รับ <b style="color:var(--in)">${baht(i)}</b> · จ่าย <b style="color:var(--out)">${baht(o)}</b></span></div><div class="panel"><ul class="list">${rs.map(r=>`<li class="click" data-act="edit" data-c="${r.src}" data-id="${r.id}"><div class="d">${fd(r.date,{day:'numeric',month:'short'})}</div><div><div class="t">${esc(r.title)}</div><div class="s"><span class="kind">${esc(r.cat)}</span>${r.src!=='money'?'มาจากหน้า '+({works:'ฉีดยา/ปุ๋ย',sales:'การขาย',stock:'สต็อก'})[r.src]:''} ${who(r.by)}</div></div><div class="amt ${r.dir}">${r.dir==='in'?'+':'−'}${baht(r.amount)}</div></li>`).join('')}</ul></div>`}).join('');
+  return h+`</section>`;
+}
+
+/* ---------- sheets ---------- */
+const sheet=$('#sheet');
+function openSheet(title,body,foot){sheet.innerHTML=`<form id="sf" novalidate><div class="sh-h"><h2>${title}</h2><button type="button" class="ib" data-act="close" aria-label="ปิด">${ic('x')}</button></div><div class="sh-b">${body}</div>${foot?`<div class="sh-f">${foot}</div>`:''}</form>`;if(!sheet.open)sheet.showModal();const f=sheet.querySelector('input:not([type=hidden]),select');if(f&&window.innerWidth>899)f.focus()}
+function closeSheet(){if(sheet.open)sheet.close()}
+sheet.addEventListener('click',e=>{if(e.target===sheet)closeSheet()});
+sheet.addEventListener('close',()=>stopPhotos());
+
+function quick(){
+  const items=[['works','drop','ฉีดยา / ใส่ปุ๋ย','ยา ปุ๋ย ฮอร์โมน ราดสาร'],['flowers','flower','ทำดอก / ติดผล','ราดสาร ดอกออก ดอกบาน ติดผล ตัด'],['sales','basket','ขายทุเรียน','รอบตัดให้ล้ง หรือออเดอร์ออนไลน์'],['money-out','out','จ่ายเงิน','ค่าแรง ค่าไฟ น้ำมัน อุปกรณ์'],['money-in','in','รับเงินอื่นๆ','รายรับที่ไม่ใช่การขายทุเรียน'],['lab','flask','ผสมยา / คำนวณสูตร','ลำดับการเติม ราคาต่อถัง'],['stock','box','ซื้อปุ๋ย/ยาเข้าสต็อก','จำนวน ราคา หักออกตอนใช้'],['trees','tag','เพิ่มต้นไม้','ติดเบอร์ต้นทุเรียน/มังคุดใหม่']];
+  openSheet('จดอะไร?',`<div class="choose">${items.map(([k,i,t,d])=>`<button type="button" data-act="new" data-kind="${k}"><span class="ic">${ic(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}</div>`);
+}
+const opt=(arr,v)=>arr.map(a=>`<option ${a===v?'selected':''}>${esc(a)}</option>`).join('');
+function pickerHTML(sel){
+  const ts=trees();const st=treeState();const set=new Set(sel||[]);
+  if(!ts.length)return `<p class="muted">ยังไม่มีต้นทุเรียน — เพิ่มต้นก่อนที่หน้า "ต้นทุเรียน" (บันทึกนี้จดแบบไม่ระบุต้นได้)</p>`;
+  return `<div class="row" style="margin-bottom:8px"><button type="button" class="btn" data-act="pickall">ทุกต้น</button><button type="button" class="btn" data-act="pickbear">เฉพาะต้นให้ผล</button>${ts.some(isMg)?'<button type="button" class="btn" data-act="pickdur">เฉพาะทุเรียน</button><button type="button" class="btn" data-act="pickmg">เฉพาะมังคุด</button>':''}<button type="button" class="btn" data-act="picknone">ล้าง</button><span class="muted" id="pc">เลือก ${set.size} ต้น</span></div><div class="pick" id="pick">${ts.map(t=>tagHTML(t,st,{pick:true,on:set.has(t.id)})).join('')}</div>`;
+}
+const pickedIds=()=>[...sheet.querySelectorAll('#pick .tag[aria-pressed=true]')].map(e=>e.dataset.id);
+const delBtn=(c,id)=>id?`<button type="button" class="btn danger" data-act="del" data-c="${c}" data-id="${id}">ลบรายการนี้</button>`:'<span></span>';
+const saveBtn=`<button type="submit" class="btn pri" style="min-width:140px;justify-content:center">บันทึก</button>`;
+
+const forms={
+ works(id,x={}){const today_=x.date||today();
+  openSheet(id?'แก้ไขงานสวน':'จดงานสวน',`<input type="hidden" name="_c" value="works"><input type="hidden" name="_id" value="${id||''}"><input type="hidden" name="uses" value="${esc(JSON.stringify(x.uses||[]))}">
+  ${(x.uses||[]).length?`<div class="note" style="background:#e9f1e9;border-color:#c7d9c8;color:var(--ink)"><span>จากสูตรผสม: ${x.uses.map(u=>esc(u.item)+' '+fmtAmt(+u.qty,u.unit)).join(' · ')} (หักสต็อกให้ถ้าชื่อตรงกัน)</span></div>`:''}
+  <div class="grid2"><div class="fld"><label class="l" for="w1">วันที่</label><input class="f" id="w1" type="date" name="date" value="${today_}" required></div>
+  <div class="fld"><label class="l" for="w2">ทำอะไร</label><select class="f" id="w2" name="type">${opt(WORK_TYPES,x.type)}</select></div></div>
+  <div class="grid2"><div class="fld"><label class="l" for="w3">ชื่อยา/ปุ๋ย/สาร <small>(ถ้ามี)</small></label><input class="f" id="w3" name="product" value="${esc(x.product)}" placeholder="เช่น 8-24-24, แมนโคเซบ" list="prodlist"></div>
+  <div class="fld"><label class="l" for="w4">อัตราที่ใช้</label><input class="f" id="w4" name="rate" value="${esc(x.rate)}" placeholder="เช่น 30 ซีซี/น้ำ 20 ลิตร, 1 กก./ต้น"></div></div>
+  <datalist id="prodlist">${[...new Set([...stockLevels().map(o=>o.item),...list('works').map(w=>w.product)].filter(Boolean))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>
+  <div class="fld"><label class="l">ทำกับต้นไหนบ้าง</label>${pickerHTML(x.trees)}</div>
+  <div class="grid2"><div class="fld"><label class="l" for="w5">ค่าใช้จ่ายครั้งนี้ (บาท) <small>ถ้าซื้อเข้าสต็อกแล้ว ไม่ต้องใส่ซ้ำ</small></label><input class="f num" style="font-size:20px" id="w5" name="cost" type="number" inputmode="decimal" min="0" step="any" value="${x.cost??''}" placeholder="0"></div>
+  <div class="fld"><label class="l" for="w6">หมายเหตุ</label><input class="f" id="w6" name="note" value="${esc(x.note)}" placeholder="เช่น ฝนตกหลังฉีด, เจอหนอนเจาะ"></div></div>
+  <div class="grid2"><div class="fld"><label class="l" for="w7">เว้นก่อนตัด (วัน) <small>ดูบนฉลากยา</small></label><input class="f num" style="font-size:20px" id="w7" name="phi" type="number" inputmode="numeric" min="0" value="${x.phi||''}" placeholder="เช่น 14"></div>
+  <div class="fld"><label class="l" for="w8">ทำซ้ำทุกกี่วัน <small>จะเตือนรอบถัดไป</small></label><input class="f num" style="font-size:20px" id="w8" name="every" type="number" inputmode="numeric" min="0" value="${x.every||''}" placeholder="ไม่ทำซ้ำ เว้นว่าง"></div></div>
+  <div class="fld"><label class="l" for="w9">ใช้ไปเท่าไหร่ <small id="useunit">${unitOf(x.product)?'หน่วย: '+esc(unitOf(x.product))+' · หักจากสต็อก':'หักจากสต็อก ถ้าชื่อตรงกับของในสต็อก'}</small></label><input class="f num" style="font-size:20px" id="w9" name="useQty" type="number" inputmode="decimal" min="0" step="any" value="${x.useQty||''}"></div>`,delBtn('works',id)+saveBtn)},
+ flowers(id,x={}){
+  const stage=x.stage||'induce';
+  openSheet(id?'แก้ไขระยะดอก':'จดระยะดอก / ติดผล',`<input type="hidden" name="_c" value="flowers"><input type="hidden" name="_id" value="${id||''}">
+  <div class="fld"><label class="l">ระยะ</label><div class="seg" id="stseg">${EVENT_STAGES.map(k=>`<button type="button" data-act="stpick" data-v="${k}" aria-pressed="${k===stage}"><span class="dot st-${k}"></span>${ST[k].t}</button>`).join('')}</div><input type="hidden" name="stage" value="${stage}"><p class="muted" id="sthelp" style="margin:6px 0 0;font-size:14px">${ST[stage].d}</p></div>
+  <div class="grid2"><div class="fld"><label class="l" for="f1">วันที่</label><input class="f" id="f1" type="date" name="date" value="${x.date||today()}"></div>
+  <div class="fld" id="fruitf" ${stage==='fruit'?'':'hidden'}><label class="l" for="f2">จำนวนลูกที่ไว้ <small>(ต่อต้น)</small></label><input class="f num" style="font-size:20px" id="f2" name="fruits" type="number" inputmode="numeric" min="0" value="${x.fruits??''}"></div></div>
+  <div class="grid2" id="yieldf" ${stage==='cut'?'':'hidden'}><div class="fld"><label class="l" for="f4">ได้กี่ลูก <small>(ต่อต้น)</small></label><input class="f num" style="font-size:20px" id="f4" name="yieldN" type="number" inputmode="numeric" min="0" value="${x.yieldN??''}"></div><div class="fld"><label class="l" for="f5">ได้กี่กิโล <small>(ต่อต้น · เลือกหลายต้นให้ใส่ค่าเฉลี่ย)</small></label><input class="f num" style="font-size:20px" id="f5" name="yieldKg" type="number" inputmode="decimal" min="0" step="any" value="${x.yieldKg??''}"></div></div>
+  <div class="fld"><label class="l">ต้นไหนบ้าง</label>${pickerHTML(x.trees)}</div>
+  <div class="fld"><label class="l" for="f3">หมายเหตุ</label><input class="f" id="f3" name="note" value="${esc(x.note)}" placeholder="เช่น ใช้พาโคลบิวทราโซล 15%, ดอกรุ่นแรก"></div>`,delBtn('flowers',id)+saveBtn)},
+ sales(id,x={}){
+  const mode=x.mode||'round';
+  const lines=x.lines&&x.lines.length?x.lines:(mode==='round'?GRADES.map(g=>({grade:g,kg:'',price:''})):[{grade:'หมอนทอง',kg:'',price:''}]);
+  openSheet(id?'แก้ไขการขาย':'จดการขาย',`<input type="hidden" name="_c" value="sales"><input type="hidden" name="_id" value="${id||''}"><input type="hidden" name="mode" value="${mode}">
+  <div class="fld"><div class="seg"><button type="button" data-act="smode" data-v="round" aria-pressed="${mode==='round'}">ขายรอบตัด (ล้ง/เหมา)</button><button type="button" data-act="smode" data-v="online" aria-pressed="${mode==='online'}">ขายออนไลน์</button></div></div>
+  <div class="grid2"><div class="fld"><label class="l" for="s1">วันที่</label><input class="f" id="s1" type="date" name="date" value="${x.date||today()}"></div>
+  <div class="fld"><label class="l" for="s2">${mode==='round'?'ขายให้ (ล้ง/คนเหมา)':'ลูกค้า'}</label><input class="f" id="s2" name="buyer" value="${esc(x.buyer)}" placeholder="${mode==='round'?'เช่น ล้งเจ๊หมวย':'ชื่อลูกค้า'}"></div></div>
+  ${mode==='online'?`<div class="fld"><label class="l" for="s3">ช่องทาง</label><select class="f" id="s3" name="channel">${opt(CHANNELS,x.channel)}</select></div>`:''}
+  <div class="fld"><label class="l">${mode==='round'?'น้ำหนักแต่ละเกรด':'สินค้า'}</label><table class="lines"><thead><tr><th>${mode==='round'?'เกรด':'รายการ'}</th><th>กิโลกรัม</th><th>บาท/กก.</th></tr></thead><tbody id="ln">${lines.map(l=>lineRow(l)).join('')}</tbody></table><button type="button" class="link" data-act="addline" style="margin-top:6px">+ เพิ่มแถว</button></div>
+  <div class="grid2"><div class="fld"><label class="l" for="s4">${mode==='online'?'ค่าส่ง/ค่ากล่อง (บาท)':'ค่าใช้จ่ายการขาย (บาท)'} <small>ลงเป็นรายจ่าย</small></label><input class="f num" style="font-size:20px" id="s4" name="fee" type="number" inputmode="decimal" min="0" step="any" value="${x.fee??''}" placeholder="0"></div>
+  <div class="fld"><label class="l" for="s5">หมายเหตุ</label><input class="f" id="s5" name="note" value="${esc(x.note)}" placeholder="${mode==='round'?'เช่น ตัดมีด 2, เปอร์เซ็นต์แป้ง':'เช่น ส่ง Kerry, โอนแล้ว'}"></div></div>
+  <div class="total"><span>รวมเป็นเงิน</span><b id="stotal">0</b></div>`,delBtn('sales',id)+saveBtn);calcSale()},
+ money(id,x={}){
+  const dir=x.dir||'out';
+  openSheet(id?'แก้ไขรายการเงิน':dir==='in'?'รับเงิน':'จ่ายเงิน',`<input type="hidden" name="_c" value="money"><input type="hidden" name="_id" value="${id||''}"><input type="hidden" name="dir" value="${dir}">
+  <div class="fld"><label class="l" for="m1">จำนวนเงิน (บาท)</label><input class="f num" style="font-size:28px;min-height:58px" id="m1" name="amount" type="number" inputmode="decimal" min="0" step="any" value="${x.amount??''}" required></div>
+  <div class="grid2"><div class="fld"><label class="l" for="m2">หมวด</label><select class="f" id="m2" name="cat">${opt(dir==='in'?IN_CATS:OUT_CATS,x.cat)}</select></div>
+  <div class="fld"><label class="l" for="m3">วันที่</label><input class="f" id="m3" type="date" name="date" value="${x.date||today()}"></div></div>
+  <div class="fld"><label class="l" for="m4">รายละเอียด</label><input class="f" id="m4" name="note" value="${esc(x.note)}" placeholder="${dir==='in'?'เช่น ขายกิ่งพันธุ์':'เช่น ค่าแรงตัดหญ้า 2 คน'}"></div>`,delBtn('money',id)+saveBtn)},
+ chems(id,x={}){const others=chemList().filter(c=>c.id!==id);const tg=new Set(x.tags||[]),nm=new Set(x.notMix||[]);
+  openSheet(id?'แก้ไขสาร':'เพิ่มสารเข้าคลัง',`<input type="hidden" name="_c" value="chems"><input type="hidden" name="_id" value="${id||''}">
+  <div class="fld"><label class="l" for="c1">ชื่อสาร/ชื่อการค้า</label><input class="f" id="c1" name="name" value="${esc(x.name)}" placeholder="เช่น แมนโคเซบ 80% WP" required></div>
+  <div class="fld"><label class="l" for="c2">ชนิดสูตร <small>ดูตัวย่อบนฉลาก ใช้เรียงลำดับการเติม</small></label><select class="f" id="c2" name="form">${FORMS.map(f=>`<option value="${f.k}" ${f.k===(x.form||'OTHER')?'selected':''}>${f.t}</option>`).join('')}</select></div>
+  <div class="fld"><label class="l">เป็นสารกลุ่มไหน <small>ใช้เช็คคู่ที่ไม่ควรผสม (เลือกได้หลายข้อ)</small></label><div class="chips">${TAGS.map(t=>`<label><input type="checkbox" name="tag" value="${t.k}" ${tg.has(t.k)?'checked':''}>${t.t}</label>`).join('')}</div></div>
+  <div class="grid3"><div class="fld"><label class="l" for="c3">อัตราใช้ปกติ <small>ต่อน้ำ 20 ลิตร</small></label><input class="f num" style="font-size:20px" id="c3" name="rate" type="number" inputmode="decimal" min="0" step="any" value="${x.rate??''}"></div><div class="fld"><label class="l" for="c4">หน่วย</label><select class="f" id="c4" name="rateUnit">${MIXU.map(u=>`<option ${u===(x.rateUnit||'ซีซี')?'selected':''}>${u}</option>`).join('')}</select></div><div class="fld"><label class="l" for="c5">เว้นก่อนตัด (วัน)</label><input class="f num" style="font-size:20px" id="c5" name="phi" type="number" inputmode="numeric" min="0" value="${x.phi||''}"></div></div>
+  <div class="grid3"><div class="fld"><label class="l" for="c7">สูตรปุ๋ย N-P-K <small>(ถ้าเป็นปุ๋ย)</small></label><input class="f num" style="font-size:20px" id="c7" name="npk" value="${esc(x.npk)}" placeholder="เช่น 15-15-15"></div><div class="fld"><label class="l" for="c8">% สารออกฤทธิ์ <small>(ถ้าเป็นยา)</small></label><input class="f num" style="font-size:20px" id="c8" name="ai" type="number" inputmode="decimal" min="0" max="100" step="any" value="${x.ai??''}" placeholder="เช่น 80"></div><div class="fld"><label class="l" for="c9">ชื่อสารออกฤทธิ์</label><input class="f" id="c9" name="aiName" value="${esc(x.aiName)}" placeholder="เช่น แมนโคเซบ"></div></div>
+  <label class="l">ราคา <small>เช่น ขวด 1 ลิตร 450 บาท (ไม่ใส่ จะใช้ราคาจากสต็อกถ้าชื่อตรงกัน)</small></label>
+  <div class="grid3"><div class="fld"><input class="f num" style="font-size:20px" name="packSize" type="number" inputmode="decimal" min="0" step="any" value="${x.packSize??''}" placeholder="ขนาด" aria-label="ขนาดบรรจุ"></div><div class="fld"><select class="f" name="packUnit" aria-label="หน่วยบรรจุ">${MIXU.map(u=>`<option ${u===(x.packUnit||'ลิตร')?'selected':''}>${u}</option>`).join('')}</select></div><div class="fld"><input class="f num" style="font-size:20px" name="packPrice" type="number" inputmode="decimal" min="0" step="any" value="${x.packPrice??''}" placeholder="ราคา บาท" aria-label="ราคา"></div></div>
+  ${others.length?`<div class="fld"><label class="l">ห้ามผสมกับ <small>(ตามฉลาก หรือที่เคยผสมแล้วมีปัญหา)</small></label><div class="chips">${others.map(c=>`<label><input type="checkbox" name="nm" value="${c.id}" ${nm.has(c.id)?'checked':''}>${esc(c.name)}</label>`).join('')}</div></div>`:''}
+  <div class="fld"><label class="l" for="c6">หมายเหตุ</label><input class="f" id="c6" name="note" value="${esc(x.note)}"></div>`,delBtn('chems',id)+saveBtn)},
+ stock(id,x={}){
+  openSheet(id?'แก้ไขการซื้อ':'ซื้อปุ๋ย/ยาเข้าสต็อก',`<input type="hidden" name="_c" value="stock"><input type="hidden" name="_id" value="${id||''}">
+  <div class="fld"><label class="l" for="k1">ชื่อของ</label><input class="f" id="k1" name="item" list="stocklist" value="${esc(x.item)}" placeholder="เช่น 15-15-15, แมนโคเซบ" required><datalist id="stocklist">${stockLevels().map(o=>`<option value="${esc(o.item)}">`).join('')}</datalist></div>
+  <div class="grid2"><div class="fld"><label class="l" for="k2">จำนวน</label><input class="f num" style="font-size:22px" id="k2" name="qty" type="number" inputmode="decimal" min="0" step="any" value="${x.qty??''}" required></div><div class="fld"><label class="l" for="k3">หน่วย</label><select class="f" id="k3" name="unit">${opt(UNITS,x.unit)}</select></div></div>
+  <div class="grid2"><div class="fld"><label class="l" for="k4">ประเภท</label><select class="f" id="k4" name="kind">${opt(STOCK_KINDS,x.kind)}</select></div><div class="fld"><label class="l" for="k5">ราคารวม (บาท) <small>ลงบัญชีให้เอง</small></label><input class="f num" style="font-size:22px" id="k5" name="cost" type="number" inputmode="decimal" min="0" step="any" value="${x.cost??''}"></div></div>
+  <div class="grid2"><div class="fld"><label class="l" for="k6">วันที่ซื้อ</label><input class="f" id="k6" type="date" name="date" value="${x.date||today()}"></div><div class="fld"><label class="l" for="k7">ร้าน/หมายเหตุ</label><input class="f" id="k7" name="note" value="${esc(x.note)}"></div></div>`,delBtn('stock',id)+saveBtn)},
+ trees(id,x={}){
+  if(id){openSheet('แก้ไขต้น '+esc(x.no),`<input type="hidden" name="_c" value="trees"><input type="hidden" name="_id" value="${id}">
+   <div class="grid2"><div class="fld"><label class="l" for="t1">เบอร์ต้น</label><input class="f num" style="font-size:22px" id="t1" name="no" value="${esc(x.no)}" required></div><div class="fld"><label class="l" for="t2">แถว/โซน</label><input class="f" id="t2" name="row" value="${esc(x.row)}"></div></div>
+   <div class="grid2"><div class="fld"><label class="l" for="t3">พันธุ์</label><select class="f" id="t3" name="variety">${opt(VARIETIES,x.variety)}</select></div><div class="fld"><label class="l" for="t4">ประเภท</label><select class="f" id="t4" name="kind"><option value="bearing" ${x.kind!=='young'?'selected':''}>ให้ผลแล้ว</option><option value="young" ${x.kind==='young'?'selected':''}>ต้นเล็ก (ยังไม่ให้ผล)</option></select></div></div>
+   <div class="grid2"><div class="fld"><label class="l" for="t5">ปีที่ปลูก <small>(พ.ศ.)</small></label><input class="f" id="t5" name="planted" inputmode="numeric" value="${esc(x.planted)}"></div><div class="fld"><label class="l" for="t6">หมายเหตุ</label><input class="f" id="t6" name="note" value="${esc(x.note)}"></div></div>`,delBtn('trees',id)+saveBtn);return}
+  const n=trees().length;const nextNo=n?Math.max(0,...trees().map(t=>parseInt(t.no)||0))+1:1;
+  openSheet('เพิ่มต้นไม้',`<input type="hidden" name="_c" value="trees-bulk">
+   <p class="muted" style="margin-top:0">เพิ่มทีละหลายต้นได้ เช่น เริ่มเบอร์ 1 จำนวน 20 ต้น จะได้ต้น 1–20</p>
+   <div class="grid2"><div class="fld"><label class="l" for="b0">ตัวหน้าเบอร์ <small>(ถ้ามี เช่น ม → ม1, ม2)</small></label><input class="f" id="b0" name="prefix" maxlength="4"></div><div></div></div>
+   <div class="grid2"><div class="fld"><label class="l" for="b1">เริ่มที่เบอร์</label><input class="f num" style="font-size:22px" id="b1" name="start" type="number" inputmode="numeric" min="1" value="${nextNo}" required></div><div class="fld"><label class="l" for="b2">จำนวนต้น</label><input class="f num" style="font-size:22px" id="b2" name="count" type="number" inputmode="numeric" min="1" max="500" value="10" required></div></div>
+   <div class="grid2"><div class="fld"><label class="l" for="b3">พันธุ์</label><select class="f" id="b3" name="variety">${opt(VARIETIES,'หมอนทอง')}</select></div><div class="fld"><label class="l" for="b4">ประเภท</label><select class="f" id="b4" name="kind"><option value="bearing">ให้ผลแล้ว</option><option value="young">ต้นเล็ก (ยังไม่ให้ผล)</option></select></div></div>
+   <div class="grid2"><div class="fld"><label class="l" for="b5">แถว/โซน <small>(ถ้ามี)</small></label><input class="f" id="b5" name="row" placeholder="เช่น 1, A, แปลงหน้าบ้าน"></div><div class="fld"><label class="l" for="b6">ปีที่ปลูก <small>(พ.ศ.)</small></label><input class="f" id="b6" name="planted" inputmode="numeric" placeholder="เช่น 2565"></div></div>`,'<span></span>'+saveBtn.replace('บันทึก','เพิ่มต้น'))},
+};
+function lineRow(l){return `<tr><td><input class="f" name="lg" value="${esc(l.grade)}" style="min-height:42px"></td><td><input class="f num" name="lk" type="number" inputmode="decimal" min="0" step="any" value="${l.kg??''}" style="min-height:42px;font-size:18px"></td><td><input class="f num" name="lp" type="number" inputmode="decimal" min="0" step="any" value="${l.price??''}" style="min-height:42px;font-size:18px"></td></tr>`}
+function readLines(){return [...sheet.querySelectorAll('#ln tr')].map(tr=>({grade:tr.querySelector('[name=lg]').value.trim(),kg:+tr.querySelector('[name=lk]').value||0,price:+tr.querySelector('[name=lp]').value||0})).filter(l=>l.grade||l.kg)}
+function calcSale(){const t=$('#stotal',sheet);if(!t)return;t.textContent=baht(readLines().reduce((a,l)=>a+l.kg*l.price,0))+' บาท'}
+
+function treeSheet(id){
+  const t=treeById(id);if(!t)return;const st=treeState();const s=st[id];
+  const ev=[];
+  list('works').filter(w=>(w.trees||[]).includes(id)).forEach(w=>ev.push({d:w.date,h:`<li class="click" data-act="edit" data-c="works" data-id="${w.id}"><div class="d">${fd(w.date)}</div><div><div class="t"><span class="kind">${ic('drop')}งานสวน</span>${esc(w.type)}${w.product?' · '+esc(w.product):''}</div><div class="s">${+w.phi?'<span class="badge">เว้น '+w.phi+' วัน</span> ':''}${esc(w.rate||'')}</div></div><div></div></li>`}));
+  list('flowers').filter(f=>(f.trees||[]).includes(id)).forEach(f=>ev.push({d:f.date,h:`<li class="click" data-act="edit" data-c="flowers" data-id="${f.id}"><div class="d">${fd(f.date)}</div><div><div class="t"><span class="dot st-${f.stage}"></span>${ST[f.stage]?.t||''}${f.fruits?' · '+f.fruits+' ลูก':''}${f.yieldKg?' · ได้ '+nf.format(f.yieldKg)+' กก.':''}${f.yieldN?' · '+f.yieldN+' ลูก':''}</div><div class="s">${esc(f.note||'')}</div></div><div></div></li>`}));
+  ev.sort((a,b)=>a.d<b.d?1:-1);
+  const yl={};list('flowers').filter(f=>f.stage==='cut'&&(f.trees||[]).includes(id)&&(+f.yieldKg||+f.yieldN)).forEach(f=>{const y=yearOf(f.date);const o=yl[y]=yl[y]||{n:0,kg:0};o.n+=+f.yieldN||0;o.kg+=+f.yieldKg||0});
+  const yk=Object.keys(yl).sort().reverse().slice(0,4);
+  openSheet(`ต้นเบอร์ ${esc(t.no)}`,`<div class="row" style="gap:18px;align-items:center;margin-bottom:18px">${tagHTML(t,st,{size:'lg',open:false})}<div><div style="font-size:18px;font-weight:700"><span class="dot st-${s.stage}"></span>${ST[s.stage].t}</div><div class="muted">${esc(t.variety||'')} · ${t.kind==='young'?'ต้นเล็ก':'ให้ผลแล้ว'}${t.row?' · แถว '+esc(t.row):''}${t.planted?' · ปลูก '+esc(t.planted):''}</div>${s.cutDate?`<div style="margin-top:4px"><b class="num" style="font-size:22px">${s.left<0?'เลยวันตัด '+(-s.left)+' วัน':'อีก '+s.left+' วันตัด'}</b> <span class="muted">(${fd(s.cutDate)})</span></div>`:''}${s.inPhi?`<div style="margin-top:6px"><span class="badge ${s.phiWarn?'bad':'warn'}">อยู่ในระยะเว้นยา ตัดได้ตั้งแต่ ${fd(s.safe)}</span></div>`:''}${t.note?`<div class="muted">${esc(t.note)}</div>`:''}</div></div>
+  ${S.canWrite?`<div class="row" style="margin-bottom:16px"><button type="button" class="btn" data-act="new" data-kind="works" data-tree="${id}">${ic('drop')}จดงานสวนต้นนี้</button><button type="button" class="btn" data-act="new" data-kind="flowers" data-tree="${id}">${ic('flower')}จดระยะดอกต้นนี้</button><button type="button" class="btn" data-act="edit" data-c="trees" data-id="${id}">แก้ไขข้อมูลต้น</button></div>`:''}
+  ${yk.length?`<h3 style="font-size:16px;margin:0 0 8px">ผลผลิตแต่ละปี</h3><div class="panel sum3 lastw" style="--n:${yk.length};margin-bottom:18px">${yk.map(y=>`<div><span>ปี ${be(y)}</span><b>${yl[y].kg?nf.format(yl[y].kg)+' กก.':'–'}</b><span>${yl[y].n?nf.format(yl[y].n)+' ลูก':''}</span></div>`).join('')}</div>`:''}
+  <div class="sec-h"><h3 style="font-size:16px;margin:0">รูปถ่าย</h3>${S.canWrite&&S.mode!=='loading'?`<label class="btn" style="min-height:40px">${ic('camera')}เพิ่มรูป<input type="file" accept="image/*" data-photo="${id}" hidden></label>`:''}</div>
+  <div class="photos" id="photos" style="margin-bottom:18px"><p class="muted">กำลังโหลดรูป…</p></div>
+  <h3 style="font-size:16px;margin:0 0 8px">ประวัติต้นนี้</h3>${ev.length?`<div class="panel"><ul class="list">${ev.map(e=>e.h).join('')}</ul></div>`:'<p class="muted">ยังไม่มีบันทึกของต้นนี้</p>'}`);
+  loadPhotos(id);
+}
+/* photos: loaded per tree only when its sheet opens */
+let photoUnsub=null;const LPH='durian-photos-v1';
+const localPhotos=()=>{try{return JSON.parse(localStorage.getItem(LPH)||'{}')}catch(e){return {}}};
+function stopPhotos(){if(photoUnsub){try{photoUnsub()}catch(e){}photoUnsub=null}}
+function loadPhotos(id){stopPhotos();
+  if(S.mode==='cloud'){const tm=setTimeout(()=>{const el=$('#photos');if(el&&el.dataset.loaded!=='1')el.innerHTML='<p class="muted">ยังโหลดรูปไม่ได้ ลองเปิดใหม่อีกครั้ง</p>'},10000);
+    photoUnsub=S.db.collection('photos').where('tree','==',id).onSnapshot(sn=>{clearTimeout(tm);showPhotos(sn.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})))},()=>{clearTimeout(tm);showPhotos([])})}
+  else showPhotos(Object.entries(localPhotos()).map(([k,v])=>({id:k,...v})).filter(p=>p.tree===id));
+}
+function showPhotos(ps){const el=$('#photos');if(!el)return;el.dataset.loaded='1';
+  ps=ps.filter(p=>typeof p.img==='string'&&p.img.startsWith('data:image/')).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.updated||0)-(a.updated||0));
+  el.innerHTML=ps.length?ps.map(p=>`<figure><img src="${esc(p.img)}" alt="รูปถ่ายวันที่ ${fd(p.date)}" data-act="bigphoto"><figcaption>${fd(p.date)}${S.canWrite?` · <button type="button" class="link" data-act="delphoto" data-id="${esc(p.id)}">ลบ</button>`:''}</figcaption></figure>`).join(''):'<p class="muted" style="grid-column:1/-1;margin:0">ยังไม่มีรูป ถ่ายใบ ดอก ผล หรือโรคที่เจอเก็บไว้ดูย้อนหลังได้</p>'}
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>{res(im);setTimeout(()=>URL.revokeObjectURL(u),1000)};im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+async function compress(file,maxW,limit){const im=await loadImg(file);let w=Math.min(maxW,im.naturalWidth);
+  for(let round=0;round<4;round++){const h=Math.round(im.naturalHeight*w/im.naturalWidth);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
+    for(const q of [.8,.7,.6,.5]){const u=c.toDataURL('image/jpeg',q);if(u.length<limit)return u}w=Math.round(w*.75)}
+  throw new Error('big')}
+async function addPhoto(id,file){toast('กำลังย่อรูป…');let img;try{img=await compress(file,1280,230000)}catch(e){toast('เปิดรูปนี้ไม่ได้');return}
+  const doc={tree:id,date:today(),img,updated:Date.now()};if(S.me)doc.by=S.me;
+  if(S.mode==='cloud'){try{await S.db.collection('photos').doc(uid()).set(doc);toast('เพิ่มรูปแล้ว')}catch(e){toast(e&&e.code==='quota_exceeded'?'พื้นที่เก็บรูปเต็ม ลองลบรูปเก่า':'เพิ่มรูปไม่สำเร็จ')}}
+  else{const all=localPhotos();all[uid()]=doc;try{localStorage.setItem(LPH,JSON.stringify(all));loadPhotos(id);toast('เพิ่มรูปแล้ว')}catch(e){toast('พื้นที่ในเครื่องเต็ม')}}}
+function setupSheet(){
+  const s=settings();
+  openSheet('ตั้งค่าสวน',`<input type="hidden" name="_c" value="setup"><div class="fld"><label class="l" for="o1">ชื่อสวน</label><input class="f" id="o1" name="name" value="${esc(s.name)}"></div>
+  <label class="l">จำนวนวันจากดอกบานถึงวันตัด <small>(ใช้คำนวณวันตัด แก้ให้ตรงกับสวนตัวเอง)</small></label>
+  <div class="grid2">${VARIETIES.map(v=>`<div class="fld" style="margin-bottom:8px"><label class="l" style="font-weight:500" for="d-${v}">${v}</label><input class="f num" style="font-size:18px" id="d-${v}" name="d:${v}" type="number" min="30" max="200" value="${daysFor(v)}"></div>`).join('')}</div>
+  <h3 style="font-size:16px;margin:18px 0 6px">สำรองข้อมูล</h3><p class="muted" style="font-size:14px;margin:0 0 10px">ดาวน์โหลดข้อมูลทั้งหมดเก็บไว้เป็นไฟล์ หรือนำเข้าจากไฟล์สำรอง (รูปถ่ายไม่รวมในไฟล์)</p>
+  <div class="row"><button type="button" class="btn" data-act="backup">ดาวน์โหลดไฟล์สำรอง</button><label class="btn">นำเข้าจากไฟล์<input type="file" accept=".json,application/json" data-import hidden></label></div>`,'<span></span>'+saveBtn)}
+
+/* ---------- submit ---------- */
+sheet.addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target,fd_=new FormData(f),g=k=>(fd_.get(k)||'').toString().trim();
+  const c=g('_c'),id=g('_id')||uid();const prev=(S.data[c]||{})[id]||{};
+  const btn=f.querySelector('[type=submit]');btn.disabled=true;btn.textContent='กำลังบันทึก…';
+  let ok=false,msg='บันทึกแล้ว';
+  if(c==='works'){ok=await put('works',id,{...prev,date:g('date')||today(),type:g('type'),product:g('product'),rate:g('rate'),trees:pickedIds(),cost:+g('cost')||0,uses:(()=>{try{return JSON.parse(g('uses')||'[]')}catch(_){return []}})(),phi:+g('phi')||0,every:+g('every')||0,useQty:+g('useQty')||0,note:g('note')})}
+  else if(c==='flowers'){const ids=pickedIds();if(!ids.length){toast('เลือกต้นอย่างน้อย 1 ต้น');btn.disabled=false;btn.textContent='บันทึก';return}
+    const stage=g('stage');ok=await put('flowers',id,{...prev,date:g('date')||today(),stage,fruits:stage==='fruit'?(+g('fruits')||null):null,yieldN:stage==='cut'?(+g('yieldN')||null):null,yieldKg:stage==='cut'?(+g('yieldKg')||null):null,trees:ids,note:g('note')})}
+  else if(c==='sales'){const lines=readLines();if(!lines.some(l=>l.kg)){toast('ใส่น้ำหนักอย่างน้อย 1 แถว');btn.disabled=false;btn.textContent='บันทึก';return}
+    ok=await put('sales',id,{...prev,date:g('date')||today(),mode:g('mode'),buyer:g('buyer'),channel:g('channel'),lines,fee:+g('fee')||0,note:g('note')})}
+  else if(c==='money'){const a=+g('amount');if(!(a>0)){toast('ใส่จำนวนเงิน');btn.disabled=false;btn.textContent='บันทึก';return}
+    ok=await put('money',id,{...prev,date:g('date')||today(),dir:g('dir'),cat:g('cat'),amount:a,note:g('note')})}
+  else if(c==='chems'){if(!g('name')){toast('ใส่ชื่อสาร');btn.disabled=false;btn.textContent='บันทึก';return}
+    ok=await put('chems',id,{...prev,name:g('name'),form:g('form')||'OTHER',tags:fd_.getAll('tag'),notMix:fd_.getAll('nm'),rate:+g('rate')||null,rateUnit:g('rateUnit'),phi:+g('phi')||0,packSize:+g('packSize')||null,packUnit:g('packUnit'),packPrice:+g('packPrice')||null,npk:g('npk'),ai:+g('ai')||null,aiName:g('aiName'),note:g('note')});
+    if(ok&&ui.chemToMix){ui.mix.items=(ui.mix.items||[]).filter(r=>r.pid);ui.mix.items.push({pid:id,amt:+g('rate')||'',unit:g('rateUnit')||'ซีซี'});saveMix()}ui.chemToMix=false}
+  else if(c==='stock'){const q=+g('qty');if(!g('item')||!(q>0)){toast('ใส่ชื่อของและจำนวน');btn.disabled=false;btn.textContent='บันทึก';return}
+    ok=await put('stock',id,{...prev,date:g('date')||today(),item:g('item'),qty:q,unit:g('unit'),kind:g('kind'),cost:+g('cost')||0,note:g('note')})}
+  else if(c==='trees'){if(!g('no')){toast('ใส่เบอร์ต้น');btn.disabled=false;btn.textContent='บันทึก';return}
+    ok=await put('trees',id,{...prev,no:g('no'),row:g('row'),variety:g('variety'),kind:g('kind'),planted:g('planted'),note:g('note')})}
+  else if(c==='trees-bulk'){const st=parseInt(g('start'))||1,n=Math.min(500,parseInt(g('count'))||1);const exist=new Set(trees().map(t=>String(t.no)));let made=0;
+    for(let i=0;i<n;i++){const no=g('prefix')+String(st+i);if(exist.has(no))continue;const r=await put('trees',uid(),{no,row:g('row'),variety:g('variety'),kind:g('kind'),planted:g('planted'),created:Date.now()});if(!r)break;made++}
+    ok=made>0||n===0;msg=made?`เพิ่ม ${made} ต้นแล้ว`:'เบอร์ซ้ำกับต้นที่มีอยู่';if(!made){toast(msg);btn.disabled=false;btn.textContent='เพิ่มต้น';return}}
+  else if(c==='setup'){const days={};VARIETIES.forEach(v=>{const n=+g('d:'+v);if(n)days[v]=n});ok=await put('meta','settings',{name:g('name')||'สวนทุเรียน',days})}
+  if(ok){closeSheet();toast(msg);S.writeProven=true}else{btn.disabled=false;btn.textContent='บันทึก'}
+});
+
+/* ---------- clicks ---------- */
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
+  if(a==='quick')return quick();
+  if(a==='logout')return logout();
+  if(a==='localmode'){const sess={local:true,name:'สวนในเครื่องนี้',who:''};saveSession(sess);S.loginErr='';return enter(sess)}
+  if(a==='backup'){const out={app:'durian-book',version:1,exported:new Date().toISOString(),data:{}};COLLS.forEach(c=>out.data[c]=S.data[c]);
+    const blob=new Blob([JSON.stringify(out,null,1)],{type:'application/json'});const u=URL.createObjectURL(blob);const aa=document.createElement('a');aa.href=u;aa.download='สมุดสวน-สำรอง-'+today()+'.json';document.body.appendChild(aa);aa.click();aa.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('ดาวน์โหลดไฟล์สำรองแล้ว');return}
+  if(a==='close')return closeSheet();
+  if(a==='new'){let k=el.dataset.kind,x={};
+    if(k==='lab'){closeSheet();location.hash='lab';return}
+    if(k==='chems'&&el.dataset.tomix)ui.chemToMix=true;
+    if(k==='money-out'){k='money';x.dir='out'}if(k==='money-in'){k='money';x.dir='in'}if(k==='money')x.dir=x.dir||el.dataset.dir||'out';
+    if(el.dataset.tree)x.trees=[el.dataset.tree];
+    if(el.dataset.stage)x.stage=el.dataset.stage;
+    if(k==='flowers'&&!x.trees){/* preselect none */}
+    return forms[k](null,x)}
+  if(a==='edit'){const c=el.dataset.c,id=el.dataset.id,x=S.data[c][id];if(!x)return;if(!S.canWrite&&c!=='trees'){return}return forms[c](id,x)}
+  if(a==='tree')return treeSheet(el.dataset.id);
+  if(a==='toggle'){el.setAttribute('aria-pressed',el.getAttribute('aria-pressed')==='true'?'false':'true');return updPC()}
+  if(['pickall','pickbear','picknone','pickdur','pickmg'].includes(a)){sheet.querySelectorAll('#pick .tag').forEach(t=>{const tr=S.data.trees[t.dataset.id];const v=a==='pickall'?true:a==='picknone'?false:a==='pickdur'?!isMg(tr):a==='pickmg'?isMg(tr):(tr&&tr.kind!=='young');t.setAttribute('aria-pressed',String(!!v))});return updPC()}
+  if(a==='stpick'){const v=el.dataset.v;sheet.querySelectorAll('#stseg button').forEach(b=>b.setAttribute('aria-pressed',String(b===el)));sheet.querySelector('[name=stage]').value=v;$('#sthelp',sheet).textContent=ST[v].d;$('#fruitf',sheet).hidden=v!=='fruit';$('#yieldf',sheet).hidden=v!=='cut';return}
+  if(a==='smode'){const f=$('#sf',sheet);const id=f._id.value;const cur={...(S.data.sales[id]||{}),date:f.date.value,buyer:f.buyer.value,mode:el.dataset.v,lines:null};return forms.sales(id||null,cur)}
+  if(a==='addline'){$('#ln',sheet).insertAdjacentHTML('beforeend',lineRow({grade:'',kg:'',price:''}));return}
+  if(a==='del'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='กดอีกครั้งเพื่อยืนยันลบ';setTimeout(()=>{if(el.isConnected){el.classList.remove('arm');el.textContent='ลบรายการนี้'}},4000);return}
+    const c=el.dataset.c,id=el.dataset.id;if(await del(c,id)){closeSheet();toast('ลบแล้ว')}return}
+  if(a==='wf'){ui.workFilter=el.dataset.v;return render()}
+  if(a==='sf'){ui.stageFilter=el.dataset.v&&ui.stageFilter!==el.dataset.v?el.dataset.v:null;return render()}
+  if(a==='mt'){ui.moneyTab=el.dataset.v;return render()}
+  if(a==='setup')return setupSheet();
+  if(a==='wt'){ui.workTab=el.dataset.v;return render()}
+  if(a==='labtab'){ui.labTab=el.dataset.v;return render()}
+  if(a==='mixq'){ui.mix[el.dataset.k]=el.dataset.v;saveMix();const i=$(el.dataset.k==='base'?'#mx3':'#mx1');if(i)i.value=el.dataset.v;updMix();return}
+  if(a==='mixadd'){ui.mix.items.push({pid:'',amt:'',unit:'ซีซี'});saveMix();return render()}
+  if(a==='mixdel'){ui.mix.items.splice(+el.dataset.i,1);saveMix();return render()}
+  if(a==='mixclear'){ui.mix=newMix();saveMix();return render()}
+  if(a==='loadrec'){const r=S.data.recipes[el.dataset.id];if(!r)return;ui.mix={...newMix(),...JSON.parse(JSON.stringify(r)),id:el.dataset.id};ui.labTab='mix';saveMix();window.scrollTo(0,0);return render()}
+  if(a==='mixsave'){const m=ui.mix;if(!(m.name||'').trim()){toast('ตั้งชื่อสูตรก่อนบันทึก');const n=$('[data-mix=name]');if(n)n.focus();return}
+    const items=m.items.filter(r=>r.pid&&S.data.chems[r.pid]).map(r=>({pid:r.pid,amt:+r.amt||0,unit:r.unit}));if(!items.length)return toast('ยังไม่มีสารในสูตร');
+    const id=el.dataset.asnew||!m.id?uid():m.id;const prev=S.data.recipes[id]||{};
+    if(await put('recipes',id,{...prev,name:m.name.trim(),tank:+m.tank||200,tanks:+m.tanks||1,base:+m.base||20,perTree:+m.perTree||null,items,note:m.note||''})){ui.mix.id=id;saveMix();toast('บันทึกสูตรแล้ว');render()}return}
+  if(a==='mixdelrec'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='กดอีกครั้งเพื่อลบสูตร';setTimeout(()=>{if(el.isConnected){el.classList.remove('arm');el.textContent='ลบสูตรนี้'}},4000);return}
+    if(await del('recipes',ui.mix.id)){ui.mix.id=null;saveMix();toast('ลบสูตรแล้ว');render()}return}
+  if(a==='mixwork'){const r=mixCalc(ui.mix);if(!r.rows.length)return;const tot=r.cost;
+    return forms.works(null,{type:'ฉีดยา/สารเคมี',product:(ui.mix.name||'สูตรผสม').trim(),rate:r.rows.map(x=>x.c.name+' '+fmtAmt(x.amt,x.unit)).join(', ')+' /น้ำ '+r.base+' ลิตร · รวม '+nf.format(r.total)+' ลิตร',cost:tot?Math.round(tot*100)/100:'',phi:r.phi||'',uses:r.rows.map(x=>({item:x.c.name,qty:Math.round(x.all*100)/100,unit:x.unit}))})}
+  if(a==='starter'){let n=0;const have=new Set(chemList().map(c=>c.name));for(const [name,form,tags] of STARTER){if(have.has(name))continue;if(!await put('chems',uid(),{name,form,tags,notMix:[],note:'รายชื่อเริ่มต้น เช็คชนิดสูตรกับฉลากยี่ห้อที่ใช้'}))break;n++}toast(n?`เพิ่ม ${n} รายการแล้ว ใส่ราคา/อัตราเพิ่มได้`:'มีครบแล้ว');return}
+  if(a==='tt'){ui.treeTab=el.dataset.v;ui.mapEdit=false;ui.mapSel=null;return render()}
+  if(a==='gostock'){ui.workTab='stock';if(location.hash==='#work')render();else location.hash='work';return}
+  if(a==='repeat'){if(!S.canWrite)return;const w=S.data.works[el.dataset.id];if(!w)return;return forms.works(null,{type:w.type,product:w.product,rate:w.rate,trees:w.trees,every:w.every,phi:w.phi,useQty:w.useQty})}
+  if(a==='mapedit'){ui.mapEdit=!ui.mapEdit;ui.mapSel=null;return render()}
+  if(a==='mapsel'){ui.mapSel=ui.mapSel===el.dataset.id?null:el.dataset.id;return render()}
+  if(a==='pin'){if(!ui.mapEdit)return treeSheet(el.dataset.id);ui.mapSel=ui.mapSel===el.dataset.id?null:el.dataset.id;return render()}
+  if(a==='mapclick'){if(!ui.mapSel)return toast('เลือกป้ายต้นก่อน แล้วค่อยแตะบนรูป');const r=el.getBoundingClientRect();const mx=Math.round((e.clientX-r.left)/r.width*1000)/10,my=Math.round((e.clientY-r.top)/r.height*1000)/10;const id=ui.mapSel;const t=S.data.trees[id];if(!t)return;
+    const wasUn=t.mx==null;const nxt=trees().find(x=>x.id!==id&&(x.mx==null||x.my==null));ui.mapSel=wasUn&&nxt?nxt.id:null;await put('trees',id,{...t,mx,my});render();return}
+  if(a==='mapremove'){const id=ui.mapSel,t=S.data.trees[id];if(!t)return;ui.mapSel=null;const {mx,my,...rest}=t;await put('trees',id,{...rest,mx:null,my:null});render();return}
+  if(a==='mapreset'){await del('meta','mapimg');toast('กลับไปใช้รูปเดิมแล้ว');return}
+  if(a==='bigphoto'){el.closest('figure').classList.toggle('big');return}
+  if(a==='delphoto'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='กดอีกครั้งเพื่อลบ';setTimeout(()=>{if(el.isConnected){el.classList.remove('arm');el.textContent='ลบ'}},4000);return}
+    const pid=el.dataset.id;if(S.mode==='cloud'){try{await S.db.collection('photos').doc(pid).delete();toast('ลบรูปแล้ว')}catch(_){toast('ลบไม่สำเร็จ')}}else{const all=localPhotos();const tr=all[pid]&&all[pid].tree;delete all[pid];try{localStorage.setItem(LPH,JSON.stringify(all))}catch(_){}if(tr)loadPhotos(tr)}return}
+  if(a==='csv'){const L=ledger().filter(r=>yearOf(r.date)===ui.year);const txt=['วันที่\tประเภท\tหมวด\tรายการ\tจำนวนเงิน',...L.map(r=>[r.date,r.dir==='in'?'รายรับ':'รายจ่าย',r.cat,r.title.replace(/\t/g,' '),(r.dir==='in'?1:-1)*r.amount].join('\t'))].join('\n');
+    try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว วางใน Excel/Google Sheets ได้เลย')}catch(_){toast('คัดลอกไม่ได้ในเบราว์เซอร์นี้')}return}
+  if(a==='demo')return seedDemo();
+  if(a==='clearDemo'){for(const c of COLLS)for(const [id,x] of Object.entries(S.data[c]))if(x&&x.demo)await del(c,id);toast('ลบข้อมูลตัวอย่างแล้ว');return}
+});
+document.addEventListener('change',async e=>{const tg=e.target;
+  if(tg.matches('[data-import]')&&tg.files&&tg.files[0]){const f=tg.files[0];tg.value='';try{const j=JSON.parse(await f.text());const d=j.data||j;let n=0;
+    for(const c of COLLS){for(const [id,x] of Object.entries(d[c]||{})){if(x&&typeof x==='object'){const {updated,...rest}=x;if(await put(c,id,rest))n++}}}
+    closeSheet();toast(`นำเข้า ${n} รายการแล้ว`)}catch(_){toast('อ่านไฟล์นี้ไม่ได้')}return}
+  if(tg.matches('[data-act=year]')){ui.year=tg.value;render();return}
+  if(tg.matches('[data-photo]')&&tg.files&&tg.files[0]){const f=tg.files[0];tg.value='';addPhoto(tg.dataset.photo,f);return}
+  if(tg.matches('[data-mapfile]')&&tg.files&&tg.files[0]){const f=tg.files[0];tg.value='';toast('กำลังย่อรูป…');try{const img=await compress(f,1600,240000);if(await put('meta','mapimg',{img}))toast('เปลี่ยนรูปผังแล้ว')}catch(_){toast('เปิดรูปนี้ไม่ได้')}}});
+document.addEventListener('input',e=>{const tg=e.target;
+  if(tg.dataset&&(tg.dataset.calc!=null||tg.dataset.calcSrc!=null||tg.dataset.calcPrice!=null)){const c=ui.calc;
+    if(tg.dataset.calc!=null)c[tg.dataset.calc]=tg.value;
+    if(tg.dataset.calcPrice!=null)c.price[tg.dataset.calcPrice]=tg.value;
+    if(tg.dataset.calcSrc!=null){c.src[+tg.dataset.calcSrc]=tg.value;saveCalc();render();return}
+    saveCalc();const b=$('#blendres');if(b)b.innerHTML=blendHTML(solveBlend(c));const a=$('#aires');if(a)a.innerHTML=aiHTML();return}
+  if(tg.dataset&&tg.dataset.mix!=null){ui.mix[tg.dataset.mix]=tg.value;saveMix();updMix();return}
+  if(tg.dataset&&tg.dataset.mi!=null){const it=ui.mix.items[+tg.dataset.mi];if(!it)return;it[tg.dataset.mf]=tg.value;
+    if(tg.dataset.mf==='pid'){const c=S.data.chems[tg.value];if(c&&!it.amt&&c.rate){it.amt=c.rate;it.unit=c.rateUnit||it.unit}saveMix();render();return}
+    saveMix();updMix();return}
+if(e.target.closest('#ln'))calcSale();if(e.target.id==='w3'){const u=unitOf(e.target.value);const h=$('#useunit');if(h)h.textContent=u?'หน่วย: '+u+' · หักจากสต็อก':'หักจากสต็อก ถ้าชื่อตรงกับของในสต็อก'}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.tag[role=button]')){e.preventDefault();e.target.click()}});
+function updPC(){const n=pickedIds().length;const p=$('#pc',sheet);if(p)p.textContent=`เลือก ${n} ต้น`}
+
+/* ---------- example data (labelled, removable) ---------- */
+async function seedDemo(){
+  const T=[];const y=yearOf(today());
+  for(let i=1;i<=24;i++){const id='demo-t'+i;T.push(id);await put('trees',id,{no:String(i),row:String(Math.ceil(i/8)),variety:i%8===0?'ชะนี':'หมอนทอง',kind:i>20?'young':'bearing',planted:i>20?'2567':'2558',demo:true})}
+  const bear=T.slice(0,20),D=n=>addDays(today(),-n);
+  await put('flowers','demo-f1',{date:D(150),stage:'induce',trees:bear,note:'ราดสารรอบแรก',demo:true});
+  await put('flowers','demo-f2',{date:D(115),stage:'bud',trees:bear.slice(0,14),demo:true});
+  await put('flowers','demo-f3',{date:D(98),stage:'bloom',trees:bear.slice(0,8),demo:true});
+  await put('flowers','demo-f4',{date:D(80),stage:'bloom',trees:bear.slice(8,14),demo:true});
+  await put('flowers','demo-f5',{date:D(60),stage:'fruit',trees:bear.slice(0,8),fruits:45,demo:true});
+  await put('works','demo-w1',{date:D(40),type:'ฉีดยา/สารเคมี',product:'ยากันเชื้อรา',rate:'30 ซีซี/น้ำ 20 ลิตร',trees:bear,cost:1850,useQty:0.9,phi:14,every:14,demo:true});
+  await put('works','demo-w2',{date:D(25),type:'ปุ๋ยทางดิน',product:'13-13-21',rate:'1.5 กก./ต้น',trees:bear,cost:0,useQty:30,every:30,demo:true});
+  await put('works','demo-w3',{date:D(6),type:'ปุ๋ยทางใบ/ฮอร์โมน',product:'อาหารเสริม',rate:'50 ซีซี/น้ำ 20 ลิตร',trees:bear.slice(0,14),cost:650,phi:14,demo:true});
+  await put('stock','demo-k1',{date:D(30),item:'13-13-21',qty:150,unit:'กก.',kind:'ปุ๋ย',cost:4200,note:'ร้านเกษตร',demo:true});
+  await put('stock','demo-k2',{date:D(45),item:'ยากันเชื้อรา',qty:1,unit:'ลิตร',kind:'ยา/สารเคมี',cost:0,demo:true});
+  await put('money','demo-m1',{date:D(20),dir:'out',cat:'ค่าแรง',amount:2400,note:'ค่าแรงตัดหญ้า 2 คน 2 วัน',demo:true});
+  await put('money','demo-m2',{date:D(12),dir:'out',cat:'น้ำ/ไฟ',amount:780,note:'ค่าไฟปั๊มน้ำ',demo:true});
+  await put('sales','demo-s1',{date:D(3),mode:'online',buyer:'คุณเอ',channel:'Facebook',lines:[{grade:'หมอนทอง',kg:12,price:180}],fee:240,demo:true});
+  toast('ใส่ข้อมูลตัวอย่างแล้ว ลบได้ทุกเมื่อ');
+}
+
+route();boot();
+})();
+</script>
+</body>
+</html>
