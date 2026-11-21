@@ -285,7 +285,20 @@ dialog.sheet::backdrop{background:rgba(14,32,24,.45)}
 .mb-ck{width:36px;height:36px;border-radius:50%;border:2px solid var(--rail);background:#fff;font-weight:700;font-size:16px;cursor:pointer;color:var(--ink)}
 .mb-steps li.water .mb-ck{border-color:#4f86a8}.mb-steps li.done{opacity:.5}.mb-steps li.done .mb-ck{background:var(--rail);color:#fff}
 .mb-steps li.cur{background:#fff1c9;margin:0 -8px;padding:9px 8px;border-radius:10px}
+.today{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.td-t{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;font:inherit;color:var(--ink);min-height:96px}
+.td-t span{font-size:13.5px;color:var(--ink-2)}.td-t b{font-size:22px;line-height:1.2}.td-t small{font-size:13px;color:var(--ink-2)}
+.td-t.late{border-color:#e0a3a3;background:#fdf3f3}.td-t.warn{border-color:#e8c46a;background:#fffaeb}.td-t:hover{border-color:var(--rail)}
+.pest-l .s b{color:var(--ink)}
+.pest-cal{padding:12px 14px;overflow-x:auto}.pest-cal table{border-collapse:separate;border-spacing:2px;width:100%;font-size:13.5px}
+.pest-cal th{font-weight:600;color:var(--ink-2);font-size:12px;padding:2px}.pest-cal th.now{color:var(--ink);text-decoration:underline}
+.pest-cal td:first-child{padding-right:6px;line-height:1.25}.pest-cal td.c0,.pest-cal td.c1,.pest-cal td.c2,.pest-cal td.c3{height:22px;min-width:16px;border-radius:4px}
+.pest-cal .c0{background:#f2f1ee}.pest-cal .c1{background:#f3e3b8}.pest-cal .c2{background:#eab35a}.pest-cal .c3{background:#c8553d}
+.pest-cal td.now{outline:2px solid var(--ink);outline-offset:-1px}
+.pest-key{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink-2);margin-top:8px}.pest-key span{display:inline-block;width:14px;height:14px;border-radius:3px;margin-left:8px}
 @media (max-width:899px){
+  .today{grid-template-columns:1fr 1fr;gap:8px}.td-t{min-height:84px;padding:10px 12px}.td-t b{font-size:19px}
+  .pest-cal{padding:10px 8px}.pest-cal table{border-spacing:1.5px}.pest-cal td:first-child{font-size:12px;max-width:74px}.pest-cal th{font-size:10.5px}.pest-cal td.c0,.pest-cal td.c1,.pest-cal td.c2,.pest-cal td.c3{min-width:0}.pest-cal .badge{font-size:11px;padding:1px 5px}
   .pl-list>li{grid-template-columns:78px 1fr}.pl-b{grid-column:1/-1;flex-direction:row}.pl-b .btn{flex:1}
   .wx4{grid-template-columns:1fr 1fr}.wx4>div:nth-child(2){border-right:0}.wx4>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .guide details{padding:0 14px}.guide table td,.guide table th{padding:8px}
@@ -695,9 +708,9 @@ const wxAge=()=>WX.at?Math.round((Date.now()-WX.at)/6e4):null;
 const winTxt=w=>(w.day===today()?'วันนี้':w.day===addDays(today(),1)?'พรุ่งนี้':fd(w.day,{weekday:'short',day:'numeric'}))+' '+w.from+'–'+w.to+' น.';
 
 function vPlan(st){const tab=ui.planTab||'plan';
-  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · คู่มือ</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศของสวน และคู่มือทำสวน</p></div></div>`;
-  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
-  if(tab==='wx')return h+vWx(st);if(tab==='guide')return h+guideHTML();return h+vPlanList(st)}
+  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · ศัตรูพืช</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศ ศัตรูพืชตามฤดู และคู่มือทำสวน</p></div></div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['pest','ศัตรูพืช'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
+  if(tab==='wx')return h+vWx(st);if(tab==='pest')return h+vPest(st);if(tab==='guide')return h+guideHTML();return h+vPlanList(st)}
 function vPlanList(st){const p=planMeta(),T=planTasks(st),R=bloomRounds(st);
   const ro=S.canWrite?'':' disabled';
   let h=`<div class="panel pl-anc"><div class="fld"><label class="l">วิธีทำดอก</label><div class="seg">${[['pbz','ทำสาร (PBZ)'],['nat','ไม่ทำสาร']].map(([k,t])=>`<button data-act="pmode" data-v="${k}" aria-pressed="${p.mode===k}"${ro}>${t}</button>`).join('')}</div></div><div class="grid2"><div class="fld"><label class="l" for="pH">วันเริ่มรอบใหม่ (หลังเก็บเกี่ยว/ตัดแต่งกิ่ง)</label><input class="f" id="pH" type="date" value="${esc(p.H)}"${ro}></div>
@@ -784,6 +797,79 @@ function mbAct(a,el){loadMB();const b=ui.mb;if(!b&&a!=='mbstart')return false;
   if(a==='mbclose'){ui.mb=null;saveMB();render();return true}
   return false}
 
+/* ---------- pest season (month x orchard stage x live weather) ---------- */
+// m = base risk by month Jan..Dec for the eastern region (0 none .. 3 high)
+const PESTS=[
+ {k:'psy',n:'เพลี้ยไก่แจ้',ty:'แมลง',m:[1,1,1,1,2,3,3,3,3,2,1,1],st:['rest','young'],see:'ใบอ่อนหงิกงอ มีปุยขาวและน้ำหวานที่ยอดอ่อน',act:'ตรวจทุกครั้งที่ใบเพิ่งแทง พ่นกลุ่ม 4A สลับ 3A ตอนใบเพิ่งแทง'},
+ {k:'thr',n:'เพลี้ยไฟ',ty:'แมลง',m:[3,3,3,3,3,1,1,1,1,1,2,3],st:['bud','bloom','fruit'],dry:1,see:'ดอกแห้งเป็นสีน้ำตาล ผลอ่อนปลายหนามแห้ง ผิวกร้าน',act:'เคาะช่อดอกหรือยอดลงบนกระดาษขาว ดูตัวเล็กสีเหลือง-ดำ · พ่น spinosyn (5) สลับกลุ่มอื่น'},
+ {k:'mite',n:'ไรแดง',ty:'แมลง',m:[3,3,3,3,2,0,0,0,0,0,1,2],dry:1,see:'หน้าใบมีคราบคล้ายฝุ่นขาว ใบซีดไม่เป็นมัน',act:'ดูใบด้านนอกทรงพุ่มที่โดนแดด · อะบาเมกติน (6) หรือกำมะถันผง'},
+ {k:'fb',n:'หนอนเจาะผล',ty:'แมลง',m:[0,1,2,3,3,3,3,1,0,0,0,0],fruit:56,see:'มีขุยและมูลหนอนระหว่างผลที่ชิดกัน น้ำไหลเยิ้ม',act:'ตัดแต่งไม่ให้ผลชิดกัน ตรวจร่องระหว่างผล · diamide (28) สลับกลุ่ม'},
+ {k:'sb',n:'หนอนเจาะเมล็ด',ty:'แมลง',m:[0,1,2,2,2,2,1,0,0,0,0,0],fruit:0,see:'รูเจาะเล็กมาก มองยาก มักเจอรูออกหลังตัด',act:'ห่อผลด้วยถุงพลาสติกขาวขุ่นเจาะก้นถุง ตั้งแต่ผลอายุ 6 สัปดาห์'},
+ {k:'mb',n:'เพลี้ยแป้ง',ty:'แมลง',m:[0,1,1,2,3,3,3,1,0,0,0,0],st:['fruit'],see:'ปุยขาวตามขั้วผลและกิ่ง มีมดขึ้น มีราดำ',act:'กันมดขึ้นต้น (ผ้าชุบน้ำมันพันโคน) ตัดส่วนที่พบ พ่นเมื่อระบาด'},
+ {k:'rr',n:'รากเน่าโคนเน่า',ty:'โรค',m:[1,1,1,1,2,3,3,3,3,3,2,1],wet:1,see:'ใบปลายกิ่งซีด ไม่เป็นมัน เหี่ยวลู่ โคนต้นมีน้ำเยิ้มสีน้ำตาล',act:'เปิดร่องระบาย หว่านไตรโคเดอร์มา พ่นหรืออัดฉีดฟอสโฟเนต (P07)'},
+ {k:'fr',n:'ผลเน่า',ty:'โรค',m:[0,0,1,2,3,3,2,0,0,0,0,0],wet:1,st:['fruit'],see:'ผลมีจุดช้ำสีน้ำตาลเข้ม ลามเร็วหลังฝน',act:'เมทาแลกซิล (4) หรือฟอสอีทิล (P07) หยุดพ่นก่อนตัด ≥15 วัน ไม่ให้ผลสัมผัสดิน'},
+ {k:'an',n:'ใบติด/แอนแทรคโนส',ty:'โรค',m:[0,0,0,1,2,3,3,3,3,2,1,0],wet:1,st:['rest','young'],see:'ใบอ่อนเป็นแผลสีน้ำตาล ใบติดกันเป็นกระจุก',act:'ตัดแต่งให้โปร่ง · แมนโคเซบ (M03) สลับ 11 ตอนใบอ่อน'}];
+const LV=['ต่ำมาก','ต่ำ','ปานกลาง','สูง'],LVC=['','','warn','bad'];
+const SEASON=['หนาว · ดอกบาน','แล้ง · ผลอ่อน','แล้ง · ผลอ่อน','ร้อน · ผลโต','ร้อน · เก็บเกี่ยว','หลังเก็บเกี่ยว · ฟื้นต้น','ฝน · แตกใบอ่อน','ฝนชุก · สร้างใบ','ฝนชุก · สร้างใบ','ปลายฝน · สะสมอาหาร','ปลายฝน · ทำดอก','หนาว · ตาดอก'];
+function orchardStage(st){const cnt={};trees().filter(t=>!isMg(t)).forEach(t=>{const s=st[t.id].stage;cnt[s]=(cnt[s]||0)+1});const e=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);return {main:e[0]?e[0][0]:null,cnt}}
+function pestRisk(st){const mi=+today().slice(5,7)-1,os=orchardStage(st),stages=Object.keys(os.cnt);
+  const hasFlowerData=stages.some(s=>!['rest','young'].includes(s));
+  const ages=trees().filter(t=>!isMg(t)).map(t=>st[t.id]).filter(s=>s.stage==='fruit'&&s.age!=null).map(s=>s.age);
+  const wx=planMeta().lat!=null?wxAnalyze(st):null;
+  const rain7=wx?wx.days.slice(0,7).filter(x=>x.r>=5).length:null,dry=wx?wx.dry:null,rhLow=wx?Math.min(...wx.days.slice(0,5).map(x=>x.rh??100)):null;
+  return PESTS.map(p=>{let s=p.m[mi];const why=[];
+    if(p.st&&p.st.some(x=>stages.includes(x))){s+=1;why.push('ต้นอยู่ระยะ'+p.st.filter(x=>stages.includes(x)).map(x=>ST[x].t).join('/'))}
+    if(p.fruit!=null&&hasFlowerData){const ok=ages.some(a=>a>=p.fruit);if(ok){s=Math.max(s,2)+(p.fruit?1:0);why.push(p.fruit?'มีผลอายุ ≥'+Math.round(p.fruit/7)+' สัปดาห์':'มีผลอ่อนอยู่')}else s=Math.min(s,1)}
+    if(wx){if(p.wet&&rain7>=3){s+=1;why.push('ฝนตก '+rain7+' วันใน 7 วันข้างหน้า')}
+      if(p.dry&&rain7>=3)s-=1;
+      if(p.dry&&dry>=10&&rain7<2){s+=1;why.push('แล้งมา '+dry+' วัน')}
+      if(p.k==='mite'&&rhLow<50){s+=1;why.push('อากาศแห้ง ความชื้นต่ำ')}}
+    s=Math.max(0,Math.min(3,s));return {...p,s,why,base:p.m[mi]}}).sort((a,b)=>b.s-a.s||b.base-a.base)}
+function pestCardHTML(st,limit){const R=pestRisk(st).filter(p=>p.s>=2).slice(0,limit||4);const mi=+today().slice(5,7)-1;
+  if(!R.length)return `<p class="muted" style="margin:0;padding:14px 18px">ช่วงนี้ยังไม่มีศัตรูพืชที่เสี่ยงสูง ตรวจสวนตามปกติ</p>`;
+  return `<ul class="list pest-l">${R.map(p=>`<li><div class="d"><span class="badge ${LVC[p.s]}">${LV[p.s]}</span></div><div><div class="t">${esc(p.n)} <span class="muted" style="font-weight:400;font-size:13px">${p.ty}</span></div><div class="s"><b>ดู:</b> ${esc(p.see)}</div><div class="s"><b>ทำ:</b> ${esc(p.act)}</div>${p.why.length?`<div class="s pl-why">เพราะ ${esc(p.why.join(' · '))}</div>`:''}</div><div></div></li>`).join('')}</ul>`}
+function vPest(st){const mi=+today().slice(5,7)-1,R=pestRisk(st),M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  let h=`<section class="sec" style="margin-top:0"><div class="sec-h"><h2>ช่วงนี้ต้องระวัง</h2><span class="muted">${M[mi]} · ${SEASON[mi]}</span></div><div class="panel">${pestCardHTML(st,9)}</div></section>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>ปฏิทินศัตรูพืชทั้งปี</h2><span class="muted">ภาคตะวันออก</span></div><div class="panel pest-cal"><table><thead><tr><th></th>${M.map((m,i)=>`<th class="${i===mi?'now':''}" title="${m}">${i+1}</th>`).join('')}<th>ตอนนี้</th></tr></thead><tbody>${PESTS.map(p=>{const r=R.find(x=>x.k===p.k);return `<tr><td>${esc(p.n)}</td>${p.m.map((v,i)=>`<td class="c${v}${i===mi?' now':''}" title="${LV[v]}"></td>`).join('')}<td><span class="badge ${LVC[r.s]}">${LV[r.s]}</span></td></tr>`}).join('')}</tbody></table>
+  <div class="pest-key">เลข = เดือน (1 = ม.ค.) ·<span class="c1"></span>ต่ำ <span class="c2"></span>ปานกลาง <span class="c3"></span>สูง</div></div>
+  <p class="muted" style="font-size:13px">ช่องสีคือช่วงที่มักระบาดตามเดือน (อ้างอิงข้อมูลเตือนภัยศัตรูทุเรียนของกรมวิชาการเกษตร เขต 2) ช่อง "ตอนนี้" ปรับตามระยะต้นที่จดในแอป${planMeta().lat!=null?' และฝน/ความชื้นจากพยากรณ์อากาศ':' · ใส่ตำแหน่งสวนในหน้าอากาศ เพื่อให้ปรับตามฝนจริงด้วย'}</p></section>`;
+  return h}
+
+/* ---------- what's missing (gaps) ---------- */
+const GKEY='durian-gaps-off';
+function gapsOff(){try{return JSON.parse(localStorage.getItem(GKEY)||'{}')}catch(e){return {}}}
+function gapList(st){const p=planMeta(),G=[],ts=trees().filter(t=>!isMg(t)),mi=+today().slice(5,7);
+  if(p.lat==null)G.push(['loc','ยังไม่ได้ใส่ตำแหน่งสวน','ใส่แล้วจะได้พยากรณ์ฝน ช่วงพ่นยา และเตือนศัตรูพืชตามอากาศจริง','gowx','ใส่ตำแหน่ง']);
+  if(!p.H&&!bloomRounds(st).length&&!p.B)G.push(['plan','ยังไม่มีตารางฉีดยา/ใส่ปุ๋ย','ใส่วันเริ่มรอบ (วันตัดแต่งกิ่งหลังเก็บเกี่ยว) แอปจะคำนวณให้ทั้งปี','goplan','ตั้งวันเริ่ม']);
+  if(ts.length>=10&&!ts.some(t=>t.variety&&t.variety!=='หมอนทอง'))G.push(['pol','ยังไม่มีต้นพันธุ์ผสมเกสร','ทุกต้นเป็นหมอนทอง ลองแทรกก้านยาว/ชะนี/จันทบุรี 3 สัก 2–3 ต้น ช่วยให้ติดผลดีและลูกไม่เบี้ยว','goguide','อ่านคู่มือ']);
+  const ch=chemList();if(ch.length&&ch.filter(c=>!pricePer(c)).length>ch.length/2)G.push(['price','สารในคลังส่วนใหญ่ยังไม่มีราคา','ใส่ขนาดบรรจุกับราคา แอปจะคิดต้นทุนต่อถัง ต่อต้น ให้','golab','ไปคลังสาร']);
+  const W=list('works');const lastW=W.reduce((a,w)=>w.date>a?w.date:a,'');if(ts.length&&(!lastW||daysBetween(lastW,today())>30))G.push(['work','ไม่ได้จดงานสวนมา 30 วัน','จดทุกครั้งที่ฉีดยา ใส่ปุ๋ย ใช้เป็นหลักฐาน GAP และดูย้อนหลังได้ว่าอะไรได้ผล','quick','จดงาน']);
+  if(ts.length&&!W.some(w=>/ตรวจดิน|ตรวจใบ|วิเคราะห์ดิน/.test((w.type||'')+(w.product||'')+(w.note||''))&&daysBetween(w.date,today())<1100))G.push(['soil','ยังไม่มีบันทึกตรวจดิน/ตรวจใบ','ตรวจดินทุก 2–3 ปี ตรวจใบปีละครั้ง ช่วยให้ใส่ปุ๋ยตรงกับที่ต้นขาดจริง','goguide','อ่านวิธี']);
+  if([10,11,12].includes(mi)&&ts.some(t=>t.kind!=='young')&&!list('flowers').some(f=>daysBetween(f.date,today())<90))G.push(['flw','ถึงช่วงทำดอกแล้ว ยังไม่ได้จดระยะต้น','จดว่าต้นไหนทำดอก/เห็นตาดอก แอปจะนับวันตัดและเตือนศัตรูพืชตามระยะให้','goflower','จดทำดอก']);
+  const off=gapsOff();return G.filter(g=>!off[g[0]])}
+function gapsHTML(st){const G=gapList(st);if(!G.length)return '';
+  return `<section class="sec"><div class="sec-h"><h2>สิ่งที่ยังขาด</h2><span class="muted">${G.length} เรื่อง</span></div><div class="panel"><ul class="list">${G.map(g=>`<li><div class="d"><span class="badge warn">แนะนำ</span></div><div><div class="t">${esc(g[1])}</div><div class="s">${esc(g[2])}</div></div><div class="pl-b">${g[3]==='quick'?(S.canWrite?`<button class="btn pri" data-act="new" data-kind="works">${g[4]}</button>`:''):`<button class="btn pri" data-act="${g[3]}">${g[4]}</button>`}<button class="link" data-act="gapoff" data-k="${g[0]}">ไม่ต้องเตือน</button></div></li>`).join('')}</ul></div></section>`}
+
+/* ---------- today hero ---------- */
+function todayHTML(st){const mi=+today().slice(5,7)-1,os=orchardStage(st),p=planMeta();
+  const T=planTasks(st).filter(t=>!t.done&&t.left<=7&&t.left>=-30);const due=schedules().filter(x=>x.left<=7).length;
+  let w=null;if(p.lat!=null){if(!WX.d||WX.key!==wxKey(p)||Date.now()-WX.at>36e5)fetchWx();w=wxAnalyze(st)}
+  const top=pestRisk(st).filter(x=>x.s>=2);
+  const tile=(act,lab,big,sub,cls)=>`<button class="td-t ${cls||''}" data-act="${act}"><span>${lab}</span><b>${big}</b><small>${sub}</small></button>`;
+  return `<div class="today">`+
+   tile('goflower','ระยะสวนตอนนี้',os.main?esc(ST[os.main].t):'—',os.main?`${os.cnt[os.main]} จาก ${trees().filter(t=>!isMg(t)).length} ต้น`:'ยังไม่ได้จด')+
+   tile(T.length+due?'goplan':'goplan','งาน 7 วันนี้',(T.length+due)+' งาน',T.length?esc(T[0].x[1]):due?'ถึงรอบงานที่ทำซ้ำ':'ไม่มีงานค้าง',T.some(t=>t.left<0)?'late':'')+
+   tile('gowx','อากาศวันนี้',w?`${Math.round(w.days[0].mn)}–${Math.round(w.days[0].mx)}°`:'ใส่ตำแหน่ง',w?`ฝน ${w.days[0].pp??0}%${w.windows.length?' · พ่นยาได้ '+winTxt(w.windows[0]).replace(/ น\.$/,''):''}`:'เพื่อดูพยากรณ์',w&&w.A.some(a=>a[0]==='bad')?'late':'')+
+   tile('gopest','ศัตรูพืชช่วงนี้',top.length?esc(top[0].n):'ปกติ',top.length>1?'และอีก '+(top.length-1)+' อย่าง':top.length?LV[top[0].s]:'ยังไม่มีที่เสี่ยงสูง',top.some(x=>x.s>=3)?'warn':'')+
+  `</div>`}
+async function homeAct(a,el){
+  if(a==='gopest'){ui.planTab='pest';if(location.hash==='#plan')render();else location.hash='plan';return true}
+  if(a==='goguide'){ui.planTab='guide';if(location.hash==='#plan')render();else location.hash='plan';return true}
+  if(a==='golab'){ui.labTab='chems';if(location.hash==='#lab')render();else location.hash='lab';return true}
+  if(a==='goflower'){if(location.hash==='#flower')render();else location.hash='flower';return true}
+  if(a==='gapoff'){const o=gapsOff();o[el.dataset.k]=1;try{localStorage.setItem(GKEY,JSON.stringify(o))}catch(e){}render();return true}
+  return false}
+
 /* ---------- tag ---------- */
 function tagHTML(t,st,opts={}){
   if(!t)return '';
@@ -835,13 +921,16 @@ function vHome(st){
   const ts=trees();
   let h=`<div class="top"><div><h1>ภาพรวมสวน</h1><p>ปี ${be(y)} · ${countLine(ts)}</p></div></div>`;
   if(!ts.length)return h+onboard();
-  h+=`<div class="panel money"><div class="in"><span>รายรับปีนี้</span><b>${baht(inc)}</b><small>บาท</small></div><div class="out"><span>รายจ่ายปีนี้</span><b>${baht(out)}</b><small>บาท</small></div><div><span>คงเหลือ (กำไร)</span><b>${inc-out<0?'−':''}${baht(Math.abs(inc-out))}</b><small>บาท · <a class="link" style="color:inherit" href="#money">ดูบัญชี</a></small></div></div>`;
+  h+=todayHTML(st);
   const due=schedules().filter(x=>x.left<=7),phi=ts.filter(t=>st[t.id].phiWarn),low=stockLevels().filter(o=>o.low);
   if(due.length||phi.length||low.length){h+=`<section class="sec"><div class="sec-h"><h2>ต้องดู</h2></div><div class="panel"><ul class="list">`+
    phi.map(t=>{const s=st[t.id],w=s.safeW;return `<li class="click" data-act="tree" data-id="${t.id}"><div class="d"><span class="badge bad">ระวังสารตกค้าง</span></div><div><div class="t">ต้น ${esc(t.no)} ถึงวันตัด ${fd(s.cutDate,{day:'numeric',month:'short'})} ก่อนพ้นระยะเว้นยา</div><div class="s">${esc(w.type)}${w.product?' · '+esc(w.product):''} เมื่อ ${fd(w.date,{day:'numeric',month:'short'})} ต้องเว้น ${w.phi} วัน · ตัดได้ตั้งแต่ ${fd(s.safe,{day:'numeric',month:'short'})}</div></div><div>${tagHTML(t,st,{open:false,size:'sm'})}</div></li>`}).join('')+
    due.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':'warn'}">${dueTxt(x.left)}</span></div><div><div class="t">ถึงรอบ ${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทำทุก ${x.w.every} วัน · ครั้งล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')+
    low.map(o=>`<li class="click" data-act="gostock"><div class="d"><span class="badge warn">ใกล้หมด</span></div><div><div class="t">${esc(o.item)}</div><div class="s">เหลือ ${nf.format(o.left)} ${esc(o.unit||'')} จากที่ซื้อ ${nf.format(o.inQ)}</div></div><div></div></li>`).join('')+`</ul></div></section>`}
   h+=homePlanHTML(st);
+  h+=`<section class="sec"><div class="sec-h"><h2>ศัตรูพืชช่วงนี้</h2><a href="#plan" data-act="gopest">${esc(SEASON[+today().slice(5,7)-1])} · ดูทั้งปี</a></div><div class="panel">${pestCardHTML(st,3)}</div></section>`;
+  h+=gapsHTML(st);
+  h+=`<div class="panel money" style="margin-top:20px"><div class="in"><span>รายรับปีนี้</span><b>${baht(inc)}</b><small>บาท</small></div><div class="out"><span>รายจ่ายปีนี้</span><b>${baht(out)}</b><small>บาท</small></div><div><span>คงเหลือ (กำไร)</span><b>${inc-out<0?'−':''}${baht(Math.abs(inc-out))}</b><small>บาท · <a class="link" style="color:inherit" href="#money">ดูบัญชี</a></small></div></div>`;
   const soon=ts.filter(t=>st[t.id].cutDate).sort((a,b)=>st[a.id].left-st[b.id].left);
   h+=`<section class="sec"><div class="sec-h"><h2>ใกล้ตัด</h2><a href="#flower">ดูรอบทำดอกทั้งหมด</a></div>`;
   h+=soon.length?`<div class="soon">${soon.slice(0,8).map(t=>{const s=st[t.id];return `<div class="panel it ${s.left<0?'late':''}" data-act="tree" data-id="${t.id}">${tagHTML(t,st,{open:false})}<div><b>${s.left<0?'เลย '+(-s.left):s.left} วัน</b><span>${s.left<0?'เลยกำหนดตัด':'ตัด '+fd(s.cutDate,{day:'numeric',month:'short'})}</span></div></div>`}).join('')}</div>`
@@ -1310,6 +1399,7 @@ document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
   if(await planAct(a,el))return;
   if(/^mb/.test(a)&&mbAct(a,el))return;
+  if(await homeAct(a,el))return;
   if(a==='quick')return quick();
   if(a==='logout')return logout();
   if(a==='localmode'){const sess={local:true,name:'สวนในเครื่องนี้',who:''};saveSession(sess);S.loginErr='';return enter(sess)}
