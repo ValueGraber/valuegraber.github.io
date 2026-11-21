@@ -395,7 +395,8 @@ const STAGES=[
 const ST=Object.fromEntries(STAGES.map(s=>[s.k,s]));
 const EVENT_STAGES=['induce','bud','bloom','fruit','cut','rest'];
 const WORK_TYPES=['ฉีดยา/สารเคมี','ปุ๋ยทางดิน','ปุ๋ยทางใบ/ฮอร์โมน','ราดสารทำดอก','ตัดแต่งกิ่ง','ให้น้ำ','อื่นๆ'];
-const OUT_CATS=['ปุ๋ย','ยา/สารเคมี','ค่าแรง','น้ำ/ไฟ','น้ำมัน','อุปกรณ์','ต้นพันธุ์','ค่าส่ง','อื่นๆ'];
+const OUT_CATS=['ปุ๋ย','ยา/สารเคมี','ค่าแรง','น้ำ/ไฟ','น้ำมัน','อุปกรณ์','ต้นพันธุ์','ถมดิน/ปรับพื้นที่','ระบบน้ำ','ค่าส่ง','อื่นๆ'];
+const CAPITAL=['ต้นพันธุ์','อุปกรณ์','ถมดิน/ปรับพื้นที่','ระบบน้ำ'];
 const IN_CATS=['ขายทุเรียน','ขายผลผลิตอื่น','อื่นๆ'];
 const VARIETIES=['หมอนทอง','ชะนี','ก้านยาว','พวงมณี','กระดุม','นกหยิบ','มังคุด','อื่นๆ'];
 const isMg=t=>t&&t.variety==='มังคุด';
@@ -634,7 +635,9 @@ const PLAN_END=[ // offsets before cut day (D)
  [-25,'กันผลเน่า','เมทาแลกซิล 25% WP 30–50 ก./น้ำ 20 ล. (FRAC 4)','ฉีดยา/สารเคมี','ดูระยะเว้นก่อนตัดบนฉลาก'],
  [-16,'กันผลเน่า ครั้งสุดท้าย','ฟอสอีทิล-อะลูมิเนียม 80% WP 30–50 ก./น้ำ 20 ล. (P07)','ฉีดยา/สารเคมี','หยุดพ่นก่อนตัดอย่างน้อย 15 วัน'],
  [-7,'ตรวจความแก่','สุ่มตัด 1 ผล ตรวจเนื้อแห้ง (หมอนทอง ≥ 32%)','อื่นๆ','ผูกป้ายสีตามวันดอกบานทุกรุ่น'],
- [0,'ถึงวันตัด','ไม่ให้ผลสัมผัสดิน','อื่นๆ','']];
+ [0,'ถึงวันตัด','ไม่ให้ผลสัมผัสดิน','อื่นๆ',''],
+ [-21,'ติดต่อคนซื้อ/ล้ง','บอกจำนวนลูกและวันตัดคร่าว ๆ ถามราคาหลายเจ้า','อื่นๆ','ดูยอดคาดการณ์ในหน้า ทำดอก/ติดผล › แผนตัดผล'],
+ [-10,'นัดวันตัด','นัดล้งหรือทีมตัด เตรียมเชือกโรยผล ตะกร้า','อื่นๆ','']];
 const PLAN_A_NAT=PLAN_A.filter(x=>x[0]<75).concat([
  [80,'สะสมอาหาร (ไม่ทำสาร)','8-24-24 ทางดิน · งดปุ๋ย N ทุกชนิด','ปุ๋ยทางดิน','ไม่มี PBZ ช่วย ต้องลด N ให้ C/N สูงพอ'],
  [85,'กดใบอ่อน ครั้งที่ 1','0-52-34 ทางใบ','ปุ๋ยทางใบ/ฮอร์โมน','กดใบอ่อน เร่งใบให้แก่'],
@@ -707,10 +710,104 @@ function wxAnalyze(st){const d=WX.d;if(!d||!d.daily)return null;const D=d.daily,
 const wxAge=()=>WX.at?Math.round((Date.now()-WX.at)/6e4):null;
 const winTxt=w=>(w.day===today()?'วันนี้':w.day===addDays(today(),1)?'พรุ่งนี้':fd(w.day,{weekday:'short',day:'numeric'}))+' '+w.from+'–'+w.to+' น.';
 
+
+/* river / flood (Open-Meteo Flood API = GloFAS, free, no key) */
+const RV={f:null,h:null,at:0,hAt:0,key:'',loading:false,err:''};
+try{const c=JSON.parse(localStorage.getItem('durian-rv-v1')||'null');if(c){RV.f=c.f;RV.h=c.h;RV.at=c.at;RV.hAt=c.hAt;RV.key=c.key}}catch(_){}
+const rvPt=p=>p.rlat!=null?{lat:p.rlat,lon:p.rlon}:p.lat!=null?{lat:p.lat,lon:p.lon}:null;
+const rvKey=p=>{const q=rvPt(p);return q?(+q.lat).toFixed(3)+','+(+q.lon).toFixed(3):''};
+const RL=['ปกติ','น้ำสูงกว่าปกติ','เฝ้าระวัง','อันตราย'],RLC=['ok','','warn','bad'];
+function rvStats(D){const T=D.time||[],V=D.river_discharge||[];const ym={},all=[];
+  T.forEach((t,i)=>{const v=V[i];if(v==null)return;all.push(v);const y=t.slice(0,4);const o=ym[y]=ym[y]||{n:0,v:-1,d:''};o.n++;if(v>o.v){o.v=v;o.d=t}});
+  if(all.length<365)return null;
+  const yr=Object.values(ym).filter(o=>o.n>=300).map(o=>({d:o.d,v:o.v}));const am=yr.map(o=>o.v).sort((a,b)=>a-b),sa=all.sort((a,b)=>a-b);
+  const q=(a,p)=>a[Math.min(a.length-1,Math.max(0,Math.round(p*(a.length-1))))];const n=Math.min(T.length,1500);
+  return {q2:q(am,.5),q5:q(am,.8),p90:q(sa,.9),med:q(sa,.5),ny:am.length,peaks:yr,rt:T[T.length-n],rv:V.slice(-n)}}
+async function fetchRv(force){const p=planMeta(),q=rvPt(p);if(!q||RV.loading)return;const key=rvKey(p);
+  if(!force&&RV.key===key&&RV.f&&Date.now()-RV.at<6*36e5)return;
+  if(!force&&Date.now()-(RV.tried||0)<6e4)return;RV.tried=Date.now();RV.loading=true;RV.err='';
+  const base='https://flood-api.open-meteo.com/v1/flood?latitude='+q.lat+'&longitude='+q.lon;
+  const needH=force||RV.key!==key||!RV.h||Date.now()-(RV.hAt||0)>7*864e5;
+  try{const [f,h]=await Promise.all([
+      fetch(base+'&past_days=60&forecast_days=30&daily=river_discharge,river_discharge_median,river_discharge_max,river_discharge_p25,river_discharge_p75').then(r=>{if(!r.ok)throw 0;return r.json()}),
+      needH?fetch(base+'&start_date=1995-01-01&end_date='+today()+'&daily=river_discharge').then(r=>{if(!r.ok)throw 0;return r.json()}):null]);
+    RV.f=f.daily;if(h){RV.h=rvStats(h.daily||{});RV.hAt=Date.now()}RV.at=Date.now();RV.key=key;
+    try{localStorage.setItem('durian-rv-v1',JSON.stringify({f:RV.f,h:RV.h,at:RV.at,hAt:RV.hAt,key}))}catch(_){}}
+  catch(_){RV.err='ดึงข้อมูลแม่น้ำไม่ได้ ลองใหม่อีกครั้ง'}
+  RV.loading=false;if(ui.view==='plan'||ui.view==='home')render()}
+function rvAround(d){let best=null;const take=v=>{if(v!=null&&(best==null||v>best))best=v};
+  for(let k=-3;k<=3;k++){const t=addDays(d,k);
+    if(RV.f&&RV.f.time){const i=RV.f.time.indexOf(t);if(i>=0)take(RV.f.river_discharge[i])}
+    if(RV.h&&RV.h.rt){const i=daysBetween(RV.h.rt,t);if(i>=0&&i<RV.h.rv.length)take(RV.h.rv[i])}}
+  return best}
+function rvAnalyze(){const F=RV.f,H=RV.h;if(!F||!F.time)return null;const t0=today(),i0=F.time.indexOf(t0);if(i0<0)return null;
+  const g=k=>F[k]||[];const med=i=>g('river_discharge_median')[i]??g('river_discharge')[i],mx=i=>g('river_discharge_max')[i]??med(i);
+  const cur=g('river_discharge')[i0]??med(i0);if(cur==null)return {none:true};
+  const p=planMeta(),Qf=p.floodDate?rvAround(p.floodDate):null;
+  let th=null;if(H){th={hi:H.p90,watch:H.q2,danger:H.q5,cal:false};if(Qf){th.danger=Qf*0.9;th.watch=Math.min(H.q2,Qf*0.7);th.cal=true}
+    if(th.watch>=th.danger)th.watch=th.danger*0.75;if(th.hi>=th.watch)th.hi=th.watch*0.8}
+  const lv=v=>!th||v==null?0:v>=th.danger?3:v>=th.watch?2:v>=th.hi?1:0;
+  const fut=[];for(let i=i0;i<F.time.length;i++)fut.push({t:F.time[i],m:med(i),x:mx(i)});
+  const n15=fut.slice(0,15),pk=n15.reduce((a,o)=>o.m!=null&&(!a||o.m>a.m)?o:a,null),pkx=n15.reduce((a,o)=>o.x!=null&&(!a||o.x>a.x)?o:a,null);
+  const firstW=th?n15.find(o=>o.m!=null&&o.m>=th.watch):null,firstX=th?n15.find(o=>o.x!=null&&o.x>=th.danger):null;
+  const level=Math.max(lv(cur),lv(pk&&pk.m)),worst=lv(pkx&&pkx.x);
+  return {cur,pk,pkx,level,worst,th,Qf,firstW,firstX,lv}}
+const m3=v=>v==null?'–':nf.format(v>=100?Math.round(v):Math.round(v*10)/10);
+const RV_ADV=['15 วันข้างหน้าไม่มีสัญญาณน้ำล้นตลิ่ง','น้ำมากกว่าช่วงปกติ ยังไม่ถึงระดับน่าห่วง เช็กร่องระบายกับเครื่องสูบไว้',
+  'เตรียมพร้อม: ขนปุ๋ย ยา เครื่องพ่นขึ้นที่สูง ทดสอบเครื่องสูบ เปิดร่องระบาย ติดตามประกาศกรมชลประทานและอำเภอ',
+  'น้ำอาจขึ้นใกล้ระดับที่เคยท่วม: ย้ายเครื่องมือ ตัดไฟปั๊ม ผลที่แก่พอให้รีบตัด หลังน้ำลดห้ามเหยียบดินโคนต้น หว่านไตรโคเดอร์มา พ่นฟอสโฟเนต'];
+function rvChart(a){const F=RV.f,T=F.time,t0=today(),n=T.length,th=a.th;if(n<2)return '';
+  const W=640,Hh=220,pl=54,pr=10,pt=12,pb=26;
+  const ln=T.map((t,i)=>t>=t0?(F.river_discharge_median||[])[i]??F.river_discharge[i]:F.river_discharge[i]);
+  const mx=T.map((t,i)=>t>=t0?(F.river_discharge_max||[])[i]:null),p25=F.river_discharge_p25||[],p75=F.river_discharge_p75||[];
+  let top=Math.max(1,...ln.filter(v=>v!=null),...mx.filter(v=>v!=null),th?th.danger*1.08:0);
+  const x=i=>pl+(W-pl-pr)*i/(n-1),y=v=>pt+(Hh-pt-pb)*(1-v/top);
+  const path=(arr,f)=>{let d='';arr.forEach((v,i)=>{if(v==null||!f(i))return;d+=(d?'L':'M')+x(i).toFixed(1)+','+y(v).toFixed(1)});return d};
+  const i0=Math.max(0,T.indexOf(t0));
+  let band='';const up=[],dn=[];for(let i=i0;i<n;i++){if(p75[i]!=null&&p25[i]!=null){up.push(x(i).toFixed(1)+','+y(p75[i]).toFixed(1));dn.unshift(x(i).toFixed(1)+','+y(p25[i]).toFixed(1))}}
+  if(up.length>1)band=`<polygon points="${up.concat(dn).join(' ')}" fill="#2f6db3" opacity=".16"/>`;
+  const hl=(v,c,t)=>v==null?'':`<line x1="${pl}" x2="${W-pr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${c}" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${W-pr-4}" y="${(y(v)-4).toFixed(1)}" text-anchor="end" font-size="15" fill="${c}">${t}</text>`;
+  const tk=[0,top/2,top].map(v=>`<text x="${pl-6}" y="${(y(v)+4).toFixed(1)}" text-anchor="end" font-size="14" fill="var(--ink-2)">${m3(v)}</text>`).join('');
+  const lab=(i,t,anc)=>`<text x="${x(i).toFixed(1)}" y="${Hh-6}" text-anchor="${anc}" font-size="14" fill="var(--ink-2)">${t}</text>`;
+  return `<svg viewBox="0 0 ${W} ${Hh}" style="width:100%;height:auto;display:block" role="img" aria-label="กราฟปริมาณน้ำในแม่น้ำ 60 วันที่ผ่านมาและพยากรณ์ 30 วัน">
+  <line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>${tk}${band}
+  ${th?hl(th.watch,'#a87300','เฝ้าระวัง')+hl(th.danger,'#b2412d',th.cal?'ระดับที่เคยท่วม':'อันตราย'):''}
+  <line x1="${x(i0)}" x2="${x(i0)}" y1="${pt}" y2="${Hh-pb}" stroke="var(--ink-2)" stroke-width="1"/>
+  <path d="${path(mx,i=>i>=i0)}" fill="none" stroke="#2f6db3" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <path d="${path(ln,i=>i<=i0)}" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <path d="${path(ln,i=>i>=i0)}" fill="none" stroke="#2f6db3" stroke-width="2.5"/>
+  ${lab(0,fd(T[0],{day:'numeric',month:'short'}),'start')}${lab(i0,'วันนี้','middle')}${lab(n-1,fd(T[n-1],{day:'numeric',month:'short'}),'end')}</svg>
+  <p class="muted" style="font-size:13px;margin:6px 0 0">หน่วย ลบ.ม./วินาที · เส้นดำ = ที่ผ่านมา · เส้นน้ำเงิน = พยากรณ์ค่ากลาง · แถบฟ้า = ช่วงที่น่าจะเป็น · เส้นประฟ้า = กรณีแย่สุด</p>`}
+function vRiver(st){const p=planMeta(),ro=S.canWrite?'':' disabled';
+  let h=`<div class="panel pl-anc"><div class="grid2"><div class="fld"><label class="l" for="rFlood">วันที่น้ำท่วมสวนครั้งล่าสุด <small>วันที่น้ำขึ้นสูงสุด ใช้ตั้งระดับเตือนให้ตรงกับสวนจริง</small></label><input class="f" id="rFlood" type="date" value="${esc(p.floodDate||'')}"${ro}></div>
+   <div class="fld"><label class="l" for="rLoc">พิกัดจุดแม่น้ำ <small>ไม่ใส่ = ใช้พิกัดสวน</small></label><input class="f" id="rLoc" value="${p.rlat!=null?esc(p.rlat+', '+p.rlon):''}" placeholder="ถ้าข้อมูลดูผิดแม่น้ำ ให้วางพิกัดกลางแม่น้ำ"${ro}></div></div>
+   <div class="row">${S.canWrite?`<button class="btn pri" data-act="rvsave">บันทึก</button>`:''}${rvPt(p)?`<button class="btn" data-act="rvre">โหลดใหม่</button>`:''}</div></div>`;
+  if(!rvPt(p))return h+`<div class="panel empty" style="margin-top:16px"><h3>ยังไม่ได้ใส่ตำแหน่งสวน</h3><p>ใส่ตำแหน่งในแท็บ "อากาศ" ก่อน แอปจะดึงพยากรณ์น้ำในแม่น้ำใกล้สวน 30 วันข้างหน้า</p><button class="btn pri" data-act="pt" data-v="wx">ไปใส่ตำแหน่ง</button></div>`;
+  if(!RV.f||RV.key!==rvKey(p)){fetchRv();return h+(RV.err?`<div class="note" style="margin-top:16px">${RV.err}</div>`:`<div class="skel" style="margin-top:16px"></div><div class="skel" style="height:200px"></div>`)}
+  if(Date.now()-RV.at>6*36e5)fetchRv();
+  const a=rvAnalyze();if(!a)return h+`<div class="note" style="margin-top:16px">ข้อมูลแม่น้ำเก่าเกินไป กด "โหลดใหม่"</div>`;
+  if(a.none)return h+`<div class="note" style="margin-top:16px">จุดนี้ไม่พบแม่น้ำในแบบจำลอง ลองวางพิกัดกลางแม่น้ำที่ใกล้สวนที่สุดแล้วกดบันทึก</div>`;
+  if(RV.err)h+=`<div class="note" style="margin-top:16px">${RV.err} (แสดงข้อมูลเดิม)</div>`;
+  const th=a.th,dd=d=>d.t===today()?'วันนี้':fd(d.t,{day:'numeric',month:'short'});
+  h+=`<div class="panel" style="margin-top:16px;padding:16px 18px"><div class="row" style="align-items:center;gap:10px"><span class="badge ${RLC[a.level]}" style="font-size:16px;padding:5px 12px">${RL[a.level]}</span><b style="font-size:18px">แม่น้ำใกล้สวน 15 วันข้างหน้า</b></div>
+   <p style="margin:10px 0 0">${RV_ADV[a.level]}</p>
+   ${a.firstW&&a.level>=2?`<p style="margin:6px 0 0">น้ำเริ่มถึงระดับเฝ้าระวัง <b>${dd(a.firstW)}</b></p>`:''}
+   ${a.worst>a.level?`<p class="muted" style="margin:6px 0 0">กรณีแย่สุดอาจถึงระดับ "${RL[a.worst]}"${a.firstX?' ตั้งแต่ '+dd(a.firstX):''} ให้เฝ้าดูพยากรณ์ทุกวัน</p>`:''}</div>`;
+  h+=`<div class="panel sum3" style="margin-top:12px"><div><span>น้ำตอนนี้</span><b>${m3(a.cur)}</b><span>ลบ.ม./วิ${th?' · '+Math.round(a.cur/th.danger*100)+'% ของระดับอันตราย':''}</span></div><div><span>สูงสุด 15 วัน (ค่ากลาง)</span><b>${m3(a.pk&&a.pk.m)}</b><span>${a.pk?dd(a.pk):''}</span></div><div><span>กรณีแย่สุด</span><b>${m3(a.pkx&&a.pkx.x)}</b><span>${a.pkx?dd(a.pkx):''}</span></div></div>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>60 วันที่ผ่านมา + พยากรณ์ 30 วัน</h2></div><div class="panel" style="padding:12px 14px">${rvChart(a)}</div></section>`;
+  if(th){h+=`<section class="sec"><div class="sec-h"><h2>ระดับเตือน</h2><span class="muted">${th.cal?'ตั้งจากวันที่สวนเคยท่วม':'ตั้งจากสถิติ '+RV.h.ny+' ปี'}</span></div><div class="panel"><ul class="list">
+     <li><div class="d"><span class="badge">สูงกว่าปกติ</span></div><div><div class="t">${m3(th.hi)} ลบ.ม./วิ</div><div class="s">น้ำมากกว่า 90% ของวันทั้งหมดในอดีต</div></div><div></div></li>
+     <li><div class="d"><span class="badge warn">เฝ้าระวัง</span></div><div><div class="t">${m3(th.watch)} ลบ.ม./วิ</div><div class="s">${th.cal?'70% ของน้ำวันที่สวนท่วม หรือระดับที่เกิดราว 2 ปีครั้ง แล้วแต่อันไหนต่ำกว่า':'ระดับสูงสุดที่เกิดราว 2 ปีครั้ง'}</div></div><div></div></li>
+     <li><div class="d"><span class="badge bad">อันตราย</span></div><div><div class="t">${m3(th.danger)} ลบ.ม./วิ</div><div class="s">${th.cal?'90% ของน้ำวันที่สวนท่วม ('+fd(p.floodDate)+' ≈ '+m3(a.Qf)+')':'ระดับที่เกิดราว 5 ปีครั้ง · ใส่วันที่เคยท่วมด้านบนจะแม่นขึ้น'}</div></div><div></div></li></ul></div></section>`;
+    if(p.floodDate&&a.Qf==null)h+=`<div class="note">ไม่พบข้อมูลน้ำช่วงวันที่ ${fd(p.floodDate)} ลองเช็กวันที่อีกครั้ง</div>`;
+    const pk=RV.h.peaks.slice().sort((x,y)=>y.v-x.v).slice(0,6);
+    h+=`<section class="sec"><div class="sec-h"><h2>น้ำสูงสุดแต่ละปี (6 ปีที่สูงที่สุด)</h2></div><div class="panel"><ul class="list">${pk.map(o=>`<li><div class="d">${fd(o.d)}</div><div><div class="t">${m3(o.v)} ลบ.ม./วิ</div><div class="s">${Math.round(o.v/th.danger*100)}% ของระดับอันตราย</div></div><div></div></li>`).join('')}</ul></div><p class="muted" style="font-size:13px">ถ้าปีที่น้ำท่วมสวนไม่อยู่ในรายการต้น ๆ อาจเป็นแม่น้ำคนละสาย ให้ลองใส่พิกัดแม่น้ำเอง</p></section>`}
+  h+=`<p class="muted" style="font-size:13px">ข้อมูลจากแบบจำลอง GloFAS ผ่าน Open-Meteo ความละเอียดราว 5 กม. ใช้ดูแนวโน้มล่วงหน้า ไม่ใช่ระดับน้ำจริงหน้าสวน ให้ดูคู่กับป้ายวัดระดับน้ำและประกาศกรมชลประทาน · อัปเดต ${Math.round((Date.now()-RV.at)/6e4)} นาทีก่อน · จุด ${esc(rvKey(p))}</p>`;
+  return h}
 function vPlan(st){const tab=ui.planTab||'plan';
-  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · ศัตรูพืช</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศ ศัตรูพืชตามฤดู และคู่มือทำสวน</p></div></div>`;
-  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['pest','ศัตรูพืช'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
-  if(tab==='wx')return h+vWx(st);if(tab==='pest')return h+vPest(st);if(tab==='guide')return h+guideHTML();return h+vPlanList(st)}
+  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · ศัตรูพืช</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศ เตือนน้ำแม่น้ำ ศัตรูพืชตามฤดู และคู่มือทำสวน</p></div></div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['rv','แม่น้ำ'],['pest','ศัตรูพืช'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
+  if(tab==='wx')return h+vWx(st);if(tab==='rv')return h+vRiver(st);if(tab==='pest')return h+vPest(st);if(tab==='guide')return h+guideHTML();return h+vPlanList(st)}
 function vPlanList(st){const p=planMeta(),T=planTasks(st),R=bloomRounds(st);
   const ro=S.canWrite?'':' disabled';
   let h=`<div class="panel pl-anc"><div class="fld"><label class="l">วิธีทำดอก</label><div class="seg">${[['pbz','ทำสาร (PBZ)'],['nat','ไม่ทำสาร']].map(([k,t])=>`<button data-act="pmode" data-v="${k}" aria-pressed="${p.mode===k}"${ro}>${t}</button>`).join('')}</div></div><div class="grid2"><div class="fld"><label class="l" for="pH">วันเริ่มรอบใหม่ (หลังเก็บเกี่ยว/ตัดแต่งกิ่ง)</label><input class="f" id="pH" type="date" value="${esc(p.H)}"${ro}></div>
@@ -745,9 +842,10 @@ function vWx(st){const p=planMeta();
   h+=`<p class="muted" style="font-size:13px">ข้อมูลจาก Open-Meteo อัปเดต ${wxAge()} นาทีก่อน · พิกัด ${esc(wxKey(p))}</p>`;
   return h}
 function homePlanHTML(st){const p=planMeta();let h='';const T=planTasks(st).filter(t=>!t.done&&t.left<=7&&t.left>=-30).slice(0,6);
-  let w=null;if(p.lat!=null){if(!WX.d||WX.key!==wxKey(p)||Date.now()-WX.at>36e5)fetchWx();w=wxAnalyze(st)}
+  let w=null,rv=null;if(p.lat!=null){if(!WX.d||WX.key!==wxKey(p)||Date.now()-WX.at>36e5)fetchWx();w=wxAnalyze(st);if(!RV.f||RV.key!==rvKey(p)||Date.now()-RV.at>6*36e5)fetchRv();if(RV.key===rvKey(p))rv=rvAnalyze();if(rv&&rv.none)rv=null}
   if(!T.length&&!w)return '';
   h+=`<section class="sec"><div class="sec-h"><h2>แผนงานและอากาศ</h2><a href="#plan">ดูตาราง</a></div><div class="panel"><ul class="list">`;
+  if(rv)h+=`<li class="click" data-act="gorv"><div class="d"><span class="badge ${RLC[rv.level]}">แม่น้ำ</span></div><div><div class="t">${RL[rv.level]}${rv.level>=2&&rv.firstW?' · ถึงระดับเฝ้าระวัง '+(rv.firstW.t===today()?'วันนี้':fd(rv.firstW.t,{day:'numeric',month:'short'})):''}</div><div class="s">${RV_ADV[rv.level]}${rv.worst>rv.level?' · กรณีแย่สุด: '+RL[rv.worst]:''}</div></div><div></div></li>`;
   if(w){const td=w.days[0],tm=w.days[1];h+=`<li class="click" data-act="gowx"><div class="d"><span class="badge ${w.A.some(a=>a[0]==='bad')?'bad':w.A.length?'warn':'ok'}">อากาศ</span></div><div><div class="t">วันนี้ ${Math.round(td.mn)}–${Math.round(td.mx)}°C ฝน ${td.pp??0}% · พรุ่งนี้ฝน ${tm?tm.pp??0:'–'}%</div><div class="s">${w.windows.length?'ช่วงพ่นยาดี: '+winTxt(w.windows[0]):'48 ชม. นี้ไม่มีช่วงพ่นยาที่ดี'}${w.A.length?' · '+w.A.map(a=>a[1]).join(', '):''}</div></div><div></div></li>`}
   h+=T.map(t=>`<li class="click" data-act="goplan"><div class="d"><span class="badge ${t.left<0?'bad':t.left<=3?'warn':''}">${dueTxt(t.left)}</span></div><div><div class="t">${esc(t.x[1])}</div><div class="s">${esc(t.x[2])}</div></div><div></div></li>`).join('');
   return h+`</ul></div></section>`}
@@ -757,6 +855,11 @@ async function planAct(a,el){
   if(a==='pt'){ui.planTab=el.dataset.v;render();return true}
   if(a==='gmode'){ui.guideMode=el.dataset.v;render();return true}
   if(a==='pmode'){if(!S.canWrite)return true;if(await savePlan({mode:el.dataset.v}))toast(el.dataset.v==='nat'?'เปลี่ยนตารางเป็นแบบไม่ทำสารแล้ว':'เปลี่ยนตารางเป็นแบบทำสารแล้ว');ui.guideMode=el.dataset.v;return true}
+  if(a==='gorv'){ui.planTab='rv';if(location.hash==='#plan')render();else location.hash='plan';return true}
+  if(a==='rvre'){fetchRv(true);toast('กำลังโหลดข้อมูลแม่น้ำ…');return true}
+  if(a==='rvsave'){if(!S.canWrite)return true;const raw=(($('#rLoc')||{}).value||'').trim();let ll={rlat:null,rlon:null};if(raw){const q=parseLoc(raw);if(!q)return toast('อ่านพิกัดแม่น้ำไม่ได้'),true;ll={rlat:q.lat,rlon:q.lon}}
+    const fdt=($('#rFlood')||{}).value||'';if(await savePlan({...ll,floodDate:fdt})){toast('บันทึกแล้ว');fetchRv(true)}return true}
+  if(a==='raisave'){if(!S.canWrite)return true;const r=+(($('#cRai')||{}).value);if(!(r>0))return toast('ใส่พื้นที่เป็นไร่ เช่น 2'),true;if(await savePlan({rai:r}))toast('บันทึกพื้นที่แล้ว');return true}
   if(a==='gowx'){ui.planTab='wx';if(location.hash==='#plan')render();else location.hash='plan';return true}
   if(a==='goplan'){ui.planTab='plan';if(location.hash==='#plan')render();else location.hash='plan';return true}
   if(a==='wxre'){fetchWx(true);toast('กำลังโหลดอากาศ…');return true}
@@ -840,6 +943,7 @@ const GKEY='durian-gaps-off';
 function gapsOff(){try{return JSON.parse(localStorage.getItem(GKEY)||'{}')}catch(e){return {}}}
 function gapList(st){const p=planMeta(),G=[],ts=trees().filter(t=>!isMg(t)),mi=+today().slice(5,7);
   if(p.lat==null)G.push(['loc','ยังไม่ได้ใส่ตำแหน่งสวน','ใส่แล้วจะได้พยากรณ์ฝน ช่วงพ่นยา และเตือนศัตรูพืชตามอากาศจริง','gowx','ใส่ตำแหน่ง']);
+  if(p.lat!=null&&!p.floodDate)G.push(['fld','ยังไม่ได้ใส่วันที่น้ำท่วมครั้งล่าสุด','ใส่แล้วเตือนน้ำแม่น้ำจะตั้งระดับอันตรายตามที่สวนเคยท่วมจริง','gorv','ใส่วันที่']);
   if(!p.H&&!bloomRounds(st).length&&!p.B)G.push(['plan','ยังไม่มีตารางฉีดยา/ใส่ปุ๋ย','ใส่วันเริ่มรอบ (วันตัดแต่งกิ่งหลังเก็บเกี่ยว) แอปจะคำนวณให้ทั้งปี','goplan','ตั้งวันเริ่ม']);
   if(ts.length>=10&&!ts.some(t=>t.variety&&t.variety!=='หมอนทอง'))G.push(['pol','ยังไม่มีต้นพันธุ์ผสมเกสร','ทุกต้นเป็นหมอนทอง ลองแทรกก้านยาว/ชะนี/จันทบุรี 3 สัก 2–3 ต้น ช่วยให้ติดผลดีและลูกไม่เบี้ยว','goguide','อ่านคู่มือ']);
   const ch=chemList();if(ch.length&&ch.filter(c=>!pricePer(c)).length>ch.length/2)G.push(['price','สารในคลังส่วนใหญ่ยังไม่มีราคา','ใส่ขนาดบรรจุกับราคา แอปจะคิดต้นทุนต่อถัง ต่อต้น ให้','golab','ไปคลังสาร']);
@@ -859,7 +963,7 @@ function todayHTML(st){const mi=+today().slice(5,7)-1,os=orchardStage(st),p=plan
   return `<div class="today">`+
    tile('goflower','ระยะสวนตอนนี้',os.main?esc(ST[os.main].t):'—',os.main?`${os.cnt[os.main]} จาก ${trees().filter(t=>!isMg(t)).length} ต้น`:'ยังไม่ได้จด')+
    tile(T.length+due?'goplan':'goplan','งาน 7 วันนี้',(T.length+due)+' งาน',T.length?esc(T[0].x[1]):due?'ถึงรอบงานที่ทำซ้ำ':'ไม่มีงานค้าง',T.some(t=>t.left<0)?'late':'')+
-   tile('gowx','อากาศวันนี้',w?`${Math.round(w.days[0].mn)}–${Math.round(w.days[0].mx)}°`:'ใส่ตำแหน่ง',w?`ฝน ${w.days[0].pp??0}%${w.windows.length?' · พ่นยาได้ '+winTxt(w.windows[0]).replace(/ น\.$/,''):''}`:'เพื่อดูพยากรณ์',w&&w.A.some(a=>a[0]==='bad')?'late':'')+
+   tile('gowx','อากาศวันนี้',w?`${Math.round(w.days[0].mn)}–${Math.round(w.days[0].mx)}°`:'ใส่ตำแหน่ง',w?`ฝน ${w.days[0].pp??0}%${w.windows.length?' · พ่นยาได้ '+winTxt(w.windows[0]).replace(/ น\.$/,''):''}`:'เพื่อดูพยากรณ์',w&&w.A.some(a=>a[0]==='bad')||(p.lat!=null&&RV.key===rvKey(p)&&(rvAnalyze()||{}).level>=2)?'late':'')+
    tile('gopest','ศัตรูพืชช่วงนี้',top.length?esc(top[0].n):'ปกติ',top.length>1?'และอีก '+(top.length-1)+' อย่าง':top.length?LV[top[0].s]:'ยังไม่มีที่เสี่ยงสูง',top.some(x=>x.s>=3)?'warn':'')+
   `</div>`}
 async function homeAct(a,el){
@@ -1174,6 +1278,24 @@ function vChems(){
   return `<div class="panel"><ul class="list">${ch.map(c=>`<li class="click" data-act="edit" data-c="chems" data-id="${c.id}" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.name)} <span class="badge">${esc((FORM[c.form]||FORM.OTHER).sh)}</span>${npkOf(c)?` <span class="badge">${npkOf(c).join('-')}</span>`:''}${parseAI(c)?` <span class="badge">${parseAI(c)}%${c.aiName?' '+esc(c.aiName):''}</span>`:''}${best.has(c.id)?' <span class="badge ok">คุ้มสุดในกลุ่มตัวยาเดียวกัน</span>':''}</div><div class="s">${(c.tags||[]).map(t=>esc(TAG[t]||t)).join(' · ')}${c.rate?' · อัตรา '+nf.format(c.rate)+' '+esc(c.rateUnit||'')+'/20 ลิตร':''}${+c.phi?' · เว้น '+c.phi+' วัน':''}${(c.notMix||[]).length?' · ห้ามผสมกับ '+c.notMix.map(i=>S.data.chems[i]?esc(S.data.chems[i].name):'').filter(Boolean).join(', '):''}</div></div><div class="muted" style="text-align:right;font-size:14px">${priceTxt(c)||'<span style="color:var(--out)">ยังไม่มีราคา</span>'}${aiCost(c)!=null?`<div>ตัวยาจริง ${baht(aiCost(c)*(pricePer(c).d==='v'?1:1))} บาท/${pricePer(c).d==='v'?'ซีซี':'กรัม'}</div>`:''}</div></li>`).join('')}</ul></div>
   <p class="muted" style="font-size:13.5px">ชนิดสูตรดูได้จากฉลาก เช่น 80% WP = ผง, 25% SC = น้ำข้น, 2.5% EC = น้ำมัน · ราคาถ้าไม่ใส่ จะใช้ราคาล่าสุดจากสต็อกที่ชื่อตรงกัน</p>`;
 }
+
+const HV_STEPS=[[-21,'ติดต่อคนซื้อ/ล้ง','บอกจำนวนลูกและวันตัดคร่าว ๆ ถามราคาหลายเจ้า'],[-16,'หยุดพ่นยาเคมี','เช็กระยะเว้นก่อนตัดบนฉลากทุกตัว'],[-10,'นัดวันตัด','นัดล้งหรือทีมตัด เตรียมเชือกโรยผล ตะกร้า'],
+ [-7,'ตรวจความแก่','ก้านผลนุ่มเห็นรอยปล้องชัด ปลายหนามแห้งสีเข้ม เคาะเสียงหลวม สุ่มผ่าดูเนื้อแห้ง ≥ 32%'],[0,'ถึงวันตัด','ตัดตอนเช้า ไม่ให้ผลตกพื้น ห้ามวางผลบนดิน'],[7,'ตัดให้หมดรุ่น','ลูกที่ค้างนานจะสุกคาต้นและร่วง']];
+function harvestHTML(st){const p=planMeta();let R=bloomRounds(st);if(!R.length&&p.B)R=[{b:p.B,ids:[],v:'หมอนทอง',plan:true}];if(!R.length)return '';
+  const cutF=list('flowers').filter(f=>f.stage==='cut'&&+f.yieldKg>0&&+f.fruits>0);const fk=cutF.reduce((a,f)=>a+(+f.fruits),0);const kgPer=fk?cutF.reduce((a,f)=>a+(+f.yieldKg),0)/fk:4;
+  const yr=list('sales').filter(s=>daysBetween(s.date,today())<=400),ykg=yr.reduce((a,s)=>a+saleKg(s),0),price=ykg?yr.reduce((a,s)=>a+saleGross(s),0)/ykg:0;
+  const w=p.lat!=null?wxAnalyze(st):null,t0=today();
+  return `<section class="sec"><div class="sec-h"><h2>แผนตัดผล</h2><span class="muted">${R.length} รุ่น</span></div>`+R.map((r,ri)=>{const D=daysFor(r.v||'หมอนทอง'),cut=addDays(r.b,D),left=daysBetween(t0,cut),age=daysBetween(r.b,t0),pct=Math.max(0,Math.min(100,age/D*100));
+    const fr=r.ids.reduce((a,id)=>a+(+(st[id]||{}).fruits||0),0),kg=fr*kgPer;
+    const rain=w?w.days.filter(x=>x.t>=addDays(cut,-5)&&x.t<=addDays(cut,3)&&x.r>=30):[];
+    const nx=HV_STEPS.findIndex(s=>addDays(cut,s[0])>=t0);
+    return `<div class="panel" style="padding:14px 18px;margin-bottom:12px"><div class="row" style="justify-content:space-between;align-items:baseline"><b style="font-size:17px">${R.length>1?'รุ่น '+(ri+1)+' · ':''}ดอกบาน ${fd(r.b,{day:'numeric',month:'short'})}${r.plan?' (คาด)':''}</b><span class="badge ${left<0?'bad':left<=10?'warn':''}">${left<0?'เลยวันตัด '+(-left)+' วัน':left===0?'ตัดวันนี้':'อีก '+left+' วัน'}</span></div>
+     <div class="prog"><i style="width:${pct}%"></i></div>
+     <p style="margin:8px 0 0">ตัดได้ราว <b>${fd(cut,{day:'numeric',month:'short'})}–${fd(addDays(cut,7),{day:'numeric',month:'short'})}</b> (${esc(r.v||'หมอนทอง')} ${D} วันหลังดอกบาน) · อายุผล ${Math.max(0,age)} วัน${r.ids.length?' · '+r.ids.length+' ต้น':''}</p>
+     ${fr?`<p style="margin:4px 0 0">ไว้ผล ${nf.format(fr)} ลูก ≈ <b>${nf.format(Math.round(kg))} กก.</b>${price?' ≈ '+baht(Math.round(kg*price))+' บาท':''} <span class="muted" style="font-size:13px">(${fk?'เฉลี่ยจากที่เคยตัด':'คิดลูกละ ~4 กก.'} ${nf.format(Math.round(kgPer*10)/10)} กก./ลูก${price?' · ราคาเฉลี่ยที่เคยขาย '+baht(price)+' บ./กก.':''})</span></p>`:`<p class="muted" style="margin:4px 0 0;font-size:14px">จดจำนวนลูกตอน "ติดผล" แล้วจะคาดได้ว่าได้กี่กิโล</p>`}
+     ${rain.length?`<div class="note" style="margin-top:8px">ฝนหนักช่วงใกล้วันตัด (${rain.map(x=>fd(x.t,{day:'numeric',month:'short'})+' '+Math.round(x.r)+' มม.').join(', ')}) ถ้าความแก่ถึงแล้วให้ตัดก่อนฝน ผลที่โดนฝนหนักช่วงแก่เสี่ยงไส้ซึม</div>`:''}
+     ${(()=>{const li=(s,i)=>{const d=addDays(cut,s[0]),l=daysBetween(t0,d);return `<li${i<nx||nx<0?' style="opacity:.55"':''}><div class="d"><span class="badge ${i===nx?(l<=3?'warn':'ok'):''}">${fd(d,{day:'numeric',month:'short'})}</span></div><div><div class="t">${s[1]}${i===nx?' · '+(l===0?'วันนี้':'อีก '+l+' วัน'):''}</div><div class="s">${s[2]}</div></div><div></div></li>`};const a=nx<0?HV_STEPS.length:nx,sh=HV_STEPS.slice(a,a+2);
+      return (sh.length?`<ul class="list" style="margin-top:8px">${sh.map((s,i)=>li(s,a+i)).join('')}</ul>`:'')+`<details style="margin-top:6px"><summary class="muted" style="cursor:pointer;font-size:14px">ดูทุกขั้นก่อนตัด (${HV_STEPS.length})</summary><ul class="list">${HV_STEPS.map(li).join('')}</ul></details>`})()}</div>`}).join('')+`</section>`}
 function vFlower(st){
   const ts=trees();
   const bearing=ts.filter(t=>t.kind!=='young');
@@ -1181,6 +1303,7 @@ function vFlower(st){
   if(!ts.length)return h+onboard();
   const cnt=k=>ts.filter(t=>st[t.id].stage===k).length;
   h+=`<div class="stages" role="group" aria-label="กรองตามระยะ">${STAGES.map(s=>`<button class="st-${s.k}" data-act="sf" data-v="${s.k}" aria-pressed="${ui.stageFilter===s.k}"><b>${cnt(s.k)}</b><span>${s.t}</span></button>`).join('')}</div>`;
+  if(!ui.stageFilter)h+=harvestHTML(st);
   let F=ui.stageFilter?ts.filter(t=>st[t.id].stage===ui.stageFilter):bearing;
   F=F.slice().sort((a,b)=>{const A=st[a.id],B=st[b.id];if(A.left!=null&&B.left!=null)return A.left-B.left;if(A.left!=null)return -1;if(B.left!=null)return 1;return STAGES.findIndex(s=>s.k===B.stage)-STAGES.findIndex(s=>s.k===A.stage)});
   h+=`<div class="sec-h" style="margin-top:22px"><h2>${ui.stageFilter?ST[ui.stageFilter].t:'ต้นที่ให้ผลแล้ว'} · ${F.length} ต้น</h2>${ui.stageFilter?`<button class="link" data-act="sf" data-v="">ดูทุกต้นที่ให้ผล</button>`:''}</div>`;
@@ -1195,9 +1318,38 @@ function vFlower(st){
 function vMoney(st){
   const ys=years();if(!ys.includes(ui.year))ui.year=ys[0];
   let h=`<div class="top"><div><h1>ขาย / บัญชี</h1><p>รายรับ รายจ่าย และการขายทุเรียน ปี ${be(ui.year)}</p></div><div class="row"><select class="f" style="width:auto;min-height:44px" data-act="year" aria-label="เลือกปี">${ys.map(y=>`<option value="${y}" ${y===ui.year?'selected':''}>ปี ${be(y)}</option>`).join('')}</select>${S.canWrite?(ui.moneyTab==='sales'?`<button class="btn pri" data-act="new" data-kind="sales">${ic('plus')}จดการขาย</button>`:`<button class="btn" data-act="new" data-kind="money" data-dir="in">${ic('in')}รับเงิน</button><button class="btn pri" data-act="new" data-kind="money" data-dir="out">${ic('out')}จ่ายเงิน</button>`):''}</div></div>`;
-  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="mt" data-v="sales" aria-pressed="${ui.moneyTab==='sales'}">การขายทุเรียน</button><button data-act="mt" data-v="ledger" aria-pressed="${ui.moneyTab==='ledger'}">รายรับ-รายจ่าย</button></div>`;
-  return h+(ui.moneyTab==='sales'?vSales(st):vLedger());
+  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="mt" data-v="sales" aria-pressed="${ui.moneyTab==='sales'}">การขายทุเรียน</button><button data-act="mt" data-v="ledger" aria-pressed="${ui.moneyTab==='ledger'}">รายรับ-รายจ่าย</button><button data-act="mt" data-v="cost" aria-pressed="${ui.moneyTab==='cost'}">ต้นทุนต่อไร่</button></div>`;
+  return h+(ui.moneyTab==='sales'?vSales(st):ui.moneyTab==='cost'?vCost():vLedger());
 }
+
+function costYear(y){const L=ledger().filter(r=>yearOf(r.date)===y);const sum=f=>L.filter(f).reduce((a,r)=>a+r.amount,0);
+  const Sx=list('sales').filter(s=>yearOf(s.date)===y);
+  const cats={};L.filter(r=>r.dir==='out'&&!CAPITAL.includes(r.cat)).forEach(r=>cats[r.cat]=(cats[r.cat]||0)+r.amount);
+  return {y,inc:sum(r=>r.dir==='in'),cap:sum(r=>r.dir==='out'&&CAPITAL.includes(r.cat)),op:sum(r=>r.dir==='out'&&!CAPITAL.includes(r.cat)),kg:Sx.reduce((a,s)=>a+saleKg(s),0),dur:Sx.reduce((a,s)=>a+saleGross(s),0),cats}}
+function vCost(){const p=planMeta(),rai=+p.rai||0,c=costYear(ui.year);
+  let h=`<div class="panel pl-anc"><div class="grid2"><div class="fld"><label class="l" for="cRai">พื้นที่สวนทุเรียน (ไร่) <small>ใช้หารเป็นต่อไร่</small></label><input class="f num" id="cRai" type="number" min="0.1" step="0.25" inputmode="decimal" value="${rai||''}" placeholder="เช่น 2"${S.canWrite?'':' disabled'}></div><div class="fld" style="align-self:end">${S.canWrite?`<button class="btn pri" data-act="raisave">บันทึกพื้นที่</button>`:''}</div></div></div>`;
+  if(!rai)return h+`<div class="panel empty" style="margin-top:14px"><h3>ใส่พื้นที่สวนก่อน</h3><p>แอปจะเอารายรับรายจ่ายที่จดไว้มาหารเป็นต่อไร่ ต่อต้น ต่อกิโล และบอกจุดคุ้มทุนให้</p></div>`;
+  const R=v=>baht(Math.round(v/rai)),prof=c.inc-c.op;
+  const ts=trees().filter(t=>!isMg(t));
+  const allS=list('sales');const akg=allS.reduce((a,s)=>a+saleKg(s),0),ag=allS.reduce((a,s)=>a+saleGross(s),0);
+  const price=c.kg?c.dur/c.kg:akg?ag/akg:0;
+  h+=`<div class="panel sum3" style="margin-top:14px"><div><span>ต้นทุนดำเนินงาน/ไร่</span><b class="num">${R(c.op)}</b><span>บาท · ปี ${be(ui.year)}</span></div><div><span>รายได้/ไร่</span><b class="num">${R(c.inc)}</b><span>บาท</span></div><div><span>กำไร/ไร่</span><b class="num" style="color:${prof<0?'var(--out)':'var(--in)'}">${prof<0?'−':''}${R(Math.abs(prof))}</b><span>ยังไม่หักเงินลงทุน</span></div></div>`;
+  const li=(a,b,s2)=>`<li><div class="d"><span class="muted">${a}</span></div><div><div class="t">${b}</div>${s2?`<div class="s">${s2}</div>`:''}</div><div></div></li>`;
+  let L='';
+  L+=li('ผลผลิต',c.kg?nf.format(Math.round(c.kg/rai))+' กก./ไร่':'ยังไม่มีการขายปีนี้',c.kg?'ขายได้รวม '+nf.format(c.kg)+' กก. ราคาเฉลี่ย '+baht(c.dur/c.kg)+' บาท/กก.':'');
+  if(c.kg)L+=li('ต้นทุนต่อกิโล',baht(c.op/c.kg)+' บาท/กก.','ต้องขายได้มากกว่านี้ถึงจะมีกำไร');
+  if(price&&c.op)L+=li('จุดคุ้มทุน','ต้องได้อย่างน้อย '+nf.format(Math.ceil(c.op/price/rai))+' กก./ไร่',`ที่ราคา ${baht(price)} บาท/กก. ${c.kg?'(ราคาเฉลี่ยปีนี้)':'(ราคาเฉลี่ยที่เคยขาย)'}`);
+  if(ts.length)L+=li('ต่อต้น',baht(Math.round(c.op/ts.length))+' บาท/ต้น','ต้นทุนดำเนินงาน หารทุเรียน '+ts.length+' ต้น');
+  L+=li('เงินลงทุนปีนี้',baht(c.cap)+' บาท'+(c.cap?' ('+R(c.cap)+'/ไร่)':''),'หมวด '+CAPITAL.join(' ')+' ไม่นับในต้นทุนดำเนินงาน เพราะใช้ได้หลายปี');
+  h+=`<section class="sec"><div class="sec-h"><h2>สรุปปี ${be(ui.year)}</h2></div><div class="panel"><ul class="list">${L}</ul></div></section>`;
+  const ce=Object.entries(c.cats).sort((a,b)=>b[1]-a[1]),mx=ce[0]?ce[0][1]:1;
+  if(ce.length)h+=`<section class="sec"><div class="sec-h"><h2>ต้นทุนต่อไร่แยกหมวด</h2></div><div class="panel cat-bars">${ce.map(([k,v])=>`<div><span>${esc(k)}</span><i style="width:${Math.max(2,v/mx*100)}%"></i><em>${R(v)}</em></div>`).join('')}</div></section>`;
+  const Y=years().map(costYear).filter(o=>o.inc||o.op||o.cap);
+  if(Y.length){let ci=0,cp=0;Y.slice().reverse().forEach(o=>{ci+=o.cap;cp+=o.inc-o.op});
+    h+=`<section class="sec"><div class="sec-h"><h2>เทียบแต่ละปี (ต่อไร่)</h2></div><div class="panel"><table class="fl-table"><thead><tr><th>ปี</th><th class="r">รายได้</th><th class="r">ต้นทุน</th><th class="r">กำไร</th><th class="r hide-m">กก./ไร่</th></tr></thead><tbody>${Y.map(o=>`<tr><td><b>${be(o.y)}</b></td><td class="r num">${R(o.inc)}</td><td class="r num">${R(o.op)}</td><td class="r num" style="color:${o.inc-o.op<0?'var(--out)':'var(--in)'}">${o.inc-o.op<0?'−':''}${R(Math.abs(o.inc-o.op))}</td><td class="r num hide-m">${o.kg?nf.format(Math.round(o.kg/rai)):'–'}</td></tr>`).join('')}</tbody></table></div>
+    ${ci?`<p style="margin:10px 0 0">ลงทุนสะสม <b>${baht(ci)}</b> บาท · กำไรสะสม ${cp<0?'−':''}${baht(Math.abs(cp))} บาท · ${cp>=ci?'<b style="color:var(--in)">คืนทุนแล้ว</b>':cp>0?'คืนทุนแล้ว '+Math.round(cp/ci*100)+'%':'ยังไม่เริ่มคืนทุน'}</p>`:''}</section>`}
+  h+=`<p class="muted" style="font-size:13px">คิดจากที่จดในแอปเท่านั้น (รวมค่าปุ๋ยยาของมังคุดที่ใส่พร้อมกัน) ค่าแรงตัวเองที่ไม่ได้จ่ายจริงไม่ได้นับ ค่าถมดินและวางท่อให้จดเป็นหมวด "ถมดิน/ปรับพื้นที่" กับ "ระบบน้ำ"</p>`;
+  return h}
 function vSales(){
   const Sx=list('sales').filter(s=>yearOf(s.date)===ui.year).sort((a,b)=>a.date<b.date?1:-1);
   const kg=Sx.reduce((a,s)=>a+saleKg(s),0),g=Sx.reduce((a,s)=>a+saleGross(s),0);
