@@ -1062,6 +1062,13 @@ tr.editing td { background: var(--accent-soft); }
 .op-chk { list-style: none; margin: 0 4px 14px; padding: 0; display: grid; gap: 4px; font-size: 15px; }
 .op-learn ul { margin: 0 0 14px; padding-left: 1.2rem; display: grid; gap: 6px; font-size: 15px; }
 .op-warn { margin-top: 8px; }
+.op-paperbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 0 4px 16px; }
+.pp-card { margin-bottom: 12px; }
+.pp-card p { margin: 6px 0; font-size: 15px; }
+.pp-h { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.pp-h b { font-size: 17px; font-family: var(--font); }
+.pp-tbl { min-width: 640px; }
+.pp-set { margin-top: 14px; }
 @media (max-width: 900px) { .op-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .op-grid { grid-template-columns: 1fr; } .op-num { width: 130px; } }
 </style>
@@ -1204,6 +1211,19 @@ tr.editing td { background: var(--accent-soft); }
     </div>
     <div id="op-out"></div>
     <div class="alert op-warn">เป็นการคำนวณตามหลักเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน ราคาออปชั่นจริงต่างจากที่ประมาณได้ ผู้ซื้อออปชั่นเสียเงินที่จ่ายไปได้ทั้งหมด ลองเทรดในบัญชีจำลองก่อนใช้เงินจริง</div>
+  </section>
+
+  <section id="optpaper" data-sub="optpaper">
+    <p class="sec-note">ฝึกเทรดด้วยเงินปลอมแต่ราคาจริง เปิดไม้จากตัววางแผนด้านบน ทุกครั้งที่ข้อมูลอัปเดต (เช้าหลังตลาดปิด และทุก 30 นาทีตอนกลางคืน) ระบบจะเช็กจุดออกให้ ถึงเป้า หลุดจุดตัดขาดทุน หรือหมดเวลา ก็ปิดให้ตามแผนเหมือนทำจริง ซื้อที่ราคา ask ขายที่ bid และหักค่าคอมสัญญาละ $0.65 ต่อครั้ง</p>
+    <div class="strip" id="pp-strip"></div>
+    <div id="pp-open"></div>
+    <h3 class="sw-h3" id="pp-closed-h" hidden>ไม้ที่ปิดแล้ว</h3>
+    <div id="pp-closed"></div>
+    <div class="controls pp-set">
+      <label class="mini">เงินตั้งต้น (บาท) <input class="inp op-num" id="pp-start" type="number" step="any" min="0" inputmode="decimal"></label>
+      <button class="btn-line" type="button" id="pp-reset">เริ่มบัญชีจำลองใหม่</button>
+    </div>
+    <p class="pf-hint">ระบบเช็กด้วยราคาของแต่ละรอบอัปเดต ไม่ได้ดูทุกวินาที ราคาที่วิ่งผ่านจุดออกแล้วกลับมาระหว่างรอบจะไม่ถูกนับ และตัวที่ไม่มีตาราง strike ใช้ราคาประมาณจาก IV ผลจริงจึงต่างได้</p>
   </section>
 
   <section id="optlearn" data-sub="optlearn">
@@ -3519,7 +3539,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
-      ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
+      ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],

@@ -222,6 +222,17 @@
     sz.append(el('p', null, `กำไรต่อความเสี่ยง ≈ 1 : ${isFinite(rr) ? rr.toFixed(1) : '–'} ${rr >= 2 ? '(ผ่านขั้นต่ำ 1:2)' : '(ต่ำกว่า 1:2 ไม่คุ้มเสี่ยง)'}`));
     out.append(sz);
 
+    /* paper trade this plan: buy at the ask when there is one, else at the estimate */
+    const pb = el('div', 'op-paperbar'); const go = el('button', 'btn-solid', 'เทรดจำลองไม้นี้'); go.type = 'button';
+    const pm = el('span', 'pf-hint'); const nP = Math.max(1, n);
+    pm.textContent = `ใช้เงินจำลอง ${nP} สัญญา${n < 1 ? ' (งบเสี่ยงจริงไม่พอ แต่ฝึกได้)' : ''} · ระบบจะติดตามและปิดให้ตามจุดออกด้านบน`;
+    go.addEventListener('click', () => {
+      const fill = q.ask > 0 ? q.ask : prem;
+      const res = paperOpen({ s: r.s, dir: plan.dir, K, exp: r.exp, n: nP, entry: fill, S0: r.px, tgt, stopS, stopO: fill * 0.5, timeStop, iv0: r.iv, est: !!q.est });
+      pm.textContent = res; drawPaper();
+    });
+    pb.append(go, pm); out.append(pb);
+
     const ck = el('ul', 'op-chk');
     const item = (ok, t) => { const li = el('li', ok === true ? 'pos' : ok === false ? 'neg' : null); li.textContent = (ok === true ? '✓ ' : ok === false ? '✗ ' : '• ') + t; ck.append(li); };
     const dirOk = call ? j.trend === 'up' : j.trend === 'down';
@@ -236,9 +247,95 @@
     if (q.est) out.append(el('p', 'pf-hint', 'ราคาพรีเมียมเป็นค่าประมาณ ดูราคาจริงในแอปโบรกเกอร์ก่อนเข้าเสมอ'));
   };
 
+  /* ---------- paper trading ----------
+     Fake money, real prices: open from the planner, then each time the page has data it checks the plan's exits on the latest
+     snapshot (target, stop on the stock, −50% on the option, time stop, expiry) and closes at the bid (or the estimate).
+     Kept in VGPrefs 'optp' {start (USD), tx: [...]}, so it syncs with the account. Commission FEE per contract per side. */
+  const FEE = 0.65;
+  const sthb = (v) => (v >= 0 ? '+' : '−') + thb(Math.abs(v));
+  const PP = () => { const x = window.VGPrefs ? window.VGPrefs.get('optp', null) : null; return x && Array.isArray(x.tx) ? x : null; };
+  const setPP = (x) => { if (window.VGPrefs) window.VGPrefs.set('optp', x); };
+  const acct = () => PP() || { start: P().cap / fx(), tx: [] };
+  const cashOf = (a) => a.tx.reduce((c, t) => c - (t.entry * 100 + FEE) * t.n + (t.st === 'closed' ? (t.exit * 100 - FEE) * t.n : 0), a.start);
+  const optNow = (t) => {
+    const r = rowOf(t.s); const call = t.dir === 'call';
+    if (!r || r.px == null || !D) return { v: t.last != null ? t.last : t.entry, S: null, est: true };
+    const lr = r.exp === t.exp && r.lad ? r.lad.find((x) => x[0] === t.K) : null;
+    if (lr) { const [b, a, l] = call ? lr.slice(1, 4) : lr.slice(5, 8); if (b > 0 && a >= b) return { v: (a + b) / 2, bid: b, S: r.px }; if (l > 0) return { v: l, S: r.px }; }
+    const T = Math.max((Date.parse(t.exp) - Date.parse(D.asOf)) / 864e5, 0) / 365;
+    return { v: bs(r.px, t.K, T, (r.iv != null ? r.iv : t.iv0) / 100, call, D.r), S: r.px, est: true };
+  };
+  const WHY = { tp: ['pos', 'ถึงเป้า'], sl: ['neg', 'ตัดขาดทุน'], time: ['', 'หมดเวลา (เหลือ 21 วัน)'], exp: ['', 'หมดอายุ'], man: ['', 'ปิดเอง'] };
+  const settle = () => {
+    const a = PP(); if (!a || !D) return; let ch = false;
+    a.tx.filter((t) => t.st === 'open' && D.asOf >= t.at).forEach((t) => {
+      const q = optNow(t); t.last = q.v; const call = t.dir === 'call'; let why = null, px = q.bid > 0 ? q.bid : q.v;
+      if (D.asOf >= t.exp && q.S != null) { why = 'exp'; px = Math.max(0, call ? q.S - t.K : t.K - q.S); }
+      else if (q.S != null && D.asOf > t.at && (call ? q.S >= t.tgt : q.S <= t.tgt)) why = 'tp';
+      else if (q.S != null && D.asOf > t.at && (call ? q.S < t.stopS : q.S > t.stopS)) why = 'sl';
+      else if (D.asOf > t.at && q.v <= t.stopO) why = 'sl';
+      else if (D.asOf >= t.timeStop) why = 'time';
+      if (why) { Object.assign(t, { st: 'closed', exit: +px.toFixed(2), out: D.asOf, why, S1: q.S }); ch = true; }
+    });
+    if (ch) setPP(a);
+  };
+  const paperOpen = (o) => {
+    if (!D) return 'รอโหลดข้อมูลก่อน';
+    const a = acct(); const cost = (o.entry * 100 + FEE) * o.n; const cash = cashOf(a);
+    if (cost > cash) return `เงินจำลองไม่พอ ต้องใช้ ${thb(cost * fx())} มีอยู่ ${thb(cash * fx())} ปิดไม้อื่นหรือเริ่มใหม่ด้วยเงินตั้งต้นที่มากขึ้น`;
+    a.tx.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), st: 'open', at: D.asOf, ...o,
+      entry: +o.entry.toFixed(2), stopO: +o.stopO.toFixed(2), tgt: +o.tgt.toFixed(2), stopS: +o.stopS.toFixed(2) });
+    setPP(a);
+    return `เปิดไม้จำลองแล้ว: ${o.dir === 'call' ? 'Call' : 'Put'} ${o.s} × ${o.n} ที่ ${usd(o.entry)} (${thb(cost * fx())} รวมค่าคอม) ดูในส่วน "เทรดจำลอง"`;
+  };
+  const tname = (t) => `${t.dir === 'call' ? 'Call' : 'Put'} ${t.s} ${usd(t.K, t.K % 1 ? 2 : 0)} · ${dth(t.exp)} × ${t.n}`;
+  const drawPaper = () => {
+    const st = $('pp-strip'); if (!st) return;
+    settle();
+    const a = acct(), has = !!PP(); const open = a.tx.filter((t) => t.st === 'open'), done = a.tx.filter((t) => t.st === 'closed');
+    const cash = cashOf(a); const openV = open.reduce((v, t) => v + optNow(t).v * 100 * t.n, 0); const eq = cash + openV;
+    const plOf = (t) => (t.exit * 100 - FEE) * t.n - (t.entry * 100 + FEE) * t.n;
+    const wins = done.filter((t) => plOf(t) > 0).length;
+    const cell = (k, v, h, c) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v' + (c ? ' ' + c : ''), v), el('div', 'h', h || '')); return d; };
+    const tot = eq - a.start;
+    st.replaceChildren(
+      cell('มูลค่าบัญชีจำลอง', thb(eq * fx()), `เริ่มต้น ${thb(a.start * fx())}`),
+      cell('เงินสดคงเหลือ', thb(cash * fx()), `ไม้ที่เปิดอยู่ ${open.length} ไม้ · ${thb(openV * fx())}`),
+      cell('กำไร/ขาดทุนรวม', sthb(tot * fx()), pct(tot / a.start * 100), tot > 0 ? 'pos' : tot < 0 ? 'neg' : ''),
+      cell('ชนะ', done.length ? `${wins}/${done.length}` : '–', done.length ? `อัตราชนะ ${Math.round(wins / done.length * 100)}%` : 'ยังไม่มีไม้ที่ปิด'));
+    const ob = $('pp-open'); ob.replaceChildren();
+    if (!open.length) ob.append(el('div', 'empty', has ? 'ไม่มีไม้ที่เปิดอยู่ เลือกหุ้นในตัววางแผนแล้วกด "เทรดจำลองไม้นี้"' : 'ยังไม่เคยเทรดจำลอง เลือกหุ้นในตัววางแผนด้านบนแล้วกด "เทรดจำลองไม้นี้"'));
+    open.forEach((t) => {
+      const q = optNow(t); const pl = (q.v - t.entry) * 100 * t.n; const c = el('div', 'panel pp-card');
+      const h = el('div', 'pp-h'); h.append(el('b', null, tname(t)), el('span', 'tag ' + (pl >= 0 ? 'buy' : 'trap'), `${sthb(pl * fx())} (${pct((q.v / t.entry - 1) * 100, 0)})`));
+      c.append(h, el('p', null, `เข้า ${usd(t.entry)} เมื่อ ${dth(t.at)} · ตอนนี้ ${usd(q.v)}${q.est ? ' (ประมาณ)' : ''} · หุ้น ${usd(t.S0)} → ${q.S != null ? usd(q.S) : '–'}`));
+      c.append(el('p', 'pf-hint', `ทำกำไรเมื่อหุ้น${t.dir === 'call' ? 'ถึง' : 'ลงถึง'} ${usd(t.tgt)} · ตัดขาดทุนเมื่อหุ้น${t.dir === 'call' ? 'ต่ำกว่า' : 'สูงกว่า'} ${usd(t.stopS)} หรือออปชั่น ≤ ${usd(t.stopO)} · ออกไม่เกิน ${dth(t.timeStop)}`));
+      const act = el('div', 'sw-act');
+      const cl = el('button', 'btn-line sm', 'ปิดตอนนี้'); cl.type = 'button';
+      cl.addEventListener('click', () => { const x = PP(); const y = x && x.tx.find((z) => z.id === t.id); if (!y) return; const qq = optNow(y); Object.assign(y, { st: 'closed', exit: +(qq.bid > 0 ? qq.bid : qq.v).toFixed(2), out: D ? D.asOf : y.at, why: 'man', S1: qq.S }); setPP(x); drawPaper(); });
+      const del = el('button', 'btn-line sm', 'ลบ (กดผิด)'); del.type = 'button';
+      del.addEventListener('click', () => { if (!confirm('ลบไม้นี้ทิ้งเหมือนไม่เคยเปิด?')) return; const x = PP(); x.tx = x.tx.filter((z) => z.id !== t.id); setPP(x); drawPaper(); });
+      act.append(cl, del); c.append(act); ob.append(c);
+    });
+    const cb = $('pp-closed'); cb.replaceChildren(); $('pp-closed-h').hidden = !done.length;
+    if (done.length) {
+      const tb = el('table', 'tbl pp-tbl'); const hr = el('tr');
+      ['สัญญา', 'เข้า', 'ออก', 'ราคาเข้า → ออก', 'กำไร/ขาดทุน', 'เหตุผลที่ออก'].forEach((x, k) => hr.append(el('th', k === 0 || k === 5 ? 'l' : null, x)));
+      const th = el('thead'); th.append(hr); tb.append(th); const bd = el('tbody');
+      [...done].sort((x, y) => (y.out + y.id).localeCompare(x.out + x.id)).forEach((t) => {
+        const tr = el('tr'); const td = (v, c) => { const x = el('td', c || null, v); tr.append(x); return x; }; const pl = plOf(t);
+        td(tname(t), 'l'); td(dth(t.at)); td(dth(t.out)); td(`${usd(t.entry)} → ${usd(t.exit)}`);
+        const pc = td(null, pl > 0 ? 'pos' : pl < 0 ? 'neg' : null); pc.append(document.createTextNode(`${sthb(pl * fx())}`), el('small', 'sub', pct((t.exit / t.entry - 1) * 100, 0)));
+        td(WHY[t.why] ? WHY[t.why][1] : t.why, 'l ' + (WHY[t.why] ? WHY[t.why][0] : '')); bd.append(tr);
+      });
+      tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); cb.append(w);
+    }
+    const si = $('pp-start'); if (si && document.activeElement !== si) si.value = Math.round(a.start * fx());
+  };
+
   /* ---------- wiring ---------- */
-  const draw = () => { drawHead(); drawExtras(); drawTable(); drawPlan(); document.querySelectorAll('#op-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.m === mode))); };
-  const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && ['opt', 'optplan', 'optlearn'].some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
+  const draw = () => { drawHead(); drawExtras(); drawTable(); drawPlan(); drawPaper(); document.querySelectorAll('#op-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.m === mode))); };
+  const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && ['opt', 'optplan', 'optpaper', 'optlearn'].some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const setup = () => {
     if (!$('opt')) return;
     document.querySelectorAll('#op-mode button').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.m; draw(); }));
@@ -247,6 +344,11 @@
     $('op-cap').addEventListener('change', (e) => { const v = +e.target.value; if (v > 0) { setP('cap', v); drawPlan(); } });
     $('op-risk').addEventListener('change', (e) => { const v = +e.target.value; if (v > 0 && v <= 10) { setP('risk', v); drawPlan(); } else e.target.value = P().risk; });
     $('op-addb').addEventListener('click', addExtra);
+    $('pp-reset').addEventListener('click', () => {
+      const v = +$('pp-start').value; if (!(v > 0)) { $('pp-start').value = Math.round(acct().start * fx()); return; }
+      const a = PP(); if (a && a.tx.length && !confirm(`เริ่มบัญชีจำลองใหม่ด้วยเงิน ${thb(v)}? ไม้และประวัติเดิมจะหายทั้งหมด`)) return;
+      setPP({ start: v / fx(), tx: [] }); drawPaper();
+    });
     $('op-add').addEventListener('keydown', (e) => { if (e.key === 'Enter') addExtra(); });
     document.addEventListener('vg:ready', () => { if (D) draw(); });
     document.addEventListener('vg:prefs', () => { if (D) draw(); });
