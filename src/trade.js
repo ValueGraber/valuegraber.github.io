@@ -105,7 +105,7 @@
   };
   const preview = () => {
     const f = F(); labels(f); const out = $('tr-prev');
-    if (f.type === 'dep' || f.type === 'wd') { out.textContent = f.type === 'dep' ? 'เงินบาทที่ใส่เข้าไปลงทุนส่วนนี้ (Binance TH หรือ Dime)' : 'เงินบาทที่ถอนออก'; return; }
+    if (f.type === 'dep' || f.type === 'wd') { out.textContent = f.type === 'dep' ? 'เงินบาทที่ใส่เข้าไปลงทุนส่วนนี้ (Dime)' : 'เงินบาทที่ถอนออก'; return; }
     if (isGold(f.s) && !$('tr-fx').value) $('tr-fx').value = fxNow().toFixed(2);
     const x = calc(F());
     if (!x) { out.textContent = isGold(f.s) ? 'ใส่ยอดบาท ราคา USD/oz และอัตราแลกเปลี่ยนจากสลิป Dime น้ำหนักจะคำนวณให้ (แก้ให้ตรงสลิปได้)' : `ใส่ยอดบาทกับราคา ค่าธรรมเนียม Binance TH ${T.fees.crypto}% คิดให้อัตโนมัติ`; return; }
@@ -166,7 +166,7 @@
       const p = B.h[s], r = V.rows[s] || { v: 0, u: 0 }, st = SP() ? SP().status(s) : null;
       const w = eq > 0 ? r.v / eq : 0, t = (tg[s] || 0) / 100, gain = p && p.cost > 0 ? r.u / p.cost : 0;
       const a = { w, t, gain, st, acts: [] };
-      if (st && st.h === 'weak' && p) a.acts.push(['out', 'เทรนด์ระยะยาวเป็นขาลงและแพ้ BTC ไม่ควรถือรอ พิจารณาลดสัดส่วนแล้วย้ายไปตัวที่แข็งแรงกว่า', 'sell', r.v / 2, 'ขายครึ่งหนึ่ง']);
+      if (st && st.h === 'weak' && p) a.acts.push(['out', 'เทรนด์ระยะยาวเป็นขาลง พิจารณาลดสัดส่วนลง', 'sell', r.v / 2, 'ขายครึ่งหนึ่ง']);
       if (st && st.g === 'hot' && gain >= 0.3 && p) a.acts.push(['tp', `ร้อนแรงและมีกำไร ${pct(gain, 0)} แบ่งขาย 1/4 เก็บกำไรจริงไว้เป็นเงินสด`, 'sell', r.v / 4, 'แบ่งขาย 1/4']);
       if (hasT && w > t + band && p) a.acts.push(['tp', `สัดส่วน ${Math.round(w * 100)}% เกินเป้า ${Math.round(t * 100)}% ขายส่วนเกินให้กลับมาที่เป้า`, 'sell', (w - t) * eq, 'ขายส่วนเกิน']);
       if (hasT && w < t - band) {
@@ -236,7 +236,7 @@
     const note = $('tr-tnote');
     const miss = $('tr-tacts'); miss.replaceChildren();
     Object.entries(P).filter(([k, x]) => !B.h[k] && x.acts.length).forEach(([k, x]) => x.acts.forEach(([c, t, kind, amt, lab]) => { const d = el('div', 'sw-row'); d.append(el('div', 'sw-who', nameOf(k)), el('div', 'sw-adv sw-' + c, t + (amt ? ` ≈ ${thb(amt)}` : ''))); if (kind === 'buy') { const ac = el('div', 'sw-act'); ac.append(buyBtn(lab, k, amt)); d.append(ac); } miss.append(d); }));
-    note.textContent = sum ? `รวม ${sum}% ที่เหลือ ${Math.max(0, 100 - sum)}% เป็นเงินสด (ตอนนี้เงินสด ${V.eq > 0 ? Math.round(B.cash / V.eq * 100) : 0}%)${sum > 100 ? ' · เกิน 100% ลดลงก่อน' : ''}` : 'ยังไม่ได้ตั้งเป้า ตั้งไว้แล้วระบบจะบอกว่าตัวไหนควรขายส่วนเกินหรือซื้อเติม เช่น ทอง 40 BTC 30 ETH 10 ที่เหลือเป็นเงินสด';
+    note.textContent = sum ? `รวม ${sum}% ที่เหลือ ${Math.max(0, 100 - sum)}% เป็นเงินสด (ตอนนี้เงินสด ${V.eq > 0 ? Math.round(B.cash / V.eq * 100) : 0}%)${sum > 100 ? ' · เกิน 100% ลดลงก่อน' : ''}` : 'ยังไม่ได้ตั้งเป้า ตั้งไว้แล้วระบบจะบอกว่าตัวไหนควรขายส่วนเกินหรือซื้อเติม เช่น ทอง 60 ที่เหลือเป็นเงินสด';
   };
   const drawLedger = (B) => {
     const lb = $('tr-tx'); lb.replaceChildren(); const TY = { buy: 'ซื้อ', sell: 'ขาย', dep: 'ฝากเงิน', wd: 'ถอนเงิน' }; let month = '';
@@ -258,17 +258,17 @@
     const B = book(); const rows = [['date', 'time', 'type', 'asset', 'amount_thb', 'qty', 'unit', 'price', 'price_unit', 'fx', 'fee_thb', 'cost_or_net_thb', 'realized_thb', 'note']];
     sorted().forEach((x) => rows.push([bkDay(x.at), new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok' }), x.type, x.s || '', x.amt ?? x.thb ?? '', x.q ?? '', x.s ? (isGold(x.s) ? 'oz' : 'coin') : '', x.px ?? '', x.s ? (isGold(x.s) && x.fx ? 'USD/oz' : 'THB') : '', x.fx ?? '', x.fee ?? '',
       x.type === 'buy' ? r2(costOf(x)) : x.type === 'sell' ? r2(netOf(x)) : '', B.real[x.id] ? r2(B.real[x.id].pl) : '', '"' + (x.note || '').replace(/"/g, '""') + '"']));
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' })); a.download = 'valuegrab-crypto-gold.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' })); a.download = 'valuegrab-gold.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   const setupFees = () => {
     const box = $('tr-fees'); if (!box) return; box.replaceChildren();
-    [['crypto', 'คริปโต Binance TH (%)'], ['gold', 'ทอง Dime (%)']].forEach(([k, lab]) => { const l = el('label', null, lab); const x = el('input', 'inp'); x.type = 'number'; x.step = 'any'; x.inputMode = 'decimal'; x.value = T.fees[k];
+    [['gold', 'ทอง Dime (%)']].forEach(([k, lab]) => { const l = el('label', null, lab); const x = el('input', 'inp'); x.type = 'number'; x.step = 'any'; x.inputMode = 'decimal'; x.value = T.fees[k];
       x.addEventListener('change', () => { const v = +x.value; if (v >= 0) { T.fees[k] = v; save(); preview(); draw(); } else x.value = T.fees[k]; }); l.append(x); box.append(l); });
   };
 
   const setup = () => {
     if (!$('tr-form')) return;
-    const sel = $('tr-sym'); (SP() ? SP().assets : [['GOLD'], ['BTC']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
+    const sel = $('tr-sym'); (SP() ? SP().assets : [['GOLD']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
     ['tr-type', 'tr-sym', 'tr-q', 'tr-px', 'tr-fx', 'tr-at', 'tr-thb'].forEach((k) => $(k).addEventListener('input', preview));
     $('tr-sym').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; $('tr-fx').value = ''; } preview(); });
     $('tr-type').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; } preview(); });
