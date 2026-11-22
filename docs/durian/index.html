@@ -397,9 +397,19 @@ const EVENT_STAGES=['induce','bud','bloom','fruit','cut','rest'];
 const WORK_TYPES=['ฉีดยา/สารเคมี','ปุ๋ยทางดิน','ปุ๋ยทางใบ/ฮอร์โมน','ราดสารทำดอก','ตัดแต่งกิ่ง','ให้น้ำ','อื่นๆ'];
 const OUT_CATS=['ปุ๋ย','ยา/สารเคมี','ค่าแรง','น้ำ/ไฟ','น้ำมัน','อุปกรณ์','ต้นพันธุ์','ถมดิน/ปรับพื้นที่','ระบบน้ำ','ค่าส่ง','อื่นๆ'];
 const CAPITAL=['ต้นพันธุ์','อุปกรณ์','ถมดิน/ปรับพื้นที่','ระบบน้ำ'];
-const IN_CATS=['ขายทุเรียน','ขายผลผลิตอื่น','อื่นๆ'];
+const IN_CATS=['ขายทุเรียน','ขายมังคุด','ขายผลผลิตอื่น','อื่นๆ'];
 const VARIETIES=['หมอนทอง','ชะนี','ก้านยาว','พวงมณี','กระดุม','นกหยิบ','มังคุด','อื่นๆ'];
 const isMg=t=>t&&t.variety==='มังคุด';
+const CROPS=['ทั้งสวน','ทุเรียน','มังคุด'];
+const MG_GRADES=['ผิวมัน (ส่งออก)','ผิวลาย','ตกเกรด'];
+function cropOfIds(ids){ids=(ids||[]).filter(id=>S.data.trees[id]);if(!ids.length)return {crop:'ทั้งสวน',mg:null};const n=ids.filter(id=>isMg(S.data.trees[id])).length;return {crop:n===0?'ทุเรียน':n===ids.length?'มังคุด':'ทั้งสวน',mg:n/ids.length}}
+const cropMg=c=>c==='มังคุด'?1:c==='ทุเรียน'?0:null;
+function mgShare(){const p=planMeta();if(p.mgShare!=null&&p.mgShare!=='')return Math.max(0,Math.min(100,+p.mgShare))/100;const a=trees();return a.length?a.filter(isMg).length/a.length:0}
+function ledgerFor(crop){const L=ledger();if(!crop||crop==='ทั้งสวน')return L;const d=mgShare();
+  return L.map(r=>{const m=r.mg==null?d:r.mg,f=crop==='มังคุด'?m:1-m;return f>0?{...r,amount:r.amount*f,part:f<1}:null}).filter(Boolean)}
+const salesFor=crop=>list('sales').filter(s=>!crop||crop==='ทั้งสวน'||(s.crop||'ทุเรียน')===crop);
+const hasMg=()=>trees().some(isMg);
+const cropSeg=(act,v)=>hasMg()?`<div class="seg" style="margin-bottom:14px">${CROPS.map(c=>`<button data-act="${act}" data-v="${c}" aria-pressed="${v===c}">${c}</button>`).join('')}</div>`:'';
 const DEF_DAYS={'หมอนทอง':120,'ชะนี':105,'ก้านยาว':125,'พวงมณี':100,'กระดุม':90,'นกหยิบ':110,'มังคุด':80,'อื่นๆ':110};
 const GRADES=['A','B','C','ตกไซซ์'];
 const CHANNELS=['Facebook','LINE','TikTok','Shopee/Lazada','ขายหน้าสวน','อื่นๆ'];
@@ -572,11 +582,11 @@ function treeState(){
 }
 function ledger(){
   const rows=[];
-  list('money').forEach(m=>rows.push({src:'money',id:m.id,date:m.date,dir:m.dir,cat:m.cat,amount:+m.amount||0,title:m.note||m.cat,by:m.by,demo:m.demo}));
-  list('works').forEach(w=>{if(+w.cost>0)rows.push({src:'works',id:w.id,date:w.date,dir:'out',cat:/ปุ๋ย/.test(w.type)?'ปุ๋ย':/ยา|สาร/.test(w.type)?'ยา/สารเคมี':'อื่นๆ',amount:+w.cost,title:w.type+(w.product?' · '+w.product:''),by:w.by})});
-  list('sales').forEach(s=>{const g=saleGross(s);rows.push({src:'sales',id:s.id,date:s.date,dir:'in',cat:'ขายทุเรียน',amount:g,title:(s.mode==='online'?'ขายออนไลน์':'ขายรอบตัด')+(s.buyer?' · '+s.buyer:''),by:s.by});
-    if(+s.fee>0)rows.push({src:'sales',id:s.id,date:s.date,dir:'out',cat:s.mode==='online'?'ค่าส่ง':'อื่นๆ',amount:+s.fee,title:(s.mode==='online'?'ค่าส่ง/แพ็ก':'ค่าใช้จ่ายการขาย')+(s.buyer?' · '+s.buyer:''),by:s.by})});
-  list('stock').forEach(k=>{if(+k.cost>0)rows.push({src:'stock',id:k.id,date:k.date,dir:'out',cat:k.kind||'อื่นๆ',amount:+k.cost,title:'ซื้อ '+k.item+' '+nf.format(+k.qty||0)+' '+(k.unit||''),by:k.by})});
+  list('money').forEach(m=>{const c=m.crop||'ทั้งสวน';rows.push({src:'money',id:m.id,date:m.date,dir:m.dir,cat:m.cat,amount:+m.amount||0,title:(m.note||m.cat)+(c!=='ทั้งสวน'?' · '+c:''),by:m.by,demo:m.demo,crop:c,mg:cropMg(c)})});
+  list('works').forEach(w=>{const co=cropOfIds(w.trees);if(+w.cost>0)rows.push({src:'works',...co,id:w.id,date:w.date,dir:'out',cat:/ปุ๋ย/.test(w.type)?'ปุ๋ย':/ยา|สาร/.test(w.type)?'ยา/สารเคมี':'อื่นๆ',amount:+w.cost,title:w.type+(w.product?' · '+w.product:''),by:w.by})});
+  list('sales').forEach(s=>{const g=saleGross(s),c=s.crop||'ทุเรียน',mg=cropMg(c),fr=c==='มังคุด'?'มังคุด':'ทุเรียน';rows.push({src:'sales',crop:c,mg,id:s.id,date:s.date,dir:'in',cat:'ขาย'+fr,amount:g,title:'ขาย'+fr+(s.mode==='online'?' ออนไลน์':' รอบตัด')+(s.buyer?' · '+s.buyer:''),by:s.by});
+    if(+s.fee>0)rows.push({src:'sales',crop:c,mg,id:s.id,date:s.date,dir:'out',cat:s.mode==='online'?'ค่าส่ง':'อื่นๆ',amount:+s.fee,title:(s.mode==='online'?'ค่าส่ง/แพ็ก':'ค่าใช้จ่ายการขาย')+(s.buyer?' · '+s.buyer:''),by:s.by})});
+  list('stock').forEach(k=>{if(+k.cost>0)rows.push({src:'stock',crop:'ทั้งสวน',mg:null,id:k.id,date:k.date,dir:'out',cat:k.kind||'อื่นๆ',amount:+k.cost,title:'ซื้อ '+k.item+' '+nf.format(+k.qty||0)+' '+(k.unit||''),by:k.by})});
   return rows.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
 }
 const saleKg=s=>(s.lines||[]).reduce((a,l)=>a+(+l.kg||0),0);
@@ -644,7 +654,7 @@ const PLAN_A_NAT=PLAN_A.filter(x=>x[0]<75).concat([
  [95,'กดใบอ่อน ครั้งที่ 2','0-52-34 ทางใบ · ตัดกิ่งกระโดงที่แตกใหม่','ปุ๋ยทางใบ/ฮอร์โมน',''],
  [105,'กดใบอ่อน ครั้งที่ 3','0-52-34 ทางใบ','ปุ๋ยทางใบ/ฮอร์โมน','ใบต้องนิ่งก่อนเข้าแล้ง'],
  [110,'งดน้ำเปิดตาดอก (แล้งธรรมชาติ)','งดน้ำ 15–30 วันเมื่อหมดฝน ดูหน้าอากาศ','ให้น้ำ','ความแล้งทำให้ต้นสร้าง ABA เป็นตัวกระตุ้นหลักเมื่อไม่ใช้สาร · เห็นตาดอกแล้วค่อยให้น้ำทีละน้อย']]);
-function bloomRounds(st){const ds=trees().filter(t=>!isMg(t)).map(t=>({t,s:st[t.id]})).filter(o=>o.s.bloom&&['bloom','fruit','bud'].includes(o.s.stage)).sort((a,b)=>a.s.bloom<b.s.bloom?-1:1);
+function bloomRounds(st,mg){const ds=trees().filter(t=>!!mg===isMg(t)).map(t=>({t,s:st[t.id]})).filter(o=>o.s.bloom&&['bloom','fruit','bud'].includes(o.s.stage)).sort((a,b)=>a.s.bloom<b.s.bloom?-1:1);
   const R=[];ds.forEach(o=>{const r=R[R.length-1];if(r&&daysBetween(r.b,o.s.bloom)<=10)r.ids.push(o.t.id);else R.push({b:o.s.bloom,ids:[o.t.id],v:o.t.variety})});return R}
 function planTasks(st){const p=planMeta(),T=[];
   if(p.H)(p.mode==='nat'?PLAN_A_NAT:PLAN_A).forEach((x,i)=>T.push({k:'A'+(p.mode==='nat'?'n':'')+':'+p.H+':'+i,date:addDays(p.H,x[0]),ph:'บำรุงต้น/ทำดอก',x}));
@@ -859,7 +869,7 @@ async function planAct(a,el){
   if(a==='rvre'){fetchRv(true);toast('กำลังโหลดข้อมูลแม่น้ำ…');return true}
   if(a==='rvsave'){if(!S.canWrite)return true;const raw=(($('#rLoc')||{}).value||'').trim();let ll={rlat:null,rlon:null};if(raw){const q=parseLoc(raw);if(!q)return toast('อ่านพิกัดแม่น้ำไม่ได้'),true;ll={rlat:q.lat,rlon:q.lon}}
     const fdt=($('#rFlood')||{}).value||'';if(await savePlan({...ll,floodDate:fdt})){toast('บันทึกแล้ว');fetchRv(true)}return true}
-  if(a==='raisave'){if(!S.canWrite)return true;const r=+(($('#cRai')||{}).value);if(!(r>0))return toast('ใส่พื้นที่เป็นไร่ เช่น 2'),true;if(await savePlan({rai:r}))toast('บันทึกพื้นที่แล้ว');return true}
+  if(a==='raisave'){if(!S.canWrite)return true;const r=+(($('#cRai')||{}).value);if(!(r>0))return toast('ใส่พื้นที่เป็นไร่ เช่น 2'),true;const mi=$('#cMg');const mv=mi&&mi.value!==''?Math.max(0,Math.min(100,+mi.value)):null;if(await savePlan({rai:r,mgShare:mv}))toast('บันทึกแล้ว');return true}
   if(a==='gowx'){ui.planTab='wx';if(location.hash==='#plan')render();else location.hash='plan';return true}
   if(a==='goplan'){ui.planTab='plan';if(location.hash==='#plan')render();else location.hash='plan';return true}
   if(a==='wxre'){fetchWx(true);toast('กำลังโหลดอากาศ…');return true}
@@ -1085,7 +1095,9 @@ function vWork(st){
   const sch=schedules();
   if(sch.length)h+=`<section style="margin-bottom:22px"><div class="sec-h"><h2>รอบถัดไป</h2></div><div class="panel"><ul class="list">${sch.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':x.left<=3?'warn':'ok'}">${dueTxt(x.left)}</span></div><div><div class="t">${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทุก ${x.w.every} วัน · ล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})} · ครั้งถัดไป ${fd(x.next,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')}</ul></div></section>`;
   const types=['all',...new Set(W.map(w=>w.type))];
-  const F=ui.workFilter==='all'?W:W.filter(w=>w.type===ui.workFilter);
+  const wc=ui.wcrop||'ทั้งสวน';
+  const F=(ui.workFilter==='all'?W:W.filter(w=>w.type===ui.workFilter)).filter(w=>{if(wc==='ทั้งสวน')return true;const ids=(w.trees||[]).filter(id=>S.data.trees[id]);return !ids.length||ids.some(id=>isMg(S.data.trees[id])===(wc==='มังคุด'))});
+  if(hasMg())h+=`<div class="seg" style="margin-bottom:10px">${CROPS.map(c=>`<button data-act="wcrop" data-v="${c}" aria-pressed="${wc===c}">${c==='ทั้งสวน'?'ทุกต้น':'มีจด'+c}</button>`).join('')}</div>`;
   if(types.length>2)h+=`<div class="seg" style="margin-bottom:14px">${types.map(t=>`<button data-act="wf" data-v="${esc(t)}" aria-pressed="${ui.workFilter===t}">${t==='all'?'ทั้งหมด':esc(t)}</button>`).join('')}</div>`;
   if(!W.length)return h+`<div class="panel empty"><h3>ยังไม่มีบันทึกงานสวน</h3><p>จดทุกครั้งที่ฉีดยา ใส่ปุ๋ย ราดสาร: ใช้อะไร อัตราเท่าไหร่ ต้นไหนบ้าง ต้องเว้นกี่วันก่อนตัด และทำซ้ำทุกกี่วัน แอปจะเตือนให้</p>${S.canWrite?`<button class="btn pri" data-act="new" data-kind="works">${ic('plus')}จดงานสวนครั้งแรก</button>`:''}</div>`;
   h+=`<div class="panel"><ul class="list">${F.map(w=>`<li class="click" data-act="edit" data-c="works" data-id="${w.id}"><div class="d">${fd(w.date)}</div><div><div class="t">${esc(w.type)}${w.product?' · '+esc(w.product):''}</div><div class="s">${+w.phi?'<span class="badge">เว้น '+w.phi+' วันก่อนตัด</span> ':''}${+w.every?'<span class="badge">ทุก '+w.every+' วัน</span> ':''}${[(w.uses||[]).length?'สูตร: '+w.uses.map(u=>esc(u.item)).join(', '):'',w.rate?'อัตรา '+esc(w.rate):'',+w.useQty?'ใช้ '+nf.format(w.useQty)+' '+esc(unitOf(w.product)):'',esc(w.note||'')].filter(Boolean).join(' · ')} ${who(w.by)}</div>${tagList(w.trees,st)}</div><div class="amt out">${+w.cost?'−'+baht(w.cost):''}</div></li>`).join('')}</ul></div>`;
@@ -1281,21 +1293,25 @@ function vChems(){
 
 const HV_STEPS=[[-21,'ติดต่อคนซื้อ/ล้ง','บอกจำนวนลูกและวันตัดคร่าว ๆ ถามราคาหลายเจ้า'],[-16,'หยุดพ่นยาเคมี','เช็กระยะเว้นก่อนตัดบนฉลากทุกตัว'],[-10,'นัดวันตัด','นัดล้งหรือทีมตัด เตรียมเชือกโรยผล ตะกร้า'],
  [-7,'ตรวจความแก่','ก้านผลนุ่มเห็นรอยปล้องชัด ปลายหนามแห้งสีเข้ม เคาะเสียงหลวม สุ่มผ่าดูเนื้อแห้ง ≥ 32%'],[0,'ถึงวันตัด','ตัดตอนเช้า ไม่ให้ผลตกพื้น ห้ามวางผลบนดิน'],[7,'ตัดให้หมดรุ่น','ลูกที่ค้างนานจะสุกคาต้นและร่วง']];
-function harvestHTML(st){const p=planMeta();let R=bloomRounds(st);if(!R.length&&p.B)R=[{b:p.B,ids:[],v:'หมอนทอง',plan:true}];if(!R.length)return '';
-  const cutF=list('flowers').filter(f=>f.stage==='cut'&&+f.yieldKg>0&&+f.fruits>0);const fk=cutF.reduce((a,f)=>a+(+f.fruits),0);const kgPer=fk?cutF.reduce((a,f)=>a+(+f.yieldKg),0)/fk:4;
-  const yr=list('sales').filter(s=>daysBetween(s.date,today())<=400),ykg=yr.reduce((a,s)=>a+saleKg(s),0),price=ykg?yr.reduce((a,s)=>a+saleGross(s),0)/ykg:0;
+const MG_STEPS=[[-14,'ติดต่อคนซื้อ','บอกจำนวนผลคร่าว ๆ ถามราคาเกรดส่งออก'],[-7,'หยุดพ่นยาเคมี','เช็กระยะเว้นก่อนเก็บบนฉลาก'],[0,'เริ่มเก็บ','เก็บระยะสายเลือดถึงผิวแดง ใช้ตะกร้อสอย ห้ามให้ผลตกพื้น (ยางไหลในผล)'],[21,'เก็บรอบสุดท้าย','มังคุดทยอยแก่ เดินเก็บทุก 3–5 วัน']];
+function harvestHTML(st){const p=planMeta();let R=bloomRounds(st);if(!R.length&&p.B)R=[{b:p.B,ids:[],v:'หมอนทอง',plan:true}];
+  const RM=bloomRounds(st,true).map(r=>({...r,mg:true,v:'มังคุด'}));
+  return harvestRounds(st,R,false)+harvestRounds(st,RM,true)}
+function harvestRounds(st,R,MG){const p=planMeta();if(!R.length)return '';const STEPS=MG?MG_STEPS:HV_STEPS,win=MG?21:7;
+  const cutF=list('flowers').filter(f=>f.stage==='cut'&&+f.yieldKg>0&&+f.fruits>0&&(f.trees||[]).length&&(f.trees||[]).every(id=>isMg(S.data.trees[id])===MG));const fk=cutF.reduce((a,f)=>a+(+f.fruits),0);const kgPer=fk?cutF.reduce((a,f)=>a+(+f.yieldKg),0)/fk:MG?0.09:4;
+  const yr=salesFor(MG?'มังคุด':'ทุเรียน').filter(s=>daysBetween(s.date,today())<=400),ykg=yr.reduce((a,s)=>a+saleKg(s),0),price=ykg?yr.reduce((a,s)=>a+saleGross(s),0)/ykg:0;
   const w=p.lat!=null?wxAnalyze(st):null,t0=today();
-  return `<section class="sec"><div class="sec-h"><h2>แผนตัดผล</h2><span class="muted">${R.length} รุ่น</span></div>`+R.map((r,ri)=>{const D=daysFor(r.v||'หมอนทอง'),cut=addDays(r.b,D),left=daysBetween(t0,cut),age=daysBetween(r.b,t0),pct=Math.max(0,Math.min(100,age/D*100));
+  return `<section class="sec"><div class="sec-h"><h2>${MG?'แผนเก็บมังคุด':'แผนตัดผลทุเรียน'}</h2><span class="muted">${R.length} รุ่น</span></div>`+R.map((r,ri)=>{const D=daysFor(r.v||'หมอนทอง'),cut=addDays(r.b,D),left=daysBetween(t0,cut),age=daysBetween(r.b,t0),pct=Math.max(0,Math.min(100,age/D*100));
     const fr=r.ids.reduce((a,id)=>a+(+(st[id]||{}).fruits||0),0),kg=fr*kgPer;
     const rain=w?w.days.filter(x=>x.t>=addDays(cut,-5)&&x.t<=addDays(cut,3)&&x.r>=30):[];
-    const nx=HV_STEPS.findIndex(s=>addDays(cut,s[0])>=t0);
+    const nx=STEPS.findIndex(s=>addDays(cut,s[0])>=t0);
     return `<div class="panel" style="padding:14px 18px;margin-bottom:12px"><div class="row" style="justify-content:space-between;align-items:baseline"><b style="font-size:17px">${R.length>1?'รุ่น '+(ri+1)+' · ':''}ดอกบาน ${fd(r.b,{day:'numeric',month:'short'})}${r.plan?' (คาด)':''}</b><span class="badge ${left<0?'bad':left<=10?'warn':''}">${left<0?'เลยวันตัด '+(-left)+' วัน':left===0?'ตัดวันนี้':'อีก '+left+' วัน'}</span></div>
      <div class="prog"><i style="width:${pct}%"></i></div>
-     <p style="margin:8px 0 0">ตัดได้ราว <b>${fd(cut,{day:'numeric',month:'short'})}–${fd(addDays(cut,7),{day:'numeric',month:'short'})}</b> (${esc(r.v||'หมอนทอง')} ${D} วันหลังดอกบาน) · อายุผล ${Math.max(0,age)} วัน${r.ids.length?' · '+r.ids.length+' ต้น':''}</p>
-     ${fr?`<p style="margin:4px 0 0">ไว้ผล ${nf.format(fr)} ลูก ≈ <b>${nf.format(Math.round(kg))} กก.</b>${price?' ≈ '+baht(Math.round(kg*price))+' บาท':''} <span class="muted" style="font-size:13px">(${fk?'เฉลี่ยจากที่เคยตัด':'คิดลูกละ ~4 กก.'} ${nf.format(Math.round(kgPer*10)/10)} กก./ลูก${price?' · ราคาเฉลี่ยที่เคยขาย '+baht(price)+' บ./กก.':''})</span></p>`:`<p class="muted" style="margin:4px 0 0;font-size:14px">จดจำนวนลูกตอน "ติดผล" แล้วจะคาดได้ว่าได้กี่กิโล</p>`}
-     ${rain.length?`<div class="note" style="margin-top:8px">ฝนหนักช่วงใกล้วันตัด (${rain.map(x=>fd(x.t,{day:'numeric',month:'short'})+' '+Math.round(x.r)+' มม.').join(', ')}) ถ้าความแก่ถึงแล้วให้ตัดก่อนฝน ผลที่โดนฝนหนักช่วงแก่เสี่ยงไส้ซึม</div>`:''}
-     ${(()=>{const li=(s,i)=>{const d=addDays(cut,s[0]),l=daysBetween(t0,d);return `<li${i<nx||nx<0?' style="opacity:.55"':''}><div class="d"><span class="badge ${i===nx?(l<=3?'warn':'ok'):''}">${fd(d,{day:'numeric',month:'short'})}</span></div><div><div class="t">${s[1]}${i===nx?' · '+(l===0?'วันนี้':'อีก '+l+' วัน'):''}</div><div class="s">${s[2]}</div></div><div></div></li>`};const a=nx<0?HV_STEPS.length:nx,sh=HV_STEPS.slice(a,a+2);
-      return (sh.length?`<ul class="list" style="margin-top:8px">${sh.map((s,i)=>li(s,a+i)).join('')}</ul>`:'')+`<details style="margin-top:6px"><summary class="muted" style="cursor:pointer;font-size:14px">ดูทุกขั้นก่อนตัด (${HV_STEPS.length})</summary><ul class="list">${HV_STEPS.map(li).join('')}</ul></details>`})()}</div>`}).join('')+`</section>`}
+     <p style="margin:8px 0 0">${MG?'เก็บได้ราว':'ตัดได้ราว'} <b>${fd(cut,{day:'numeric',month:'short'})}–${fd(addDays(cut,win),{day:'numeric',month:'short'})}</b> (${esc(r.v||'หมอนทอง')} ${D} วันหลังดอกบาน) · อายุผล ${Math.max(0,age)} วัน${r.ids.length?' · '+r.ids.length+' ต้น':''}</p>
+     ${fr?`<p style="margin:4px 0 0">ไว้ผล ${nf.format(fr)} ${MG?'ผล':'ลูก'} ≈ <b>${nf.format(Math.round(kg))} กก.</b>${price?' ≈ '+baht(Math.round(kg*price))+' บาท':''} <span class="muted" style="font-size:13px">(${fk?'เฉลี่ยจากที่เคยตัด':MG?'คิดผลละ ~90 กรัม':'คิดลูกละ ~4 กก.'} ${nf.format(Math.round(kgPer*10)/10)} กก./ลูก${price?' · ราคาเฉลี่ยที่เคยขาย '+baht(price)+' บ./กก.':''})</span></p>`:`<p class="muted" style="margin:4px 0 0;font-size:14px">จดจำนวนลูกตอน "ติดผล" แล้วจะคาดได้ว่าได้กี่กิโล</p>`}
+     ${rain.length&&!MG?`<div class="note" style="margin-top:8px">ฝนหนักช่วงใกล้วันตัด (${rain.map(x=>fd(x.t,{day:'numeric',month:'short'})+' '+Math.round(x.r)+' มม.').join(', ')}) ถ้าความแก่ถึงแล้วให้ตัดก่อนฝน ผลที่โดนฝนหนักช่วงแก่เสี่ยงไส้ซึม</div>`:''}
+     ${(()=>{const li=(s,i)=>{const d=addDays(cut,s[0]),l=daysBetween(t0,d);return `<li${i<nx||nx<0?' style="opacity:.55"':''}><div class="d"><span class="badge ${i===nx?(l<=3?'warn':'ok'):''}">${fd(d,{day:'numeric',month:'short'})}</span></div><div><div class="t">${s[1]}${i===nx?' · '+(l===0?'วันนี้':'อีก '+l+' วัน'):''}</div><div class="s">${s[2]}</div></div><div></div></li>`};const a=nx<0?STEPS.length:nx,sh=STEPS.slice(a,a+2);
+      return (sh.length?`<ul class="list" style="margin-top:8px">${sh.map((s,i)=>li(s,a+i)).join('')}</ul>`:'')+`<details style="margin-top:6px"><summary class="muted" style="cursor:pointer;font-size:14px">ดูทุกขั้น (${STEPS.length})</summary><ul class="list">${STEPS.map(li).join('')}</ul></details>`})()}</div>`}).join('')+`</section>`}
 function vFlower(st){
   const ts=trees();
   const bearing=ts.filter(t=>t.kind!=='young');
@@ -1317,41 +1333,46 @@ function vFlower(st){
 
 function vMoney(st){
   const ys=years();if(!ys.includes(ui.year))ui.year=ys[0];
-  let h=`<div class="top"><div><h1>ขาย / บัญชี</h1><p>รายรับ รายจ่าย และการขายทุเรียน ปี ${be(ui.year)}</p></div><div class="row"><select class="f" style="width:auto;min-height:44px" data-act="year" aria-label="เลือกปี">${ys.map(y=>`<option value="${y}" ${y===ui.year?'selected':''}>ปี ${be(y)}</option>`).join('')}</select>${S.canWrite?(ui.moneyTab==='sales'?`<button class="btn pri" data-act="new" data-kind="sales">${ic('plus')}จดการขาย</button>`:`<button class="btn" data-act="new" data-kind="money" data-dir="in">${ic('in')}รับเงิน</button><button class="btn pri" data-act="new" data-kind="money" data-dir="out">${ic('out')}จ่ายเงิน</button>`):''}</div></div>`;
-  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="mt" data-v="sales" aria-pressed="${ui.moneyTab==='sales'}">การขายทุเรียน</button><button data-act="mt" data-v="ledger" aria-pressed="${ui.moneyTab==='ledger'}">รายรับ-รายจ่าย</button><button data-act="mt" data-v="cost" aria-pressed="${ui.moneyTab==='cost'}">ต้นทุนต่อไร่</button></div>`;
+  let h=`<div class="top"><div><h1>ขาย / บัญชี</h1><p>รายรับ รายจ่าย และการขาย${hasMg()?'ทุเรียน มังคุด':'ทุเรียน'} ปี ${be(ui.year)}</p></div><div class="row"><select class="f" style="width:auto;min-height:44px" data-act="year" aria-label="เลือกปี">${ys.map(y=>`<option value="${y}" ${y===ui.year?'selected':''}>ปี ${be(y)}</option>`).join('')}</select>${S.canWrite?(ui.moneyTab==='sales'?`<button class="btn pri" data-act="new" data-kind="sales">${ic('plus')}จดการขาย</button>`:`<button class="btn" data-act="new" data-kind="money" data-dir="in">${ic('in')}รับเงิน</button><button class="btn pri" data-act="new" data-kind="money" data-dir="out">${ic('out')}จ่ายเงิน</button>`):''}</div></div>`;
+  h+=`<div class="seg" style="margin-bottom:16px"><button data-act="mt" data-v="sales" aria-pressed="${ui.moneyTab==='sales'}">${hasMg()?'การขาย':'การขายทุเรียน'}</button><button data-act="mt" data-v="ledger" aria-pressed="${ui.moneyTab==='ledger'}">รายรับ-รายจ่าย</button><button data-act="mt" data-v="cost" aria-pressed="${ui.moneyTab==='cost'}">ต้นทุน${ui.crop==='มังคุด'?'ต่อต้น':'ต่อไร่'}</button></div>`+cropSeg('mcrop',ui.crop||'ทั้งสวน');
   return h+(ui.moneyTab==='sales'?vSales(st):ui.moneyTab==='cost'?vCost():vLedger());
 }
 
-function costYear(y){const L=ledger().filter(r=>yearOf(r.date)===y);const sum=f=>L.filter(f).reduce((a,r)=>a+r.amount,0);
-  const Sx=list('sales').filter(s=>yearOf(s.date)===y);
+function costYear(y,crop){const L=ledgerFor(crop).filter(r=>yearOf(r.date)===y);const sum=f=>L.filter(f).reduce((a,r)=>a+r.amount,0);
+  const Sx=salesFor(crop).filter(s=>yearOf(s.date)===y);
   const cats={};L.filter(r=>r.dir==='out'&&!CAPITAL.includes(r.cat)).forEach(r=>cats[r.cat]=(cats[r.cat]||0)+r.amount);
   return {y,inc:sum(r=>r.dir==='in'),cap:sum(r=>r.dir==='out'&&CAPITAL.includes(r.cat)),op:sum(r=>r.dir==='out'&&!CAPITAL.includes(r.cat)),kg:Sx.reduce((a,s)=>a+saleKg(s),0),dur:Sx.reduce((a,s)=>a+saleGross(s),0),cats}}
-function vCost(){const p=planMeta(),rai=+p.rai||0,c=costYear(ui.year);
-  let h=`<div class="panel pl-anc"><div class="grid2"><div class="fld"><label class="l" for="cRai">พื้นที่สวนทุเรียน (ไร่) <small>ใช้หารเป็นต่อไร่</small></label><input class="f num" id="cRai" type="number" min="0.1" step="0.25" inputmode="decimal" value="${rai||''}" placeholder="เช่น 2"${S.canWrite?'':' disabled'}></div><div class="fld" style="align-self:end">${S.canWrite?`<button class="btn pri" data-act="raisave">บันทึกพื้นที่</button>`:''}</div></div></div>`;
-  if(!rai)return h+`<div class="panel empty" style="margin-top:14px"><h3>ใส่พื้นที่สวนก่อน</h3><p>แอปจะเอารายรับรายจ่ายที่จดไว้มาหารเป็นต่อไร่ ต่อต้น ต่อกิโล และบอกจุดคุ้มทุนให้</p></div>`;
-  const R=v=>baht(Math.round(v/rai)),prof=c.inc-c.op;
-  const ts=trees().filter(t=>!isMg(t));
-  const allS=list('sales');const akg=allS.reduce((a,s)=>a+saleKg(s),0),ag=allS.reduce((a,s)=>a+saleGross(s),0);
+function vCost(){const p=planMeta(),crop=ui.crop||'ทั้งสวน',MG=crop==='มังคุด',rai=+p.rai||0,c=costYear(ui.year,crop);
+  const mgN=trees().filter(isMg).length,durN=trees().filter(t=>!isMg(t)).length,auto=trees().length?Math.round(mgN/trees().length*100):0;
+  const ro=S.canWrite?'':' disabled';
+  let h=`<div class="panel pl-anc"><div class="grid2"><div class="fld"><label class="l" for="cRai">พื้นที่สวนทุเรียน (ไร่) <small>ใช้หารเป็นต่อไร่</small></label><input class="f num" id="cRai" type="number" min="0.1" step="0.25" inputmode="decimal" value="${rai||''}" placeholder="เช่น 2"${ro}></div>
+   ${mgN?`<div class="fld"><label class="l" for="cMg">ค่าใช้จ่ายร่วมที่เป็นของมังคุด (%) <small>เว้นว่าง = ตามจำนวนต้น ${auto}% · ต้นมังคุดใหญ่ใช้ปุ๋ยยามากกว่า ปรับขึ้นได้</small></label><input class="f num" id="cMg" type="number" min="0" max="100" step="1" inputmode="decimal" value="${p.mgShare??''}" placeholder="${auto}"${ro}></div>`:''}</div>
+   ${S.canWrite?`<button class="btn pri" data-act="raisave">บันทึก</button>`:''}</div>`;
+  const den=MG?mgN:rai,U=MG?'ต้น':'ไร่';
+  if(!den)return h+`<div class="panel empty" style="margin-top:14px"><h3>${MG?'ยังไม่มีต้นมังคุดในสวน':'ใส่พื้นที่สวนก่อน'}</h3><p>แอปจะเอารายรับรายจ่ายที่จดไว้มาหารเป็นต่อ${U} ต่อกิโล และบอกจุดคุ้มทุนให้</p></div>`;
+  const R=v=>baht(Math.round(v/den)),prof=c.inc-c.op;
+  const allS=salesFor(crop);const akg=allS.reduce((a,s)=>a+saleKg(s),0),ag=allS.reduce((a,s)=>a+saleGross(s),0);
   const price=c.kg?c.dur/c.kg:akg?ag/akg:0;
-  h+=`<div class="panel sum3" style="margin-top:14px"><div><span>ต้นทุนดำเนินงาน/ไร่</span><b class="num">${R(c.op)}</b><span>บาท · ปี ${be(ui.year)}</span></div><div><span>รายได้/ไร่</span><b class="num">${R(c.inc)}</b><span>บาท</span></div><div><span>กำไร/ไร่</span><b class="num" style="color:${prof<0?'var(--out)':'var(--in)'}">${prof<0?'−':''}${R(Math.abs(prof))}</b><span>ยังไม่หักเงินลงทุน</span></div></div>`;
+  const lbl=crop==='ทั้งสวน'?'ทั้งสวน (ทุเรียน+มังคุด) ':'';
+  h+=`<div class="panel sum3" style="margin-top:14px"><div><span>ต้นทุนดำเนินงาน/${U}</span><b class="num">${R(c.op)}</b><span>บาท · ${lbl}ปี ${be(ui.year)}</span></div><div><span>รายได้/${U}</span><b class="num">${R(c.inc)}</b><span>บาท</span></div><div><span>กำไร/${U}</span><b class="num" style="color:${prof<0?'var(--out)':'var(--in)'}">${prof<0?'−':''}${R(Math.abs(prof))}</b><span>ยังไม่หักเงินลงทุน</span></div></div>`;
   const li=(a,b,s2)=>`<li><div class="d"><span class="muted">${a}</span></div><div><div class="t">${b}</div>${s2?`<div class="s">${s2}</div>`:''}</div><div></div></li>`;
   let L='';
-  L+=li('ผลผลิต',c.kg?nf.format(Math.round(c.kg/rai))+' กก./ไร่':'ยังไม่มีการขายปีนี้',c.kg?'ขายได้รวม '+nf.format(c.kg)+' กก. ราคาเฉลี่ย '+baht(c.dur/c.kg)+' บาท/กก.':'');
+  L+=li('ผลผลิต',c.kg?nf.format(Math.round(c.kg/den))+' กก./'+U:'ยังไม่มีการขายปีนี้',c.kg?'ขายได้รวม '+nf.format(c.kg)+' กก. ราคาเฉลี่ย '+baht(c.dur/c.kg)+' บาท/กก.':'');
   if(c.kg)L+=li('ต้นทุนต่อกิโล',baht(c.op/c.kg)+' บาท/กก.','ต้องขายได้มากกว่านี้ถึงจะมีกำไร');
-  if(price&&c.op)L+=li('จุดคุ้มทุน','ต้องได้อย่างน้อย '+nf.format(Math.ceil(c.op/price/rai))+' กก./ไร่',`ที่ราคา ${baht(price)} บาท/กก. ${c.kg?'(ราคาเฉลี่ยปีนี้)':'(ราคาเฉลี่ยที่เคยขาย)'}`);
-  if(ts.length)L+=li('ต่อต้น',baht(Math.round(c.op/ts.length))+' บาท/ต้น','ต้นทุนดำเนินงาน หารทุเรียน '+ts.length+' ต้น');
-  L+=li('เงินลงทุนปีนี้',baht(c.cap)+' บาท'+(c.cap?' ('+R(c.cap)+'/ไร่)':''),'หมวด '+CAPITAL.join(' ')+' ไม่นับในต้นทุนดำเนินงาน เพราะใช้ได้หลายปี');
-  h+=`<section class="sec"><div class="sec-h"><h2>สรุปปี ${be(ui.year)}</h2></div><div class="panel"><ul class="list">${L}</ul></div></section>`;
+  if(price&&c.op)L+=li('จุดคุ้มทุน','ต้องได้อย่างน้อย '+nf.format(Math.ceil(c.op/price/den))+' กก./'+U,`ที่ราคา ${baht(price)} บาท/กก. ${c.kg?'(ราคาเฉลี่ยปีนี้)':'(ราคาเฉลี่ยที่เคยขาย)'}`);
+  if(!MG){const n=crop==='ทุเรียน'?durN:trees().length;if(n)L+=li('ต่อต้น',baht(Math.round(c.op/n))+' บาท/ต้น','ต้นทุนดำเนินงาน หาร '+n+' ต้น')}
+  L+=li('เงินลงทุนปีนี้',baht(c.cap)+' บาท'+(c.cap?' ('+R(c.cap)+'/'+U+')':''),'หมวด '+CAPITAL.join(' ')+' ไม่นับในต้นทุนดำเนินงาน เพราะใช้ได้หลายปี');
+  h+=`<section class="sec"><div class="sec-h"><h2>สรุปปี ${be(ui.year)}${crop!=='ทั้งสวน'?' · '+crop:''}</h2></div><div class="panel"><ul class="list">${L}</ul></div></section>`;
   const ce=Object.entries(c.cats).sort((a,b)=>b[1]-a[1]),mx=ce[0]?ce[0][1]:1;
-  if(ce.length)h+=`<section class="sec"><div class="sec-h"><h2>ต้นทุนต่อไร่แยกหมวด</h2></div><div class="panel cat-bars">${ce.map(([k,v])=>`<div><span>${esc(k)}</span><i style="width:${Math.max(2,v/mx*100)}%"></i><em>${R(v)}</em></div>`).join('')}</div></section>`;
-  const Y=years().map(costYear).filter(o=>o.inc||o.op||o.cap);
-  if(Y.length){let ci=0,cp=0;Y.slice().reverse().forEach(o=>{ci+=o.cap;cp+=o.inc-o.op});
-    h+=`<section class="sec"><div class="sec-h"><h2>เทียบแต่ละปี (ต่อไร่)</h2></div><div class="panel"><table class="fl-table"><thead><tr><th>ปี</th><th class="r">รายได้</th><th class="r">ต้นทุน</th><th class="r">กำไร</th><th class="r hide-m">กก./ไร่</th></tr></thead><tbody>${Y.map(o=>`<tr><td><b>${be(o.y)}</b></td><td class="r num">${R(o.inc)}</td><td class="r num">${R(o.op)}</td><td class="r num" style="color:${o.inc-o.op<0?'var(--out)':'var(--in)'}">${o.inc-o.op<0?'−':''}${R(Math.abs(o.inc-o.op))}</td><td class="r num hide-m">${o.kg?nf.format(Math.round(o.kg/rai)):'–'}</td></tr>`).join('')}</tbody></table></div>
+  if(ce.length)h+=`<section class="sec"><div class="sec-h"><h2>ต้นทุนต่อ${U}แยกหมวด</h2></div><div class="panel cat-bars">${ce.map(([k,v])=>`<div><span>${esc(k)}</span><i style="width:${Math.max(2,v/mx*100)}%"></i><em>${R(v)}</em></div>`).join('')}</div></section>`;
+  const Y=years().map(y=>costYear(y,crop)).filter(o=>o.inc||o.op||o.cap);
+  if(Y.length){let ci=0,cp=0;Y.forEach(o=>{ci+=o.cap;cp+=o.inc-o.op});
+    h+=`<section class="sec"><div class="sec-h"><h2>เทียบแต่ละปี (ต่อ${U})</h2></div><div class="panel"><table class="fl-table"><thead><tr><th>ปี</th><th class="r">รายได้</th><th class="r">ต้นทุน</th><th class="r">กำไร</th><th class="r hide-m">กก./${U}</th></tr></thead><tbody>${Y.map(o=>`<tr><td><b>${be(o.y)}</b></td><td class="r num">${R(o.inc)}</td><td class="r num">${R(o.op)}</td><td class="r num" style="color:${o.inc-o.op<0?'var(--out)':'var(--in)'}">${o.inc-o.op<0?'−':''}${R(Math.abs(o.inc-o.op))}</td><td class="r num hide-m">${o.kg?nf.format(Math.round(o.kg/den)):'–'}</td></tr>`).join('')}</tbody></table></div>
     ${ci?`<p style="margin:10px 0 0">ลงทุนสะสม <b>${baht(ci)}</b> บาท · กำไรสะสม ${cp<0?'−':''}${baht(Math.abs(cp))} บาท · ${cp>=ci?'<b style="color:var(--in)">คืนทุนแล้ว</b>':cp>0?'คืนทุนแล้ว '+Math.round(cp/ci*100)+'%':'ยังไม่เริ่มคืนทุน'}</p>`:''}</section>`}
-  h+=`<p class="muted" style="font-size:13px">คิดจากที่จดในแอปเท่านั้น (รวมค่าปุ๋ยยาของมังคุดที่ใส่พร้อมกัน) ค่าแรงตัวเองที่ไม่ได้จ่ายจริงไม่ได้นับ ค่าถมดินและวางท่อให้จดเป็นหมวด "ถมดิน/ปรับพื้นที่" กับ "ระบบน้ำ"</p>`;
+  h+=`<p class="muted" style="font-size:13px">คิดจากที่จดในแอปเท่านั้น ${mgN?'งานที่ฉีด/ใส่ปุ๋ยพร้อมกันแบ่งตามจำนวนต้นที่เลือกในงานนั้น ส่วนค่าใช้จ่ายร่วมอื่น (ค่าแรง ค่าน้ำไฟ สต็อก) แบ่งตาม % ด้านบน (มังคุด '+Math.round(mgShare()*100)+'%) ':''}ค่าแรงตัวเองที่ไม่ได้จ่ายจริงไม่ได้นับ ค่าถมดินและวางท่อให้จดเป็นหมวด "ถมดิน/ปรับพื้นที่" กับ "ระบบน้ำ"</p>`;
   return h}
 function vSales(){
-  const Sx=list('sales').filter(s=>yearOf(s.date)===ui.year).sort((a,b)=>a.date<b.date?1:-1);
+  const Sx=salesFor(ui.crop).filter(s=>yearOf(s.date)===ui.year).sort((a,b)=>a.date<b.date?1:-1);
   const kg=Sx.reduce((a,s)=>a+saleKg(s),0),g=Sx.reduce((a,s)=>a+saleGross(s),0);
   const by=m=>Sx.filter(s=>s.mode===m);
   let h=`<div class="panel sum3"><div><span>ขายได้รวม</span><b class="num">${baht(g)}</b><span>บาท</span></div><div><span>น้ำหนักรวม</span><b class="num">${nf.format(kg)}</b><span>กิโลกรัม</span></div><div><span>เฉลี่ย</span><b class="num">${kg?baht(g/kg):'–'}</b><span>บาท/กก.</span></div></div>`;
@@ -1361,10 +1382,11 @@ function vSales(){
   return h;
 }
 function vLedger(){
-  const L=ledger().filter(r=>yearOf(r.date)===ui.year);
+  const L=ledgerFor(ui.crop).filter(r=>yearOf(r.date)===ui.year);
   const inc=L.filter(r=>r.dir==='in').reduce((a,r)=>a+r.amount,0),out=L.filter(r=>r.dir==='out').reduce((a,r)=>a+r.amount,0);
   let h=`<div class="panel money"><div class="in"><span>รายรับ</span><b>${baht(inc)}</b><small>บาท</small></div><div class="out"><span>รายจ่าย</span><b>${baht(out)}</b><small>บาท</small></div><div><span>คงเหลือ</span><b>${inc-out<0?'−':''}${baht(Math.abs(inc-out))}</b><small>บาท</small></div></div>`;
   if(!L.length)return h+`<div class="panel empty" style="margin-top:14px"><h3>ยังไม่มีรายการเงินในปีนี้</h3><p>ค่าปุ๋ยค่ายาจากหน้า "ฉีดยา/ปุ๋ย" และเงินจากการขายจะมาลงที่นี่เอง ส่วนค่าแรง ค่าไฟ ค่าน้ำมัน จดเพิ่มด้วยปุ่ม "จ่ายเงิน"</p></div>`;
+  if(ui.crop&&ui.crop!=='ทั้งสวน')h+=`<p class="muted" style="font-size:13.5px;margin:10px 0 0">แสดงเฉพาะส่วนของ${ui.crop} · รายการที่ใช้ร่วมกัน (ฉีดยา/ใส่ปุ๋ยพร้อมกัน ค่าแรง ค่าน้ำไฟ) แบ่งตามสัดส่วน ${ui.crop==='มังคุด'?Math.round(mgShare()*100):100-Math.round(mgShare()*100)}% ตั้งได้ในแท็บต้นทุน</p>`;
   const cats={};L.filter(r=>r.dir==='out').forEach(r=>cats[r.cat]=(cats[r.cat]||0)+r.amount);
   const ce=Object.entries(cats).sort((a,b)=>b[1]-a[1]);const mx=ce[0]?ce[0][1]:1;
   if(ce.length)h+=`<section class="sec" style="margin-top:20px"><div class="sec-h"><h2>รายจ่ายแยกหมวด</h2></div><div class="panel cat-bars">${ce.map(([c,v])=>`<div><span>${esc(c)}</span><i style="width:${Math.max(2,v/mx*100)}%"></i><em>${baht(v)}</em></div>`).join('')}</div></section>`;
@@ -1422,9 +1444,10 @@ const forms={
   <div class="fld"><label class="l">ต้นไหนบ้าง</label>${pickerHTML(x.trees)}</div>
   <div class="fld"><label class="l" for="f3">หมายเหตุ</label><input class="f" id="f3" name="note" value="${esc(x.note)}" placeholder="เช่น ใช้พาโคลบิวทราโซล 15%, ดอกรุ่นแรก"></div>`,delBtn('flowers',id)+saveBtn)},
  sales(id,x={}){
-  const mode=x.mode||'round';
-  const lines=x.lines&&x.lines.length?x.lines:(mode==='round'?GRADES.map(g=>({grade:g,kg:'',price:''})):[{grade:'หมอนทอง',kg:'',price:''}]);
-  openSheet(id?'แก้ไขการขาย':'จดการขาย',`<input type="hidden" name="_c" value="sales"><input type="hidden" name="_id" value="${id||''}"><input type="hidden" name="mode" value="${mode}">
+  const mode=x.mode||'round',crop=x.crop||(ui.crop==='มังคุด'?'มังคุด':'ทุเรียน'),mg=crop==='มังคุด';
+  const lines=x.lines&&x.lines.length?x.lines:(mode==='round'?(mg?MG_GRADES:GRADES).map(g=>({grade:g,kg:'',price:''})):[{grade:mg?'มังคุด':'หมอนทอง',kg:'',price:''}]);
+  openSheet(id?'แก้ไขการขาย':mg?'จดการขายมังคุด':'จดการขาย',`<input type="hidden" name="_c" value="sales"><input type="hidden" name="_id" value="${id||''}"><input type="hidden" name="mode" value="${mode}"><input type="hidden" name="crop" value="${crop}">
+  ${hasMg()||mg?`<div class="fld"><div class="seg">${['ทุเรียน','มังคุด'].map(c=>`<button type="button" data-act="scrop" data-v="${c}" aria-pressed="${crop===c}">ขาย${c}</button>`).join('')}</div></div>`:''}
   <div class="fld"><div class="seg"><button type="button" data-act="smode" data-v="round" aria-pressed="${mode==='round'}">ขายรอบตัด (ล้ง/เหมา)</button><button type="button" data-act="smode" data-v="online" aria-pressed="${mode==='online'}">ขายออนไลน์</button></div></div>
   <div class="grid2"><div class="fld"><label class="l" for="s1">วันที่</label><input class="f" id="s1" type="date" name="date" value="${x.date||today()}"></div>
   <div class="fld"><label class="l" for="s2">${mode==='round'?'ขายให้ (ล้ง/คนเหมา)':'ลูกค้า'}</label><input class="f" id="s2" name="buyer" value="${esc(x.buyer)}" placeholder="${mode==='round'?'เช่น ล้งเจ๊หมวย':'ชื่อลูกค้า'}"></div></div>
@@ -1439,7 +1462,8 @@ const forms={
   <div class="fld"><label class="l" for="m1">จำนวนเงิน (บาท)</label><input class="f num" style="font-size:28px;min-height:58px" id="m1" name="amount" type="number" inputmode="decimal" min="0" step="any" value="${x.amount??''}" required></div>
   <div class="grid2"><div class="fld"><label class="l" for="m2">หมวด</label><select class="f" id="m2" name="cat">${opt(dir==='in'?IN_CATS:OUT_CATS,x.cat)}</select></div>
   <div class="fld"><label class="l" for="m3">วันที่</label><input class="f" id="m3" type="date" name="date" value="${x.date||today()}"></div></div>
-  <div class="fld"><label class="l" for="m4">รายละเอียด</label><input class="f" id="m4" name="note" value="${esc(x.note)}" placeholder="${dir==='in'?'เช่น ขายกิ่งพันธุ์':'เช่น ค่าแรงตัดหญ้า 2 คน'}"></div>`,delBtn('money',id)+saveBtn)},
+  <div class="fld"><label class="l" for="m4">รายละเอียด</label><input class="f" id="m4" name="note" value="${esc(x.note)}" placeholder="${dir==='in'?'เช่น ขายกิ่งพันธุ์':'เช่น ค่าแรงตัดหญ้า 2 คน'}"></div>
+  ${hasMg()?`<div class="fld"><label class="l" for="m5">เป็นของ <small>ทั้งสวน = แบ่งตามสัดส่วนในหน้าต้นทุน</small></label><select class="f" id="m5" name="crop">${opt(CROPS,x.crop||(x.cat==='ขายมังคุด'?'มังคุด':'ทั้งสวน'))}</select></div>`:''}`,delBtn('money',id)+saveBtn)},
  chems(id,x={}){const others=chemList().filter(c=>c.id!==id);const tg=new Set(x.tags||[]),nm=new Set(x.notMix||[]);
   openSheet(id?'แก้ไขสาร':'เพิ่มสารเข้าคลัง',`<input type="hidden" name="_c" value="chems"><input type="hidden" name="_id" value="${id||''}">
   <div class="fld"><label class="l" for="c1">ชื่อสาร/ชื่อการค้า</label><input class="f" id="c1" name="name" value="${esc(x.name)}" placeholder="เช่น แมนโคเซบ 80% WP" required></div>
@@ -1529,9 +1553,9 @@ sheet.addEventListener('submit',async e=>{
   else if(c==='flowers'){const ids=pickedIds();if(!ids.length){toast('เลือกต้นอย่างน้อย 1 ต้น');btn.disabled=false;btn.textContent='บันทึก';return}
     const stage=g('stage');ok=await put('flowers',id,{...prev,date:g('date')||today(),stage,fruits:stage==='fruit'?(+g('fruits')||null):null,yieldN:stage==='cut'?(+g('yieldN')||null):null,yieldKg:stage==='cut'?(+g('yieldKg')||null):null,trees:ids,note:g('note')})}
   else if(c==='sales'){const lines=readLines();if(!lines.some(l=>l.kg)){toast('ใส่น้ำหนักอย่างน้อย 1 แถว');btn.disabled=false;btn.textContent='บันทึก';return}
-    ok=await put('sales',id,{...prev,date:g('date')||today(),mode:g('mode'),buyer:g('buyer'),channel:g('channel'),lines,fee:+g('fee')||0,note:g('note')})}
+    ok=await put('sales',id,{...prev,crop:g('crop')||'ทุเรียน',date:g('date')||today(),mode:g('mode'),buyer:g('buyer'),channel:g('channel'),lines,fee:+g('fee')||0,note:g('note')})}
   else if(c==='money'){const a=+g('amount');if(!(a>0)){toast('ใส่จำนวนเงิน');btn.disabled=false;btn.textContent='บันทึก';return}
-    ok=await put('money',id,{...prev,date:g('date')||today(),dir:g('dir'),cat:g('cat'),amount:a,note:g('note')})}
+    ok=await put('money',id,{...prev,date:g('date')||today(),dir:g('dir'),cat:g('cat'),amount:a,note:g('note'),crop:g('crop')||(g('cat')==='ขายมังคุด'?'มังคุด':'ทั้งสวน')})}
   else if(c==='chems'){if(!g('name')){toast('ใส่ชื่อสาร');btn.disabled=false;btn.textContent='บันทึก';return}
     ok=await put('chems',id,{...prev,name:g('name'),form:g('form')||'OTHER',tags:fd_.getAll('tag'),notMix:fd_.getAll('nm'),rate:+g('rate')||null,rateUnit:g('rateUnit'),phi:+g('phi')||0,packSize:+g('packSize')||null,packUnit:g('packUnit'),packPrice:+g('packPrice')||null,npk:g('npk'),ai:+g('ai')||null,aiName:g('aiName'),note:g('note')});
     if(ok&&ui.chemToMix){ui.mix.items=(ui.mix.items||[]).filter(r=>r.pid);ui.mix.items.push({pid:id,amt:+g('rate')||'',unit:g('rateUnit')||'ซีซี'});saveMix()}ui.chemToMix=false}
@@ -1571,7 +1595,9 @@ document.addEventListener('click',async e=>{
   if(a==='toggle'){el.setAttribute('aria-pressed',el.getAttribute('aria-pressed')==='true'?'false':'true');return updPC()}
   if(['pickall','pickbear','picknone','pickdur','pickmg'].includes(a)){sheet.querySelectorAll('#pick .tag').forEach(t=>{const tr=S.data.trees[t.dataset.id];const v=a==='pickall'?true:a==='picknone'?false:a==='pickdur'?!isMg(tr):a==='pickmg'?isMg(tr):(tr&&tr.kind!=='young');t.setAttribute('aria-pressed',String(!!v))});return updPC()}
   if(a==='stpick'){const v=el.dataset.v;sheet.querySelectorAll('#stseg button').forEach(b=>b.setAttribute('aria-pressed',String(b===el)));sheet.querySelector('[name=stage]').value=v;$('#sthelp',sheet).textContent=ST[v].d;$('#fruitf',sheet).hidden=v!=='fruit';$('#yieldf',sheet).hidden=v!=='cut';return}
-  if(a==='smode'){const f=$('#sf',sheet);const id=f._id.value;const cur={...(S.data.sales[id]||{}),date:f.date.value,buyer:f.buyer.value,mode:el.dataset.v,lines:null};return forms.sales(id||null,cur)}
+  if(a==='smode'||a==='scrop'){const f=$('#sf',sheet);const id=f._id.value;const cur={...(S.data.sales[id]||{}),date:f.date.value,buyer:f.buyer.value,mode:a==='smode'?el.dataset.v:f.mode.value,crop:a==='scrop'?el.dataset.v:f.crop.value,lines:null};return forms.sales(id||null,cur)}
+  if(a==='mcrop'){ui.crop=el.dataset.v;return render()}
+  if(a==='wcrop'){ui.wcrop=el.dataset.v;return render()}
   if(a==='addline'){$('#ln',sheet).insertAdjacentHTML('beforeend',lineRow({grade:'',kg:'',price:''}));return}
   if(a==='del'){if(!el.classList.contains('arm')){el.classList.add('arm');el.textContent='กดอีกครั้งเพื่อยืนยันลบ';setTimeout(()=>{if(el.isConnected){el.classList.remove('arm');el.textContent='ลบรายการนี้'}},4000);return}
     const c=el.dataset.c,id=el.dataset.id;if(await del(c,id)){closeSheet();toast('ลบแล้ว')}return}
