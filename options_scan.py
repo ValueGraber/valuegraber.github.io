@@ -188,9 +188,16 @@ def vix_block():
 
 
 # ---------- options ----------
+def is_monthly(e):
+    """สัญญารายเดือนมาตรฐาน (ศุกร์ที่ 3 ของเดือน) มักคล่องกว่าสัญญารายสัปดาห์"""
+    d = date.fromisoformat(e)
+    return d.weekday() == 4 and 15 <= d.day <= 21
+
+
 def pick_expiry(exps, today):
     best, bd = None, 1e9
-    for e in exps:
+    monthly = [e for e in exps if is_monthly(e) and DTE_MIN <= (date.fromisoformat(e) - today).days <= DTE_MAX]
+    for e in (monthly or exps):
         try:
             dte = (date.fromisoformat(e) - today).days
         except ValueError:
