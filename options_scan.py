@@ -254,7 +254,7 @@ def option_block(sym, px, today, ladder):
         m = calls[["strike", "bid", "ask", "lastPrice", "openInterest"]].merge(
             puts[["strike", "bid", "ask", "lastPrice", "openInterest"]], on="strike", suffixes=("c", "p"))
         m = m[(m["strike"] >= lo) & (m["strike"] <= hi)]
-        m = m.iloc[(m["strike"] - px).abs().argsort()[:36]].sort_values("strike")
+        m = m.iloc[(m["strike"] - px).abs().argsort()[:60]].sort_values("strike")
         f = lambda v: rnd(v) or 0  # noqa: E731
         out["lad"] = [[f(r.strike), f(r.bidc), f(r.askc), f(r.lastPricec), nz(r.openInterestc),
                        f(r.bidp), f(r.askp), f(r.lastPricep), nz(r.openInterestp)] for r in m.fillna(0).itertuples()]
