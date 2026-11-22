@@ -266,9 +266,16 @@
       x.addEventListener('change', () => { const v = +x.value; if (v >= 0) { T.fees[k] = v; save(); preview(); draw(); } else x.value = T.fees[k]; }); l.append(x); box.append(l); });
   };
 
+  /* asset choices: gold, plus any older symbol already in the journal so old entries can still be edited; one choice → hide the box */
+  const buildSym = () => {
+    const sel = $('tr-sym'); if (!sel) return; const keep = sel.value;
+    const list = (SP() ? SP().assets : [['GOLD']]).map(([a]) => a); T.tx.forEach((x) => { if (x.s && !list.includes(x.s)) list.push(x.s); });
+    sel.replaceChildren(...list.map((a) => new Option(nameOf(a), a))); if (list.includes(keep)) sel.value = keep;
+    $('tr-sym-l').classList.toggle('tr-one', list.length < 2);
+  };
   const setup = () => {
     if (!$('tr-form')) return;
-    const sel = $('tr-sym'); (SP() ? SP().assets : [['GOLD']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
+    buildSym();
     ['tr-type', 'tr-sym', 'tr-q', 'tr-px', 'tr-fx', 'tr-at', 'tr-thb'].forEach((k) => $(k).addEventListener('input', preview));
     $('tr-sym').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; $('tr-fx').value = ''; } preview(); });
     $('tr-type').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; } preview(); });
@@ -283,7 +290,7 @@
   window.VGTrade = {
     trade: () => T, prefill,
     equityTHB: () => { if (!T.tx.some((x) => x.type === 'dep')) return 0; return value(book()).eq; },
-    replace: (c) => { T = norm(c); save(false); setupFees(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
+    replace: (c) => { T = norm(c); save(false); setupFees(); buildSym(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
     merge: (c) => { const ids = new Set((c.tx || []).map((x) => x.id)); const tx = [...(c.tx || []), ...T.tx.filter((x) => !ids.has(x.id))];
       return { extra: tx.length - (c.tx || []).length, doc: { tx, snaps: { ...T.snaps, ...(c.snaps || {}) }, fees: { ...T.fees, ...(c.fees || {}) }, targets: { ...T.targets, ...(c.targets || {}) }, band: c.band || T.band } }; },
   };

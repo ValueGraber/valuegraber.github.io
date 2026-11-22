@@ -1003,6 +1003,9 @@ tr.editing td { background: var(--accent-soft); }
 #tr-cancel[hidden] { display: none; }
 /* spot portfolio layout: panels, holding rows, compact targets */
 #tport .strip { margin-bottom: 10px; }
+#tport { margin-top: 28px; }
+#tr-sym-l.tr-one { display: none; }
+.sw-card .sw-meta { display: block; margin: 2px 0 6px; }
 .tr-fxline { margin: 0 4px 18px; font-size: 13px; }
 .tr-panel { margin-top: 16px; }
 .tr-panel .ph { margin-bottom: 6px; } .tr-panel .ph h3 { margin: 0; } .tr-panel .ph p { margin: 4px 0 0; }
@@ -1175,11 +1178,6 @@ tr.editing td { background: var(--accent-soft); }
     </div>
   </section>
 
-  <section id="crypto" data-sub="market">
-    <div class="sec-head"><h2>คริปโตหลัก</h2></div>
-    <p class="sec-note">คริปโตไม่มีกำไรหรืองบการเงิน จึงประเมินมูลค่าแบบหุ้นไม่ได้ ระบบดูเฉพาะแนวโน้มราคา: ขาขึ้นคือราคาและเส้น 50 วันอยู่เหนือเส้น 200 วัน ขาลงคือกลับกัน ราคาปิดรายวันอัปเดตทุกเช้า ราคาผันผวนสูงมาก ควรถือสัดส่วนน้อย</p>
-    <div class="list" id="crypto-list"><div class="empty">ข้อมูลคริปโตจะมาหลังระบบอัปเดตรอบถัดไป</div></div>
-  </section>
 
   <section id="opt" data-sub="opt">
     <div class="sec-head"><h2>สแกนออปชั่น</h2></div>
@@ -1229,20 +1227,19 @@ tr.editing td { background: var(--accent-soft); }
   </section>
 
   <section id="swing" data-sub="swing">
-    <div class="sec-head"><h2>ซื้อสะสมทอง</h2></div>
-    <p class="sec-note">สำหรับซื้อแบบ spot แล้วถือยาว ไม่ได้เทรดเข้าออก ดูกราฟรายวันของทองคำ แล้วตอบ 2 เรื่อง: <b>ตอนนี้ราคาน่าซื้อไหม</b> (เทียบกับเส้นเฉลี่ย 200 วัน และดูว่าร้อนแรงเกินไปหรือเปล่า) และ <b>ควรถือรอไหม</b> (เทรนด์ระยะยาวขึ้นหรือลง) พร้อมบอกว่าครั้งนี้ควรซื้อมากหรือน้อยกว่างบปกติ</p>
+    <div class="sec-head"><h2>ทองคำ</h2></div>
+    <p class="sec-note">ทองแบบ spot ซื้อสะสมแล้วถือยาว ระบบดูกราฟรายวันแล้วบอกว่า <b>ตอนนี้ราคาน่าซื้อไหม</b> และ <b>ควรถือรอไหม</b> พร้อมยอดที่ควรซื้อครั้งนี้ ด้านล่างคือพอร์ตทองของคุณ</p>
     <div class="controls sw-set">
       <label class="mini">งบซื้อสะสมปกติต่อครั้ง (บาท) <input class="inp" id="sw-week" type="number" step="any" min="0" inputmode="decimal"></label>
     </div>
     <p class="pf-hint" id="sw-status">กำลังโหลด…</p>
     <div id="sw-top"></div>
-    <h3 class="sw-h3">สถานะตอนนี้</h3>
-    <div id="sw-all"></div>
     <div class="alert sw-warn">เป็นการประมาณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ทองก็ลงได้ราว 30–45% ในขาลงยาว (เช่นปี 2011–2015) ซื้อตามจังหวะช่วยให้ต้นทุนถูกลงได้บ้าง แต่ไม่ได้กันขาดทุน ใช้เงินที่ไม่ต้องใช้ในหลายปีข้างหน้า และแบ่งกำไรเก็บเป็นเงินจริงเป็นระยะ</div>
   </section>
 
   <section id="tport" data-sub="tport">
-    <p class="sec-note">บันทึกการลงทุนทองคำ (Dime) คิดเป็นบาท จดทุกครั้งที่ซื้อหรือขายพร้อมเหตุผล แยก <b>กำไรบนกระดาษ</b> (ยังไม่ขาย) กับ <b>กำไรจริง</b> (ขายแล้ว) ตั้งสัดส่วนเป้าหมายไว้ แล้วระบบจะบอกว่าตัวไหนควรแบ่งขายเก็บกำไร ตัวไหนควรซื้อเติม ไม่ต้องบันทึกฝากเงินก็ได้ ล็อกอินแล้วซิงค์ทุกเครื่อง</p>
+    <div class="sec-head"><h2>พอร์ตทองของฉัน</h2></div>
+    <p class="sec-note">จดทุกครั้งที่ซื้อหรือขายใน Dime ตามสลิป ระบบแยก <b>กำไรบนกระดาษ</b> (ยังไม่ขาย) กับ <b>กำไรจริง</b> (ขายแล้ว) ให้ ล็อกอินแล้วซิงค์ทุกเครื่อง</p>
     <div class="strip" id="tr-strip"></div>
     <p class="pf-hint tr-fxline" id="tr-fx-now"></p>
     <section class="panel tr-panel">
@@ -2103,7 +2100,7 @@ dash.calc('sectors', {
   $('pick-more').addEventListener('click', () => { st.pickN += 10; drawPicks(); });
 
   const drawCrypto = (rows) => {
-    const box = $('crypto-list'); box.replaceChildren();
+    const box = $('crypto-list'); if (!box) return; box.replaceChildren();
     if (!rows.length) { box.append(el('div', 'empty', 'ข้อมูลคริปโตจะมาหลังระบบอัปเดตรอบถัดไป')); return; }
     const cm = (v) => (v == null ? '–' : '$' + v.toLocaleString('en-US', { maximumFractionDigits: v < 10 ? 4 : 2 }));
     rows.forEach((c) => {
@@ -2953,7 +2950,7 @@ dash.calc('sectors', {
     M.accounts.forEach((a) => {
       const r = el('div', 'a-row acc'); const val = el('b', 'a-v');
       const upd = () => { val.replaceChildren(); const r = rate(a.cur); if (a.type !== 'gold' && a.cur !== 'THB') { val.append(r ? '≈ ' + baht(accValue(a)) : 'ใส่อัตราแลกเปลี่ยน'); val.append(el('small', null, r ? `1 ${a.cur} = ${r.toFixed(r < 10 ? 3 : 2)} บาท` : `ยังไม่มีอัตรา ${a.cur}`)); } else val.append(baht(accValue(a))); };
-      const sel = el('select', 'inp a-type'); sel.setAttribute('aria-label', 'ประเภท'); Object.entries(TYPES).forEach(([k, v]) => sel.append(new Option(v, k))); sel.value = a.type;
+      const sel = el('select', 'inp a-type'); sel.setAttribute('aria-label', 'ประเภท'); Object.entries(TYPES).filter(([k]) => k !== 'crypto' || a.type === 'crypto').forEach(([k, v]) => sel.append(new Option(v, k))); sel.value = a.type;
       sel.addEventListener('change', () => { a.type = sel.value; if (a.type === 'gold') a.cur = 'THB'; save(); drawAccounts(); refresh(); });
       const valIn = a.type === 'gold' ? numIn(a.gold, 'น้ำหนัก (บาททอง)', 'a-num', (v) => { a.gold = v; a.upd = today(); upd(); refresh(); save(true); }) : numIn(a.value, `ยอดเงิน (${CURS[a.cur]})`, 'a-num', (v) => { a.value = v; a.upd = today(); logNow(a); upd(); refresh(); save(true); });
       let cs = el('span', 'a-cur'); if (a.type !== 'gold') { cs = el('select', 'inp a-cur'); cs.setAttribute('aria-label', 'สกุลเงิน'); Object.entries(CURS).forEach(([k, v]) => cs.append(new Option(v, k))); cs.value = a.cur;
@@ -3012,7 +3009,7 @@ dash.calc('sectors', {
     const fa = document.activeElement; if (fa && box.contains(fa) && fa.tagName === 'INPUT' && box.dataset.ids === list.map((a) => a.id).join()) { box.querySelectorAll('.pl-acc').forEach((c) => c._recalc && c._recalc()); drawPLSum(); return; }
     box.replaceChildren(); box.dataset.ids = list.map((a) => a.id).join();
     drawPLSum();
-    if (!list.length) { box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชีที่ติ๊ก "ดูกำไร" เหมาะกับพอร์ตคริปโต กองทุน หุ้นไทย หรือบัญชีเทรดที่อยากรู้ว่าได้หรือเสียเท่าไหร่')); return; }
+    if (!list.length) { box.append(el('div', 'pf-hint', 'ยังไม่มีบัญชีที่ติ๊ก "ดูกำไร" เหมาะกับกองทุน หุ้นไทย หรือบัญชีเทรดที่อยากรู้ว่าได้หรือเสียเท่าไหร่')); return; }
     const now = ymOf(today());
     list.forEach((a) => {
       const c = plCur(a); const card = el('div', 'pl-acc'); const h = el('h4', null, a.name || TYPES[a.type]); h.append(el('small', null, `${TYPES[a.type]} · ${CURS[c]}`)); card.append(h);
@@ -3623,9 +3620,8 @@ dash.calc('sectors', {
       ['plan', 'แผนการเงิน', 'money', [['goals', 'เป้าหมายออม', 'เก็บเงินเพื่อเป้าหมายต่างๆ', true], ['emerg', 'เงินฉุกเฉิน', 'มีเงินพอใช้กี่เดือนถ้าไม่มีรายได้', false],
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
-      ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาดและคริปโต', 'ตลาดตอนนี้ถูกหรือแพง และราคาคริปโตหลัก', false]]],
-      ['swing', 'ซื้อสะสมทอง', 'scan', [['swing'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
-      ['cg', 'พอร์ตทอง', 'scan', [['tport']]],
+      ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
+      ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
@@ -4305,7 +4301,7 @@ dash.calc('sectors', {
   document.addEventListener('vg:watch', () => { if (!$('view-port').hidden) render(); });
   document.addEventListener('vg:ready', () => {
     map = {}; (window.VG.scan || []).forEach((r) => { map[r.symbol] = r; }); (window.VG.crypto || []).forEach((c) => { map[c.symbol] = c; }); raw = window.VG.raw || {}; fx = window.VG.fx || null; ready = true;
-    $('sym-list').replaceChildren(...[...(window.VG.crypto || []), ...window.VG.scan].map((r) => { const o = el('option'); o.value = r.symbol; o.label = r.crypto ? r.name + ' (คริปโต)' : r.name; return o; }));
+    $('sym-list').replaceChildren(...window.VG.scan.map((r) => { const o = el('option'); o.value = r.symbol; o.label = r.name; return o; }));
     render();
   });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('view-port').hidden) { drawGrowth(); const { total } = holdings(); const L = ledger(); drawGoal(total + (L.cashOn ? L.cash : 0)); } }, 200); });
@@ -4355,7 +4351,6 @@ dash.calc('sectors', {
       kv(m, 'ห่างเส้น 40 สัปดาห์', pc(mk.spyVsMa40), mk.spyVsMa40 >= 0 ? 'pos' : 'neg');
       kv(m, 'หุ้นเหนือเส้น 200 วัน', Math.round(mk.breadth200 * 100) + '%');
       kv(m, 'ดอกเบี้ยพันธบัตร 10 ปี', mk.yield10y.toFixed(2) + '%');
-      const btc = (VG.crypto || []).find((c) => c.symbol === 'BTC'); if (btc) kv(m, 'Bitcoin', `$${Math.round(btc.price).toLocaleString('en-US')} · ${btc.signal}`, btc.signal === 'ขาขึ้น' ? 'pos' : btc.signal === 'ขาลง' ? 'neg' : '');
     } else m.append(el('div', 'hsub', 'กำลังโหลด…'));
 
     const p = $('h-picks'); p.replaceChildren();
@@ -4427,7 +4422,7 @@ dash.calc('sectors', {
       kv(lf, 'รายรับ', baht(MS.month.i), 'pos'); kv(lf, 'รายจ่าย', baht(MS.month.o)); if (MS.month.v) kv(lf, 'เก็บเงิน/ลงทุน', baht(MS.month.v));
     }
     const hp = $('h-pl'); hp.replaceChildren();
-    if (!MS || !MS.pl || !MS.pl.n) empty(hp, 'ติ๊ก "ดูกำไร" ที่บัญชีลงทุน เช่น คริปโต กองทุน หุ้นไทย เพื่อดูกำไรขาดทุนแต่ละเดือน', 'ตั้งค่า', 'money:nw');
+    if (!MS || !MS.pl || !MS.pl.n) empty(hp, 'ติ๊ก "ดูกำไร" ที่บัญชีลงทุน เช่น กองทุน หุ้นไทย เพื่อดูกำไรขาดทุนแต่ละเดือน', 'ตั้งค่า', 'money:nw');
     else { const T = MS.pl; const big = T.tot != null ? T.tot : T.month; hp.append(el('div', 'hbig ' + (big > 0 ? 'pos' : big < 0 ? 'neg' : ''), big == null ? '–' : (big > 0 ? '+' : '') + baht(big)), el('div', 'hsub', T.tot != null ? `กำไร/ขาดทุนรวม จากเงินลงทุน ${baht(T.inv)}` : 'กำไรขาดทุนเดือนนี้ (เป็นบาท)'));
       if (T.tot != null && T.month != null) kv(hp, 'เดือนนี้', (T.month > 0 ? '+' : '') + baht(T.month), T.month >= 0 ? 'pos' : 'neg'); else if (T.prev != null) kv(hp, 'เดือนก่อน', (T.prev > 0 ? '+' : '') + baht(T.prev), T.prev >= 0 ? 'pos' : 'neg'); kv(hp, 'ปีนี้', (T.year > 0 ? '+' : '') + baht(T.year), T.year >= 0 ? 'pos' : 'neg'); }
     const gl = $('h-goals'); gl.replaceChildren();
@@ -4716,7 +4711,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '63152fef50';
+  const BUILD = 'c9efcc20ba';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -4881,32 +4876,22 @@ const SPC = (() => {
     const h = el('div', 'sw-h'); h.append(el('b', 'sw-sym', nameOf(a)), el('span', 'tag ' + G[s.g][0], G[s.g][1]), el('span', 'tag ' + H[s.h][0], H[s.h][1]));
     const px = el('div', 'sw-px'); px.append(el('b', null, money(a, s.px)), el('small', null, isGold(a) ? `USD ต่อออนซ์ · ≈ ${thb(s.px * fx())}` : usd(s.px)));
     const amt = amountFor(s);
-    c.append(h, px, el('p', 'sw-why', 'จังหวะ: ' + timingWhy(a, s)), el('p', 'sw-why', 'ถือยาว: ' + holdWhy(a, s)),
+    const meta = el('small', 'pf-hint sw-meta', `ราคา ÷ เส้น 200 วัน ${s.mm.toFixed(2)} · RSI ${Math.round(s.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(s.dd * 100)}%${s.ret1y != null ? ' · 1 ปี ' + pct(s.ret1y) : ''}${s.better ? ' · ราคาที่น่ารอ ≈ ' + money(a, s.better) : ''}`);
+    c.append(h, px, meta, el('p', 'sw-why', 'จังหวะ: ' + timingWhy(a, s)), el('p', 'sw-why', 'ถือยาว: ' + holdWhy(a, s)),
       el('p', 'sw-size', amt ? `ครั้งนี้ซื้อได้ราว ${thb(amt)} (งบปกติ ${thb(set.week)} × ${SPC.W[s.g]})` : 'ครั้งนี้ยังไม่ต้องซื้อ'));
     const t = tt[a]; if (t) c.append(el('p', 'pf-hint', `ตั้งแต่ ${day(t.from)} ถ้าซื้อตามจังหวะนี้ ต้นทุนเฉลี่ย${t.better >= 0 ? 'ถูกกว่า' : 'แพงกว่า'}ซื้อเท่ากันทุกวัน ${Math.abs(t.better * 100).toFixed(1)}%`));
     const act = el('div', 'sw-act');
     const l = el('a', 'btn ghost sm', 'กราฟ'); l.href = chart(a); l.target = '_blank'; l.rel = 'noopener noreferrer';
-    const b = el('button', 'btn-line sm', 'ซื้อแล้ว'); b.type = 'button';
+    const b = el('button', amt ? 'btn-solid sm' : 'btn-line sm', 'จดการซื้อ'); b.type = 'button';
     b.addEventListener('click', () => { if (window.VGTrade) window.VGTrade.prefill({ type: 'buy', s: a, amt: amt || set.week, pxUsd: s.px }); });
     act.append(l, b); c.append(act); return c;
   };
   const draw = () => {
     const box = $('sw-top'); if (!box) return; box.replaceChildren();
     const all = ASSETS.map(([a]) => [a, stat(a)]).filter((x) => x[1]);
-    const top = all.filter(([, s]) => ['buy', 'knife', 'dca'].includes(s.g) && s.h !== 'weak').sort((x, y) => y[1].score - x[1].score).slice(0, 3);
-    if (!top.length) box.append(el('div', 'empty', loaded ? 'ตอนนี้ราคาทองยังไม่น่าซื้อเพิ่ม เก็บงบไว้ก่อน ดูสถานะด้านล่าง' : err || 'กำลังโหลดราคา…'));
-    top.forEach(([a, s], i) => box.append(card(a, s, i)));
-    const list = $('sw-all'); list.replaceChildren();
-    ASSETS.forEach(([a]) => {
-      const s = all.find((x) => x[0] === a); const r = el('div', 'sw-arow');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(a)), el('small', null, s ? (isGold(a) ? `${money(a, s[1].px)} ต่อออนซ์` : `${money(a, s[1].px)} · ${usd(s[1].px)}`) : 'กำลังโหลด'));
-      const st = el('div', 'sw-ast');
-      if (s) {
-        const x = s[1]; const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + G[x.g][0], G[x.g][1]), el('span', 'tag ' + H[x.h][0], H[x.h][1])); st.append(tags);
-        st.append(el('small', 'sw-meta', `ราคา ÷ เส้น 200 วัน ${x.mm.toFixed(2)} · RSI ${Math.round(x.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(x.dd * 100)}%${x.ret1y != null ? ' · 1 ปี ' + pct(x.ret1y) : ''}${x.better ? ' · ราคาที่น่ารอ ≈ ' + money(a, x.better) : ''}`));
-      }
-      r.append(who, st); list.append(r);
-    });
+    /* gold only: always show its card, whatever the grade */
+    if (!all.length) box.append(el('div', 'empty', err || 'กำลังโหลดราคา…'));
+    all.forEach(([a, s], i) => box.append(card(a, s, i)));
     $('sw-status').textContent = loaded ? `ทองคำ: ${Date.now() - lastTick < 60000 ? 'ราคาสด' : on && Date.now() - lastPoll < 120000 ? 'ราคาอัปเดตทุก 1 นาที' : on ? 'กำลังเชื่อมต่อ' : 'หยุดอัปเดต (เปิดหน้านี้เพื่อดูสด)'} · ราคาเป็น USD ต่อออนซ์ (จาก PAXG) ราคาในแอปจะต่างเล็กน้อย` : err || 'กำลังโหลด…';
     document.dispatchEvent(new Event('vg:spot'));
   };
@@ -5207,9 +5192,16 @@ const SPC = (() => {
       x.addEventListener('change', () => { const v = +x.value; if (v >= 0) { T.fees[k] = v; save(); preview(); draw(); } else x.value = T.fees[k]; }); l.append(x); box.append(l); });
   };
 
+  /* asset choices: gold, plus any older symbol already in the journal so old entries can still be edited; one choice → hide the box */
+  const buildSym = () => {
+    const sel = $('tr-sym'); if (!sel) return; const keep = sel.value;
+    const list = (SP() ? SP().assets : [['GOLD']]).map(([a]) => a); T.tx.forEach((x) => { if (x.s && !list.includes(x.s)) list.push(x.s); });
+    sel.replaceChildren(...list.map((a) => new Option(nameOf(a), a))); if (list.includes(keep)) sel.value = keep;
+    $('tr-sym-l').classList.toggle('tr-one', list.length < 2);
+  };
   const setup = () => {
     if (!$('tr-form')) return;
-    const sel = $('tr-sym'); (SP() ? SP().assets : [['GOLD']]).forEach(([a]) => sel.append(new Option(nameOf(a), a)));
+    buildSym();
     ['tr-type', 'tr-sym', 'tr-q', 'tr-px', 'tr-fx', 'tr-at', 'tr-thb'].forEach((k) => $(k).addEventListener('input', preview));
     $('tr-sym').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; $('tr-fx').value = ''; } preview(); });
     $('tr-type').addEventListener('change', () => { if (!editId) { nTouched = false; feeTouched = false; } preview(); });
@@ -5224,7 +5216,7 @@ const SPC = (() => {
   window.VGTrade = {
     trade: () => T, prefill,
     equityTHB: () => { if (!T.tx.some((x) => x.type === 'dep')) return 0; return value(book()).eq; },
-    replace: (c) => { T = norm(c); save(false); setupFees(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
+    replace: (c) => { T = norm(c); save(false); setupFees(); buildSym(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
     merge: (c) => { const ids = new Set((c.tx || []).map((x) => x.id)); const tx = [...(c.tx || []), ...T.tx.filter((x) => !ids.has(x.id))];
       return { extra: tx.length - (c.tx || []).length, doc: { tx, snaps: { ...T.snaps, ...(c.snaps || {}) }, fees: { ...T.fees, ...(c.fees || {}) }, targets: { ...T.targets, ...(c.targets || {}) }, band: c.band || T.band } }; },
   };

@@ -86,32 +86,22 @@
     const h = el('div', 'sw-h'); h.append(el('b', 'sw-sym', nameOf(a)), el('span', 'tag ' + G[s.g][0], G[s.g][1]), el('span', 'tag ' + H[s.h][0], H[s.h][1]));
     const px = el('div', 'sw-px'); px.append(el('b', null, money(a, s.px)), el('small', null, isGold(a) ? `USD ต่อออนซ์ · ≈ ${thb(s.px * fx())}` : usd(s.px)));
     const amt = amountFor(s);
-    c.append(h, px, el('p', 'sw-why', 'จังหวะ: ' + timingWhy(a, s)), el('p', 'sw-why', 'ถือยาว: ' + holdWhy(a, s)),
+    const meta = el('small', 'pf-hint sw-meta', `ราคา ÷ เส้น 200 วัน ${s.mm.toFixed(2)} · RSI ${Math.round(s.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(s.dd * 100)}%${s.ret1y != null ? ' · 1 ปี ' + pct(s.ret1y) : ''}${s.better ? ' · ราคาที่น่ารอ ≈ ' + money(a, s.better) : ''}`);
+    c.append(h, px, meta, el('p', 'sw-why', 'จังหวะ: ' + timingWhy(a, s)), el('p', 'sw-why', 'ถือยาว: ' + holdWhy(a, s)),
       el('p', 'sw-size', amt ? `ครั้งนี้ซื้อได้ราว ${thb(amt)} (งบปกติ ${thb(set.week)} × ${SPC.W[s.g]})` : 'ครั้งนี้ยังไม่ต้องซื้อ'));
     const t = tt[a]; if (t) c.append(el('p', 'pf-hint', `ตั้งแต่ ${day(t.from)} ถ้าซื้อตามจังหวะนี้ ต้นทุนเฉลี่ย${t.better >= 0 ? 'ถูกกว่า' : 'แพงกว่า'}ซื้อเท่ากันทุกวัน ${Math.abs(t.better * 100).toFixed(1)}%`));
     const act = el('div', 'sw-act');
     const l = el('a', 'btn ghost sm', 'กราฟ'); l.href = chart(a); l.target = '_blank'; l.rel = 'noopener noreferrer';
-    const b = el('button', 'btn-line sm', 'ซื้อแล้ว'); b.type = 'button';
+    const b = el('button', amt ? 'btn-solid sm' : 'btn-line sm', 'จดการซื้อ'); b.type = 'button';
     b.addEventListener('click', () => { if (window.VGTrade) window.VGTrade.prefill({ type: 'buy', s: a, amt: amt || set.week, pxUsd: s.px }); });
     act.append(l, b); c.append(act); return c;
   };
   const draw = () => {
     const box = $('sw-top'); if (!box) return; box.replaceChildren();
     const all = ASSETS.map(([a]) => [a, stat(a)]).filter((x) => x[1]);
-    const top = all.filter(([, s]) => ['buy', 'knife', 'dca'].includes(s.g) && s.h !== 'weak').sort((x, y) => y[1].score - x[1].score).slice(0, 3);
-    if (!top.length) box.append(el('div', 'empty', loaded ? 'ตอนนี้ราคาทองยังไม่น่าซื้อเพิ่ม เก็บงบไว้ก่อน ดูสถานะด้านล่าง' : err || 'กำลังโหลดราคา…'));
-    top.forEach(([a, s], i) => box.append(card(a, s, i)));
-    const list = $('sw-all'); list.replaceChildren();
-    ASSETS.forEach(([a]) => {
-      const s = all.find((x) => x[0] === a); const r = el('div', 'sw-arow');
-      const who = el('div', 'sw-who'); who.append(el('b', null, nameOf(a)), el('small', null, s ? (isGold(a) ? `${money(a, s[1].px)} ต่อออนซ์` : `${money(a, s[1].px)} · ${usd(s[1].px)}`) : 'กำลังโหลด'));
-      const st = el('div', 'sw-ast');
-      if (s) {
-        const x = s[1]; const tags = el('div', 'sw-tags'); tags.append(el('span', 'tag ' + G[x.g][0], G[x.g][1]), el('span', 'tag ' + H[x.h][0], H[x.h][1])); st.append(tags);
-        st.append(el('small', 'sw-meta', `ราคา ÷ เส้น 200 วัน ${x.mm.toFixed(2)} · RSI ${Math.round(x.rsi)} · ต่ำกว่าจุดสูงสุด ${Math.round(x.dd * 100)}%${x.ret1y != null ? ' · 1 ปี ' + pct(x.ret1y) : ''}${x.better ? ' · ราคาที่น่ารอ ≈ ' + money(a, x.better) : ''}`));
-      }
-      r.append(who, st); list.append(r);
-    });
+    /* gold only: always show its card, whatever the grade */
+    if (!all.length) box.append(el('div', 'empty', err || 'กำลังโหลดราคา…'));
+    all.forEach(([a, s], i) => box.append(card(a, s, i)));
     $('sw-status').textContent = loaded ? `ทองคำ: ${Date.now() - lastTick < 60000 ? 'ราคาสด' : on && Date.now() - lastPoll < 120000 ? 'ราคาอัปเดตทุก 1 นาที' : on ? 'กำลังเชื่อมต่อ' : 'หยุดอัปเดต (เปิดหน้านี้เพื่อดูสด)'} · ราคาเป็น USD ต่อออนซ์ (จาก PAXG) ราคาในแอปจะต่างเล็กน้อย` : err || 'กำลังโหลด…';
     document.dispatchEvent(new Event('vg:spot'));
   };
