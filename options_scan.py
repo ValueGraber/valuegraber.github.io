@@ -151,7 +151,7 @@ def price_block(syms):
                 lo = (df["Low"][t] if multi else df["Low"]).reindex(c.index)
             except KeyError:
                 continue
-            if len(c) < 60:
+            if len(c) < 2:
                 continue
             px, prev = float(c.iloc[-1]), float(c.iloc[-2])
             lr = (c / c.shift(1)).apply(math.log).dropna()
@@ -161,13 +161,13 @@ def price_block(syms):
             out[t] = {
                 "px": rnd(px), "chg": rnd((px / prev - 1) * 100),
                 "t": c.index[-1].strftime("%Y-%m-%d"),
-                "ma20": rnd(c.tail(20).mean()), "ma50": rnd(c.tail(50).mean()),
+                "ma20": rnd(c.tail(20).mean()) if len(c) >= 20 else None, "ma50": rnd(c.tail(50).mean()) if len(c) >= 50 else None,
                 "ma200": rnd(c.tail(200).mean()) if len(c) >= 200 else None,
                 "sup": rnd(lo.tail(20).min()), "res": rnd(h.tail(20).max()),
                 "sup60": rnd(lo.tail(60).min()), "res60": rnd(h.tail(60).max()),
                 "bo": 1 if px > res_prior else (-1 if px < sup_prior else 0),
                 "atr": rnd(tr.tail(14).mean()),
-                "hv": rnd(float(lr.tail(20).std()) * math.sqrt(252) * 100, 1),
+                "hv": rnd(float(lr.tail(20).std()) * math.sqrt(252) * 100, 1) if len(lr) >= 10 else None,
                 "hi52": rnd(h.max()), "lo52": rnd(lo.min()),
             }
         time.sleep(1)

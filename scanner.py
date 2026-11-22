@@ -30,6 +30,11 @@ SECTOR_TH = {
     "Industrials": "อุตสาหกรรม", "Consumer Staples": "สินค้าจำเป็น", "Energy": "พลังงาน",
     "Utilities": "สาธารณูปโภค", "Real Estate": "อสังหาฯ", "Materials": "วัตถุดิบ",
 }
+# หุ้นนอก S&P 500 ที่อยากให้สแกนด้วย เช่น หุ้นที่เพิ่ง IPO (ยังเข้าดัชนีไม่ได้จนกว่าจะซื้อขายครบราว 12 เดือน)
+# ประวัติราคาสั้นกว่า 200 วัน เส้น 50/200 วันกับ RSI จะว่างไว้จนกว่าจะมีข้อมูลพอ
+EXTRA = [
+    {"symbol": "ANT", "name": "Anthropic (IPO ใหม่ นอก S&P 500)", "sector": "เทคโนโลยี", "ipo": "2026-11-19"},
+]
 RATING = {"strong_buy": "Strong Buy", "buy": "Buy", "hold": "Hold", "underperform": "Sell", "sell": "Sell", "strong_sell": "Strong Sell"}
 
 
@@ -112,7 +117,10 @@ def price_stats(symbols):
             if t not in close:
                 continue
             c = close[t].dropna()
-            if len(c) < 30:
+            if len(c) < 30:  # หุ้นเข้าตลาดใหม่: มีแค่ราคา ส่วนเส้นค่าเฉลี่ยรอให้ข้อมูลพอก่อน
+                if len(c):
+                    out[t] = {"price": rnd(c.iloc[-1]), "asOf": c.index[-1].strftime("%Y-%m-%d"), "ma50": None, "ma200": None,
+                              "rsi": rnd(rsi14(c)) if len(c) >= 15 else None, "change52w": None}
                 continue
             out[t] = {
                 "price": rnd(c.iloc[-1]),
@@ -305,7 +313,9 @@ def weekly_history(symbols):
 def main():
     prev = load_previous()
     prev_rows = {r["symbol"]: r for r in prev.get("stocks", [])}
-    uni = load_universe(list(prev_rows.values()))
+    uni = [u for u in load_universe(list(prev_rows.values())) if not u.get("ipo")]
+    have = {u["symbol"] for u in uni}
+    uni += [dict(x) for x in EXTRA if x["symbol"] not in have]
     symbols = [u["symbol"] for u in uni]
     log(f"หุ้นทั้งหมด {len(symbols)} ตัว")
 
