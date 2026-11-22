@@ -115,7 +115,7 @@
     const rows = rowsFor(mode);
     if (!rows.length) { box.append(el('div', 'empty', mode === 'mine' ? 'ยังไม่มีหุ้นในรายการ' : 'ตอนนี้ไม่มีหุ้นที่เข้าเงื่อนไข')); return; }
     const tb = el('table', 'tbl op-tbl'); const hr = el('tr');
-    ['หุ้น', 'ราคา', 'แนวโน้ม', 'แนวรับ / แนวต้าน', 'IV', 'สภาพคล่อง', 'แนวทาง', ''].forEach((h, k) => hr.append(el('th', k === 0 || k === 6 ? 'l' : null, h)));
+    ['หุ้น', 'ราคา', 'แนวโน้ม', 'รับ / ต้าน', 'IV', 'สภาพคล่อง', 'แนวทาง', ''].forEach((h, k) => hr.append(el('th', k === 0 || k === 6 ? 'l' : null, h)));
     const th = el('thead'); th.append(hr); tb.append(th); const bd = el('tbody');
     rows.forEach((r) => {
       const j = judge(r); const tr = el('tr'); const td = (c) => { const x = el('td', c || null); tr.append(x); return x; };
@@ -123,10 +123,10 @@
       if (r.t && D.asOf && r.t < D.asOf) a.append(el('small', 'sub', 'ข้อมูล ' + dth(r.t)));
       const p = td(); p.append(document.createTextNode(usd(r.px))); p.append(el('small', 'sub ' + (r.chg >= 0 ? 'pos' : 'neg'), pct(r.chg)));
       const tn = td(TREND[j.trend][0]); tn.append(document.createTextNode(TREND[j.trend][1])); tn.append(el('small', 'sub', POS[j.pos]));
-      const sr = td(); sr.append(document.createTextNode(`${usd(r.sup)} / ${usd(r.res)}`)); sr.append(el('small', 'sub', `ATR ${usd(r.atr)}`));
+      const sr = td(); sr.append(document.createTextNode(usd(r.sup, 0))); sr.append(el('small', 'sub', usd(r.res, 0)));
       const iv = td(j.iv ? IVT[j.iv][0] : null); iv.append(document.createTextNode(r.iv != null ? `${r.iv.toFixed(0)}% ${j.iv ? IVT[j.iv][1] : ''}` : '–'));
-      iv.append(el('small', 'sub', r.ivr != null ? `IV Rank ${r.ivr}` : r.hv ? `HV ${r.hv.toFixed(0)}% · IV/HV ${r.iv != null ? (r.iv / r.hv).toFixed(2) : '–'}` : ''));
-      const lq = td(LIQ[j.liq][0]); lq.append(document.createTextNode(LIQ[j.liq][1])); lq.append(el('small', 'sub', r.spr != null ? `ส่วนต่าง ${r.spr}%` : r.q === 'last' ? 'ตลาดปิด ไม่มี bid/ask' : ''));
+      iv.append(el('small', 'sub', r.ivr != null ? `IV Rank ${r.ivr}` : r.hv && r.iv != null ? `IV/HV ${(r.iv / r.hv).toFixed(2)}` : ''));
+      const lq = td(LIQ[j.liq][0]); lq.append(document.createTextNode(LIQ[j.liq][1])); lq.append(el('small', 'sub', r.spr != null ? `ต่าง ${r.spr}%` : r.q === 'last' ? 'ไม่มี bid/ask' : ''));
       const g = td('l'); g.append(el('span', 'tag ' + SETUP[j.setup][0], SETUP[j.setup][1]));
       if (j.earn) g.append(el('small', 'sub neg', `ประกาศงบ ${dth(j.earnDate)} ก่อนหมดอายุ`)); else if (j.why[0] && j.setup === 'none') g.append(el('small', 'sub', j.why[0]));
       const b = el('button', 'btn-line op-go', 'วางแผน'); b.type = 'button'; b.disabled = r.iv == null;
