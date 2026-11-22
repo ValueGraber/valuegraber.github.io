@@ -1,0 +1,67 @@
+name: อัปเดตข้อมูลออปชั่น
+
+on:
+  schedule:
+    # รอบเช้า (หลังตลาดสหรัฐปิด) สแกนรายการหลัก 20 ตัว + หุ้น S&P 500 ทั้งหมด และเก็บประวัติ IV
+    # ลอง 3 รอบ ถ้ามีข้อมูลปิดของวันล่าสุดแล้วจะข้ามภายในไม่กี่วินาที
+    - cron: "17 23 * * 1-5"        # 06:17 น. เวลาไทย อังคาร–เสาร์
+    - cron: "17 1,3 * * 2-6"       # 08:17 และ 10:17 น. เวลาไทย
+    # รอบกลางคืน (ตลาดเปิดอยู่) ทุก 30 นาที 21:07–23:37 น. เวลาไทย จันทร์–ศุกร์ เฉพาะรายการหลัก
+    # ถ้าตลาดยังไม่เปิด (เช่นหน้าหนาวเปิด 21:30 น. หรือวันหยุด) จะข้าม
+    - cron: "7,37 14-16 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "all = สแกนทั้ง 500 ตัว, base = เฉพาะรายการหลัก"
+        type: choice
+        options: [all, base]
+        default: base
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-options
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: เช็กว่าต้องรันรอบนี้ไหม
+        id: chk
+        if: github.event_name == 'schedule'
+        run: python3 options_scan.py --check ${{ startsWith(github.event.schedule, '7,37') && '--live' || '' }}
+
+      - uses: actions/setup-python@v5
+        if: steps.chk.outputs.skip != 'true'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: ติดตั้งไลบรารี
+        if: steps.chk.outputs.skip != 'true'
+        run: pip install -r requirements.txt
+
+      - name: สแกนออปชั่น
+        if: steps.chk.outputs.skip != 'true'
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "${{ startsWith(github.event.schedule, '7,37') }}" = "true" ]; then python options_scan.py --live; else python options_scan.py --all; fi
+          elif [ "${{ inputs.mode }}" = "all" ]; then python options_scan.py --all
+          else python options_scan.py
+          fi
+
+      - name: บันทึกไฟล์ข้อมูลใหม่
+        if: steps.chk.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/options.json docs/ivhist.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "ข้อมูลไม่เปลี่ยน"; exit 0; fi
+          git commit -m "อัปเดตข้อมูลออปชั่น $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull --rebase -q && git push && exit 0; sleep 5; done
+          exit 1

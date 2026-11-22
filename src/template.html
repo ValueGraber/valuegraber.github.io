@@ -1036,6 +1036,30 @@ tr.editing td { background: var(--accent-soft); }
 .fx-row small.pos { color: var(--jade); } .fx-row small.neg { color: var(--brick); }
 .fx-calc { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; margin-top: 12px; } .fx-calc .inp { width: 9em; } .fx-calc span { padding-bottom: 10px; color: var(--ink-2); }
 @media (max-width: 640px) { .sw-lvs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sw-row { grid-template-columns: 1fr; } .sw-row .sw-act { justify-content: flex-start; } }
+/* options page */
+.op-tbl { min-width: 860px; }
+.op-tbl td small.sub { white-space: nowrap; }
+.op-go { padding: 6px 12px; font-size: 14px; }
+.op-addi { width: 96px; text-transform: uppercase; }
+.op-num { width: 120px; }
+#op-extras:empty { display: none; }
+.op-head { display: grid; gap: 4px; margin: 4px 4px 14px; }
+.op-head b { font-size: 18px; font-family: var(--font); }
+.op-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+.op-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 14px 16px; min-width: 0; }
+.op-box h4, .op-size h4, .op-ckh, .op-learn h4 { margin: 0 0 8px; font-size: 15px; color: var(--ink-2); font-weight: 600; }
+.op-box.good h4 { color: var(--jade); } .op-box.bad h4 { color: var(--brick); }
+.op-row { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-top: 6px; }
+.op-row span { color: var(--ink-2); font-size: 14px; } .op-row b { font-size: 16px; text-align: right; }
+.op-box small.pf-hint { display: block; font-size: 12px; margin: 2px 0 0; }
+.op-size { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 14px; }
+.op-size p { margin: 4px 0; font-size: 15px; }
+.op-ckh { margin: 6px 4px 6px; }
+.op-chk { list-style: none; margin: 0 4px 14px; padding: 0; display: grid; gap: 4px; font-size: 15px; }
+.op-learn ul { margin: 0 0 14px; padding-left: 1.2rem; display: grid; gap: 6px; font-size: 15px; }
+.op-warn { margin-top: 8px; }
+@media (max-width: 900px) { .op-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .op-grid { grid-template-columns: 1fr; } .op-num { width: 130px; } }
 </style>
 </head>
 <body>
@@ -1154,6 +1178,53 @@ tr.editing td { background: var(--accent-soft); }
     <div class="sec-head"><h2>คริปโตหลัก</h2></div>
     <p class="sec-note">คริปโตไม่มีกำไรหรืองบการเงิน จึงประเมินมูลค่าแบบหุ้นไม่ได้ ระบบดูเฉพาะแนวโน้มราคา: ขาขึ้นคือราคาและเส้น 50 วันอยู่เหนือเส้น 200 วัน ขาลงคือกลับกัน ราคาปิดรายวันอัปเดตทุกเช้า ราคาผันผวนสูงมาก ควรถือสัดส่วนน้อย</p>
     <div class="list" id="crypto-list"><div class="empty">ข้อมูลคริปโตจะมาหลังระบบอัปเดตรอบถัดไป</div></div>
+  </section>
+
+  <section id="opt" data-sub="opt">
+    <div class="sec-head"><h2>สแกนออปชั่น</h2></div>
+    <p class="sec-note">ดูหุ้นที่ออปชั่นคล่องที่สุด 20 ตัว และหุ้นที่เพิ่มเอง ตามเช็กลิสต์ 4 ขั้น: <b>แนวโน้มและจุดเข้า</b> (ใกล้แนวรับในขาขึ้น หรือทะลุแนวต้าน) <b>IV ถูกหรือแพง</b> <b>สภาพคล่อง</b> และ <b>ประกาศงบก่อนหมดอายุไหม</b> อัปเดตทุกเช้าหลังตลาดปิด และทุก 30 นาทีช่วง 21:30–23:30 น. คืนวันจันทร์–ศุกร์</p>
+    <div class="strip" id="op-strip"></div>
+    <div class="alert" id="op-alert" hidden></div>
+    <div class="controls">
+      <div class="seg" id="op-mode"><button type="button" data-m="mine" aria-pressed="true">รายการของฉัน</button><button type="button" data-m="scan" aria-pressed="false">หาจาก 500 ตัว</button></div>
+      <label class="mini">เพิ่มหุ้น <input class="inp op-addi" id="op-add" maxlength="6" placeholder="ORCL" autocomplete="off" autocapitalize="characters"></label>
+      <button class="btn-line" type="button" id="op-addb">เพิ่ม</button>
+      <span class="pf-hint" id="op-msg" role="status"></span>
+    </div>
+    <div class="controls" id="op-extras"></div>
+    <div id="op-table"></div>
+    <p class="pf-hint">"หาจาก 500 ตัว" ใช้ข้อมูลรอบเช้า แสดงเฉพาะตัวที่เข้าเงื่อนไขและออปชั่นคล่องพอ เรียงตามความครบของเช็กลิสต์ IV Rank จะเริ่มแสดงเมื่อระบบเก็บประวัติ IV ครบ 20 วันทำการ ระหว่างนั้นใช้ IV เทียบกับความผันผวนจริง 20 วัน (HV)</p>
+  </section>
+
+  <section id="optplan" data-sub="optplan">
+    <div class="controls">
+      <label class="mini">หุ้น <select class="sel" id="op-sym"></select></label>
+      <div class="seg" id="op-dir"><button type="button" data-d="call" aria-pressed="true">Call (ขาขึ้น)</button><button type="button" data-d="put" aria-pressed="false">Put (ขาลง)</button></div>
+      <label class="mini">เงินทุนเทรด (บาท) <input class="inp op-num" id="op-cap" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="mini">เสี่ยงต่อไม้ (%) <input class="inp op-num" id="op-risk" type="number" step="0.5" min="0.5" max="10" inputmode="decimal"></label>
+    </div>
+    <div id="op-out"></div>
+    <div class="alert op-warn">เป็นการคำนวณตามหลักเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน ราคาออปชั่นจริงต่างจากที่ประมาณได้ ผู้ซื้อออปชั่นเสียเงินที่จ่ายไปได้ทั้งหมด ลองเทรดในบัญชีจำลองก่อนใช้เงินจริง</div>
+  </section>
+
+  <section id="optlearn" data-sub="optlearn">
+    <div class="panel op-learn">
+      <h4>จุดเข้า</h4>
+      <ul>
+        <li><b>ดูกราฟหุ้นก่อน</b> ขาขึ้น = ราคาเหนือเส้น 50 วัน และเส้น 50 วันเหนือ 200 วัน จุดเข้าดีคือย่อมาใกล้แนวรับ 20 วัน (ไม่เกิน 1 ATR) หรือปิดทะลุแนวต้าน ขาลงกลับด้านกัน ใช้ Put</li>
+        <li><b>Strike</b> เลือก Delta ราว 0.6 (ITM นิดๆ) <b>อายุ</b> ราว 45 วัน ยาวกว่าเวลาที่คิดว่าราคาจะถึงเป้า</li>
+        <li><b>IV</b> ถูก = IV Rank ต่ำกว่า 30 หรือ IV ไม่เกิน HV แพง = IV Rank เกิน 60 หรือ IV เกิน 1.35 เท่าของ HV ถ้าแพงให้ใช้ spread แทนการซื้อเดี่ยว</li>
+        <li><b>สภาพคล่อง</b> ส่วนต่าง bid-ask ของ ATM ไม่เกิน 5% และ open interest ตั้งแต่ 500 ขึ้นไปถือว่าดี เกิน 12% ข้าม</li>
+        <li><b>ประกาศงบ</b> ถ้าอยู่ก่อนวันหมดอายุ IV มักร่วงหลังข่าว (IV crush)</li>
+      </ul>
+      <h4>จุดออก (ตั้งก่อนเข้าทุกครั้ง)</h4>
+      <ul>
+        <li><b>ทำกำไร</b> เมื่อหุ้นถึงแนวต้าน (Call) หรือแนวรับ (Put)</li>
+        <li><b>ตัดขาดทุน</b> เมื่อหุ้นปิดหลุดแนวรับ/แตกแนวต้าน หรือออปชั่นเหลือครึ่งเดียว อะไรถึงก่อนออกก่อน</li>
+        <li><b>หมดเวลา</b> เหลือ 21 วันแล้วยังไม่ถึงเป้า ให้ออก</li>
+        <li><b>ขนาดไม้</b> เสียได้ไม่เกิน 1–2% ของเงินทุนต่อไม้ และกำไรต่อความเสี่ยงอย่างน้อย 1:2</li>
+      </ul>
+    </div>
   </section>
 
   <section id="swing" data-sub="swing">
@@ -3446,6 +3517,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาดและคริปโต', 'ตลาดตอนนี้ถูกหรือแพง และราคาคริปโตหลัก', false]]],
       ['swing', 'ซื้อสะสมคริปโตและทอง', 'scan', [['swing'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
       ['cg', 'พอร์ตคริปโตและทอง', 'scan', [['tport']]],
+      ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
@@ -4550,6 +4622,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
 /*SPOTCORE*/
 /*SPOT*/
 /*TRADE*/
+/*OPTIONS*/
 </script>
 <script type="module">
 /* account sync (Firebase): each signed-in user reads/writes only portfolios/{uid} and business/{uid} */
