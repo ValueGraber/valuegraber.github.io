@@ -1331,9 +1331,9 @@ tr.editing td { background: var(--accent-soft); }
   <section class="panel" id="pf-add" data-sub="add">
     <h3 id="f-title">บันทึกรายการ</h3>
     <p id="f-sub">เลือกประเภทรายการก่อน ระบบจะใส่ราคาปิดล่าสุดหรือเรทวันนี้ให้ แก้เป็นตัวเลขจริงได้</p>
-    <div class="f-types"><span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อหุ้น</button><button type="button" data-v="sell" aria-pressed="false">ขายหุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ได้ปันผล</button></span></div>
+    <div class="f-types"><span class="seg" id="f-type"><button type="button" data-v="buy" aria-pressed="true">ซื้อหุ้น</button><button type="button" data-v="sell" aria-pressed="false">ขายหุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="split" aria-pressed="false">แตก/รวมหุ้น</button><button type="button" data-v="div" aria-pressed="false">ได้ปันผล</button></span></div>
     <form class="pf-form f2" id="pf-form" autocomplete="off">
-      <label class="for-trade for-div">หุ้น<input class="inp" id="f-sym" list="sym-list" placeholder="เช่น MSFT"></label>
+      <label class="for-trade for-div for-split">หุ้น<input class="inp" id="f-sym" list="sym-list" placeholder="เช่น MSFT"></label>
       <label class="for-trade wide2">จ่าย/รับเป็น<span class="seg" id="f-cur"><button type="button" data-v="thb" aria-pressed="true">เงินบาท</button><button type="button" data-v="usd" aria-pressed="false">ดอลลาร์ (USD)</button></span></label>
       <label class="for-trade cur-thb"><span id="f-pay-lab">จ่ายรวม (บาท)</span><input class="inp" id="f-pay" type="number" step="any" min="0" inputmode="decimal" placeholder="ไม่ใส่ก็ได้"></label>
       <label class="for-trade">จำนวนหุ้น<input class="inp" id="f-sh" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2.5"></label>
@@ -1343,6 +1343,8 @@ tr.editing td { background: var(--accent-soft); }
       <label class="for-fx wide2">ทิศทาง<span class="seg" id="f-dir"><button type="button" data-v="in" aria-pressed="true">บาท → ดอลลาร์</button><button type="button" data-v="out" aria-pressed="false">ดอลลาร์ → บาท</button></span></label>
       <label class="for-fx">เงินบาท<input class="inp" id="f-thb" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 35000"></label>
       <label class="for-fx">ได้/ใช้ดอลลาร์<input class="inp" id="f-usd" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 1040.50"></label>
+      <label class="for-split">หุ้นเดิม (จำนวน)<input class="inp" id="f-sfrom" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 1"></label>
+      <label class="for-split">กลายเป็น (จำนวน)<input class="inp" id="f-sto" type="number" step="any" min="0" inputmode="decimal" placeholder="เช่น 2"></label>
       <label class="for-div">ปันผลก่อนภาษี ($)<input class="inp" id="f-amt" type="number" step="any" min="0" inputmode="decimal"></label>
       <label class="for-div">ภาษีหัก ณ ที่จ่าย ($)<input class="inp" id="f-tax" type="number" step="any" min="0" inputmode="decimal"></label>
       <label>วันที่<input class="inp" id="f-date" type="date"></label>
@@ -1441,7 +1443,7 @@ tr.editing td { background: var(--accent-soft); }
   <section class="panel" style="margin-top:16px" data-sub="add">
     <h3>ประวัติรายการ</h3>
     <div class="ph"><p>กด ✎ เพื่อแก้ไขรายการที่ลงผิด หรือ ✕ เพื่อลบ</p>
-      <span class="seg" id="h-filter"><button type="button" data-v="all" aria-pressed="true">ทั้งหมด</button><button type="button" data-v="trade" aria-pressed="false">หุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ปันผล</button></span></div>
+      <span class="seg" id="h-filter"><button type="button" data-v="all" aria-pressed="true">ทั้งหมด</button><button type="button" data-v="trade" aria-pressed="false">หุ้น</button><button type="button" data-v="fx" aria-pressed="false">แลกเงิน</button><button type="button" data-v="div" aria-pressed="false">ปันผล</button><button type="button" data-v="split" aria-pressed="false">แตก/รวม</button></span></div>
     <div class="scroll"><table class="tbl" id="pf-tx"><thead><tr><th class="l">วันที่</th><th class="l">หุ้น</th><th class="l">ประเภท</th><th>จำนวน</th><th>ราคา / เรท</th><th>ค่าธรรมเนียม / ภาษี</th><th>เงินสดเปลี่ยน</th><th></th></tr></thead><tbody></tbody></table></div>
     <div class="pf-actions">
       <button class="btn-line" id="pf-export" type="button">สำรองข้อมูล (ดาวน์โหลดไฟล์)</button>
@@ -3598,6 +3600,9 @@ dash.calc('sectors', {
   const CASH_COLOR = '#c9c2b0';
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const isTrade = (t) => t.type === 'buy' || t.type === 'sell';
+  /* stock split / reverse split: every `from` old shares become `to` new shares; total cost stays, so the average cost moves */
+  const isSplit = (t) => t.type === 'split';
+  const ratioOf = (t) => t.to / t.from;
   const cashDelta = (t) => isTrade(t) && t.cur === 'thb' ? 0 : t.type === 'buy' ? -(t.shares * t.price + (t.fee || 0)) : t.type === 'sell' ? t.shares * t.price - (t.fee || 0)
     : t.type === 'fx' ? (t.dir === 'out' ? -t.usd : t.usd) : t.type === 'div' ? t.amount - (t.tax || 0) : 0;
 
@@ -3693,8 +3698,9 @@ dash.calc('sectors', {
   const sorted = () => [...db.tx].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));
   const holdings = () => {
     const h = {}; let realized = 0; const realizedY = {};
-    sorted().filter(isTrade).forEach((t) => {
+    sorted().filter((t) => isTrade(t) || isSplit(t)).forEach((t) => {
       const x = h[t.sym] || (h[t.sym] = { sym: t.sym, shares: 0, cost: 0 });
+      if (isSplit(t)) { x.shares *= ratioOf(t); return; }
       if (t.type === 'buy') { x.cost += t.shares * t.price + (t.fee || 0); x.shares += t.shares; }
       else {
         const avg = x.shares > 0 ? x.cost / x.shares : 0; const n = Math.min(t.shares, x.shares); const g = n * t.price - (t.fee || 0) - avg * n;
@@ -3722,7 +3728,9 @@ dash.calc('sectors', {
     L.avgRate = L.usdIn ? L.thbIn / L.usdIn : null;
     return L;
   };
-  const sharesOn = (sym, date) => sorted().filter((t) => isTrade(t) && t.sym === sym && (!date || t.date <= date)).reduce((a, t) => a + (t.type === 'buy' ? t.shares : -t.shares), 0);
+  const sharesOn = (sym, date) => sorted().filter((t) => (isTrade(t) || isSplit(t)) && t.sym === sym && (!date || t.date <= date)).reduce((a, t) => (isSplit(t) ? a * ratioOf(t) : a + (t.type === 'buy' ? t.shares : -t.shares)), 0);
+  /* Yahoo history is split-adjusted: put a trade's shares on today's basis by applying the splits that came after it */
+  const splitAfter = (t) => db.tx.filter((x) => isSplit(x) && x.sym === t.sym && x.date > t.date).reduce((a, x) => a * ratioOf(x), 1);
 
   /* target weights: set ones as given, the rest share what's left equally; always sums to 1 */
   const targetWeights = (list) => {
@@ -3821,8 +3829,9 @@ dash.calc('sectors', {
     const out = []; const sh = {}; const lastPx = {}; let invested = 0, spyUnits = 0, ti = 0;
     const apply = (t, spyPx) => {
       const amt = t.type === 'buy' ? t.shares * t.price + (t.fee || 0) : -(t.shares * t.price - (t.fee || 0));
-      sh[t.sym] = (sh[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares);
-      lastPx[t.sym] = t.price; invested += amt; if (spyPx) spyUnits += amt / spyPx;
+      const f = splitAfter(t);
+      sh[t.sym] = (sh[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares) * f;
+      lastPx[t.sym] = t.price / f; invested += amt; if (spyPx) spyUnits += amt / spyPx;
     };
     let start = dates.findIndex((d) => d >= first); if (start < 0) start = dates.length;
     start = Math.max(0, start - 1);
@@ -4012,10 +4021,10 @@ dash.calc('sectors', {
   };
 
   /* ---------- history ---------- */
-  const TYPE_TH = (t) => t.type === 'buy' ? ['ซื้อ', 'pos'] : t.type === 'sell' ? ['ขาย', 'neg'] : t.type === 'div' ? ['ปันผล', 'pos'] : t.dir === 'out' ? ['แลกกลับเป็นบาท', 'neg'] : ['แลกเงิน', 'pos'];
+  const TYPE_TH = (t) => isSplit(t) ? [t.to > t.from ? 'แตกหุ้น' : 'รวมหุ้น', ''] : t.type === 'buy' ? ['ซื้อ', 'pos'] : t.type === 'sell' ? ['ขาย', 'neg'] : t.type === 'div' ? ['ปันผล', 'pos'] : t.dir === 'out' ? ['แลกกลับเป็นบาท', 'neg'] : ['แลกเงิน', 'pos'];
   const drawTx = () => {
     const tx = $('pf-tx').tBodies[0]; tx.replaceChildren();
-    const keepT = (t) => hFilter === 'all' || (hFilter === 'trade' ? isTrade(t) : t.type === hFilter);
+    const keepT = (t) => hFilter === 'all' || (hFilter === 'trade' ? isTrade(t) || isSplit(t) : t.type === hFilter);
     const rows = [...db.tx].filter(keepT).sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
     if (!rows.length) { const tr = el('tr'); const td = el('td', 'pf-empty', 'ยังไม่มีรายการ'); td.colSpan = 8; tr.append(td); tx.append(tr); return; }
     rows.forEach((t) => {
@@ -4025,8 +4034,9 @@ dash.calc('sectors', {
         const feeTxt = t.cur === 'thb' ? `จ่ายเป็นบาท เรท ${t.rate} · ค่าธรรมเนียม ${(t.feeThb || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท` : t.cur === 'usd' ? `จ่ายเป็นดอลลาร์ · ค่าธรรมเนียม ${usd(t.fee || 0)}` : t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
         cells = [t.sym, qty(t.shares, 6) + (map[t.sym] && map[t.sym].crypto ? ' เหรียญ' : ' หุ้น'), usd(t.price), feeTxt];
       } else if (t.type === 'fx') cells = ['–', baht(t.thb), 'เรท ' + (t.thb / t.usd).toFixed(2), ''];
+      else if (isSplit(t)) cells = [t.sym, `${qty(t.from, 4)} → ${qty(t.to, 4)}`, '', `จำนวนหุ้น ×${qty(ratioOf(t), 4)} ต้นทุนรวมเท่าเดิม`];
       else cells = [t.sym, '', '', t.tax ? 'ภาษี ' + usd(t.tax) : ''];
-      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], isTrade(t) && t.cur === 'thb' ? [(t.type === 'buy' ? '−' : '+') + baht(t.shares * t.price * t.rate + (t.type === 'buy' ? 1 : -1) * (t.feeThb || 0)), t.type === 'sell' ? 'pos' : ''] : [usdS(cd), cd >= 0 ? 'pos' : '']].forEach(([v, c]) => tr.append(el('td', c || null, v)));
+      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], isTrade(t) && t.cur === 'thb' ? [(t.type === 'buy' ? '−' : '+') + baht(t.shares * t.price * t.rate + (t.type === 'buy' ? 1 : -1) * (t.feeThb || 0)), t.type === 'sell' ? 'pos' : ''] : (isSplit(t) ? ['–', ''] : [usdS(cd), cd >= 0 ? 'pos' : ''])].forEach(([v, c]) => tr.append(el('td', c || null, v)));
       const e = el('button', 'edit', '✎'); e.type = 'button'; e.title = 'แก้ไข'; e.setAttribute('aria-label', 'แก้ไขรายการ'); e.addEventListener('click', () => startEdit(t));
       const d = el('button', 'del', '✕'); d.type = 'button'; d.title = 'ลบ'; d.setAttribute('aria-label', 'ลบรายการ');
       d.addEventListener('click', () => { if (confirm(`ลบรายการ${tn} ${t.sym || baht(t.thb)} วันที่ ${dTH(t.date)}?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); if (editId === t.id) endEdit(); save(); render(); } });
@@ -4193,9 +4203,20 @@ dash.calc('sectors', {
     if (fType === 'fx') return;
     const s = $('f-sym').value.trim().toUpperCase(); const x = map[s];
     if (fType === 'div') { divSuggest(); return; }
+    if (fType === 'split') { splitInfo(); return; }
     hint(x ? `${x.name}${x.crypto ? ' (คริปโต ใส่จำนวนเป็นทศนิยมได้ เช่น 0.005)' : ''} ราคาปิดล่าสุด ${x.crypto && x.price < 10 ? '$' + x.price : usd(x.price)}` : s && ready ? 'ไม่พบใน S&P 500 หรือคริปโตหลัก บันทึกได้ แต่จะไม่มีราคาล่าสุดให้' : '');
     if (x && !$('f-px').dataset.touched && !editId) $('f-px').value = x.price;
   };
+  const splitInfo = () => {
+    const s = $('f-sym').value.trim().toUpperCase(); const a = Number($('f-sfrom').value), b = Number($('f-sto').value);
+    if (!s) { hint('ใส่ตัวย่อหุ้น แล้วใส่อัตรา เช่น แตกหุ้น 1 เป็น 2 หรือรวมหุ้น 10 เป็น 1'); return; }
+    const d = $('f-date').value || undefined; const sh = sharesOn(s, d); const h = holdings().list.find((x) => x.sym === s);
+    if (!(sh > 0)) { hint(`ยังไม่มีหุ้น ${s} ในพอร์ต ณ วันที่เลือก`); return; }
+    if (!(a > 0 && b > 0)) { hint(`ถือ ${s} ${qty(sh, 4)} หุ้น ใส่อัตรา เช่น 1 เป็น 2 (แตกหุ้น) หรือ 10 เป็น 1 (รวมหุ้น)`); return; }
+    const r = b / a; const avg = h && h.shares > 0 ? h.cost / h.shares : null;
+    hint(`${r > 1 ? 'แตกหุ้น' : 'รวมหุ้น'}: ${qty(sh, 4)} หุ้น → ${qty(sh * r, 4)} หุ้น${avg ? ` · ต้นทุนเฉลี่ย ${usd(avg)} → ${usd(avg / r)}` : ''} · ต้นทุนรวมเท่าเดิม${r < 1 && Math.abs(sh * r - Math.round(sh * r)) > 1e-6 && sh >= 1 ? ' · ถ้าโบรกจ่ายเงินคืนเศษหุ้น ให้บันทึกเป็น "ขายหุ้น" ส่วนที่เป็นเศษแยกอีกรายการ' : ''}`);
+  };
+  ['f-sfrom', 'f-sto'].forEach((id) => $(id).addEventListener('input', () => { if (fType === 'split') splitInfo(); }));
   const divSuggest = () => {
     const s = $('f-sym').value.trim().toUpperCase(); if (!s) { hint('ใส่ตัวย่อหุ้นที่ได้ปันผล ระบบจะคำนวณให้จากจำนวนหุ้นที่ถือ'); return; }
     const sh = sharesOn(s, $('f-date').value || undefined); const r = raw[s];
@@ -4213,9 +4234,9 @@ dash.calc('sectors', {
   $('f-usd').addEventListener('input', () => { if (fx && !$('f-thb').dataset.touched) $('f-thb').value = $('f-usd').value ? +(Number($('f-usd').value) * fx).toFixed(2) : ''; fxInfo(); });
   $('f-amt').addEventListener('input', taxAuto);
   $('f-sym').addEventListener('input', symInfo);
-  $('f-date').addEventListener('change', () => { if (fType === 'div') divSuggest(); });
+  $('f-date').addEventListener('change', () => { if (fType === 'div') divSuggest(); if (fType === 'split') splitInfo(); });
   const clearForm = () => {
-    ['f-sh', 'f-px', 'f-sym', 'f-thb', 'f-usd', 'f-amt', 'f-tax', 'f-pay'].forEach((id) => { $(id).value = ''; delete $(id).dataset.touched; });
+    ['f-sh', 'f-px', 'f-sym', 'f-thb', 'f-usd', 'f-amt', 'f-tax', 'f-pay', 'f-sfrom', 'f-sto'].forEach((id) => { $(id).value = ''; delete $(id).dataset.touched; });
     $('f-fee').value = '0'; $('f-rate').value = fx ? fx.toFixed(2) : ''; $('f-date').value = today();
   };
   const startEdit = (t) => {
@@ -4227,6 +4248,7 @@ dash.calc('sectors', {
       $('f-fee').value = fCur === 'thb' ? (t.feeThb != null ? t.feeThb : +((t.fee || 0) * (t.rate || fx || 0)).toFixed(2)) : +(t.fee || 0).toFixed(2);
     }
     else if (t.type === 'fx') { fDir = t.dir || 'in'; setSeg('f-dir', fDir); $('f-thb').value = t.thb; $('f-usd').value = t.usd; }
+    else if (isSplit(t)) { $('f-sym').value = t.sym; $('f-sfrom').value = t.from; $('f-sto').value = t.to; }
     else { $('f-sym').value = t.sym; $('f-amt').value = t.amount; $('f-tax').value = t.tax || 0; }
     $('f-title').textContent = 'แก้ไขรายการ' + (t.sym ? ' ' + t.sym : ''); $('f-sub').textContent = 'แก้ตัวเลขที่ลงผิด แล้วกด "บันทึกการแก้ไข"';
     $('f-save').textContent = 'บันทึกการแก้ไข'; $('f-cancel').hidden = false; hint('');
@@ -4253,6 +4275,11 @@ dash.calc('sectors', {
       err = !(t > 0) ? 'ใส่จำนวนเงินบาท' : !(u > 0) ? 'ใส่จำนวนดอลลาร์' : !date ? 'เลือกวันที่' : (t / u < 10 || t / u > 100) ? `เรทที่ได้คือ ${(t / u).toFixed(2)} บาทต่อดอลลาร์ ดูผิดปกติ ตรวจตัวเลขอีกครั้ง` : null;
       rec = { id, type: 'fx', dir: fDir, thb: t, usd: u, date };
       done = `${old ? 'แก้ไข' : 'บันทึก'}การแลกเงิน ${baht(t)} ↔ ${usd(u)} แล้ว`;
+    } else if (fType === 'split') {
+      const a = Number($('f-sfrom').value), b = Number($('f-sto').value);
+      err = !sym ? 'ใส่ตัวย่อหุ้น' : !(a > 0 && b > 0) ? 'ใส่อัตราให้ครบ เช่น 1 เป็น 2' : a === b ? 'จำนวนเดิมกับใหม่เท่ากัน ไม่ใช่การแตกหรือรวมหุ้น' : !date ? 'เลือกวันที่' : null;
+      rec = { id, type: 'split', sym, from: a, to: b, date };
+      done = `${old ? 'แก้ไข' : 'บันทึก'}${b > a ? 'แตกหุ้น' : 'รวมหุ้น'} ${sym} ${qty(a, 4)} → ${qty(b, 4)} แล้ว`;
     } else {
       const a = Number($('f-amt').value), x = Number($('f-tax').value) || 0;
       err = !sym ? 'ใส่ตัวย่อหุ้นที่ได้ปันผล' : !(a > 0) ? 'ใส่จำนวนปันผลก่อนภาษี' : x < 0 || x > a ? 'ภาษีต้องไม่เกินปันผล' : !date ? 'เลือกวันที่' : null;
@@ -4262,7 +4289,11 @@ dash.calc('sectors', {
     if (err) return hint(err, true);
     const trial = old ? db.tx.map((t) => (t.id === old.id ? rec : t)) : [...db.tx, rec];
     const held = {}; let bad = null;
-    [...trial].filter(isTrade).sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id)).forEach((t) => { held[t.sym] = (held[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares); if (held[t.sym] < -1e-9 && !bad) bad = t; });
+    let noHold = null;
+    [...trial].filter((t) => isTrade(t) || isSplit(t)).sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id)).forEach((t) => {
+      if (isSplit(t)) { if (!((held[t.sym] || 0) > 1e-9) && t.id === rec.id) noHold = t; held[t.sym] = (held[t.sym] || 0) * ratioOf(t); return; }
+      held[t.sym] = (held[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares); if (held[t.sym] < -1e-9 && !bad) bad = t; });
+    if (noHold) return hint(`ยังไม่มีหุ้น ${noHold.sym} ในพอร์ต ณ วันที่ ${noHold.date} ต้องบันทึกการซื้อก่อนวันแตก/รวมหุ้น`, true);
     if (bad) return hint(`ขาย ${bad.sym} เกินจำนวนที่ถืออยู่ ณ วันที่ ${bad.date} ตรวจจำนวนหรือวันที่อีกครั้ง`, true);
     db.tx = trial; save(); if (old) endEdit(); else clearForm(); hint(done); render();
   });
@@ -4279,6 +4310,7 @@ dash.calc('sectors', {
     if ((t.type === 'buy' || t.type === 'sell') && typeof t.sym === 'string' && t.shares > 0 && t.price > 0)
       return { ...base, sym: t.sym.toUpperCase().slice(0, 12), type: t.type, shares: +t.shares, price: +t.price, fee: +(t.fee || 0), ...(t.feeThb != null && isFinite(+t.feeThb) ? { feeThb: +t.feeThb } : {}), ...(t.cur === 'thb' || t.cur === 'usd' ? { cur: t.cur } : {}), ...(+t.rate > 0 ? { rate: +t.rate } : {}) };
     if (t.type === 'fx' && +t.thb > 0 && +t.usd > 0) return { ...base, type: 'fx', dir: t.dir === 'out' ? 'out' : 'in', thb: +t.thb, usd: +t.usd };
+    if (t.type === 'split' && typeof t.sym === 'string' && +t.from > 0 && +t.to > 0) return { ...base, type: 'split', sym: t.sym.toUpperCase().slice(0, 12), from: +t.from, to: +t.to };
     if (t.type === 'div' && typeof t.sym === 'string' && +t.amount > 0) return { ...base, type: 'div', sym: t.sym.toUpperCase().slice(0, 12), amount: +t.amount, tax: Math.max(0, +(t.tax || 0)) };
     return null;
   };
@@ -4711,7 +4743,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = 'c9efcc20ba';
+  const BUILD = 'f3107bd49a';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
