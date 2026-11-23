@@ -1094,6 +1094,7 @@ tr.editing td { background: var(--accent-soft); }
 .gt-rule { color: var(--brick); } .gt-block { color: var(--brick); margin: 0; font-size: 14px; }
 .gp-chk { flex-direction: row !important; align-items: center; gap: 8px; display: flex; }
 .rk-l { margin: 8px 0; font-size: 15px; }
+.val3 .v3-verdict { margin: 8px 0 4px; font-weight: 600; } .val3 .pos { color: var(--jade); } .val3 .neg { color: var(--brick); }
 .fc-strip { margin-bottom: 12px; } .fc-opt { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
 .fc-svg { width: 100%; height: auto; display: block; margin: 4px 0 8px; }
 .fc-band { fill: var(--jade-soft); opacity: .8; } .fc-line { fill: none; stroke: var(--jade); stroke-width: 2.2; } .fc-zero { stroke: var(--brick); stroke-dasharray: 4 4; } .fc-tick { stroke: var(--chart-grid); } .fc-ax { font: 11px var(--num); fill: var(--ink-3); }
@@ -2141,7 +2142,29 @@ dash.calc('sectors', {
   window.VGWatch = { get: () => [...watch], set: (a) => { watch = new Set(a); keepWatch(); if (scan.length) { drawPicks(); drawAll(); } } };
   const link = (href, text, cls) => { const a = el('a', cls, text); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
 
-  let scan = [], market = null, sectors = [];
+  let scan = [], market = null, sectors = [], RAW = new Map(), Y10 = 4.5;
+  /* money-master 3.2: triangulate fair value — FCF DCF (cost of equity = 10Y + beta × 5.5%, growth fades to 2.5%), sector-median multiples, Graham (existing) */
+  const med = (a) => { const b = a.filter((v) => v != null && isFinite(v)).sort((x, y) => x - y); return b.length ? (b.length % 2 ? b[(b.length - 1) / 2] : (b[b.length / 2 - 1] + b[b.length / 2]) / 2) : null; };
+  const val3 = (r) => {
+    const x = RAW.get(r.symbol) || {}, price = r.price; if (!(price > 0)) return null;
+    const fin = (r.sector || '').includes('การเงิน'), out = { notes: [] };
+    const gs = [x.epsGrowth3y, x.revenueGrowth3y].filter((v) => v != null && isFinite(v)), g = Math.max(0, Math.min(0.15, (gs.length ? gs.reduce((a, v) => a + v, 0) / gs.length : 5) / 100));
+    const ke = Math.max(0.07, Math.min(0.14, Y10 / 100 + (x.beta > 0 ? x.beta : 1) * 0.055)), gt = 0.025;
+    const fcfOk = x.pfcf > 0 && x.pfcf <= 80 && (x.fcfMargin == null || x.fcfMargin >= 3), fcf = fcfOk ? price / x.pfcf : null;
+    const dcf = (r0, g0) => { let v = 0, f = fcf; for (let t = 1; t <= 5; t++) { f *= 1 + (g - (g - g0) * (t - 1) / 5); v += f / (1 + r0) ** t; } return v + (f * (1 + g0)) / (r0 - g0) / (1 + r0) ** 5; };
+    if (fcf && !fin) { out.dcf = dcf(ke, gt); const c = [dcf(ke + 0.01, 0.015), dcf(ke - 0.01, 0.035), dcf(ke + 0.01, 0.035), dcf(ke - 0.01, 0.015)]; out.dcfLo = Math.min(...c); out.dcfHi = Math.max(...c); }
+    else out.notes.push(fin ? 'DCF ไม่เหมาะกับธุรกิจการเงิน' : x.pfcf > 0 ? 'กระแสเงินสดอิสระผิดปกติ (P/FCF ' + x.pfcf.toFixed(0) + ') เลยไม่ใช้ DCF' : 'ไม่มีข้อมูลกระแสเงินสดอิสระ');
+    const peers = [...RAW.values()].filter((y) => y.sector === r.sector && y.symbol !== r.symbol);
+    const mPe = med(peers.map((y) => (y.forwardPe > 0 && y.forwardPe < 80 ? y.forwardPe : null))), mPf = med(peers.map((y) => (y.pfcf > 0 && y.pfcf < 80 ? y.pfcf : null)));
+    const fwdEps = x.forwardPe > 0 ? price / x.forwardPe : null, cs = [];
+    if (fwdEps && mPe) cs.push(fwdEps * mPe); if (fcf && mPf && !fin) cs.push(fcf * mPf);
+    if (cs.length && peers.length >= 4) { out.comps = cs.reduce((a, v) => a + v, 0) / cs.length; out.mPe = mPe; out.mPf = mPf; out.nPeers = peers.length; }
+    if (r.fairValue > 0) out.graham = r.fairValue;
+    let vs = [out.dcf, out.comps, out.graham].filter((v) => v > 0); if (!vs.length) return out;
+    if (vs.length === 3) { const m0 = med(vs), keep = vs.filter((v) => Math.max(v / m0, m0 / v) <= 3); if (keep.length < 3) { out.notes.push('ตัดวิธีที่ได้ค่าห่างจากค่ากลางเกิน 3 เท่า'); vs = keep; } }
+    out.mid = med(vs); out.lo = Math.min(...vs, out.dcf && vs.includes(out.dcf) ? out.dcfLo : Infinity); out.hi = Math.max(...vs, out.dcf && vs.includes(out.dcf) ? out.dcfHi : 0); out.mos = (out.mid - price) / out.mid; out.n = vs.length;
+    out.g = g; out.ke = ke; return out;
+  };
   const st = { q: '', sort: 'vi', sector: '', signal: 'ทั้งหมด', allN: 25, pickN: 10 };
 
   /* value ladder: fair value vs price on one line, the gap coloured by direction */
@@ -2303,6 +2326,19 @@ dash.calc('sectors', {
       b.append(el('span', null, k), t, el('b', null, v == null ? '–' : String(v))); bars.append(b);
     });
     box.append(bars);
+    const v3 = val3(r);
+    if (v3 && v3.mid) {
+      const g3 = el('div', 'group val3'); g3.append(el('h4', null, 'มูลค่าเหมาะสม 3 วิธี [ประมาณ]'));
+      const kv = (k, v, cl) => { const d = el('div', 'kv'); d.append(el('span', null, k), el('span', cl || null, v)); g3.append(d); };
+      kv('กระแสเงินสดคิดลด (DCF)', v3.dcf ? `${money(v3.dcf)} (ช่วง ${money(v3.dcfLo)}–${money(v3.dcfHi)})` : '–');
+      kv(`เทียบ ${v3.nPeers || 0} ตัวในกลุ่ม`, v3.comps ? `${money(v3.comps)} (P/E กลุ่ม ${fx(v3.mPe, 1)}${v3.mPf ? ', P/FCF ' + fx(v3.mPf, 1) : ''})` : '–');
+      kv('สูตร Graham', v3.graham ? money(v3.graham) : '–');
+      kv('ค่ากลางของ 3 วิธี', `${money(v3.mid)} · ช่วง ${money(v3.lo)}–${money(v3.hi)}`);
+      kv('ส่วนเผื่อความปลอดภัย', pc(v3.mos), v3.mos >= 0.25 ? 'pos' : v3.mos < 0 ? 'neg' : null);
+      g3.append(el('p', 'v3-verdict ' + (v3.mos >= 0.25 ? 'pos' : v3.mos < 0 ? 'neg' : ''), v3.mos >= 0.25 ? 'ราคาต่ำกว่ามูลค่ากลางเกิน 25% มีส่วนเผื่อพอ' : v3.mos >= 0 ? 'ราคาใกล้มูลค่า ส่วนเผื่อยังไม่ถึง 25%' : 'ราคาสูงกว่ามูลค่ากลาง ต้องเชื่อว่าโตเร็วกว่าที่สมมติไว้'));
+      g3.append(el('p', 'pf-hint', `สมมติฐาน: โต ${(v3.g * 100).toFixed(0)}% ต่อปีแล้วค่อยๆ ลดเหลือ 2.5% ใน 5 ปี · ผลตอบแทนที่ต้องการ ${(v3.ke * 100).toFixed(1)}% (พันธบัตร 10 ปี ${Y10.toFixed(2)}% + เบต้า × 5.5%) · ช่วง DCF = ผลตอบแทน ±1% และโตระยะยาว 1.5–3.5%${v3.notes.length ? ' · ' + v3.notes.join(' · ') : ''}`));
+      box.append(g3);
+    }
     const groups = [
       ['ราคาถูกหรือแพง', [['P/E', fx(r.pe, 1)], ['Forward P/E', fx(r.forwardPe, 1)], ['PEG', fx(r.peg)], ['P/B', fx(r.pb, 1)], ['ปันผล', pr(r.dividendYield)]]],
       ['คุณภาพธุรกิจ', [['ROE', pr(r.roe)], ['ROA', pr(r.roic)], ['อัตรากำไรสุทธิ', pr(r.netMargin)], ['กระแสเงินสดอิสระต่อยอดขาย', pr(r.fcfMargin)], ['หนี้สินต่อทุน', fx(r.debtToEquity)]]],
@@ -2405,7 +2441,7 @@ dash.calc('sectors', {
   };
 
   fetch('data.json?v=' + Date.now()).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((j) => {
-    scan = CALC.scan.fn(j.stocks, j.yield);
+    scan = CALC.scan.fn(j.stocks, j.yield); RAW = new Map(j.stocks.map((x) => [x.symbol, x])); Y10 = (j.yield && j.yield.length && +j.yield[j.yield.length - 1].yield10y) || 4.5;
     market = CALC.market.fn(j.spy, j.yield, j.stocks)[0];
     sectors = CALC.sectors.fn(scan);
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -4066,6 +4102,7 @@ dash.calc('sectors', {
     if (r != null && r <= -0.3) bad(`ขาดทุน ${Math.abs(r * 100).toFixed(0)}% ทบทวนว่าเหตุผลที่ซื้อยังจริงอยู่ไหม`, 2); else if (r != null && r <= -0.2) bad(`ขาดทุน ${Math.abs(r * 100).toFixed(0)}%`);
     if (r != null && r >= 0.5 && s.mos != null && s.mos < -0.1) bad(`กำไร ${(r * 100).toFixed(0)}% แล้วและราคาเกินมูลค่า พิจารณาขายทำกำไรบางส่วน`);
     if (tw && x.w - tw[x.sym] > band) bad(`สัดส่วนเกินเป้า ${((x.w - tw[x.sym]) * 100).toFixed(1)} จุด`);
+    if (x.w > 0.25) bad(`ตัวเดียวเกิน 25% ของพอร์ต (${(x.w * 100).toFixed(0)}%) ถ้าตัวนี้ร่วงหนักพอร์ตจะเจ็บมาก ทยอยลดหรือหยุดเติม`);
     return { level: sc >= 3 ? 'sell' : sc >= 1 ? 'watch' : 'hold', sc, R };
   };
   const LV = { sell: ['พิจารณาขาย', 'trap'], watch: ['จับตา', 'watch'], hold: ['ถือต่อ', 'buy'], na: ['ไม่มีข้อมูล', 'skip'] };
@@ -5034,7 +5071,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = 'dc7054a77e';
+  const BUILD = '06444d901f';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;

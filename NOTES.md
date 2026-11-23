@@ -33,6 +33,12 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 | `<script type="module">` | Firebase sync: `STORES` = portfolios / business / money docs per uid, `window.VGSync.push(col)` |
 | `const PAGES =` | navigation: 4 tabs (home, money, invest, biz) → pages → groups of old `data-sub` keys; titled groups fold (`.acc-h`, state in `vg-acc`). invest pages use views `port` and `scan`. Global `nav.subnav` sits before `#view-home`; bottom bar on phones; `#fab` quick-add menu (home script) |
 
+## Money-master upgrades (2026-11-23)
+- Scan sheet `val3(r)`: FCF DCF (ke = 10Y + β×5.5% clamped 7–14%, growth = avg EPS/revenue 3y clamped 0–15% fading to 2.5% over 5y; skipped for การเงิน or P/FCF > 80 / FCF margin < 3%) + sector-median forward P/E & P/FCF comps (≥ 4 peers) + Graham `fairValue`; median of the 3, any method > 3× from the median dropped; group `.val3` in `openSheet`; raw rows `RAW`, 10Y `Y10`.
+- Portfolio `checkHolding`: single holding > 25% of the portfolio → warning.
+- Money nw page `#fc-panel`: `cashFc()`/`drawFc()` 90-day forecast from wallet balances (`walBal`) + unpaid `schedule()` items (overdue ones skipped when a matching entry ±5% exists that month) − average variable out/sav spend (non-bill categories, last 90 days, base/worst/best 30-day windows); optional average irregular income (`#fc-var`, localStorage `vg-fcvar`).
+- Gold trading: `breaker()` (streak → 24h cooldown, weekly/monthly loss caps, revenge minutes, no bigger lot after a loss) inside `check()`; rules `wkLoss/moLoss/streak/revenge`; `drawStats()` under the P/L calendar: expectancy in R (`r0` = risk at entry via `sl0`), PF, max drawdown, by setup (`x.setup` from `#gt-setup`) and Thai session, 7-day review with behavior tags and temporary rules.
+
 ## Conventions
 - Events: `vg:ready` (data.json loaded), `vg:data` (any user data changed → home + scan re-render), `vg:view` (tab shown), `vg:watch`, `vg:prefs`, `vg:add` (open portfolio form with a symbol), `vg:open` (stock sheet).
 - Navigation: `window.VGNav.go(view, sub)` still takes old pairs like ('money','goals') or ('port','check'); `resolve()` maps them to tab/page and opens the group. Hashes: #money #invest #biz (old #portfolio #scan #business still work). Views: home, money, scan, port, biz.
