@@ -1153,6 +1153,36 @@ body.gt-noscroll { overflow: hidden; }
 .gt-grid .mc-d .a { font-family: var(--num); }
 #gt-day h4 { margin: 18px 0 6px; font-size: 16px; }
 @media (max-width: 640px) { .gt-lv span { font-size: 15px; } .gt-grid .mc-d { min-height: 54px; padding: 4px; } .gt-grid .mc-d .a { font-size: 10px; } }
+
+/* invest: two-row nav + overview */
+.subnav.two { flex-direction: column; gap: 0; padding: 0; border-bottom: 0; }
+.subcat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 4px; }
+.subcat button { border: 0; background: transparent; border-radius: 7px; padding: 9px 4px; font: 600 15px/1.2 var(--font, inherit); color: var(--ink-2); cursor: pointer; transition: background .15s, color .15s; }
+.subcat button:hover { color: var(--ink); }
+.subcat button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.subcat button:focus-visible, .subpg button:focus-visible, .ivr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.subpg { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+.subpg::-webkit-scrollbar { display: none; }
+.subpg[hidden] { display: none; }
+.subnav .subpg button { flex: none; }
+.subnav .subpg button[hidden] { display: none; }
+.ivo-sec { margin: 0 0 22px; }
+.ivo-sec h3 { font-size: 15px; color: var(--ink-2); font-weight: 600; margin: 0 4px 6px; }
+.ivo-sec { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.ivo-sec h3 { padding: 12px 14px 4px; margin: 0; }
+.ivr { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; width: 100%; text-align: left; background: transparent; border: 0; border-top: 1px solid var(--line); padding: 12px 14px; cursor: pointer; color: var(--ink); font: inherit; }
+.ivo-sec h3 + .ivr { border-top: 0; }
+.ivr:hover { background: var(--accent-soft); }
+.ivr-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ivr-t b { font-size: 16px; font-weight: 600; }
+.ivr-t small { font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
+.ivr-v { font-family: var(--num), var(--font, inherit); font-feature-settings: "tnum"; font-size: 15px; font-weight: 600; text-align: right; max-width: 42vw; overflow-wrap: anywhere; }
+.ivr-v.pos { color: var(--jade); } .ivr-v.neg { color: var(--brick); } .ivr-v.wn { color: var(--ochre); }
+.ivr-c { color: var(--ink-2); font-size: 20px; line-height: 1; }
+@media (max-width: 640px) { .subnav .subpg button { padding: 10px 9px 9px; } }
+details.how { margin: 4px 4px 16px; max-width: 64ch; }
+details.how summary { cursor: pointer; color: var(--accent); font-size: 14px; width: fit-content; list-style-position: inside; }
+details.how .sec-note { margin: 6px 0 0; }
 </style>
 </head>
 <body>
@@ -1204,6 +1234,7 @@ body.gt-noscroll { overflow: hidden; }
   </section>
 </div>
   <div id="view-scan">
+  <section id="ivov" data-sub="ivov"><div id="ivov-out"><div class="loading">กำลังโหลด…</div></div></section>
   <header class="hero" data-sub="picks">
     <p class="stamp" id="stamp">กำลังโหลดข้อมูลล่าสุด</p>
     <h1 class="verdict" id="verdict">กำลังคัดหุ้นจาก S&amp;P 500</h1>
@@ -3915,16 +3946,19 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       ['flow', 'รายรับรายจ่าย', 'money', [['budget'], ['fixed', 'รับ-จ่ายประจำ', 'เงินเดือน รายรับประจำ และบิลที่ต้องจ่ายทุกเดือน', true]]],
       ['plan', 'แผนการเงิน', 'money', [['goals', 'เป้าหมายออม', 'เก็บเงินเพื่อเป้าหมายต่างๆ', true], ['emerg', 'เงินฉุกเฉิน', 'มีเงินพอใช้กี่เดือนถ้าไม่มีรายได้', false],
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
-    invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
+    invest: [['ov', 'ภาพรวม', 'scan', [['ivov']]], ['mine', 'พอร์ต', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
-      ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
+      ['gold', 'ทองถือยาว', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
       ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
   };
+  /* invest has many pages: a first row of 4 groups, then the pages of the chosen group */
+  const CATS = { invest: [['ov', 'ภาพรวม', ['ov']], ['stk', 'หุ้น', ['mine', 'find', 'sxp', 'plan', 'log']], ['gld', 'ทอง', ['gold', 'gt']], ['opt', 'ออปชั่น', ['opt']]] };
+  const catOf = (tab, page) => (CATS[tab] || []).find((c) => c[2].includes(page));
   const TABS = ['home', 'money', 'invest', 'biz'], VIEWS = ['home', 'money', 'scan', 'port', 'biz'];
   let ACC = {}; try { ACC = JSON.parse(localStorage.getItem('vg-acc') || '{}') || {}; } catch (e) { /* ignore */ }
   const accKey = (tab, p, g) => tab + ':' + p[0] + ':' + g[0];
@@ -3948,7 +3982,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const { tab } = cur; const p = findPage(tab, cur.page); const v = p ? p[2] : 'home';
     VIEWS.forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v; document.body.dataset.tab = tab;
     document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === tab)));
-    subnav.hidden = !p; subnav.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(!!p && b.dataset.s === p[0])));
+    subnav.hidden = !p; subnav.querySelectorAll('button[data-s]').forEach((b) => b.setAttribute('aria-pressed', String(!!p && b.dataset.s === p[0])));
+    const c = p && catOf(tab, p[0]); subnav.classList.toggle('two', !!c);
+    if (c) { subnav.querySelectorAll('button[data-c]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.c === c[0])));
+      subnav.querySelectorAll('button[data-s]').forEach((b) => { b.hidden = !c[2].includes(b.dataset.s); }); const row = subnav.querySelector('.subpg'); if (row) row.hidden = c[2].length < 2;
+      try { localStorage.setItem('vg-cat-' + c[0], p[0]); } catch (e) { /* ignore */ } }
     Object.values(heads).forEach((h) => { h.hidden = true; });
     if (p) {
       const on = new Set();
@@ -3958,8 +3996,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     window.dispatchEvent(new Event('resize'));
   };
   const buildSubnav = (tab) => {
-    subnav.replaceChildren();
-    (PAGES[tab] || []).forEach(([k, label]) => { const b = el('button', null, label); b.type = 'button'; b.dataset.s = k; b.addEventListener('click', () => open(tab, k)); subnav.append(b); });
+    subnav.replaceChildren(); let row = subnav;
+    if (CATS[tab]) { const cr = el('div', 'subcat'); CATS[tab].forEach(([k, label, pages]) => { const b = el('button', null, label); b.type = 'button'; b.dataset.c = k;
+        b.addEventListener('click', () => { let pg = null; try { pg = localStorage.getItem('vg-cat-' + k); } catch (e) { /* ignore */ } open(tab, pages.includes(pg) ? pg : pages[0]); }); cr.append(b); });
+      row = el('div', 'subpg'); subnav.append(cr, row); }
+    (PAGES[tab] || []).forEach(([k, label]) => { const b = el('button', null, label); b.type = 'button'; b.dataset.s = k; b.addEventListener('click', () => open(tab, k)); row.append(b); });
   };
   const open = (tab, page, focus) => {
     if (!TABS.includes(tab)) tab = 'home';
@@ -3986,6 +4027,42 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   const show = (v, sub) => open(...resolve(v, sub));
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => open(b.dataset.v)));
   window.VGNav = { go: (v, sub) => show(v, sub) };
+
+  /* invest overview: one screen, each row says what to look at today and opens that page */
+  const drawOv = () => {
+    const box = $('ivov-out'); if (!box || cur.tab !== 'invest' || cur.page !== 'ov') return; box.replaceChildren();
+    const row = (title, detail, val, cls, page, grp) => { const b = el('button', 'ivr'); b.type = 'button'; const a = el('span', 'ivr-t'); a.append(el('b', null, title)); if (detail) a.append(el('small', null, detail));
+      b.append(a, el('span', 'ivr-v ' + (cls || ''), val || ''), el('span', 'ivr-c', '›')); b.addEventListener('click', () => open('invest', page, grp)); return b; };
+    const sec = (h) => { const d = el('div', 'ivo-sec'); d.append(el('h3', null, h)); box.append(d); return d; };
+    let P = null; try { P = summary(); } catch (e) { /* not ready yet */ }
+    const s1 = sec('หุ้น');
+    if (!P || !P.n) s1.append(row('พอร์ตหุ้น', 'ยังไม่มีหุ้นในพอร์ต กดเพื่อบันทึกรายการแรก', '', '', 'log'));
+    else {
+      s1.append(row('พอร์ตหุ้น', `${P.n} ตัว${P.fx ? ' · ' + baht(P.all * P.fx) : ''} · กำไร/ขาดทุน ${pc(P.cost ? P.pl / P.cost : null)}`, usd0(P.all), '', 'mine'));
+      if (P.sells.length) s1.append(row('สัญญาณขาย', 'หุ้นที่ถืออยู่ควรทบทวน', P.sells.join(', '), 'neg', 'mine', 'check'));
+      if (P.notBought.length) s1.append(row(`DCA ${P.perLabel}`, `ซื้อแล้ว ${P.bought.length} ตัว`, 'ยังไม่ซื้อ ' + P.notBought.length, 'wn', 'plan'));
+      if (P.outs) s1.append(row('ปรับสมดุล', 'สัดส่วนเบี้ยวจากเป้าเกินที่ตั้งไว้', P.outs + ' ตัว', 'wn', 'plan'));
+    }
+    const rows = window.VG && window.VG.scan ? window.VG.scan.filter((r) => r.signal === 'น่าซื้อสะสม') : null;
+    s1.append(row('หุ้นน่าซื้อสะสมวันนี้', rows ? rows.slice(0, 4).map((r) => r.symbol).join(' · ') || 'วันนี้ไม่มี' : 'กำลังโหลด…', rows ? rows.length + ' ตัว' : '', rows && rows.length ? 'pos' : '', 'find'));
+    const vd = $('verdict') ? $('verdict').textContent.trim() : ''; if (vd && !/กำลัง/.test(vd)) s1.append(row('ตลาดหุ้นสหรัฐ', vd, '', '', 'find', 'market'));
+    s1.append(row('หุ้นเทรด (swing)', 'หุ้นใกล้จุดเบรกและย่อในขาขึ้น พร้อมจุดเข้า SL TP', '', '', 'sxp'));
+    const s2 = sec('ทอง');
+    let gv = 0; try { gv = window.VGTrade ? window.VGTrade.goldTHB() : 0; } catch (e) { /* ignore */ }
+    s2.append(row('ทองถือยาว', gv ? 'ทองที่ถืออยู่ · จังหวะซื้อวันนี้ดูในหน้านี้' : 'จังหวะซื้อทองวันนี้ และงบซื้อรายสัปดาห์', gv ? baht(gv) : '', '', 'gold'));
+    let G = null; try { G = window.VGGT ? window.VGGT.get() : null; } catch (e) { /* ignore */ }
+    if (G) { const open1 = (G.tx || []).filter((x) => x.exit == null).length, pp = G.paper && G.paper.tx ? G.paper.tx.filter((x) => x.exit == null).length : 0;
+      const SN = { dip: 'ย่อในเทรนด์', brk: 'เบรก 20 ชม.', st: 'Supertrend' };
+      s2.append(row('เทรดทอง XAUUSD', `ท่าที่ดู: ${SN[G.set && G.set.strat] || SN.dip}${pp ? ` · เทรดกระดาษเปิด ${pp} ไม้` : ''}`, open1 ? `ไม้จริงเปิด ${open1}` : 'ดูสัญญาณ', open1 ? 'wn' : '', 'gt')); }
+    const s3 = sec('อื่นๆ');
+    s3.append(row('ออปชั่น', 'สัญญาณ แผนเทรด และเทรดจำลอง', '', '', 'opt'));
+    box.append(el('p', 'pf-hint', 'ตัวเลขทั้งหมดเป็นการประมาณ ไม่ใช่คำแนะนำการลงทุน'));
+  };
+  ['vg:view', 'vg:ready', 'vg:data'].forEach((e) => document.addEventListener(e, () => setTimeout(drawOv, 0)));
+  /* long explanations fold under "วิธีอ่าน" so the numbers come first */
+  ['view-scan', 'view-port'].forEach((v) => $(v).querySelectorAll('p.sec-note:not([id]), p.pf-intro:not([id])').forEach((n) => { if (n.textContent.length < 90) return;
+    const d = el('details', 'how ' + [...n.classList].filter((c) => c !== 'sec-note' && c !== 'pf-intro').join(' ')); if (n.dataset.sub) d.dataset.sub = n.dataset.sub;
+    d.append(el('summary', null, 'วิธีอ่านหน้านี้')); const q = el('p', 'sec-note'); q.append(...n.childNodes); d.append(q); n.replaceWith(d); }));
 
   /* ---------- holdings (average cost) and the cash/fx ledger ---------- */
   const sorted = () => [...db.tx].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));

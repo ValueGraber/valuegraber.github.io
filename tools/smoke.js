@@ -24,8 +24,8 @@ const d3p = path.join(__dirname, 'node_modules/d3/dist/d3.min.js');
     await p.goto('http://t/index.html'); await p.waitForTimeout(1500);
     for (const v of ['home', 'money', 'invest', 'biz']) {
       await p.click(`.tabs button[data-v=${v}]`); await p.waitForTimeout(200);
-      for (const s of await p.$$eval('nav.subnav button', (x) => x.map((y) => y.dataset.s))) {
-        await p.click(`nav.subnav button[data-s=${s}]`); await p.waitForTimeout(150);
+      for (const s of await p.$$eval('nav.subnav button[data-s]', (x) => x.map((y) => y.dataset.s))) {
+        await p.evaluate((k) => document.querySelector(`nav.subnav button[data-s="${k}"]`).click(), s); await p.waitForTimeout(150);
         /* open every folded group on the page so its content renders too */
         for (const h of await p.$$('.acc-h:not([hidden])[aria-expanded="false"]')) { await h.click(); await p.waitForTimeout(120); }
       }
