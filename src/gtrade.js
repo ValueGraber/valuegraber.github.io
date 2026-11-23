@@ -23,6 +23,7 @@
       paper: (() => { const q = { ...pblank(), ...pp, auto: { ...(pp.auto || pblank().auto) }, since: { ...(pp.since || pblank().since) }, tx: Array.isArray(pp.tx) ? pp.tx : [] };
         if (q.auto.dip === undefined) { ['asia', 'sweep', 'ema'].forEach((k) => delete q.auto[k]); q.auto.dip = true; q.since.dip = Date.now(); } return q; })() }; };
   const P = () => D.paper;
+  const OFF = () => (isFinite(D.set.off) ? +D.set.off : 0); /* MT5 price − PAXG price, set by Mon from his broker's quote */
   const SPD = () => (D.set.spread >= 0 ? D.set.spread : 0.3); /* broker spread, USD per ounce (setting) */
   let D = norm(null); try { D = norm(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { /* defaults */ }
   try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!raw || !raw.paper || !raw.paper.auto || raw.paper.auto.dip === undefined) localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } /* pin the bot start time */
@@ -523,14 +524,15 @@
   const all1 = () => (form ? bars.length : bars.length - 1); /* index of the newest bar in I */
   const drawNow = () => {
     const st = $('gt-status'), box = $('gt-now'); if (!st || !box) return;
-    st.textContent = err || (!loaded ? 'กำลังโหลดกราฟ…' : `ราคาตอนนี้ $${px(live)} ต่อออนซ์ · อัปเดต ${hhmm(lastTick || Date.now())} น.`);
+    st.textContent = err || (!loaded ? 'กำลังโหลดกราฟ…' : `ราคาตอนนี้ $${px(live)} ต่อออนซ์${OFF() ? ` · ใน MT5 ≈ $${px(live + OFF())}` : ''} · อัปเดต ${hhmm(lastTick || Date.now())} น.`);
+    drawOff();
     box.replaceChildren(); if (!loaded) return;
     const s = lastSig(), tr = trendNow();
     const card = el('div', 'gt-sig' + (s ? ' ' + s.side : ''));
     if (s) {
       card.append(el('b', null, s.side === 'buy' ? 'สัญญาณซื้อ (Buy)' : 'สัญญาณขาย (Sell)'),
         el('p', null, `${STRATS[strat()].name} · แท่งปิด ${hm(s.t)} · ${STRATS[strat()].why(s)}`));
-      const g = el('div', 'gt-lv'); [['เข้า', s.entry], ['ตัดขาดทุน (SL)', s.sl], ['ทำกำไร (TP)', s.tp]].forEach(([k, p]) => { const d = el('div'); d.append(el('small', null, k), el('span', null, px(p))); g.append(d); });
+      const g = el('div', 'gt-lv'); [['เข้า', s.entry], ['ตัดขาดทุน (SL)', s.sl], ['ทำกำไร (TP)', s.tp]].forEach(([k, p]) => { const d = el('div'); d.append(el('small', null, k + (OFF() ? ' MT5' : '')), el('span', null, px(p + OFF()))); g.append(d); });
       const lot = sizeLot(Math.abs(s.entry - s.sl)), rr = Math.abs(s.tp - s.entry) / Math.abs(s.entry - s.sl), risk = Math.abs(s.entry - s.sl) * (lot || 0) * D.set.cs;
       card.append(g, el('p', 'pf-hint', lot >= 0.01 ? `lot ที่เหมาะ ${lot} (ยอมเสียไม้ละ $${f2(rules().maxLoss)}): ถ้าโดน SL เสีย ${usd(-risk)} (${thb(-risk)}) ถ้าถึง TP ได้ ${usd(risk * rr)} · TP:SL = ${rr.toFixed(2)}` : `SL ไกลเกินไปสำหรับเงินที่ยอมเสียไม้ละ $${f2(rules().maxLoss)} แม้ 0.01 lot ก็เสียเกิน`));
       const bx = el('div', 'gt-act'); const b = el('button', 'btn-solid', 'เข้าไม้นี้ (จริง)'); b.type = 'button'; b.addEventListener('click', () => prefill(s));
@@ -557,9 +559,14 @@
   };
 
   /* ---------- journal ---------- */
+  const drawOff = () => { const m = $('gt-offmsg'); if (!m) return; const o = OFF(), at = D.set.offAt || 0, old = at && Date.now() - at > 12 * 3600e3;
+    $('gt-mt5').placeholder = live != null ? 'เช่น ' + px(live + o) : '';
+    m.textContent = o ? `ส่วนต่าง ${o > 0 ? '+' : '−'}$${f2(Math.abs(o))} ตั้งเมื่อ ${new Date(at).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} น. · จุดเข้า SL TP ในการ์ดเป็นราคา MT5 แล้ว${old ? ' · ตั้งไว้นานแล้ว ควรพิมพ์ราคาใหม่' : ''}` : 'พิมพ์ราคา Bid ใน MT5 ตอนนี้ เว็บจะเลื่อนจุดเข้า SL TP ให้ตรงกับโบรกของคุณ';
+    m.classList.toggle('neg', !!old); };
+  const setOff = (v) => { if (v > 0 && live != null) { D.set.off = Math.round((v - live) * 100) / 100; D.set.offAt = Date.now(); } else { D.set.off = 0; D.set.offAt = 0; } save(); drawAll(); };
   const prefill = (s) => {
-    $('gt-side').value = s ? s.side : 'buy'; $('gt-entry').value = s ? s.entry.toFixed(2) : live != null ? live.toFixed(2) : '';
-    $('gt-sl').value = s ? s.sl.toFixed(2) : ''; $('gt-tp').value = s ? s.tp.toFixed(2) : ''; if (s) { const lt = sizeLot(Math.abs(s.entry - s.sl)); if (lt >= 0.01) $('gt-lot').value = lt; } sizeHint(); $('gt-at').value = ''; $('gt-note').value = s ? 'ตามสัญญาณระบบ' : '';
+    $('gt-side').value = s ? s.side : 'buy'; $('gt-entry').value = s ? (s.entry + OFF()).toFixed(2) : live != null ? (live + OFF()).toFixed(2) : '';
+    $('gt-sl').value = s ? (s.sl + OFF()).toFixed(2) : ''; $('gt-tp').value = s ? (s.tp + OFF()).toFixed(2) : ''; if (s) { const lt = sizeLot(Math.abs(s.entry - s.sl)); if (lt >= 0.01) $('gt-lot').value = lt; } sizeHint(); $('gt-at').value = ''; $('gt-note').value = s ? 'ตามสัญญาณระบบ' : '';
     $('gt-form').dataset.sig = s ? '1' : ''; $('gt-setup').value = s ? strat() : 'man'; $('gt-msg').textContent = 'แก้ราคาเข้าให้ตรงกับใน MT5 แล้วกดบันทึก';
     if (window.VGNav) window.VGNav.go('scan', 'gtj');
     setTimeout(() => { const f = $('gt-form'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('gt-entry').focus(); } }, 120);
@@ -732,6 +739,9 @@
   const setup = () => {
     if (!$('gt-chart')) return;
     $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs;
+    const mt = () => { const v = +$('gt-mt5').value; if (v > 0) { setOff(v); $('gt-mt5').value = ''; } };
+    $('gt-mt5-set').addEventListener('click', mt); $('gt-mt5').addEventListener('keydown', (e) => { if (e.key === 'Enter') mt(); });
+    $('gt-mt5-clr').addEventListener('click', () => { $('gt-mt5').value = ''; setOff(0); });
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
     $('gt-add').addEventListener('click', add); $('gt-csv').addEventListener('click', csv);
     document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
