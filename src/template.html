@@ -1362,13 +1362,13 @@ tr.editing td { background: var(--accent-soft); }
   <section id="gtc" data-sub="gtc">
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
     <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
-    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="sweep" aria-pressed="true">กวาดสต็อป</button><button type="button" data-k="ema" aria-pressed="false">EMA ย่อ</button></div></div>
+    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="asia" aria-pressed="false">เบรกกรอบเอเชีย</button><button type="button" data-k="sweep" aria-pressed="true">กวาดสต็อป</button><button type="button" data-k="ema" aria-pressed="false">EMA ย่อ</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
     <div id="gt-now"></div>
     <div class="gt-bar"><div class="seg" id="gt-span" role="group" aria-label="ช่วงกราฟ"><button type="button" data-n="48" aria-pressed="false">2 วัน</button><button type="button" data-n="72" aria-pressed="true">3 วัน</button><button type="button" data-n="168" aria-pressed="false">1 สัปดาห์</button><button type="button" data-n="336" aria-pressed="false">2 สัปดาห์</button></div></div>
     <div class="gt-chart" id="gt-chart"></div>
     <p class="pf-hint gt-read" id="gt-read"></p>
-    <p class="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>จุดสูง/ต่ำเมื่อวาน (กวาดสต็อป)</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+    <p class="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบเอเชีย หรือจุดสูง/ต่ำเมื่อวาน</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
       <h4>กวาดสต็อป (Liquidity sweep)</h4><ul>
@@ -1376,6 +1376,10 @@ tr.editing td { background: var(--accent-soft); }
       <li>ขาย: วันนี้ราคาทะลุจุดสูงของเมื่อวานครั้งแรก แต่แท่งนั้นปิดกลับลงมาใต้เส้น เป็นแท่งแดง และมีไส้ด้านบนยาวอย่างน้อย 35% ของแท่ง</li>
       <li>ซื้อ: กลับด้านกันที่จุดต่ำของเมื่อวาน</li>
       <li>SL เลยปลายไส้ไปนิด (0.1 ATR) อย่างน้อย 0.5 ATR และไม่เกิน 3 ATR · TP = 2 เท่าของ SL · ดูได้ 24 ชม. วันใหม่เริ่ม 05:00 น. เวลาไทย (ตลาดนิวยอร์กปิด) เว้นเสาร์-อาทิตย์</li></ul>
+      <h4>เบรกกรอบเอเชีย (Asian range breakout)</h4><ul>
+      <li>ช่วง 07:00–14:00 น. เวลาไทย ตลาดเอเชียเปิด ทองมักแกว่งแคบ ระบบจดจุดสูงสุดและต่ำสุดของช่วงนี้เป็นกรอบ</li>
+      <li>หลัง 14:00 น. ลอนดอนเปิด เงินก้อนใหญ่เข้า แท่ง 1 ชม. แรกที่ปิดเหนือขอบบน = ซื้อ ปิดใต้ขอบล่าง = ขาย วันละไม่เกิน 1 ไม้ นับถึง 22:00 น.</li>
+      <li>SL ที่กลางกรอบ (อย่างน้อย 0.5 ATR) · TP = 2 เท่าของ SL · ข้ามวันที่กรอบกว้างเกิน 4 ATR (ราคาวิ่งไปแล้ว) และเว้นเสาร์-อาทิตย์</li></ul>
       <h4>EMA ย่อ</h4><ul>
       <li>ซื้อ: EMA 20 อยู่เหนือ EMA 50 และ EMA 50 ชี้ขึ้น (ขาขึ้น) ราคาย่อลงมาแตะ EMA 20 ในสองแท่งล่าสุด แล้วแท่งที่เพิ่งปิดเป็นแท่งเขียว ปิดเหนือ EMA 20 และสูงกว่าแท่งก่อน RSI อยู่ระหว่าง 45–70</li>
       <li>ขาย: กลับด้านกัน (ขาลง ราคาเด้งขึ้นแตะ EMA 20 แล้วปิดต่ำกว่า RSI 30–55)</li>
@@ -1405,7 +1409,7 @@ tr.editing td { background: var(--accent-soft); }
     </section>
     <section class="panel">
       <div class="ph"><h3>บอทเทรดกระดาษ 24 ชม.</h3></div>
-      <div class="gp-auto"><label><input type="checkbox" id="gp-a-sweep"> บอทกวาดสต็อป</label><label><input type="checkbox" id="gp-a-ema"> บอท EMA ย่อ</label>
+      <div class="gp-auto"><label><input type="checkbox" id="gp-a-asia"> บอทเบรกกรอบเอเชีย</label><label><input type="checkbox" id="gp-a-sweep"> บอทกวาดสต็อป</label><label><input type="checkbox" id="gp-a-ema"> บอท EMA ย่อ</label>
         <label><input type="checkbox" id="gp-be"> เลื่อน SL มาที่จุดเข้าเมื่อกำไรเท่าความเสี่ยง (ทุกไม้กระดาษ)</label></div>
       <p class="pf-hint">บอทเปิดไม้เองทุกครั้งที่มีสัญญาณ นับตั้งแต่ตอนที่ติ๊กเปิด แข่งกับไม้ที่คุณกดเอง ดูอันดับในตาราง</p>
       <div id="gp-board"></div>

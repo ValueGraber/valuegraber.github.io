@@ -18,11 +18,12 @@
   const pblank = () => ({ start: 1000, lot: 0.01, be: true, auto: { sweep: true }, since: { sweep: Date.now() }, tx: [] });
   const norm = (j) => { const pp = (j && j.paper) || {};
     return { tx: Array.isArray(j && j.tx) ? j.tx : [], set: { ...blank().set, ...((j && j.set) || {}) },
-      paper: { ...pblank(), ...pp, auto: { ...(pp.auto || pblank().auto) }, since: { ...(pp.since || pblank().since) }, tx: Array.isArray(pp.tx) ? pp.tx : [] } }; };
+      paper: (() => { const q = { ...pblank(), ...pp, auto: { ...(pp.auto || pblank().auto) }, since: { ...(pp.since || pblank().since) }, tx: Array.isArray(pp.tx) ? pp.tx : [] };
+        if (q.auto.asia === undefined) { q.auto.asia = true; q.since.asia = Date.now(); } return q; })() }; };
   const P = () => D.paper;
   const SPREAD = 0.3; /* simulated broker spread, USD per ounce */
   let D = norm(null); try { D = norm(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { /* defaults */ }
-  try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!raw || !raw.paper) localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } /* pin the bot start time */
+  try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!raw || !raw.paper || !raw.paper.auto || raw.paper.auto.asia === undefined) localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } /* pin the bot start time */
   const save = (sync = true) => { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } if (sync && window.VGSync) window.VGSync.push('portfolios'); };
 
   const fx = () => (window.VG && window.VG.fx) || 33;
@@ -50,11 +51,17 @@
     for (let i = 1; i < b.length; i++) { const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c));
       a = i <= n ? a + tr / n : (a * (n - 1) + tr) / n; if (i >= n) o[i] = a; } return o; };
   const wkend = (t) => { const d = new Date(t + 2 * 3600e3).getUTCDay(); return d === 6 || d === 0; }; /* XAUUSD closed: Sat 05:00 → Mon 05:00 Thai */
-  const ind = (b) => { const c = b.map((x) => x.c); const o = { e20: ema(c, 20), e50: ema(c, 50), rsi: rsi(c), atr: atr(b), pdh: [], pdl: [], hiB: [], loB: [] };
+  const ind = (b) => { const c = b.map((x) => x.c); const o = { e20: ema(c, 20), e50: ema(c, 50), rsi: rsi(c), atr: atr(b), pdh: [], pdl: [], hiB: [], loB: [], ah: [], al: [], ab: [] };
     let cur = null, ph = null, pl = null, hh = -Infinity, ll = Infinity;
     b.forEach((x, i) => { o.pdh[i] = o.pdl[i] = null; if (wkend(x.t)) return; const k = Math.floor((x.t + 2 * 3600e3) / 86400e3);
       if (k !== cur) { if (cur != null) { ph = hh; pl = ll; } cur = k; hh = -Infinity; ll = Infinity; }
       o.pdh[i] = ph; o.pdl[i] = pl; o.hiB[i] = hh; o.loB[i] = ll; hh = Math.max(hh, x.h); ll = Math.min(ll, x.l); });
+    /* Asian range: high/low of the bars opening 07:00–13:00 Thai; usable from 14:00; ab = a bar already closed outside it today */
+    let ak = null, ah = -Infinity, al = Infinity, done = false;
+    b.forEach((x, i) => { const tt = x.t + 7 * 3600e3, k = Math.floor(tt / 86400e3), h = new Date(tt).getUTCHours();
+      if (k !== ak) { ak = k; ah = -Infinity; al = Infinity; done = false; }
+      o.ah[i] = o.al[i] = null; o.ab[i] = done;
+      if (h >= 7 && h < 14) { ah = Math.max(ah, x.h); al = Math.min(al, x.l); } else if (h >= 14 && ah > -Infinity) { o.ah[i] = ah; o.al[i] = al; if (x.c > ah || x.c < al) done = true; } });
     return o; };
 
   /* signal on closed bar i: trend by EMA 20 vs 50 (50 sloping the same way), a dip to EMA 20 in the last 2 bars, then a close back past it */
@@ -78,8 +85,18 @@
       const risk = Math.max(x.c - (x.l - 0.1 * a), 0.5 * a); if (risk > 3 * a) return null; return { side: 'buy', entry: x.c, sl: x.c - risk, tp: x.c + 2 * risk, lvl: L }; }
     return null;
   };
+  /* Asian range breakout: the first 1h close outside today's 07:00–14:00 range, from 14:00 to 22:00 Thai (London + early New York);
+     stop at the middle of the range (at least 0.5 ATR), target 2× the risk; skip ranges wider than 4 ATR */
+  const sigAsia = (b, I, i) => {
+    const x = b[i], H = I.ah[i], L = I.al[i], a = I.atr[i]; if (H == null || !a || I.ab[i] || wkend(x.t)) return null;
+    if (new Date(x.t + 7 * 3600e3).getUTCHours() > 21) return null; const w = H - L; if (w <= 0 || w > 4 * a) return null; const mid = (H + L) / 2;
+    if (x.c > H) { const risk = Math.max(x.c - mid, 0.5 * a); return { side: 'buy', entry: x.c, sl: x.c - risk, tp: x.c + 2 * risk, lvl: H, w }; }
+    if (x.c < L) { const risk = Math.max(mid - x.c, 0.5 * a); return { side: 'sell', entry: x.c, sl: x.c + risk, tp: x.c - 2 * risk, lvl: L, w }; }
+    return null;
+  };
   const STRATS = {
-    sweep: { name: 'กวาดสต็อป', fn: sigSweep, why: (s) => (s.side === 'buy' ? `ราคาทะลุจุดต่ำของเมื่อวาน (${px(s.lvl)}) ลงไปกวาดสต็อป แล้วดีดกลับขึ้นมาปิดเหนือเส้นในแท่งเดียว` : `ราคาทะลุจุดสูงของเมื่อวาน (${px(s.lvl)}) ขึ้นไปกวาดสต็อป แล้วโดนตบกลับลงมาปิดใต้เส้นในแท่งเดียว`) },
+    asia: { name: 'เบรกกรอบเอเชีย', fn: sigAsia, lines: (I) => [I.ah, I.al], why: (s) => `กรอบเอเชียวันนี้กว้าง $${px(s.w)} ราคาปิด${s.side === 'buy' ? 'เหนือขอบบน' : 'ใต้ขอบล่าง'} (${px(s.lvl)}) หลังตลาดลอนดอนเปิด ${s.side === 'buy' ? 'แรงซื้อพาเบรกขึ้น' : 'แรงขายพาเบรกลง'}` },
+    sweep: { name: 'กวาดสต็อป', fn: sigSweep, lines: (I) => [I.pdh, I.pdl], why: (s) => (s.side === 'buy' ? `ราคาทะลุจุดต่ำของเมื่อวาน (${px(s.lvl)}) ลงไปกวาดสต็อป แล้วดีดกลับขึ้นมาปิดเหนือเส้นในแท่งเดียว` : `ราคาทะลุจุดสูงของเมื่อวาน (${px(s.lvl)}) ขึ้นไปกวาดสต็อป แล้วโดนตบกลับลงมาปิดใต้เส้นในแท่งเดียว`) },
     ema: { name: 'EMA ย่อ', fn: sigEma, why: (s) => (s.side === 'buy' ? 'ขาขึ้น ราคาย่อแตะเส้น EMA 20 แล้วเด้งกลับขึ้น' : 'ขาลง ราคาเด้งแตะเส้น EMA 20 แล้วกลับลง') },
   };
   const strat = () => (STRATS[D.set.strat] ? D.set.strat : 'sweep');
@@ -188,10 +205,10 @@
     if (!all.length || !I) { box.innerHTML = ''; return; }
     const W = Math.max(300, box.clientWidth || 600), R = 58, H1 = 250, H2 = 74, GAP = 22, H = H1 + GAP + H2 + 18;
     const n = Math.min(span, all.length), s0 = all.length - n, v = all.slice(s0);
-    const opens = [...openTx(), ...pOpen()], sw = strat() === 'sweep';
+    const opens = [...openTx(), ...pOpen()], LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
     let lo = Infinity, hi = -Infinity;
     v.forEach((b, k) => { lo = Math.min(lo, b.l, I.e50[s0 + k] ?? b.l); hi = Math.max(hi, b.h, I.e50[s0 + k] ?? b.h); });
-    const rng0 = hi - lo; if (sw) v.forEach((b, k) => [I.pdh[s0 + k], I.pdl[s0 + k]].forEach((p) => { if (p != null && p > lo - rng0 * 0.5 && p < hi + rng0 * 0.5) { lo = Math.min(lo, p); hi = Math.max(hi, p); } }));
+    const rng0 = hi - lo; if (LV) v.forEach((b, k) => [LV[0][s0 + k], LV[1][s0 + k]].forEach((p) => { if (p != null && p > lo - rng0 * 0.5 && p < hi + rng0 * 0.5) { lo = Math.min(lo, p); hi = Math.max(hi, p); } }));
     opens.forEach((x) => [x.entry, x.sl, x.tp].forEach((p) => { if (p && p > lo - rng0 && p < hi + rng0) { lo = Math.min(lo, p); hi = Math.max(hi, p); } }));
     const padP = (hi - lo) * 0.06 || 1; lo -= padP; hi += padP;
     const cw = (W - R) / n, y = (p) => 8 + ((hi - p) / (hi - lo)) * (H1 - 16), xi = (k) => k * cw + cw / 2;
@@ -209,7 +226,7 @@
     /* EMAs */
     const line = (arr, cls, yy) => { const pts = []; v.forEach((b, k) => { const z = arr[s0 + k]; if (z != null) pts.push(`${xi(k).toFixed(1)},${yy(z).toFixed(1)}`); }); return pts.length > 1 ? `<polyline points="${pts.join(' ')}" class="${cls}"/>` : ''; };
     o.push(line(I.e20, 'gt-e20', y), line(I.e50, 'gt-e50', y));
-    if (sw) v.forEach((b, k) => { [[I.pdh[s0 + k], 'gt-pdh'], [I.pdl[s0 + k], 'gt-pdl']].forEach(([p, c]) => { if (p != null && p > lo && p < hi) o.push(`<line x1="${k * cw}" x2="${(k + 1) * cw}" y1="${y(p)}" y2="${y(p)}" class="${c}"/>`); }); });
+    if (LV) v.forEach((b, k) => { [[LV[0][s0 + k], 'gt-pdh'], [LV[1][s0 + k], 'gt-pdl']].forEach(([p, c]) => { if (p != null && p > lo && p < hi) o.push(`<line x1="${k * cw}" x2="${(k + 1) * cw}" y1="${y(p)}" y2="${y(p)}" class="${c}"/>`); }); });
     /* signals */
     const t0 = v[0].t;
     S.forEach((s) => { const k = s.i - s0; if (k < 0 || s.t - 3600e3 < t0) return; const x = xi(k), b = all[s.i];
@@ -236,6 +253,16 @@
   /* ---------- signal card ---------- */
   const lastSig = () => { const s = S[S.length - 1]; if (!s) return null; const age = bars.length - 1 - s.i; return age <= 2 && !s.out ? s : null; };
   const trendNow = () => { const i = bars.length - 1; if (!I || i < 60) return null; const up = I.e20[i] > I.e50[i]; const j = all1(); return { up, rsi: I.rsi[i], atr: I.atr[i], pdh: I.pdh[j], pdl: I.pdl[j], wk: wkend(Date.now()) }; };
+  const asiaNow = () => {
+    const all = form ? [...bars, form] : bars, now = Date.now() + 7 * 3600e3, k = Math.floor(now / 86400e3), h = new Date(now).getUTCHours();
+    const td = all.filter((x) => Math.floor((x.t + 7 * 3600e3) / 86400e3) === k && (() => { const q = new Date(x.t + 7 * 3600e3).getUTCHours(); return q >= 7 && q < 14; })());
+    const hi = td.length ? Math.max(...td.map((x) => x.h)) : null, lo = td.length ? Math.min(...td.map((x) => x.l)) : null;
+    if (h < 7) return 'รอเก็บกรอบเอเชียของวันนี้ ช่วง 07:00–14:00 น. แล้วค่อยดูว่าราคาจะเบรกออกทางไหน';
+    if (h < 14) return `กำลังเก็บกรอบเอเชีย ตอนนี้สูงสุด ${px(hi)} ต่ำสุด ${px(lo)} เบรกนับได้หลัง 14:00 น.`;
+    const j = bars.length - 1; if (I.ah[j] != null && (I.ab[j] || bars[j].c > I.ah[j] || bars[j].c < I.al[j])) return `วันนี้ราคาเบรกกรอบ ${px(hi)}–${px(lo)} ไปแล้ว หรือเลยเวลา รอกรอบใหม่พรุ่งนี้ 07:00 น.`;
+    if (h >= 22) return 'เลย 22:00 น. แล้ว วันนี้ไม่มีการเบรก รอกรอบใหม่พรุ่งนี้';
+    return `กรอบเอเชียวันนี้ ${px(lo)}–${px(hi)} (เส้นประสีทอง) รอแท่ง 1 ชม. ปิดเหนือ ${px(hi)} = ซื้อ หรือปิดใต้ ${px(lo)} = ขาย ถึง 22:00 น.`;
+  };
   const all1 = () => (form ? bars.length : bars.length - 1); /* index of the newest bar in I */
   const drawNow = () => {
     const st = $('gt-status'), box = $('gt-now'); if (!st || !box) return;
@@ -256,6 +283,7 @@
     } else {
       card.append(el('b', null, 'ยังไม่มีสัญญาณ รอก่อน'));
       if (tr && tr.wk) card.append(el('p', null, 'วันเสาร์-อาทิตย์ ตลาดทองจริงปิด ราคา PAXG ยังขยับได้ แต่ระบบไม่ให้สัญญาณ'));
+      else if (tr && strat() === 'asia') card.append(el('p', null, asiaNow()));
       else if (tr && strat() === 'sweep') card.append(el('p', null, tr.pdh != null ? `จุดสูงของเมื่อวาน ${px(tr.pdh)} · จุดต่ำ ${px(tr.pdl)} (เส้นประสีทองบนกราฟ) รอให้ราคาทะลุเส้นใดเส้นหนึ่งแล้วกลับเข้ามาปิดในแท่งเดียว ขึ้นไปกวาดแล้วกลับลง = ขาย ลงไปกวาดแล้วดีดขึ้น = ซื้อ` : 'กำลังรอข้อมูลของวันก่อน'));
       else if (tr) card.append(el('p', null, `${tr.up ? 'ตอนนี้เป็นขาขึ้น (EMA 20 อยู่เหนือ EMA 50) รอราคาย่อลงมาแตะ EMA 20 แล้วเด้งขึ้น' : 'ตอนนี้เป็นขาลง (EMA 20 อยู่ใต้ EMA 50) รอราคาเด้งขึ้นไปแตะ EMA 20 แล้วกลับลง'} · RSI ${tr.rsi.toFixed(0)} · แกว่งเฉลี่ยแท่งละ $${px(tr.atr)}`));
       const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุด: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
