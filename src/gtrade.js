@@ -199,6 +199,89 @@
 
   /* ---------- chart ---------- */
   let span = 72;
+  /* ---------- risk rules, position size and the time machine
+     (ideas from github.com/Jakeschincariol/day-trader-skill, MIT: trader-budget, trader-risk, trader-timemachine) ---------- */
+  const RULES = { maxLoss: 20, maxDay: 50, maxTrades: 3, minRR: 1.3 }; /* 0.01 lot of gold moves $1 per $1, and a normal 1h stop is $10–20 */
+  const rules = () => ({ ...RULES, ...(D.set.rules || {}) });
+  /* the stop decides the size: lot = money you accept to lose ÷ (stop distance × ounces per lot), rounded down to 0.01 */
+  const sizeLot = (risk) => (risk > 0 ? Math.floor((rules().maxLoss / (risk * D.set.cs)) * 100 + 1e-9) / 100 : null);
+  const riskOf = (x) => (x.sl ? Math.max(0, (x.entry - x.sl) * (x.side === 'buy' ? 1 : -1)) * x.lot * D.set.cs : 0);
+  const dayState = (list) => { const t = bkDay(Date.now());
+    return { n: list.filter((x) => bkDay(x.at) === t).length, pl: list.filter((x) => x.exit != null && bkDay(x.closedAt) === t).reduce((a, x) => a + plOf(x), 0),
+      open: list.filter((x) => x.exit == null).reduce((a, x) => a + riskOf(x), 0) }; };
+  /* every rule that fails is listed; paper entries are blocked, real ones are saved with a warning */
+  const check = (o, list) => {
+    const r = rules(), bl = [], wn = [], dir = o.side === 'buy' ? 1 : -1, risk = o.sl ? Math.abs(o.entry - o.sl) : 0, loss = risk * o.lot * D.set.cs;
+    if (!o.sl) bl.push('ไม่มี SL'); else if ((o.entry - o.sl) * dir <= 0) bl.push(o.side === 'buy' ? 'SL ต้องต่ำกว่าราคาเข้า' : 'SL ต้องสูงกว่าราคาเข้า');
+    else if (loss > r.maxLoss * 1.05 + 0.01) bl.push(`ถ้าโดน SL จะเสีย $${f2(loss)} เกินที่ตั้งไว้ไม้ละ $${f2(r.maxLoss)}`);
+    if (!o.tp) wn.push('ไม่มี TP'); else if ((o.tp - o.entry) * dir <= 0) bl.push('TP อยู่ผิดฝั่ง');
+    else if (risk && Math.abs(o.tp - o.entry) / risk < r.minRR - 1e-9) bl.push(`TP:SL = ${(Math.abs(o.tp - o.entry) / risk).toFixed(2)} ต่ำกว่าขั้นต่ำ ${r.minRR}`);
+    const d = dayState(list); if (d.n >= r.maxTrades) bl.push(`วันนี้เข้าไปแล้ว ${d.n} ไม้ ครบโควตา ${r.maxTrades} ไม้ต่อวัน`);
+    const worst = Math.max(0, -d.pl) + d.open + loss; if (worst > r.maxDay + 0.01) bl.push(`ถ้าไม้นี้โดน SL วันนี้อาจเสียรวม $${f2(worst)} เกินเพดาน $${f2(r.maxDay)} ต่อวัน`);
+    if (wkend(Date.now())) wn.push('เสาร์-อาทิตย์ ตลาดทองจริงปิด');
+    return { ok: !bl.length, bl, wn };
+  };
+  /* time machine: replay the next H hours 10,000 times from gold's own 1h bars at the same hour of day (±1 h, weekdays, ~4 months);
+     each bar is its open/high/low/close over the previous close, scaled to the running price; stop checked before target */
+  let tmPool = null, tmAt = 0;
+  const tmLoad = async () => {
+    if (tmPool && Date.now() - tmAt < 3600e3) return tmPool; if (!bars.length) return null;
+    let all = bars.slice();
+    for (let k = 0; k < 2; k++) { try { const r = (await get(`klines?symbol=PAXGUSDT&interval=1h&limit=1000&endTime=${all[0].t - 1}`)).map(kl); if (!r.length) break; all = [...r, ...all]; } catch (e) { break; } }
+    const pool = Array.from({ length: 24 }, () => []);
+    for (let i = 1; i < all.length; i++) { const x = all[i], q = all[i - 1]; if (wkend(x.t) || wkend(q.t) || x.t - q.t !== 3600e3) continue;
+      pool[(new Date(x.t).getUTCHours() + 7) % 24].push([x.o / q.c, x.h / q.c, x.l / q.c, x.c / q.c]); }
+    tmPool = { pool, days: Math.round((all[all.length - 1].t - all[0].t) / 86400e3) }; tmAt = Date.now(); return tmPool;
+  };
+  const rng = (a) => () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const tmRun = (T0, plan, H = 24, N = 10000, seed = 19) => {
+    const R = rng(seed), dir = plan.side === 'buy' ? 1 : -1, risk = Math.abs(plan.entry - plan.sl), rr = Math.abs(plan.tp - plan.entry) / risk, h0 = (new Date(plan.at || Date.now()).getUTCHours() + 7) % 24;
+    let tp = 0, sl = 0, ne = 0, sumR = 0; const ends = new Float64Array(N);
+    for (let n = 0; n < N; n++) {
+      let p = plan.entry, out = null;
+      for (let k = 1; k <= H; k++) { const h = (h0 + k) % 24, w = (h + 23 + Math.floor(R() * 3)) % 24, pl = T0.pool[w].length ? T0.pool[w] : T0.pool[h]; const b = pl[Math.floor(R() * pl.length)];
+        const hi = p * b[1], lo = p * b[2]; if (!out) { if (dir > 0 ? lo <= plan.sl : hi >= plan.sl) out = 'sl'; else if (dir > 0 ? hi >= plan.tp : lo <= plan.tp) out = 'tp'; } p *= b[3]; }
+      ends[n] = p; if (out === 'tp') { tp++; sumR += rr; } else if (out === 'sl') { sl++; sumR -= 1; } else { ne++; sumR += ((p - plan.entry) * dir) / risk; }
+    }
+    const e = Array.from(ends).sort((a, b) => a - b), q = (f) => e[Math.min(N - 1, Math.floor(f * N))];
+    return { N, H, seed, tp: tp / N, sl: sl / N, ne: ne / N, avgR: sumR / N, rr, p5: q(0.05), p50: q(0.5), p95: q(0.95), days: T0.days };
+  };
+  const pc1 = (v) => (v * 100).toFixed(1) + '%';
+  const verdict = (r) => {
+    const hit = r.tp + r.sl; if (!hit) return 'แทบทุกรอบไม่ถึงทั้ง TP และ SL ลองดูไปข้างหน้านานขึ้น';
+    const be = 1 / (1 + r.rr), ws = r.tp / hit, d = (ws - be) * 100, a = Math.abs(d), side = d > 0 ? 'TP' : 'SL';
+    const head = a < 5 ? (Math.abs(r.rr - 1) < 0.05 ? 'พอๆ กับโยนเหรียญ' : 'ใกล้เคียงเท่าทุน') : a < 15 ? `เอียงไปทาง ${side}` : `เอียงไปทาง ${side} ชัดเจน`;
+    return `${head}: ในรอบที่ชนเส้นใดเส้นหนึ่ง ถึง TP ก่อน ${pc1(ws)} ส่วนจุดเท่าทุนของ TP:SL = ${r.rr.toFixed(2)} คือ ${pc1(be)}`;
+  };
+  let tmFrom = null;
+  const tmGo = async () => {
+    const m = $('tm-msg'), out = $('tm-out'); if (live == null || !bars.length) { m.textContent = 'ยังโหลดราคาไม่เสร็จ'; return; }
+    const side = $('tm-side').value, dir = side === 'buy' ? 1 : -1, a = atrNow(), entry = +$('tm-entry').value || live + (dir * SPREAD) / 2;
+    const sl = +$('tm-sl').value || entry - dir * SLK * a, tp = +$('tm-tp').value || entry + dir * TPK * a, H = +$('tm-h').value || 24;
+    if ((entry - sl) * dir <= 0 || (tp - entry) * dir <= 0) { m.textContent = side === 'buy' ? 'Buy: SL ต้องต่ำกว่าราคาเข้า และ TP สูงกว่า' : 'Sell: SL ต้องสูงกว่าราคาเข้า และ TP ต่ำกว่า'; return; }
+    m.textContent = 'กำลังโหลดประวัติราคาและเล่นอนาคต…'; const T0 = await tmLoad(); if (!T0) { m.textContent = 'โหลดประวัติราคาไม่สำเร็จ'; return; }
+    const r = tmRun(T0, { side, entry, sl, tp }, H); m.textContent = '';
+    const bar = (k, v, c) => { const d = el('div', 'tm-row'); const f = el('i', 'tm-f ' + c); f.style.width = Math.max(1, v * 100) + '%'; const t = el('div', 'tm-t'); t.append(f); d.append(el('span', null, k), t, el('b', null, pc1(v))); return d; };
+    const lot = sizeLot(Math.abs(entry - sl));
+    out.replaceChildren(
+      el('p', 'pf-hint', `${side === 'buy' ? 'Buy' : 'Sell'} ที่ ${px(entry)} · SL ${px(sl)} · TP ${px(tp)} · ดูไป ${H} ชม. · ${r.N.toLocaleString()} รอบ จากแท่งจริงราว ${r.days} วัน · seed ${r.seed}`),
+      bar('ถึง TP ก่อน', r.tp, 'pos'), bar('โดน SL ก่อน', r.sl, 'neg'), bar(`ไม่ถึงทั้งคู่ใน ${H} ชม.`, r.ne, 'mid'),
+      el('p', null, `ราคาตอนครบ ${H} ชม.: กลางๆ ${px(r.p50)} · 90% ของรอบอยู่ระหว่าง ${px(r.p5)} ถึง ${px(r.p95)} · กำไรเฉลี่ยต่อไม้ ${sgn(r.avgR)}${Math.abs(r.avgR).toFixed(2)}R${lot ? ` (≈ ${usd(r.avgR * rules().maxLoss)} ต่อไม้ ถ้าเสี่ยงไม้ละ $${f2(rules().maxLoss)})` : ''}`));
+    const v = el('p', 'tm-v'); v.textContent = verdict(r); out.append(v);
+    if (r.ne > 0.4) out.append(el('p', 'pf-hint', `${pc1(r.ne)} ของรอบไม่ถึงทั้ง TP และ SL ราคาตอนจบเป็นตัวตัดสินรอบพวกนั้น`));
+    if (tmFrom) { const d = (SS[tmFrom] || []).filter((x) => x.out), w = d.filter((x) => x.R > 0).length, rs = d.reduce((acc, x) => acc + x.R, 0);
+      if (d.length) out.append(el('p', 'pf-hint', `ประวัติจริงของ ${STRATS[tmFrom].name} ในกราฟที่โหลดไว้: ให้สัญญาณ ${d.length} ครั้ง ถึง TP ${d.filter((x) => x.out === 'tp').length} โดน SL ${d.filter((x) => x.out === 'sl').length} หมดเวลา ${d.filter((x) => x.out === 'time').length} · ชนะ ${Math.round((w / d.length) * 100)}% · รวม ${sgn(rs)}${Math.abs(rs).toFixed(1)}R`)); }
+    out.append(el('p', 'pf-hint', 'เป็นการจำลองจากแท่งราคาในอดีต ไม่ใช่คำทำนาย ข่าวใหญ่ทำให้ราคาวิ่งต่างจากที่เคยเกิดได้'));
+  };
+  const tmFill = (s, k) => { $('tm-side').value = s.side; $('tm-entry').value = ''; $('tm-sl').value = s.sl.toFixed(2); $('tm-tp').value = s.tp.toFixed(2); tmFrom = k || null;
+    if (window.VGNav) window.VGNav.go('scan', 'gttm'); setTimeout(() => { $('gttm').scrollIntoView({ behavior: 'smooth', block: 'start' }); tmGo(); }, 120); };
+  const drawRules = () => {
+    const box = $('rk-today'); if (!box) return; const r = rules();
+    const line = (k, list) => { const d = dayState(list), left = r.maxDay - Math.max(0, -d.pl) - d.open;
+      const p = el('p', 'rk-l'); p.append(el('b', null, k), el('span', null, ` เข้าแล้ว ${d.n}/${r.maxTrades} ไม้ · ปิดแล้ว ${usd(d.pl)} · ความเสี่ยงไม้ที่เปิด $${f2(d.open)} · เสียได้อีก `), el('b', left > 0 ? 'pos' : 'neg', '$' + f2(Math.max(0, left)))); return p; };
+    box.replaceChildren(line('ไม้จริงวันนี้:', D.tx), line('ไม้กระดาษของคุณวันนี้:', P().tx.filter((x) => x.src === 'man')));
+  };
+
   /* ---------- TradingView-style chart: lightweight-charts 4.2.3 (TradingView's open-source library) loaded on demand;
      pan, pinch/wheel zoom, crosshair, timeframes 15m/1h/4h/1d, RSI pane synced below. The SVG chart below stays as the fallback.
      Mode 'tv' embeds the real TradingView widget (OANDA:XAUUSD, drawing tools) instead. ---------- */
@@ -359,12 +442,17 @@
       card.append(el('b', null, s.side === 'buy' ? 'สัญญาณซื้อ (Buy)' : 'สัญญาณขาย (Sell)'),
         el('p', null, `${STRATS[strat()].name} · แท่งปิด ${hm(s.t)} · ${STRATS[strat()].why(s)}`));
       const g = el('div', 'gt-lv'); [['เข้า', s.entry], ['ตัดขาดทุน (SL)', s.sl], ['ทำกำไร (TP)', s.tp]].forEach(([k, p]) => { const d = el('div'); d.append(el('small', null, k), el('span', null, px(p))); g.append(d); });
-      const risk = Math.abs(s.entry - s.sl) * D.set.lot * D.set.cs, rr = Math.abs(s.tp - s.entry) / Math.abs(s.entry - s.sl);
-      card.append(g, el('p', 'pf-hint', `ถ้าเข้า ${D.set.lot} lot: เสี่ยงราว ${usd(-risk)} (${thb(-risk)}) ถ้าถึง TP ได้ราว ${usd(risk * rr)}`));
+      const lot = sizeLot(Math.abs(s.entry - s.sl)), rr = Math.abs(s.tp - s.entry) / Math.abs(s.entry - s.sl), risk = Math.abs(s.entry - s.sl) * (lot || 0) * D.set.cs;
+      card.append(g, el('p', 'pf-hint', lot >= 0.01 ? `lot ที่เหมาะ ${lot} (ยอมเสียไม้ละ $${f2(rules().maxLoss)}): ถ้าโดน SL เสีย ${usd(-risk)} (${thb(-risk)}) ถ้าถึง TP ได้ ${usd(risk * rr)} · TP:SL = ${rr.toFixed(2)}` : `SL ไกลเกินไปสำหรับเงินที่ยอมเสียไม้ละ $${f2(rules().maxLoss)} แม้ 0.01 lot ก็เสียเกิน`));
       const bx = el('div', 'gt-act'); const b = el('button', 'btn-solid', 'เข้าไม้นี้ (จริง)'); b.type = 'button'; b.addEventListener('click', () => prefill(s));
       const b2 = el('button', 'btn-line', 'เทรดกระดาษไม้นี้'); b2.type = 'button';
-      b2.addEventListener('click', () => { const x = paperOpen(s.side, { sl: s.sl, tp: s.tp }); if (x) { save(); drawAll(); if (window.VGNav) window.VGNav.go('scan', 'gtp'); } });
-      bx.append(b, b2); card.append(bx);
+      const warn = el('p', 'gt-block'); warn.hidden = true;
+      b2.addEventListener('click', () => { if (live == null) return; const e = live + ((s.side === 'buy' ? 1 : -1) * SPREAD) / 2, lt = P().autoLot !== false ? sizeLot(Math.abs(e - s.sl)) : P().lot;
+        const c = check({ side: s.side, entry: e, sl: s.sl, tp: s.tp, lot: lt || 0 }, P().tx.filter((x) => x.src === 'man'));
+        if (!(lt >= 0.01) || !c.ok) { warn.hidden = false; warn.textContent = 'ไม่ผ่านด่านตรวจ: ' + (lt >= 0.01 ? c.bl : ['SL ไกลเกินเงินที่ยอมเสีย']).join(' · '); return; }
+        const x = paperOpen(s.side, { sl: s.sl, tp: s.tp, lot: lt }); if (x) { save(); drawAll(); if (window.VGNav) window.VGNav.go('scan', 'gtp'); } });
+      const b3 = el('button', 'btn-line', 'ไทม์แมชชีน'); b3.type = 'button'; b3.addEventListener('click', () => tmFill(s, strat()));
+      bx.append(b, b2, b3); card.append(bx, warn);
     } else {
       card.append(el('b', null, 'ยังไม่มีสัญญาณ รอก่อน'));
       if (tr && tr.wk) card.append(el('p', null, 'วันเสาร์-อาทิตย์ ตลาดทองจริงปิด ราคา PAXG ยังขยับได้ แต่ระบบไม่ให้สัญญาณ'));
@@ -384,19 +472,22 @@
   /* ---------- journal ---------- */
   const prefill = (s) => {
     $('gt-side').value = s ? s.side : 'buy'; $('gt-entry').value = s ? s.entry.toFixed(2) : live != null ? live.toFixed(2) : '';
-    $('gt-sl').value = s ? s.sl.toFixed(2) : ''; $('gt-tp').value = s ? s.tp.toFixed(2) : ''; $('gt-at').value = ''; $('gt-note').value = s ? 'ตามสัญญาณระบบ' : '';
+    $('gt-sl').value = s ? s.sl.toFixed(2) : ''; $('gt-tp').value = s ? s.tp.toFixed(2) : ''; if (s) { const lt = sizeLot(Math.abs(s.entry - s.sl)); if (lt >= 0.01) $('gt-lot').value = lt; } sizeHint(); $('gt-at').value = ''; $('gt-note').value = s ? 'ตามสัญญาณระบบ' : '';
     $('gt-form').dataset.sig = s ? '1' : ''; $('gt-msg').textContent = 'แก้ราคาเข้าให้ตรงกับใน MT5 แล้วกดบันทึก';
     if (window.VGNav) window.VGNav.go('scan', 'gtj');
     setTimeout(() => { const f = $('gt-form'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('gt-entry').focus(); } }, 120);
   };
+  const sizeHint = () => { const h = $('gt-size'); if (!h) return; const e = +$('gt-entry').value, sl = +$('gt-sl').value;
+    h.textContent = e > 0 && sl > 0 && e !== sl ? (() => { const lt = sizeLot(Math.abs(e - sl)); return lt >= 0.01 ? `SL ห่าง $${f2(Math.abs(e - sl))} → lot ที่เหมาะ ${lt} (ยอมเสียไม้ละ $${f2(rules().maxLoss)})` : `SL ห่าง $${f2(Math.abs(e - sl))} ไกลเกิน แม้ 0.01 lot ก็เสียเกิน $${f2(rules().maxLoss)}`; })() : 'ใส่ราคาเข้าและ SL แล้วจะบอก lot ที่เหมาะ'; };
   const add = () => {
     const entry = +$('gt-entry').value, lot = +$('gt-lot').value, sl = +$('gt-sl').value || null, tp = +$('gt-tp').value || null, side = $('gt-side').value;
     if (!(entry > 0) || !(lot > 0)) { $('gt-msg').textContent = 'ใส่ราคาเข้าและขนาด lot ก่อน'; return; }
     if (sl && (side === 'buy' ? sl >= entry : sl <= entry)) { $('gt-msg').textContent = side === 'buy' ? 'ซื้อ: SL ต้องต่ำกว่าราคาเข้า' : 'ขาย: SL ต้องสูงกว่าราคาเข้า'; return; }
     const at = $('gt-at').value ? new Date($('gt-at').value).getTime() : Date.now();
-    D.tx.push({ id: uid(), side, at, entry, lot, sl, tp, note: $('gt-note').value.trim(), sig: $('gt-form').dataset.sig === '1' });
-    D.set.lot = lot; save(); $('gt-form').dataset.sig = ''; ['gt-entry', 'gt-sl', 'gt-tp', 'gt-at', 'gt-note'].forEach((k) => { $(k).value = ''; });
-    $('gt-msg').textContent = 'บันทึกแล้ว'; drawAll();
+    const c = check({ side, entry, sl, tp, lot }, D.tx), x = { id: uid(), side, at, entry, lot, sl, tp, note: $('gt-note').value.trim(), sig: $('gt-form').dataset.sig === '1' };
+    if (!c.ok) x.rule = c.bl; D.tx.push(x);
+    D.set.lot = lot; save(); $('gt-form').dataset.sig = ''; ['gt-entry', 'gt-sl', 'gt-tp', 'gt-at', 'gt-note'].forEach((k) => { $(k).value = ''; }); sizeHint();
+    $('gt-msg').textContent = c.ok ? 'บันทึกแล้ว ผ่านกฎทุกข้อ' : 'บันทึกแล้ว แต่ไม้นี้ผิดกฎ: ' + c.bl.join(' · '); drawAll();
   };
   const closeRow = (x, row) => {
     if (row.querySelector('.gt-close')) return;
@@ -418,6 +509,7 @@
     left.append(el('small', null, isOpen ? `เข้า ${hm(x.at)}${x.sl ? ' · SL ' + px(x.sl) + (x.sl0 != null && x.sl !== x.sl0 ? ' (เลื่อนมาจุดเข้าแล้ว)' : '') : ''}${x.tp ? ' · TP ' + px(x.tp) : ''}` : `${hm(x.at)} → ${hm(x.closedAt)} · ปิด ${px(x.exit)}${OUT[x.out] || ''}${x.fee ? ' · คอม $' + f2(x.fee) : ''}`));
     if (paper) left.append(el('small', 'gt-note', srcName(x.src)));
     if (x.note) left.append(el('small', 'gt-note', x.note));
+    if (x.rule && x.rule.length) left.append(el('small', 'gt-rule', 'ผิดกฎ: ' + x.rule.join(' · ')));
     const p = isOpen ? (paper ? qtyFloat(x) : plOf(x, live)) : plOf(x); const right = el('div', 'gt-pl ' + tone(p)); right.append(el('b', null, usd(p)), el('small', null, thb(p) + (isOpen ? ' ยังไม่ปิด' : '')));
     top.append(left, right); r.append(top);
     const act = el('div', 'gt-act');
@@ -500,10 +592,10 @@
       dl.append(el('h4', null, `${new Date(selDay + 'T12:00').toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' })} · ${usd(net)} (${thb(net)})`));
       if (!list.length) dl.append(el('div', 'empty', 'วันนี้ไม่มีไม้ที่ปิด')); list.forEach((x) => dl.append(row(x, false, pp))); }
   };
-  const drawAll = () => { drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); };
+  const drawAll = () => { drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
 
   /* ---------- wiring ---------- */
-  const SUBS = ['gtc', 'gtp', 'gtj', 'gtd'];
+  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtr'];
   const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && SUBS.some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const csv = () => {
     const rows = [['เข้า', 'ปิด', 'ฝั่ง', 'lot', 'ราคาเข้า', 'SL', 'TP', 'ราคาปิด', 'ค่าคอม USD', 'กำไร USD', 'บันทึก']];
@@ -530,14 +622,24 @@
     const pset = () => { $('gp-lot').value = P().lot; $('gp-start').value = P().start; $('gp-be').checked = !!P().be; Object.keys(STRATS).forEach((k) => { $('gp-a-' + k).checked = !!P().auto[k]; }); };
     pset();
     const trade = (side) => {
-      const lot = +$('gp-lot').value, sl = +$('gp-sl').value || null, tp = +$('gp-tp').value || null; const m = $('gp-msg');
-      if (live == null) { m.textContent = 'ยังโหลดราคาไม่เสร็จ'; return; } if (!(lot > 0)) { m.textContent = 'ใส่ขนาด lot ก่อน'; return; }
-      const e = live + (side === 'buy' ? SPREAD / 2 : -SPREAD / 2);
+      const sl0 = +$('gp-sl').value || null, tp0 = +$('gp-tp').value || null, m = $('gp-msg'), auto = $('gp-autolot').checked;
+      if (live == null) { m.textContent = 'ยังโหลดราคาไม่เสร็จ'; return; }
+      const e = live + (side === 'buy' ? SPREAD / 2 : -SPREAD / 2), dir = side === 'buy' ? 1 : -1, a = atrNow(), sl = sl0 ?? e - dir * SLK * a, tp = tp0 ?? e + dir * TPK * a;
+      const lot = auto ? sizeLot(Math.abs(e - sl)) : +$('gp-lot').value;
+      if (!(lot >= 0.01)) { m.textContent = auto ? `SL ห่าง $${f2(Math.abs(e - sl))} ไกลเกิน แม้ 0.01 lot ก็เสียเกินไม้ละ $${f2(rules().maxLoss)} ลองตั้ง SL ใกล้ขึ้น` : 'ใส่ขนาด lot ก่อน'; return; }
       if (sl && (side === 'buy' ? sl >= e : sl <= e)) { m.textContent = side === 'buy' ? 'Buy: SL ต้องต่ำกว่าราคาตอนนี้' : 'Sell: SL ต้องสูงกว่าราคาตอนนี้'; return; }
       if (tp && (side === 'buy' ? tp <= e : tp >= e)) { m.textContent = side === 'buy' ? 'Buy: TP ต้องสูงกว่าราคาตอนนี้' : 'Sell: TP ต้องต่ำกว่าราคาตอนนี้'; return; }
-      P().lot = lot; const x = paperOpen(side, { sl: sl ?? undefined, tp: tp ?? undefined, lot }); $('gp-sl').value = ''; $('gp-tp').value = '';
-      m.textContent = `เปิด ${side === 'buy' ? 'Buy' : 'Sell'} ${lot} lot ที่ ${px(x.entry)} · SL ${px(x.sl)} · TP ${px(x.tp)}`; save(); drawAll();
+      const c = check({ side, entry: e, sl, tp, lot }, P().tx.filter((x) => x.src === 'man'));
+      if (!c.ok) { m.textContent = 'ไม่ผ่านด่านตรวจ: ' + c.bl.join(' · '); m.className = 'pf-hint neg'; return; } m.className = 'pf-hint';
+      if (!auto) P().lot = lot; const x = paperOpen(side, { sl, tp, lot }); $('gp-sl').value = ''; $('gp-tp').value = '';
+      m.textContent = (c.wn.length ? c.wn.join(' · ') + ' · ' : '') + `เปิด ${side === 'buy' ? 'Buy' : 'Sell'} ${lot} lot ที่ ${px(x.entry)} · SL ${px(x.sl)} · TP ${px(x.tp)}`; save(); drawAll();
     };
+    $('gp-autolot').checked = P().autoLot !== false; $('gp-lot').disabled = $('gp-autolot').checked;
+    $('gp-autolot').addEventListener('change', (ev) => { P().autoLot = ev.target.checked; $('gp-lot').disabled = ev.target.checked; save(); });
+    const rk = [['rk-loss', 'maxLoss'], ['rk-day', 'maxDay'], ['rk-n', 'maxTrades'], ['rk-rr', 'minRR']];
+    rk.forEach(([id, k]) => { $(id).value = rules()[k]; $(id).addEventListener('change', () => { const v = +$(id).value; if (v > 0) { D.set.rules = { ...(D.set.rules || {}), [k]: k === 'maxTrades' ? Math.round(v) : v }; save(); drawAll(); } else $(id).value = rules()[k]; }); });
+    ['gt-entry', 'gt-sl'].forEach((k) => $(k).addEventListener('input', sizeHint)); sizeHint();
+    $('tm-run').addEventListener('click', () => { tmFrom = null; tmGo(); });
     $('gp-buy').addEventListener('click', () => trade('buy')); $('gp-sell').addEventListener('click', () => trade('sell'));
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
@@ -555,6 +657,6 @@
       const tx = by(c.tx || [], D.tx), cp = (c.paper || {}), ptx = by(cp.tx || [], P().tx);
       return { extra: tx.length - (c.tx || []).length + ptx.length - (cp.tx || []).length,
         doc: { tx, set: { ...D.set, ...(c.set || {}) }, paper: { ...P(), ...cp, auto: { ...P().auto, ...(cp.auto || {}) }, since: { ...P().since, ...(cp.since || {}) }, tx: ptx } } }; },
-    _test: { ind, sigEma, sigSweep, test, settle: () => settle(), D: () => D },
+    _test: { tmRun, check, sizeLot, ind, sigEma, sigSweep, test, settle: () => settle(), D: () => D },
   };
 })();

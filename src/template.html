@@ -1087,6 +1087,14 @@ tr.editing td { background: var(--accent-soft); }
 .gt-le { stroke: var(--ink); stroke-dasharray: 5 4; } .gt-lsl { stroke: var(--brick); stroke-dasharray: 2 3; stroke-width: 1.4; } .gt-ltp { stroke: var(--jade); stroke-dasharray: 2 3; stroke-width: 1.4; }
 .gt-last { stroke: var(--foil-ink); stroke-dasharray: 1 3; } .gt-lastb { fill: var(--foil-ink); } .gt-lastt { font: 600 11px var(--num); fill: #fff; }
 .gt-cross { stroke: var(--ink-3); stroke-width: 1; }
+.tm-row { display: grid; grid-template-columns: 10.5em 1fr 4.2em; gap: 10px; align-items: center; margin: 6px 0; font-size: 14px; }
+.tm-row b { font-family: var(--num); text-align: right; } .tm-t { height: 12px; background: var(--slate-soft); border-radius: 6px; overflow: hidden; }
+.tm-f { display: block; height: 100%; } .tm-f.pos { background: var(--jade); } .tm-f.neg { background: var(--brick); } .tm-f.mid { background: var(--ink-3); }
+.tm-v { font-weight: 600; padding: 10px 12px; background: var(--slate-soft); border-radius: var(--radius-sm); }
+.gt-rule { color: var(--brick); } .gt-block { color: var(--brick); margin: 0; font-size: 14px; }
+.gp-chk { flex-direction: row !important; align-items: center; gap: 8px; display: flex; }
+.rk-l { margin: 8px 0; font-size: 15px; }
+@media (max-width: 640px) { .tm-row { grid-template-columns: 7.5em 1fr 3.8em; font-size: 13px; } }
 .gt-pdh, .gt-pdl { stroke: var(--foil); stroke-width: 1.6; stroke-dasharray: 4 3; }
 .gt-ln.pd { border-color: var(--foil); }
 .gt-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 8px; }
@@ -1411,6 +1419,19 @@ body.gt-noscroll { overflow: hidden; }
     <div class="alert">สัญญาณเป็นการคำนวณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ผลย้อนหลังไม่รับประกันอนาคต XAUUSD มีเลเวอเรจ ขาดทุนได้เร็วกว่าซื้อทองจริง ตั้ง SL ทุกไม้</div>
   </section>
 
+  <section id="gttm" data-sub="gttm">
+    <p class="sec-note">ก่อนเข้าไม้ ให้ระบบเล่นอนาคตซ้ำ 10,000 รอบ โดยหยิบแท่ง 1 ชม. จริงของทองในชั่วโมงเดียวกันของวันก่อนๆ (ย้อนหลังราว 4 เดือน) มาต่อกันแบบสุ่ม ดูว่าไม้นี้ถึง TP หรือโดน SL ก่อนบ่อยแค่ไหน</p>
+    <div class="pf-form f2">
+      <label>ฝั่ง <select class="sel" id="tm-side"><option value="buy">ซื้อ (Buy)</option><option value="sell">ขาย (Sell)</option></select></label>
+      <label>ดูไปข้างหน้า <select class="sel" id="tm-h"><option value="8">8 ชม.</option><option value="24" selected>24 ชม.</option><option value="48">48 ชม.</option></select></label>
+      <label>ราคาเข้า (ว่าง = ราคาตอนนี้) <input class="inp" id="tm-entry" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>SL (ว่าง = 1.5 ATR) <input class="inp" id="tm-sl" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>TP (ว่าง = 2 ATR) <input class="inp" id="tm-tp" type="number" step="any" min="0" inputmode="decimal"></label>
+    </div>
+    <div class="pf-actions"><button class="btn-solid" type="button" id="tm-run">เล่นอนาคต 10,000 รอบ</button><span class="pf-hint" id="tm-msg" role="status"></span></div>
+    <div id="tm-out"></div>
+  </section>
+
   <section id="gtp" data-sub="gtp">
     <p class="sec-note">เทรดด้วยเงินปลอม ใช้ราคาจากกราฟ บวกสเปรด $0.30 ให้ใกล้โบรกจริง ระบบไล่ดูกราฟย้อนหลังแล้วปิดไม้ที่ถึง SL หรือ TP ให้ แม้ไม่ได้เปิดเว็บไว้ จึงเทรดได้ 24 ชม.</p>
     <div class="strip" id="gp-strip"></div>
@@ -1418,6 +1439,7 @@ body.gt-noscroll { overflow: hidden; }
       <div class="ph"><h3>กดเทรด</h3></div>
       <div class="pf-form f2">
         <label>ขนาด (lot) <input class="inp" id="gp-lot" type="number" step="0.01" min="0.01" inputmode="decimal"></label>
+        <label class="gp-chk"><input type="checkbox" id="gp-autolot"> คิด lot ให้อัตโนมัติจากเงินที่ยอมเสียต่อไม้</label>
         <label>SL (ว่าง = อัตโนมัติ 1.5 ATR) <input class="inp" id="gp-sl" type="number" step="any" min="0" inputmode="decimal"></label>
         <label>TP (ว่าง = อัตโนมัติ 2 ATR) <input class="inp" id="gp-tp" type="number" step="any" min="0" inputmode="decimal"></label>
       </div>
@@ -1458,6 +1480,7 @@ body.gt-noscroll { overflow: hidden; }
         <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
         <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
       </div>
+      <p class="pf-hint" id="gt-size"></p>
       <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
     </section>
     <section class="panel">
@@ -1474,6 +1497,17 @@ body.gt-noscroll { overflow: hidden; }
     <div id="gt-cal"></div>
     <p class="pf-hint">นับกำไรขาดทุนเข้าวันที่ปิดไม้ (เวลาไทย) แตะวันเพื่อดูไม้ของวันนั้น ตัวเลขบาทคิดจากเรตวันนี้</p>
     <div id="gt-day"></div>
+  </section>
+
+  <section id="gtr" data-sub="gtr">
+    <p class="sec-note">ตั้งครั้งเดียว ระบบคิด lot ให้จากเงินที่ยอมเสีย และตรวจทุกไม้ก่อนเข้า ไม้กระดาษที่ผิดกฎจะเปิดไม่ได้ ไม้จริงยังจดได้แต่ติดป้าย "ผิดกฎ" ไว้ บอทไม่ติดกฎนี้</p>
+    <div class="pf-form f2">
+      <label>ยอมเสียต่อไม้ (USD) <input class="inp" id="rk-loss" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>ขาดทุนสูงสุดต่อวัน (USD) <input class="inp" id="rk-day" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>เข้าได้สูงสุดต่อวัน (ไม้) <input class="inp" id="rk-n" type="number" step="1" min="1" inputmode="numeric"></label>
+      <label>TP:SL ขั้นต่ำ (เช่น 1.3) <input class="inp" id="rk-rr" type="number" step="0.1" min="0" inputmode="decimal"></label>
+    </div>
+    <div id="rk-today"></div>
   </section>
 
   <details class="method" data-sub="market">
@@ -3709,7 +3743,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
-      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true]]],
+      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
