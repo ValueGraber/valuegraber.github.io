@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>gold lab</title>
+<style>body{font:14px/1.4 monospace;padding:12px;white-space:pre-wrap}</style></head><body><div id="o">loading…</div>
+<script>
+const API='https://data-api.binance.vision/api/v3/klines?symbol=PAXGUSDT&interval=1h&limit=1000';
+const out=document.getElementById('o'); const log=(s)=>{out.textContent+=s+'\n';};
+const ema=(v,n)=>{const k=2/(n+1),o=[];let e=null;v.forEach((x,i)=>{e=e==null?x:x*k+e*(1-k);o[i]=i>=n-1?e:null;});return o;};
+const rsiN=(c,n)=>{const o=Array(c.length).fill(null);let g=0,l=0;for(let i=1;i<c.length;i++){const d=c[i]-c[i-1],u=Math.max(d,0),w=Math.max(-d,0);if(i<=n){g+=u/n;l+=w/n;}else{g=(g*(n-1)+u)/n;l=(l*(n-1)+w)/n;}if(i>=n)o[i]=l===0?100:100-100/(1+g/l);}return o;};
+const atrN=(b,n)=>{const o=Array(b.length).fill(null);let a=0;for(let i=1;i<b.length;i++){const tr=Math.max(b[i].h-b[i].l,Math.abs(b[i].h-b[i-1].c),Math.abs(b[i].l-b[i-1].c));a=i<=n?a+tr/n:(a*(n-1)+tr)/n;if(i>=n)o[i]=a;}return o;};
+const wkend=(t)=>{const d=new Date(t+2*3600e3).getUTCDay();return d===6||d===0;};
+const hr=(t)=>new Date(t+7*3600e3+3600e3-1).getUTCHours(); // Thai hour at bar close
+function ind(b){const c=b.map(x=>x.c),n=b.length,I={e20:ema(c,20),e50:ema(c,50),e200:ema(c,200),e480:ema(c,480),r2:rsiN(c,2),r14:rsiN(c,14),atr:atr14=atrN(b,14),bu:[],bl:[],bm:[],bw:[],dh:[],dl:[],st:[],sd:[]};
+ for(let i=0;i<n;i++){if(i<19){I.bu[i]=I.bl[i]=I.bm[i]=I.bw[i]=null;}else{let s=0,q=0;for(let j=i-19;j<=i;j++){s+=c[j];}const m=s/20;for(let j=i-19;j<=i;j++)q+=(c[j]-m)**2;const sd=Math.sqrt(q/20);I.bm[i]=m;I.bu[i]=m+2*sd;I.bl[i]=m-2*sd;I.bw[i]=4*sd/m;}
+  if(i<20){I.dh[i]=I.dl[i]=null;}else{let h=-1e9,l=1e9;for(let j=i-20;j<i;j++){h=Math.max(h,b[j].h);l=Math.min(l,b[j].l);}I.dh[i]=h;I.dl[i]=l;}}
+ const a10=atrN(b,10);let up=null,dn=null,dir=1;for(let i=0;i<n;i++){if(a10[i]==null){I.st[i]=null;I.sd[i]=0;continue;}const m=(b[i].h+b[i].l)/2,u=m+3*a10[i],d=m-3*a10[i];
+  up=(up==null||u<up||b[i-1].c>up)?u:up; dn=(dn==null||d>dn||b[i-1].c<dn)?d:dn; if(dir===1&&b[i].c<dn)dir=-1;else if(dir===-1&&b[i].c>up)dir=1; I.st[i]=dir===1?dn:up; I.sd[i]=dir;}
+ return I;}
+const mk=(side,e,risk,R)=>({side,entry:e,sl:side==='buy'?e-risk:e+risk,tp:side==='buy'?e+R*risk:e-R*risk});
+const S={
+ squeeze:(b,I,i)=>{if(i<60||wkend(b[i].t))return null;const h=hr(b[i].t);if(h<13&&h>2)return null;let mn=1e9;for(let j=i-50;j<i-1;j++)mn=Math.min(mn,I.bw[j]);const sq=Math.min(I.bw[i-1],I.bw[i-2],I.bw[i-3])<=mn*1.05;if(!sq)return null;const x=b[i],a=I.atr[i];
+  if(x.c>I.bu[i]&&x.c>x.o&&I.e20[i]>I.e50[i]){const r=Math.min(Math.max(x.c-I.bm[i],a),3*a);return mk('buy',x.c,r,2);} if(x.c<I.bl[i]&&x.c<x.o&&I.e20[i]<I.e50[i]){const r=Math.min(Math.max(I.bm[i]-x.c,a),3*a);return mk('sell',x.c,r,2);}return null;},
+ rsi2:(b,I,i)=>{if(i<210||wkend(b[i].t))return null;const x=b[i],a=I.atr[i];if(x.c>I.e200[i]&&I.e50[i]>I.e200[i]&&I.r2[i]<8)return mk('buy',x.c,2*a,0.75);if(x.c<I.e200[i]&&I.e50[i]<I.e200[i]&&I.r2[i]>92)return mk('sell',x.c,2*a,0.75);return null;},
+ fvg:(b,I,i)=>{if(i<60||wkend(b[i].t))return null;const x=b[i],a=I.atr[i];
+  for(let k=i-2;k>=i-12;k--){const g0=b[k-2],g2=b[k];
+   if(I.e20[i]>I.e50[i]&&g2.l-g0.h>=0.3*a){const top=g2.l,bot=g0.h;let used=false;for(let j=k+1;j<i;j++)if(b[j].l<=top){used=true;break;}if(used)continue;if(x.l<=top&&x.c>top&&x.c>x.o&&x.l>bot-0.5*a){const r=Math.max(x.c-(bot-0.2*a),0.5*a);if(r>3*a)return null;return mk('buy',x.c,r,2);}}
+   if(I.e20[i]<I.e50[i]&&g0.l-g2.h>=0.3*a){const bot=g2.h,top=g0.l;let used=false;for(let j=k+1;j<i;j++)if(b[j].h>=bot){used=true;break;}if(used)continue;if(x.h>=bot&&x.c<bot&&x.c<x.o&&x.h<top+0.5*a){const r=Math.max(top+0.2*a-x.c,0.5*a);if(r>3*a)return null;return mk('sell',x.c,r,2);}}}
+  return null;},
+ donch:(b,I,i)=>{if(i<210||wkend(b[i].t))return null;const h=hr(b[i].t);if(h<14&&h>1)return null;const x=b[i],a=I.atr[i],p=b[i-1];
+  if(x.c>I.dh[i]&&p.c<=I.dh[i-1]&&I.e50[i]>I.e200[i])return mk('buy',x.c,1.5*a,2);if(x.c<I.dl[i]&&p.c>=I.dl[i-1]&&I.e50[i]<I.e200[i])return mk('sell',x.c,1.5*a,2);return null;},
+ inside:(b,I,i)=>{if(i<60||wkend(b[i].t))return null;const m=b[i-2],c=b[i-1],x=b[i],a=I.atr[i];if(!(c.h<=m.h&&c.l>=m.l))return null;
+  if(x.c>m.h&&I.e20[i]>I.e50[i]){const r=Math.max(x.c-m.l,0.5*a);if(r>3*a)return null;return mk('buy',x.c,r,2);}if(x.c<m.l&&I.e20[i]<I.e50[i]){const r=Math.max(m.h-x.c,0.5*a);if(r>3*a)return null;return mk('sell',x.c,r,2);}return null;},
+ super:(b,I,i)=>{if(i<500||wkend(b[i].t))return null;const x=b[i],a=I.atr[i];if(I.sd[i]===1&&I.sd[i-1]===-1&&x.c>I.e480[i]){const r=Math.min(Math.max(x.c-I.st[i],0.5*a),3*a);return mk('buy',x.c,r,2);}if(I.sd[i]===-1&&I.sd[i-1]===1&&x.c<I.e480[i]){const r=Math.min(Math.max(I.st[i]-x.c,0.5*a),3*a);return mk('sell',x.c,r,2);}return null;},
+ rsi2t:(b,I,i)=>{if(i<500||wkend(b[i].t))return null;const x=b[i],a=I.atr[i];if(x.c>I.e480[i]&&I.e50[i]>I.e200[i]&&I.r2[i]<8)return mk('buy',x.c,1.5*a,1.5);if(x.c<I.e480[i]&&I.e50[i]<I.e200[i]&&I.r2[i]>92)return mk('sell',x.c,1.5*a,1.5);return null;},
+};
+const COST=0.4,MAXH=48;
+function run(b,I,fn,slM=1,tpM=1,htf=false){const o=[];let i=60;while(i<b.length){let s=fn(b,I,i);if(s&&htf&&I.e480[i]!=null&&(s.side==='buy'?b[i].c<I.e480[i]:b[i].c>I.e480[i]))s=null;if(!s){i++;continue;}
+ const d=s.side==='buy'?1:-1,risk=Math.abs(s.entry-s.sl)*slM,sl=s.entry-d*risk,tp=s.entry+d*Math.abs(s.tp-s.entry)*tpM;let ex=null,j=i+1;
+ for(;j<b.length&&j<=i+MAXH;j++){const y=b[j];if(d>0?y.l<=sl:y.h>=sl){ex=sl;break;}if(d>0?y.h>=tp:y.l<=tp){ex=tp;break;}if(j===i+MAXH){ex=y.c;break;}}
+ if(ex==null)break;o.push({t:b[i].t,R:((ex-s.entry)*d-COST)/risk,rk:risk});i=j+1;}return o;}
+function sum(x){const n=x.length,w=x.filter(v=>v.R>0),gw=w.reduce((a,v)=>a+v.R,0),gl=-x.filter(v=>v.R<=0).reduce((a,v)=>a+v.R,0);let eq=0,pk=0,dd=0;x.forEach(v=>{eq+=v.R;pk=Math.max(pk,eq);dd=Math.min(dd,eq-pk);});
+ return `n=${n} win=${n?Math.round(w.length/n*100):0}% exp=${n?((gw-gl)/n).toFixed(3):0} pf=${gl?(gw/gl).toFixed(2):'-'} tot=${(gw-gl).toFixed(1)} dd=${dd.toFixed(1)} risk$=${n?(x.reduce((a,v)=>a+v.rk,0)/n).toFixed(1):0}`;}
+(async()=>{try{let b=[],end=Date.now();const Y=+(new URLSearchParams(location.search).get('y')||3);
+ while(b.length<Y*8760){const r=await fetch(API+'&endTime='+end);const j=await r.json();if(!j.length)break;b=j.map(a=>({t:a[0],o:+a[1],h:+a[2],l:+a[3],c:+a[4]})).concat(b);end=j[0][0]-1;if(j.length<1000)break;}
+ out.textContent='';log(`bars ${b.length} ${new Date(b[0].t).toISOString().slice(0,10)} → ${new Date(b[b.length-1].t).toISOString().slice(0,10)} cost ${COST}`);
+ const I=ind(b),cut=b[Math.floor(b.length*0.7)].t;
+ for(const k of Object.keys(S)){for(const htf of [false,true]){const x=run(b,I,S[k],1,1,htf);log(`\n${k}${htf?'+htf':''}: ${sum(x)}`);
+  const yr={};x.forEach(v=>{const y=new Date(v.t).getUTCFullYear();yr[y]=(yr[y]||0)+v.R;});log('  years '+Object.entries(yr).map(([y,v])=>y+':'+v.toFixed(1)).join(' '));
+  const is=x.filter(v=>v.t<cut),os=x.filter(v=>v.t>=cut);log('  IS '+sum(is)+'\n  OOS '+sum(os));
+  log('  grid '+[[0.75,1],[1.25,1],[1,0.8],[1,1.2]].map(([s,t])=>`sl${s}tp${t}:`+(()=>{const z=run(b,I,S[k],s,t,htf);return (z.reduce((a,v)=>a+v.R,0)/Math.max(1,z.length)).toFixed(3);})()).join(' '));}}
+ log('\nDONE');}catch(e){log('ERR '+e.message);}})();
+</script></body></html>
