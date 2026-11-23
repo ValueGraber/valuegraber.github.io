@@ -1094,6 +1094,7 @@ tr.editing td { background: var(--accent-soft); }
 .gt-rule { color: var(--brick); } .gt-block { color: var(--brick); margin: 0; font-size: 14px; }
 .gp-chk { flex-direction: row !important; align-items: center; gap: 8px; display: flex; }
 .rk-l { margin: 8px 0; font-size: 15px; }
+.sx-card { margin: 10px 0; } .sx-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; } .sx-sym { font-size: 19px; } .sx-nm { color: var(--ink-2); font-size: 14px; } .sx-warn { font-size: 14px; margin: 4px 0; }
 .gt-lbc { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
 .lb-card { border: 1px solid var(--line); border-left: 4px solid var(--ink-3); border-radius: var(--radius-lg); background: var(--surface); padding: 12px 14px; margin: 10px 0; }
 .lb-card.ok { border-left-color: var(--jade); } .lb-card.mid { border-left-color: var(--ochre); } .lb-card.bad { border-left-color: var(--brick); } .lb-card > b { font-size: 17px; } .lb-card p { margin: 4px 0; }
@@ -1230,6 +1231,19 @@ body.gt-noscroll { overflow: hidden; }
     <p class="sec-note">หุ้นคุณภาพดีที่ราคายังต่ำกว่ามูลค่าที่ประเมิน ขีดดำคือราคาตอนนี้ ขีดเทาคือมูลค่าที่ประเมิน แถบเขียวยิ่งยาวยิ่งมีส่วนเผื่อความปลอดภัยมาก (แถบแดงคือราคาแพงกว่ามูลค่า) กดที่หุ้นเพื่อดูรายละเอียดและเปิดกราฟ</p>
     <div class="list" id="pick-list"><div class="loading">กำลังโหลด…</div></div>
     <button class="more" id="pick-more" hidden>ดูเพิ่ม</button>
+  </section>
+
+  <section id="track" data-sub="track">
+    <p class="sec-note">ระบบจดหุ้นที่ขึ้นป้าย "น่าซื้อสะสม" ทุกวันพร้อมราคา แล้ววัดว่าถ้าซื้อเท่ากันทุกตัววันนั้น ตอนนี้ได้ผลเทียบกับซื้อ S&amp;P 500 (SPY) วันเดียวกันเท่าไหร่ นี่คือวิธีเดียวที่รู้ว่าตัวกรองนี้ใช้ได้จริง</p>
+    <div id="track-out"><div class="loading">กำลังโหลด…</div></div>
+  </section>
+
+  <section id="sx" data-sub="sx">
+    <div class="sec-head"><h2>หุ้นเทรด (swing)</h2></div>
+    <p class="sec-note">คัดหุ้นที่เทรนด์แข็งตามเกณฑ์ Minervini 8 ข้อ แบ่งเป็น <b>ใกล้จุดเบรก</b> กับ <b>ย่อในขาขึ้น</b> พร้อมจุดเข้า SL TP และจำนวนหุ้นตามเงินที่ยอมเสีย ถือราว 3–20 วัน</p>
+    <div class="controls sw-set"><label class="mini">เงินในบัญชีเทรด (USD) <input class="inp" id="sx-acct" type="number" step="any" min="0" inputmode="decimal"></label><label class="mini">เสี่ยงต่อไม้ (% ของบัญชี) <input class="inp" id="sx-risk" type="number" step="0.1" min="0" inputmode="decimal"></label></div>
+    <div id="sx-out"></div>
+    <div class="alert">ใช้คัดหุ้นมาดูต่อ ไม่ใช่คำแนะนำการลงทุน หุ้นเทรดระยะสั้นแพ้บ่อย ตั้ง SL ทุกไม้ และลองในเทรดกระดาษก่อน</div>
   </section>
 
   <section id="all" data-sub="all">
@@ -2112,10 +2126,12 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     const who = el('div', 'who');
     who.append(el('span', 'sym', r.symbol)); if (watch.has(r.symbol)) { const w = el('span', 'wst', '★'); w.title = 'หุ้นที่ติดตาม'; who.append(w); } who.append(el('span', 'nm', r.name));
     if (r.signal !== 'น่าซื้อสะสม') who.append(el('span', 'tag ' + TAG[r.signal], r.signal));
+    if (r.earnDays != null && r.earnDays <= 7) who.append(el('span', 'tag watch', `งบออกใน ${r.earnDays} วัน`));
+    if (r.flags && r.flags.length) { const f = el('span', 'tag trap', 'ข้อมูลน่าสงสัย'); f.title = r.flags.join(' · '); who.append(f); }
     const bo = window.VGPort && window.VGPort.bought ? window.VGPort.bought() : null; const bt = bo && bo.map[r.symbol];
     if (bt) who.append(el('span', 'tag bought', `✓ ซื้อแล้ว${bo.label} ${new Date(bt.date + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}`));
-    const m = el('div', 'mos ' + (r.mos == null ? '' : r.mos >= 0 ? 'pos' : 'neg'), pc(r.mos));
-    m.append(el('small', null, r.mos == null ? '' : r.mos >= 0 ? 'ต่ำกว่ามูลค่า' : 'แพงกว่ามูลค่า'));
+    const mv = r.mos3 ?? r.mos; const m = el('div', 'mos ' + (mv == null ? '' : mv >= 0 ? 'pos' : 'neg'), pc(mv));
+    m.append(el('small', null, mv == null ? '' : mv >= 0 ? 'ต่ำกว่ามูลค่า' : 'แพงกว่ามูลค่า'));
     const s = el('div', 'score ' + (r.vi >= 65 ? 'hi' : r.vi >= 50 ? 'md' : 'lo'), String(r.vi));
     s.title = 'คะแนน VI';
     b.append(who, ladder(r), m, s);
@@ -2123,6 +2139,29 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     return b;
   };
 
+  /* track record (money-master: prove the screener) — docs/picks.json is written daily by tools/picks.js */
+  let trackLog = null;
+  const drawTrack = () => {
+    const box = $('track-out'); if (!box || !window.VG || !window.VG.raw) return; box.replaceChildren();
+    if (!trackLog) { box.append(el('div', 'loading', 'กำลังโหลด…')); return; }
+    if (!trackLog.length) { box.append(el('div', 'empty', 'ยังไม่มีบันทึก ระบบจะเริ่มจดหลังอัปเดตข้อมูลรอบถัดไป')); return; }
+    const raw = window.VG.raw, spyNow = window.VG.spyNow, now = Date.now();
+    const rows = trackLog.map((e) => { const rs = e.p.map(([s, px]) => (raw[s] && raw[s].price > 0 ? raw[s].price / px - 1 : null)).filter((v) => v != null);
+      const avg = rs.length ? rs.reduce((a, v) => a + v, 0) / rs.length : null, spy = spyNow && e.spy ? spyNow / e.spy - 1 : null;
+      return { d: e.d, n: e.p.length, avg, spy, beat: spy == null ? null : rs.filter((v) => v > spy).length / Math.max(1, rs.length), age: Math.round((now - new Date(e.d + 'T12:00:00Z')) / 86400000) }; });
+    const mature = rows.filter((r) => r.age >= 30 && r.avg != null && r.spy != null), alpha = mature.length ? mature.reduce((a, r) => a + (r.avg - r.spy), 0) / mature.length : null;
+    const st = el('p', 'rk-l ' + (alpha == null ? '' : alpha > 0 ? 'pos' : 'neg'), alpha == null ? `เริ่มเก็บ ${rows[0].d} · ${rows.length} วัน · ผลที่เชื่อได้จะเริ่มมีเมื่อบันทึกเก่าเกิน 30 วัน` : `บันทึกที่เก่าเกิน 30 วัน ${mature.length} วัน: หุ้นที่ระบบเลือกทำได้ ${pc(alpha, 1)} เทียบ S&P 500 โดยเฉลี่ย`);
+    box.append(st);
+    const today = rows[rows.length - 1], last = trackLog[trackLog.length - 1], sec = {};
+    last.p.forEach(([s]) => { const k = raw[s] ? raw[s].sector : '?'; sec[k] = (sec[k] || 0) + 1; });
+    const top = Object.entries(sec).sort((a, b) => b[1] - a[1])[0];
+    if (top && last.p.length >= 4 && top[1] / last.p.length > 0.5) box.append(el('p', 'pf-hint neg', `รายการล่าสุดกระจุกในกลุ่ม${top[0]} ${top[1]}/${last.p.length} ตัว ถ้าจะซื้อ เลือกไม่เกิน 2–3 ตัวต่อกลุ่ม`));
+    const tb = el('table', 'tr-table'), hd = el('tr'); ['วันที่เลือก', 'ตัว', 'เฉลี่ยตอนนี้', 'S&P 500', 'ชนะ S&P'].forEach((h) => hd.append(el('th', null, h))); const th = el('thead'); th.append(hd); tb.append(th);
+    const bd = el('tbody'); rows.slice(-12).reverse().forEach((r) => { const tr = el('tr'); [r.d, String(r.n), pc(r.avg, 1), pc(r.spy, 1), r.beat == null ? '–' : Math.round(r.beat * 100) + '% ของตัว'].forEach((v, i) => tr.append(el('td', i === 2 && r.avg != null && r.spy != null ? (r.avg > r.spy ? 'pos' : 'neg') : null, v))); bd.append(tr); });
+    tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); box.append(w);
+    box.append(el('p', 'pf-hint', `วันนี้ระบบเลือก ${today.n} ตัว · ผลช่วงสั้นกว่า 1 เดือนแกว่งมาก ดูภาพรวมหลัง 3–6 เดือน`));
+  };
+  const loadTrack = () => fetch('picks.json?v=' + ((window.VG && window.VG.updated) || Date.now())).then((r) => (r.ok ? r.json() : [])).catch(() => []).then((j) => { trackLog = Array.isArray(j) ? j : []; drawTrack(); });
   const drawPicks = () => {
     const box = $('pick-list'); box.replaceChildren();
     const picks = scan.filter((r) => r.signal === 'น่าซื้อสะสม');
@@ -2242,7 +2281,9 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       .forEach(([k, v]) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v', v)); facts.append(d); });
     box.append(facts);
     const bars = el('div', 'bars');
-    [['คุณภาพ', r.quality], ['ความถูก', r.value], ['เติบโต', r.growth], ['จังหวะ', r.timing]].forEach(([k, v]) => {
+    if (r.flags && r.flags.length) box.append(el('div', 'warn', 'ข้อมูลน่าสงสัย: ' + r.flags.join(' · ') + ' ระบบจึงไม่ให้ป้าย "น่าซื้อสะสม" ควรเปิดงบจริงดู'));
+    if (r.earnDays != null && r.earnDays <= 7) box.append(el('div', 'warn', `งบออกในอีก ${r.earnDays} วัน (${r.earningsDate}) ราคาอาจกระโดดแรง`));
+    [['คุณภาพ', r.quality], ['ความถูก', r.value], ['แรงส่ง', r.momentum], ['เติบโต', r.growth], ['จังหวะ', r.timing]].forEach(([k, v]) => {
       const b = el('div', 'bar'); const t = el('div', 't'); const i = el('i'); i.style.width = (v ?? 0) + '%'; t.append(i);
       b.append(el('span', null, k), t, el('b', null, v == null ? '–' : String(v))); bars.append(b);
     });
@@ -2364,13 +2405,13 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   fetch('data.json?v=' + Date.now()).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((j) => {
     scan = CALC.scan.fn(j.stocks, j.yield); RAW = new Map(j.stocks.map((x) => [x.symbol, x])); Y10 = (j.yield && j.yield.length && +j.yield[j.yield.length - 1].yield10y) || 4.5;
     market = CALC.market.fn(j.spy, j.yield, j.stocks)[0];
-    sectors = CALC.sectors.fn(scan);
+    sectors = CALC.sectors.fn(scan); setTimeout(loadTrack, 0);
     const upd = new Date(j.updated).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     $('stamp').textContent = j.live ? `ราคาระหว่างวัน (ตลาดยังเปิดอยู่) วันที่ ${thDate(j.asOf)} อัปเดตเมื่อ ${upd} น. ราคาปิดจะมาเช้าวันถัดไป` : `ราคาปิดวันที่ ${thDate(j.asOf)} อัปเดตอัตโนมัติเมื่อ ${upd} น.`;
     sectors.map((s) => s.sector).sort().forEach((s) => $('sector').append(new Option(s, s)));
     const cryptoRows = (j.crypto || []).map((c) => ({ ...c, crypto: true, sector: 'คริปโต', mos: null, signal: c.price > c.ma200 && c.ma50 > c.ma200 ? 'ขาขึ้น' : c.price < c.ma50 && c.ma50 < c.ma200 ? 'ขาลง' : 'ไซด์เวย์' }));
     drawCrypto(cryptoRows);
-    window.VG = { market, crypto: cryptoRows, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, eur: j.eurthb || null, sek: j.sekthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
+    window.VG = { spyNow: Array.isArray(j.spy) && j.spy.length ? j.spy[j.spy.length - 1].close : null, market, crypto: cryptoRows, gold: j.gold || null, scan, raw: Object.fromEntries(j.stocks.map((x) => [x.symbol, x])), fx: j.usdthb || null, eur: j.eurthb || null, sek: j.sekthb || null, updated: j.updated, spyNow: j.spy && j.spy.length ? +j.spy[j.spy.length - 1].close : null }; document.dispatchEvent(new Event('vg:ready'));
     drawHero(); drawChips(); drawPicks(); drawAll(); drawSectors(); drawSpy(j.spy); drawToday(j); drawFx(j);
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { drawSectors(); drawSpy(j.spy); }, 200); });
   }).catch((e) => {
@@ -3872,7 +3913,8 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       ['plan', 'แผนการเงิน', 'money', [['goals', 'เป้าหมายออม', 'เก็บเงินเพื่อเป้าหมายต่างๆ', true], ['emerg', 'เงินฉุกเฉิน', 'มีเงินพอใช้กี่เดือนถ้าไม่มีรายได้', false],
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
-      ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
+      ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
+      ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
       ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
       ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
@@ -5008,6 +5050,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
 /*SPOT*/
 /*TRADE*/
 /*OPTIONS*/
+/*SWING*/
 /*GTRADE*/
 </script>
 <script type="module">

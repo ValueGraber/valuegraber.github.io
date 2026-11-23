@@ -57,6 +57,10 @@ jobs:
         if: steps.fresh.outputs.skip != 'true'
         run: python scanner.py
 
+      - name: จดหุ้นที่ระบบเลือกวันนี้ (วัดผลย้อนหลัง)
+        if: steps.fresh.outputs.skip != 'true'
+        run: node tools/picks.js
+
       - name: บันทึกไฟล์ข้อมูลใหม่
         if: steps.fresh.outputs.skip != 'true'
         run: |

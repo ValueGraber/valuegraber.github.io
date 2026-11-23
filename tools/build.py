@@ -4,7 +4,7 @@ R = Path(__file__).resolve().parent.parent
 t = (R / "src/template.html").read_text(encoding="utf-8")
 c = (R / "src/calcs.js").read_text(encoding="utf-8")
 assert "/*CALCS*/" in t
-for k, f in (("/*SPOTCORE*/", "spot-core.js"), ("/*SPOT*/", "spot.js"), ("/*TRADE*/", "trade.js"), ("/*OPTIONS*/", "options.js"), ("/*GTRADE*/", "gtrade.js")):
+for k, f in (("/*SPOTCORE*/", "spot-core.js"), ("/*SPOT*/", "spot.js"), ("/*TRADE*/", "trade.js"), ("/*OPTIONS*/", "options.js"), ("/*GTRADE*/", "gtrade.js"), ("/*SWING*/", "swing.js")):
     assert k in t
     t = t.replace(k, (R / "src" / f).read_text(encoding="utf-8").replace("if (typeof module !== 'undefined') module.exports = SPC;", ""))
 import hashlib, json

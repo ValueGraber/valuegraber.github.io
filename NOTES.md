@@ -71,3 +71,10 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Tab `#plan` (แผนงาน/อากาศ/คู่มือ): mode pbz|nat in meta/plan.mode (PLAN_A vs PLAN_A_NAT; guide sections data-m="pbz|nat"); spray/fertilizer calendar from `PLAN_A` (offsets from post-harvest date H) and `PLAN_B`/`PLAN_END` (offsets from bloom rounds in flowers, or expected bloom B). State in `meta/plan` {lat,lon,canopy,H,B,done}. Weather from Open-Meteo (forecast + past_days=30, plus 3-model rain spread), cached in localStorage `durian-wx-v1`; `wxAnalyze` makes spray windows, stage alerts, water need. Guide text is `GUIDE_HTML`.
 - Needs Anonymous enabled in Firebase Auth and this rule:
   `match /gardens/{gid} { allow get, create, update: if request.auth != null; allow list, delete: if false; match /{coll}/{doc} { allow read, write: if request.auth != null; } }`
+
+## Upgrades 2026-11-23 (stocks / gold spot / gold trading)
+- Gold trading `gtbt` group: long backtest (lbLoad/btRun/lbAnalyze) with spread+slip+comm, yearly, IS/OOS 70/30, SL×TP grid, verdict. Filters htf/nfp, auto-off bots (≥30 trades, mean R<0), expectancy calculator (calcGo) in gtr.
+- Gold spot: ~6y bars, target gold % of total assets (set.tpct ±5pp), dip reserve (set.res) tranches at 15/20/25% drawdown.
+- Scan (calcs.js): momentum factor, fair3/mos3 (DCF/comps/Graham), flags, earnDays; signal uses mos3 + momentum≥40 + no flags. Sheet shows แรงส่ง bar + warnings.
+- Track record: tools/picks.js (workflow step) appends docs/picks.json; section `#track` (drawTrack/loadTrack) vs SPY (VG.spyNow).
+- หุ้นเทรด page: src/swing.js (/*SWING*/), section `#sx`; Minervini 8 conditions from history.json weekly closes, regime SPY vs 40w MA, setups bo/pb, sizing in localStorage vg-swing-v1. Test: VGSwingX._compute().
