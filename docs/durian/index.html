@@ -815,9 +815,9 @@ function vRiver(st){const p=planMeta(),ro=S.canWrite?'':' disabled';
   h+=`<p class="muted" style="font-size:13px">ข้อมูลจากแบบจำลอง GloFAS ผ่าน Open-Meteo ความละเอียดราว 5 กม. ใช้ดูแนวโน้มล่วงหน้า ไม่ใช่ระดับน้ำจริงหน้าสวน ให้ดูคู่กับป้ายวัดระดับน้ำและประกาศกรมชลประทาน · อัปเดต ${Math.round((Date.now()-RV.at)/6e4)} นาทีก่อน · จุด ${esc(rvKey(p))}</p>`;
   return h}
 function vPlan(st){const tab=ui.planTab||'plan';
-  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · ศัตรูพืช</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศ เตือนน้ำแม่น้ำ ศัตรูพืชตามฤดู และคู่มือทำสวน</p></div></div>`;
-  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['rv','แม่น้ำ'],['pest','ศัตรูพืช'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
-  if(tab==='wx')return h+vWx(st);if(tab==='rv')return h+vRiver(st);if(tab==='pest')return h+vPest(st);if(tab==='guide')return h+guideHTML();return h+vPlanList(st)}
+  let h=`<div class="top"><div><h1>แผนงาน · อากาศ · ตรวจต้น</h1><p>ตารางฉีดยา/ใส่ปุ๋ยตามระยะต้น พยากรณ์อากาศ เตือนน้ำแม่น้ำ ศัตรูพืชตามฤดู ตรวจอาการต้น อ่านผลตรวจดิน และคู่มือทำสวน</p></div></div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['plan','ตารางงาน'],['wx','อากาศ'],['rv','แม่น้ำ'],['pest','ศัตรูพืช'],['diag','ตรวจอาการ'],['soil','ดิน'],['guide','คู่มือ']].map(([k,t])=>`<button data-act="pt" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
+  if(tab==='wx')return h+vWx(st);if(tab==='rv')return h+vRiver(st);if(tab==='pest')return h+vPest(st);if(tab==='diag')return h+vDiag(st);if(tab==='soil')return h+vSoil();if(tab==='guide')return h+guideHTML();return h+vPlanList(st)}
 function vPlanList(st){const p=planMeta(),T=planTasks(st),R=bloomRounds(st);
   const ro=S.canWrite?'':' disabled';
   let h=`<div class="panel pl-anc"><div class="fld"><label class="l">วิธีทำดอก</label><div class="seg">${[['pbz','ทำสาร (PBZ)'],['nat','ไม่ทำสาร']].map(([k,t])=>`<button data-act="pmode" data-v="${k}" aria-pressed="${p.mode===k}"${ro}>${t}</button>`).join('')}</div></div><div class="grid2"><div class="fld"><label class="l" for="pH">วันเริ่มรอบใหม่ (หลังเก็บเกี่ยว/ตัดแต่งกิ่ง)</label><input class="f" id="pH" type="date" value="${esc(p.H)}"${ro}></div>
@@ -1002,6 +1002,204 @@ function tagList(ids,st,size='sm'){if(!ids||!ids.length)return '';const all=tree
   const ts=ids.map(treeById).filter(Boolean);const max=14;return `<div class="tags">${ts.slice(0,max).map(t=>tagHTML(t,st,{size})).join('')}${ts.length>max?`<span class="muted">+${ts.length-max}</span>`:''}</div>`}
 
 /* ---------- views ---------- */
+/* ---------- หมอพืช: ตรวจอาการ · ดิน · น้ำหมัก/ชีวภัณฑ์ · ความปลอดภัยสาร ---------- */
+// สารที่ห้ามใช้ในไทย (วัตถุอันตรายชนิดที่ 4) อ้างอิงกรมวิชาการเกษตร — [ชื่อไทย, [คำค้น], ปี พ.ศ. ที่ห้าม]
+const BANNED=[
+ ['พาราควอต',['พาราควอต','paraquat','กรัมม็อกโซน','gramoxone'],2563],['คลอร์ไพริฟอส',['คลอร์ไพริฟอส','chlorpyrifos','คลอไพริฟอส'],2563],
+ ['อีพีเอ็น',['อีพีเอ็น','epn'],2558],['ไดโครโตฟอส',['ไดโครโตฟอส','dicrotophos'],2558],
+ ['เอนโดซัลแฟน',['เอนโดซัลแฟน','endosulfan'],2547],['พาราไทออน-เมทิล',['พาราไทออน','parathion','เมทิลพาราไทออน'],2547],
+ ['เมทามิโดฟอส',['เมทามิโดฟอส','methamidophos'],2546],['ลินเดน',['ลินเดน','lindane'],2544],['ไมเร็กซ์',['ไมเร็กซ์','mirex'],2544],
+ ['โมโนโครโตฟอส',['โมโนโครโตฟอส','monocrotophos'],2543],['คลอร์เดน',['คลอร์เดน','chlordane'],2543],['โฟเรต',['โฟเรต','phorate'],2543],
+ ['เมวินฟอส',['เมวินฟอส','mevinphos'],2543],['ฟอสฟามิดอน',['ฟอสฟามิดอน','phosphamidon'],2543],['ไดซัลโฟตอน',['ไดซัลโฟตอน','disulfoton'],2543],
+ ['อะซินฟอส',['อะซินฟอส','azinphos'],2543],['ดีดีที',['ดีดีที','ddt'],2526],['อัลดริน/ดีลดริน',['อัลดริน','ดีลดริน','aldrin','dieldrin'],2531],
+ ['เฮปทาคลอร์',['เฮปทาคลอร์','heptachlor'],2531],['เอนดริน',['เอนดริน','endrin'],2524],['บีเอชซี',['บีเอชซี','bhc'],2523],
+ ['ทอกซาฟีน',['ทอกซาฟีน','toxaphene'],2526],['ไซเฮกซาติน',['ไซเฮกซาติน','cyhexatin'],2531],['ดามิโนไซด์',['ดามิโนไซด์','daminozide'],2532],
+ ['แคปทาฟอล',['แคปทาฟอล','captafol'],2530],['สารประกอบปรอท',['ปรอท','mercury'],2536],['เฟนติน',['เฟนติน','fentin'],2537]];
+const RESTRICT=[['ไกลโฟเซต',['ไกลโฟเซต','glyphosate'],'ใช้ได้แบบมีเงื่อนไข (ผู้ใช้ต้องผ่านอบรม ห้ามใช้ใกล้แหล่งน้ำ) ตรวจเงื่อนไขล่าสุดกับกรมวิชาการเกษตร']];
+function bannedOf(txt){const s=String(txt||'').toLowerCase().replace(/\s+/g,'');if(!s)return null;
+  for(const b of BANNED)if(b[1].some(k=>s.includes(k.replace(/\s+/g,''))))return {lv:'bad',name:b[0],why:'ห้ามใช้ในไทยตั้งแต่ พ.ศ. '+b[2]};
+  for(const b of RESTRICT)if(b[1].some(k=>s.includes(k)))return {lv:'warn',name:b[0],why:b[2]};return null}
+const chemBan=c=>c?bannedOf((c.name||'')+' '+(c.aiName||'')):null;
+const NEEDPHI=['fung','ins','phos','cu','s'];
+const chemNoPhi=c=>c&&!(+c.phi)&&!['FERT','ADJ'].includes(c.form)&&(c.tags||[]).some(t=>NEEDPHI.includes(t))&&!(c.tags||[]).includes('bio');
+function safetyIssues(){const out=[];
+  chemList().forEach(c=>{const b=chemBan(c);if(b)out.push({lv:b.lv,t:`${c.name}: ${b.name}`,s:b.why,go:'chems'});else if(chemNoPhi(c))out.push({lv:'warn',t:`${c.name}: ยังไม่ใส่ระยะเว้นก่อนตัด`,s:'ดูบนฉลาก แล้วใส่ในคลังสาร แอปจะเตือนถ้าวันตัดอยู่ในระยะเว้นยา',go:'chems'})});
+  const y0=addDays(today(),-365),seen=new Set(out.map(o=>o.t));
+  list('works').filter(w=>w.date>=y0).forEach(w=>{const b=bannedOf(w.product);if(b&&b.lv==='bad'){const t=`${w.product}: ${b.name}`;if(!seen.has(t)){seen.add(t);out.push({lv:'bad',t,s:'มีในบันทึกงานเมื่อ '+fd(w.date)+' · '+b.why+' ผลผลิตอาจถูกตีกลับ',go:'works'})}}});
+  return out}
+function safetyPanelHTML(){const I=safetyIssues();
+  return `<div class="panel pad" style="margin-bottom:16px"><div class="sec-h" style="margin-bottom:6px"><h3 style="margin:0;font-size:17px">เช็กความปลอดภัยสาร</h3>${I.length?`<span class="badge ${I.some(i=>i.lv==='bad')?'bad':'warn'}">${I.length} เรื่อง</span>`:'<span class="badge ok">ผ่าน</span>'}</div>
+  ${I.length?`<ul class="list">${I.map(i=>`<li style="grid-template-columns:auto 1fr;padding:10px 0"><span class="badge ${i.lv}">${i.lv==='bad'?'ห้ามใช้':'ต้องเช็ก'}</span><div><div class="t">${esc(i.t)}</div><div class="s">${esc(i.s)}</div></div></li>`).join('')}</ul>`:'<p class="muted" style="margin:0">ไม่พบสารต้องห้ามในคลัง และสารเคมีทุกตัวใส่ระยะเว้นก่อนตัดแล้ว</p>'}
+  <details style="margin-top:10px"><summary class="muted" style="cursor:pointer">สารที่ห้ามใช้ในไทย (${BANNED.length} กลุ่มที่พบบ่อย)</summary><p style="font-size:14px;margin:8px 0">${BANNED.map(b=>esc(b[0])+' ('+b[2]+')').join(' · ')}</p><p class="muted" style="font-size:13px;margin:0">ไกลโฟเซตใช้ได้แบบมีเงื่อนไข · รายชื่ออาจเพิ่มขึ้น เช็กที่กรมวิชาการเกษตร (doa.go.th) · ใส่ถุงมือ หน้ากาก แว่น และเสื้อแขนยาวทุกครั้งที่ผสมและพ่น</p></details></div>`}
+
+// ---- ตรวจอาการต้น ----
+const DXS=[
+ ['ใบ',[['lOldY','ใบแก่เหลืองทั้งใบ'],['lOldEdge','ใบแก่ขอบเหลือง/ขอบไหม้'],['lOldIvc','ใบแก่เหลืองระหว่างเส้นใบ เส้นใบยังเขียว'],['lYIvc','ใบอ่อนเหลือง เส้นใบเขียว'],['lYSmall','ใบอ่อนเล็ก หงิก บิดเบี้ยว'],['lYBug','ใบอ่อนหงิก มีปุยขาว/แมลงตัวเล็กดูด'],['lWilt','ใบเหี่ยวห้อยทั้งต้น'],['lDrop','ใบเหลืองร่วงมาก'],['lBlight','ใบไหม้เป็นแผลน้ำตาลดำ ลามเร็วช่วงฝน'],['lSpot','ใบเป็นจุด/แผลกลมขอบเข้ม'],['lBronze','ใบซีดเป็นจุดประ ใต้ใบมีฝุ่นแดง/ใยบาง'],['lSooty','ใบมีราดำ เหนียวมือ']]],
+ ['ลำต้น/ราก',[['sOoze','โคน/ลำต้นมียางไหล เปลือกช้ำสีน้ำตาลแดง'],['sBark','ขูดเปลือกแล้วข้างในเน่าสีน้ำตาล'],['sTwig','กิ่งแห้งตายจากปลาย'],['sPink','กิ่งมีเส้นใยสีชมพู/ขาวคลุม'],['sFrass','มีขุยไม้ รูเจาะที่ลำต้น'],['rRot','รากฝอยเน่าดำ เปลือกรากหลุดง่าย'],['rFew','รากใหม่น้อย ดินแน่นหรือแฉะ']]],
+ ['ดอก/ผล',[['nFlower','ไม่ออกดอก แตกแต่ใบ'],['flLeaf','ตาดอกกลายเป็นใบ'],['flDrop','ดอกร่วง/ช่อดอกแห้ง'],['fShape','ผลเบี้ยว'],['fDrop','ผลอ่อนร่วงมาก'],['fRot','ผลเน่าเป็นแผลน้ำตาลดำ'],['fBore','ผลมีรูหรือขุยหนอน'],['fMealy','ขั้ว/ร่องหนามมีแมลงขาวเป็นปุย'],['fWet','เนื้อไส้ซึม/เต่าเผา']]]];
+const DXC=[['flood','เพิ่งน้ำท่วม/น้ำขังโคน'],['rain','ฝนตกชุกช่วงนี้'],['dry','แล้ง ขาดน้ำ'],['fert','เพิ่งใส่ปุ๋ย/ยาเข้มข้น'],['young','ต้นเล็ก เพิ่งปลูก']];
+// [ชื่อ, กลุ่ม, {อาการ:น้ำหนัก}, {บริบท:น้ำหนัก}, เช็กอะไร, [เขตกรรม, ชีวภัณฑ์/ธาตุ, สารเคมี]]
+const DXR=[
+ ['รากเน่าโคนเน่า (ไฟทอปธอรา)','โรค',{sOoze:3,sBark:3,rRot:3,lWilt:2,lDrop:2,lOldY:1,lBlight:1,fRot:1},{flood:3,rain:1},'ขูดเปลือกตรงยางไหล ถ้าเนื้อใต้เปลือกช้ำน้ำตาลแดง และขุดดูรากฝอยเน่าดำ = ใช่',['ระบายน้ำให้แห้งเร็ว เปิดโคนต้น ห้ามกองดิน/ปุ๋ยชิดโคน','หว่านไตรโคเดอร์มาผสมปุ๋ยหมักใต้ทรงพุ่มทุก 1–2 เดือน','ถากแผลแล้วทาเมทาแลกซิลหรือฟอสอีทิล-อลูมิเนียม · ฉีดกรดฟอสฟอนัสเข้าลำต้นตามฉลาก ทำซ้ำตามรอบ']],
+ ['รากขาดอากาศ (น้ำขัง/ดินแน่น)','ดิน/ราก',{rFew:3,lWilt:2,lOldY:2,lDrop:2,rRot:1},{flood:3,rain:1},'ขุดดูดินที่ลึก 20 ซม. ถ้าแฉะ มีกลิ่นเหม็นอับ รากใหม่ไม่ค่อยมี = ใช่',['ทำร่องระบายน้ำ ยกโคก คลุมโคนด้วยฟาง (ห่างโคน 15 ซม.)','ไตรโคเดอร์มา + ปุ๋ยหมัก ช่วยฟื้นราก','งดปุ๋ยเคมีเข้มข้นจนกว่าจะแตกใบใหม่']],
+ ['ขาดน้ำ','น้ำ',{lWilt:2,lOldEdge:2,lDrop:1,fDrop:2,flDrop:1},{dry:3},'ดินใต้ทรงพุ่มที่ลึก 10–20 ซม. บีบแล้วร่วน ไม่จับก้อน = แห้งเกิน',['ให้น้ำสม่ำเสมอ ทีละน้อยแต่บ่อย คลุมโคนลดการระเหย','—','—']],
+ ['ขาดไนโตรเจน (N)','ธาตุ',{lOldY:3,lYSmall:1},{},'ถ้ารากดี ไม่มีน้ำขัง แต่ใบแก่เหลืองทั่วต้น = น่าจะขาด N (รากเสียก็ทำให้ใบเหลืองได้ เช็กรากก่อน)',['ใส่ปุ๋ยคอก/ปุ๋ยหมักรอบทรงพุ่ม','ฮอร์โมนปลา 1:1,000 รดดิน (เฉพาะช่วงบำรุงต้น)','ปุ๋ย N สูง เช่น 15-15-15 หรือ 25-7-7 ช่วงแตกใบ ห้ามใส่ช่วงทำดอก']],
+ ['ขาดโพแทสเซียม (K)','ธาตุ',{lOldEdge:3,fWet:1},{},'ใบแก่ขอบไหม้ไล่จากปลายใบเข้ามา ส่วนกลางใบยังเขียว',['ตรวจดิน ดูค่า K','—','ปุ๋ย K สูง เช่น 13-13-21 หรือ 0-0-60 ช่วงผลโต']],
+ ['ขาดแมกนีเซียม (Mg)','ธาตุ',{lOldIvc:3},{},'เหลืองระหว่างเส้นใบที่ใบแก่ก่อน ถ้าใส่ K มากมักเกิดคู่กัน',['ตรวจดิน ดูสัดส่วน K กับ Mg','—','ปูนโดโลไมต์ (ถ้าดินเป็นกรด) หรือแมกนีเซียมซัลเฟตทางดิน/ทางใบ']],
+ ['ขาดธาตุเสริม (Fe/Zn/Mn)','ธาตุ',{lYIvc:3,lYSmall:1},{flood:1},'อาการขึ้นที่ใบอ่อน มักมาจาก pH ไม่เหมาะ หรือรากเสีย',['ตรวจ pH ดิน แก้รากก่อน','—','ธาตุอาหารเสริมรวมทางใบช่วงใบเพสลาด']],
+ ['ขาดโบรอน (B)','ธาตุ',{lYSmall:3,fShape:2,flDrop:1,sTwig:1},{rain:1},'ใบอ่อนเล็กหงิก ปลายยอดตาย ผลเบี้ยว ช่อดอกแห้ง',['—','—','โบรอนทางใบก่อนดอกบานและช่วงผลเล็ก ตามฉลาก (ใช้เกินเป็นพิษ)']],
+ ['ขาดแคลเซียม/โบรอนในผล','ธาตุ',{fWet:3,fDrop:1},{rain:1},'ไส้ซึมมักเกิดเมื่อฝนตกหลังแล้ง ช่วงผลใกล้แก่',['ให้น้ำสม่ำเสมอช่วงผลโต ไม่ปล่อยแห้งแล้วรดหนัก','แคลเซียมเปลือกไข่ 1:1,000 ช่วงผลเล็ก','แคลเซียม-โบรอนทางใบช่วงผลเล็ก (ได้ผลดีกว่าช่วงผลแก่)']],
+ ['ผสมเกสรไม่ทั่ว','ดอก/ผล',{fShape:3,flDrop:1},{rain:1},'ผลเบี้ยวเป็นพู ๆ ไม่ใช่ทั้งต้น มักเกิดช่วงดอกบานเจอฝน',['ช่วยผสมเกสรด้วยมือ 19:00–22:00 น.','—','โบรอนก่อนดอกบาน']],
+ ['เพลี้ยไก่แจ้','แมลง',{lYBug:3,lYSmall:2,lSooty:1},{},'พลิกดูใบอ่อน มีตัวเล็กสีน้ำตาลกับปุยขาว',['เฝ้าดูทุกครั้งที่แตกใบอ่อน ตัดยอดที่ระบาดหนัก','สารสกัดสะเดา/น้ำหมักสมุนไพร 1:1,000 หรือบิวเวอเรีย','ยากลุ่มแมลงปากดูด ตามฉลาก สลับกลุ่ม IRAC']],
+ ['ไรแดง','แมลง',{lBronze:3,lDrop:1},{dry:2},'ใช้แว่นขยายดูใต้ใบ เห็นจุดเล็กสีแดงเคลื่อนที่',['ฉีดน้ำใต้ทรงพุ่มเพิ่มความชื้นช่วงแล้ง','กำมะถันผง/น้ำมันปิโตรเลียม (ไม่พ่นช่วงแดดจัด)','ยากำจัดไรตามฉลาก สลับกลุ่ม']],
+ ['เพลี้ยแป้ง','แมลง',{fMealy:3,lSooty:2},{dry:1},'มีมดขึ้นต้นมาก มักพาเพลี้ยแป้งมา',['กำจัดมด ตัดทางเดินมด','น้ำมันปิโตรเลียม/เชื้อราเมธาไรเซียม','ยาแมลงปากดูดตามฉลาก ก่อนห่อผล']],
+ ['หนอนเจาะผล/เมล็ด','แมลง',{fBore:3,fDrop:1},{},'ผ่าผลที่ร่วง ดูหนอนในเนื้อหรือเมล็ด',['เก็บผลร่วงทำลาย ห่อผล','บีที (Bt) ช่วงผลเล็ก','ยาแมลงตามฉลาก ระวังระยะเว้นก่อนตัด']],
+ ['ด้วงหนวดยาวเจาะลำต้น','แมลง',{sFrass:3,sTwig:1,lWilt:1},{},'มีขุยไม้ร่วงใต้รู ลองแคะดูตัวหนอน',['แคะหนอนออก ทาแผล ตรวจโคนต้นทุกเดือน','—','ฉีดยาเข้ารูตามคำแนะนำเจ้าหน้าที่']],
+ ['ราสีชมพู','โรค',{sPink:3,sTwig:2},{rain:2},'เส้นใยสีชมพูอมขาวบนกิ่ง ช่วงฝนชุก',['ตัดกิ่งที่เป็นโรคต่ำกว่าแผล 30 ซม. แล้วเผา ตัดแต่งทรงพุ่มให้โปร่ง','—','ทาสารกลุ่มทองแดงที่กิ่ง']],
+ ['ใบไหม้/แอนแทรคโนส','โรค',{lBlight:3,lSpot:2},{rain:2},'แผลขยายเร็วหลังฝน ขอบแผลชัด',['ตัดใบที่เป็นโรค ตัดแต่งให้ลมผ่าน','บาซิลลัส ซับทิลิส ป้องกันช่วงฝน','ยากำจัดเชื้อราตามฉลาก สลับกลุ่ม FRAC']],
+ ['ผลเน่า','โรค',{fRot:3},{rain:2},'แผลเปียกสีน้ำตาลดำ มักเริ่มที่ปลายผล',['เก็บผลเน่าออกจากสวน ไม่ให้ผลสัมผัสดิน','—','ฟอสอีทิล-อลูมิเนียม/เมทาแลกซิลพ่นผลตามฉลาก เช็กระยะเว้นก่อนตัด']],
+ ['N มาก/ใบยังไม่แก่ ไม่ออกดอก','สรีรวิทยา',{nFlower:3,flLeaf:2},{rain:1,fert:1},'นับชุดใบ ต้องมีใบแก่เต็มที่ ≥ 2 ชุดก่อนทำดอก · ฝนตกช่วงตาดอกทำให้ตาดอกกลายเป็นใบ',['งดปุ๋ย N สะสมอาหาร ทำร่องระบายน้ำ','งดน้ำหมักพืช/ฮอร์โมนปลาช่วงนี้','ปุ๋ยตัวกลาง-ท้ายสูง (8-24-24, 0-52-34 ทางใบ) · สารทำดอกใช้ตามฉลากเท่านั้น']],
+ ['ปุ๋ย/ยาเข้มข้นเกิน (ใบไหม้)','ดิน/ราก',{lOldEdge:2,lYSmall:1,lDrop:1,lBlight:1},{fert:3},'ใบไหม้หลังใส่ปุ๋ยหรือพ่นยาไม่กี่วัน เป็นทั้งต้นพร้อมกัน',['รดน้ำล้างดินมาก ๆ งดปุ๋ย 1 เดือน','—','ครั้งหน้าลดอัตรา ไม่พ่นช่วงแดดจัด']],
+ ['ราดำ (มาจากแมลงปากดูด)','แมลง',{lSooty:3},{},'ราดำขึ้นบนน้ำหวานของเพลี้ย ต้องกำจัดแมลงต้นเหตุ',['ล้างด้วยน้ำ ตัดแต่งให้โปร่ง','กำจัดเพลี้ยด้วยสารชีวภัณฑ์','จัดการเพลี้ยตามข้อด้านบน']]];
+function dxRun(sel,ctx){if(!sel.length)return [];return DXR.map(r=>{let sc=0,m=0;sel.forEach(k=>{if(r[2][k]){sc+=r[2][k];m++}});if(!m)return null;ctx.forEach(k=>{if(r[3][k])sc+=r[3][k]});
+  const conf=sc>=7&&m>=2?'สูง':sc>=4?'กลาง':'ต่ำ';return {r,sc,m,conf}}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,4)}
+function dxState(){if(!ui.dx)ui.dx={s:[],c:[],tree:''};return ui.dx}
+function vDiag(st){const D=dxState(),R=dxRun(D.s,D.c),ts=trees();
+  const ck=(name,k,t,on)=>`<label><input type="checkbox" data-dx="${name}" value="${k}" ${on?'checked':''}>${t}</label>`;
+  let h=`<div class="panel pad" style="margin-bottom:16px"><p class="muted" style="margin:0 0 10px">ติ๊กอาการที่เห็น แอปจะบอกสาเหตุที่น่าจะเป็น วิธีเช็ก และวิธีแก้เรียงจากเบาไปหนัก · อาการไม่ชัดให้ถ่ายรูปเก็บไว้ในหน้าต้นก่อน</p>`;
+  h+=DXS.map(([g,a])=>`<div class="fld"><label class="l">${g}</label><div class="chips">${a.map(([k,t])=>ck('s',k,t,D.s.includes(k))).join('')}</div></div>`).join('');
+  h+=`<div class="fld" style="margin:0"><label class="l">ช่วงนี้เป็นแบบไหน</label><div class="chips">${DXC.map(([k,t])=>ck('c',k,t,D.c.includes(k))).join('')}</div></div>`;
+  if(D.s.length)h+=`<div class="row" style="margin-top:12px"><button class="btn" data-act="dxclear">ล้างที่เลือก</button></div>`;
+  h+=`</div>`;
+  if(!D.s.length)return h+`<div class="panel empty"><h3>ยังไม่ได้เลือกอาการ</h3><p>เลือกอาการด้านบนอย่างน้อย 1 อย่าง</p></div>`;
+  if(!R.length)return h+`<div class="panel empty"><h3>ไม่เข้ากับสาเหตุที่รู้จัก</h3><p>ถ่ายรูปใบ โคนต้น และราก แล้วปรึกษาเกษตรอำเภอหรือส่งตัวอย่างให้กรมวิชาการเกษตร</p></div>`;
+  h+=`<section class="sec"><div class="sec-h"><h2>น่าจะเป็น</h2></div>`;
+  h+=R.map((x,i)=>{const r=x.r,L=['เขตกรรม','ชีวภัณฑ์/บำรุง','สารเคมี (ทางสุดท้าย)'];return `<div class="panel pad" style="margin-bottom:12px"><div class="row" style="justify-content:space-between"><div style="font-size:18px;font-weight:700">${i+1}. ${esc(r[0])}</div><div><span class="badge">${esc(r[1])}</span> <span class="badge ${x.conf==='สูง'?'bad':x.conf==='กลาง'?'warn':''}">มั่นใจ${x.conf}</span></div></div>
+   <p style="margin:8px 0"><b>เช็กให้แน่ใจ:</b> ${esc(r[4])}</p><ol style="margin:0;padding-left:20px">${r[5].map((s,j)=>s==='—'?'':`<li><b>${L[j]}:</b> ${esc(s)}</li>`).join('')}</ol></div>`}).join('');
+  if(R.length>1)h+=`<p class="muted" style="font-size:14px">อาการหลายอย่างมีได้หลายสาเหตุพร้อมกัน แก้เรื่องราก/น้ำก่อนเสมอ เพราะรากเสียทำให้ดูเหมือนขาดธาตุ · สารเคมีใช้ตามฉลาก ใส่ชุดป้องกัน และดูระยะเว้นก่อนตัด</p>`;
+  if(S.canWrite&&ts.length)h+=`<div class="panel pad"><div class="fld" style="margin-bottom:10px"><label class="l" for="dxTree">บันทึกผลตรวจไว้ในประวัติต้น</label><select class="f" id="dxTree"><option value="">เลือกต้น</option>${ts.map(t=>`<option value="${t.id}" ${D.tree===t.id?'selected':''}>ต้น ${esc(t.no)}${t.variety?' · '+esc(t.variety):''}</option>`).join('')}</select></div><button class="btn pri" data-act="dxsave">บันทึกผลตรวจ</button></div>`;
+  return h+`</section>`}
+
+// ---- อ่านผลตรวจดิน ----
+const soilTests=()=>((S.data.meta.soil||{}).tests||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+const SF=[['pH','pH',''],['om','อินทรียวัตถุ','%'],['p','ฟอสฟอรัส (P)','ppm'],['k','โพแทสเซียม (K)','ppm'],['ca','แคลเซียม (Ca)','ppm'],['mg','แมกนีเซียม (Mg)','ppm'],['b','โบรอน (B)','ppm'],['cec','CEC','cmol/kg']];
+function soilRead(t){const n=k=>t[k]===''||t[k]==null?null:+t[k],out=[],todo=[];let lime=0;
+  const pH=n('pH'),om=n('om'),p=n('p'),k=n('k'),ca=n('ca'),mg=n('mg'),b=n('b'),cec=n('cec');
+  if(pH!=null){if(pH<4.5){out.push(['pH',pH,'bad','กรดจัด','ธาตุ P, Ca, Mg ถูกล็อก รากไม่โต']);lime=[300,400]}
+   else if(pH<5.5){out.push(['pH',pH,'warn','ค่อนข้างกรด','ทุเรียนชอบ 5.5–6.5']);lime=pH<5?[200,300]:[100,200]}
+   else if(pH<=6.5)out.push(['pH',pH,'ok','เหมาะกับทุเรียน',''])
+   else if(pH<=7.3)out.push(['pH',pH,'warn','ค่อนข้างด่าง','ธาตุเสริม Fe, Zn, Mn, B ดูดได้น้อยลง ห้ามใส่ปูน']);
+   else out.push(['pH',pH,'bad','ด่าง','ห้ามใส่ปูน ใช้ปุ๋ยอินทรีย์และกำมะถันผงตามคำแนะนำ'])}
+  if(lime)todo.push(`ใส่ปูนโดโลไมต์ประมาณ ${lime[0]}–${lime[1]} กก./ไร่ (≈ ${Math.round(lime[0]/25)}–${Math.round(lime[1]/25)} กก./ต้น) หว่านรอบทรงพุ่ม แบ่งใส่ 2 ครั้งห่างกัน 2–3 เดือน เว้นห่างจากปุ๋ยเคมี 2 สัปดาห์ แล้วตรวจซ้ำใน 6 เดือน (ตัวเลขประมาณ ดินเหนียวต้องใช้มากกว่าดินทราย)`);
+  if(om!=null){if(om<1.5){out.push(['om',om,'bad','ต่ำ','ดินอุ้มน้ำและปุ๋ยไม่อยู่ จุลินทรีย์น้อย']);todo.push('เพิ่มอินทรียวัตถุ: ปุ๋ยคอก/ปุ๋ยหมัก 20–30 กก./ต้น/ปี คลุมโคนด้วยฟางหรือเศษใบไม้ ปลูกพืชคลุมดินระหว่างแถว')}
+   else if(om<3.5)out.push(['om',om,'warn','ปานกลาง','รักษาระดับด้วยปุ๋ยหมักทุกปี']);else out.push(['om',om,'ok','สูง',''])}
+  if(p!=null){if(p<10){out.push(['p',p,'bad','ต่ำ','']);todo.push('P ต่ำ: ช่วงบำรุงต้นใช้ 15-15-15 ช่วงก่อนทำดอกใช้ 8-24-24 และแก้ pH ให้ถึง 5.5 ขึ้นไปก่อน (ดินกรดล็อก P)')}
+   else if(p<=25)out.push(['p',p,'warn','ปานกลาง','']);else if(p<=45)out.push(['p',p,'ok','สูง','']);else{out.push(['p',p,'warn','สูงมาก','ใส่ P เพิ่มเปลืองเงิน และไปกดสังกะสี']);todo.push('P สูงแล้ว: ลดปุ๋ยตัวกลาง ใช้สูตรที่ P ต่ำลง')}}
+  if(k!=null){if(k<60){out.push(['k',k,'bad','ต่ำ','']);todo.push('K ต่ำ: เพิ่มปุ๋ยตัวท้าย เช่น 13-13-21 หรือ 0-0-60 ช่วงผลโต (K ช่วยรสและเนื้อ)')}else if(k<=120)out.push(['k',k,'warn','ปานกลาง','']);else out.push(['k',k,'ok','สูง',''])}
+  if(ca!=null){if(ca<400){out.push(['ca',ca,'bad','ต่ำ','เสี่ยงไส้ซึม ผลแตก']);if(!lime)todo.push('Ca ต่ำ: ใช้ยิปซัม (ไม่เปลี่ยน pH) 50–100 กก./ไร่ และแคลเซียมทางใบช่วงผลเล็ก')}else out.push(['ca',ca,'ok','พอ',''])}
+  if(mg!=null){if(mg<60){out.push(['mg',mg,'bad','ต่ำ','ใบแก่เหลืองระหว่างเส้นใบ']);todo.push(lime?'Mg ต่ำ: ปูนโดโลไมต์ที่ใส่แก้กรดจะเพิ่ม Mg ด้วย':'Mg ต่ำ: แมกนีเซียมซัลเฟต (ดีเกลือ) ทางดิน 0.5–1 กก./ต้น หรือทางใบ')}else out.push(['mg',mg,'ok','พอ',''])}
+  if(b!=null){if(b<0.5){out.push(['b',b,'bad','ต่ำ','ผลเบี้ยว ช่อดอกแห้ง']);todo.push('B ต่ำ: โบรอนทางใบก่อนดอกบานและช่วงผลเล็ก ตามฉลาก (ใช้เกินเป็นพิษ)')}else out.push(['b',b,'ok','พอ',''])}
+  if(cec!=null)out.push(['cec',cec,cec<5?'warn':'ok',cec<5?'ต่ำ (ดินทราย/ลูกรัง)':'พอ',cec<5?'เก็บปุ๋ยได้น้อย ใส่ปุ๋ยน้อยแต่บ่อย':'']);
+  if(ca!=null&&mg!=null&&mg>0){const r=(ca/200)/(mg/120);if(r<2)todo.push(`สัดส่วน Ca:Mg = ${nf.format(r)} (ควร 2–7) Mg มากเกินไป Ca ดูดได้ยาก`);else if(r>7)todo.push(`สัดส่วน Ca:Mg = ${nf.format(r)} (ควร 2–7) Mg ถูกกด ระวังใบเหลืองระหว่างเส้นใบ`)}
+  if(k!=null&&mg!=null&&mg>0){const r=(k/390)/(mg/120);if(r>0.6)todo.push('K สูงเมื่อเทียบกับ Mg: ลดปุ๋ย K หรือเติม Mg ไม่อย่างนั้น Mg จะขาด')}
+  return {out,todo}}
+function vSoil(){const T=soilTests(),last=T[0];
+  let h=`<div class="panel pad" style="margin-bottom:16px"><p class="muted" style="margin:0 0 10px">กรอกตัวเลขจากใบผลตรวจดิน ช่องไหนไม่มีเว้นว่างได้ แอปจะบอกว่าค่าไหนพอ ไหนขาด และควรทำอะไรก่อน (เกณฑ์ทั่วไปสำหรับทุเรียน)</p>
+  <div class="grid2"><div class="fld"><label class="l" for="soDate">วันที่ตรวจ</label><input class="f" type="date" id="soDate" value="${today()}"></div><div class="fld"><label class="l" for="soPlot">แปลง/จุดเก็บ</label><input class="f" id="soPlot" placeholder="เช่น โคกใหม่เฟส 1"></div></div>
+  <div class="grid3">${SF.map(([k,t,u])=>`<div class="fld"><label class="l" for="so_${k}">${t} <small>${u}</small></label><input class="f num" inputmode="decimal" id="so_${k}"></div>`).join('')}</div>
+  ${S.canWrite?`<button class="btn pri" data-act="soilsave">อ่านผลและบันทึก</button>`:''}
+  <details style="margin-top:12px"><summary class="muted" style="cursor:pointer">เก็บดินส่งตรวจยังไง</summary><p style="font-size:14px;margin:8px 0 0">เก็บดินใต้ทรงพุ่ม 10–15 จุดต่อแปลง ลึก 0–30 ซม. คลุกรวมกัน ผึ่งในร่มให้แห้ง ใส่ถุงประมาณ 0.5 กก. เขียนชื่อแปลง ส่งตรวจที่สถานีพัฒนาที่ดินจังหวัด · ดินลูกรังที่ถมใหม่ควรตรวจแยกจากดินเดิม · ตรวจซ้ำทุก 1–2 ปี ช่วงหลังเก็บเกี่ยว</p></details></div>`;
+  if(!T.length)return h+`<div class="panel empty"><h3>ยังไม่มีผลตรวจดิน</h3><p>ส่งตรวจดินที่สถานีพัฒนาที่ดินจังหวัด แล้วกรอกตัวเลขด้านบน</p></div>`;
+  const R=soilRead(last);
+  h+=`<section class="sec"><div class="sec-h"><h2>ผลล่าสุด ${fd(last.date)}${last.plot?' · '+esc(last.plot):''}</h2></div><div class="panel"><ul class="list">${R.out.map(([k,v,lv,st,why])=>`<li style="grid-template-columns:150px 1fr auto"><div class="t">${esc((SF.find(f=>f[0]===k)||[])[1]||k)}</div><div><span class="badge ${lv}">${st}</span>${why?` <span class="s">${esc(why)}</span>`:''}</div><div class="num" style="font-weight:700">${nf.format(v)}</div></li>`).join('')}</ul></div></section>`;
+  if(R.todo.length)h+=`<section class="sec"><div class="sec-h"><h2>ทำอะไรก่อน</h2></div><div class="panel pad"><ol style="margin:0;padding-left:20px">${R.todo.map(t=>`<li style="margin-bottom:6px">${esc(t)}</li>`).join('')}</ol><p class="muted" style="font-size:13.5px;margin:8px 0 0">แก้ pH กับอินทรียวัตถุก่อนเสมอ ธาตุหลายตัวจะดีขึ้นเอง · อัตราเป็นประมาณการ ปรับตามคำแนะนำของสถานีพัฒนาที่ดิน</p></div></section>`;
+  if(T.length>1)h+=`<section class="sec"><div class="sec-h"><h2>ประวัติตรวจดิน</h2></div><div class="panel" style="overflow-x:auto"><table class="fl-table"><thead><tr><th style="text-align:left;padding:8px">วันที่</th>${SF.slice(0,6).map(f=>`<th style="padding:8px">${f[0]==='pH'?'pH':f[1].replace(/ \(.*\)/,'')}</th>`).join('')}<th></th></tr></thead><tbody>${T.map(t=>`<tr><td style="padding:8px">${fd(t.date)}${t.plot?'<div class="muted" style="font-size:12px">'+esc(t.plot)+'</div>':''}</td>${SF.slice(0,6).map(f=>`<td class="num" style="text-align:center;padding:8px">${t[f[0]]===''||t[f[0]]==null?'–':nf.format(+t[f[0]])}</td>`).join('')}<td>${S.canWrite?`<button class="ib" data-act="soildel" data-id="${t.id}" aria-label="ลบ">×</button>`:''}</td></tr>`).join('')}</tbody></table></div></section>`;
+  else if(S.canWrite)h+=`<p style="margin-top:8px"><button class="btn danger" data-act="soildel" data-id="${last.id}">ลบผลตรวจนี้</button></p>`;
+  return h}
+
+// ---- ห้องน้ำหมัก/ชีวภัณฑ์ ----
+// k, ชื่อ, หน่วยที่ใส่, ค่าเริ่ม, วันหมัก, เก็บได้ (วัน), ฉีดใบ 1:x, รดดิน 1:x, f(q)→ส่วนผสม, ขั้นตอน, ใช้ช่วงไหน(ระยะ), ห้ามช่วง
+const BIO=[
+ {k:'tri',t:'ไตรโคเดอร์มา (ขยายเชื้อด้วยข้าวสุก)',u:'ถุง',q:10,d:7,life:30,fol:0,soil:200,
+  ing:q=>[['ข้าวสารหุงแบบแข็ง (ข้าว:น้ำ 3:2)',q*0.25,'กก. ข้าวสุก'],['หัวเชื้อไตรโคเดอร์มาชนิดผง','ตามฉลากซอง',''],['ถุงพลาสติกทนร้อน + หนังยาง',q,'ใบ']],
+  st:['ตักข้าวสุกขณะยังอุ่นใส่ถุงละ 250 กรัม พับปากถุงไว้ รอให้ข้าวหายร้อน','โรยหัวเชื้อ รัดปากถุง เขย่าให้ทั่ว แล้วกดถุงให้แบน','ใช้เข็มเจาะรูรอบปากถุง 20–30 รู วางในที่ร่ม ไม่โดนแดด','ครบ 2 วัน ขยำถุงให้เชื้อกระจาย ครบ 7 วันเห็นสปอร์สีเขียวทั้งถุง = พร้อมใช้'],
+  use:'ผสมเชื้อสด 1 กก. + รำละเอียด 4 กก. + ปุ๋ยหมัก 100 กก. หว่านใต้ทรงพุ่มตอนเย็นที่ดินชื้น หรือเชื้อสด 1 กก. ต่อน้ำ 200 ลิตร กรองแล้วรดโคน/ฉีดพ่น',stages:['young','rest','cut','induce','fruit'],no:'ห้ามผสมหรือพ่นวันเดียวกับยาฆ่าเชื้อรา สารทองแดง เว้น 5–7 วัน · ใช้ให้หมดภายใน 1 เดือน (ยิ่งสดยิ่งดี)'},
+ {k:'fpj',t:'น้ำหมักพืช (FPJ)',u:'กก. ยอดพืช',q:3,d:7,life:180,fol:500,soil:500,
+  ing:q=>[['ยอดพืชอ่อนที่โตเร็ว (หน่อกล้วย ผักบุ้ง วัชพืชก่อนออกดอก)',q,'กก.'],['น้ำตาลทรายแดง',q*2/3,'กก.']],
+  st:['เก็บยอดพืชตอนเช้ามืด ไม่ต้องล้าง สับหยาบ','คลุกน้ำตาลให้ทั่ว อัดแน่นในโหลหรือถัง ให้มีน้ำท่วมเนื้อพืช','ปิดด้วยผ้า (ไม่ปิดฝาสนิท) วางในร่ม','5–7 วัน น้ำเป็นสีเหลืองอำพัน กลิ่นหอมหมัก = กรองเก็บในขวดทึบ'],
+  use:'ฉีดใบหรือรดดินทุก 7–10 วัน ช่วงแตกใบ ฉีดตอนเช้าหรือเย็น',stages:['young','rest'],no:'งดช่วงสะสมอาหาร/ทำดอก เพราะกระตุ้นการแตกใบ'},
+ {k:'fish',t:'ฮอร์โมนปลา (FF)',u:'กก. ปลา',q:5,d:90,life:365,fol:0,soil:1000,
+  ing:q=>[['ปลาหรือเศษปลาสด',q,'กก.'],['น้ำตาลทรายแดง/กากน้ำตาล',q,'กก.']],
+  st:['สลับชั้นปลากับน้ำตาลในถังพลาสติก น้ำหนักเท่ากัน','ปิดฝาหลวม ๆ ให้แก๊สออกได้','หมัก 3–6 เดือน คนเดือนละครั้ง','ได้น้ำสีน้ำตาลเข้ม กลิ่นหมักไม่เน่า = กรองเก็บ'],
+  use:'รดดินเท่านั้น เดือนละครั้งช่วงแตกใบ',stages:['young','rest'],no:'ห้ามฉีดใบ (กลิ่นเรียกแมลง ใบไหม้) · งดช่วงทำดอก'},
+ {k:'wca',t:'แคลเซียมจากเปลือกไข่ (WCA)',u:'กก. เปลือกไข่',q:0.5,d:7,life:365,fol:1000,soil:1000,
+  ing:q=>[['เปลือกไข่หรือเปลือกหอยแห้ง (คั่วจนเหลือง)',q,'กก.'],['น้ำส้มสายชู 5%',q*10,'ลิตร']],
+  st:['ล้างเปลือกไข่ ตากให้แห้ง คั่วในกระทะ 5–10 นาทีจนเหลืองอ่อน','ทิ้งให้เย็น ใส่โหลแก้ว เทน้ำส้มสายชู 10 เท่าของน้ำหนักเปลือก','ปิดฝาหลวม ๆ จะเกิดฟองช่วงวันแรก','5–7 วัน ฟองหยุด เปลือกละลายเกือบหมด = กรองเก็บ'],
+  use:'ฉีดใบทุก 7–10 วัน ตั้งแต่ตาดอกถึงผลเล็ก ช่วยเรื่องผนังเซลล์และไส้ซึม',stages:['bud','bloom','fruit'],no:'ห้ามผสมกับปุ๋ยฟอสเฟต/ซัลเฟตในถังเดียว (ตกตะกอน)'},
+ {k:'ohn',t:'น้ำหมักสมุนไพรไล่แมลง (OHN)',u:'ชุด',q:1,d:10,life:365,fol:1000,soil:1000,
+  ing:q=>[['กระเทียม',q*0.1,'กก.'],['ขิง',q*0.1,'กก.'],['ข่าหรือชะเอม',q*0.1,'กก.'],['น้ำตาลทรายแดง',q*0.1,'กก.'],['เหล้าขาว 28–40 ดีกรี',q*0.25,'ลิตร']],
+  st:['สับหรือขูดสมุนไพรให้ละเอียด คลุกน้ำตาล ใส่โหล ปิดผ้า 3 วัน','เทเหล้าขาว คนให้เข้ากัน','หมักต่อ 7 วัน คนวันละครั้ง','กรองเก็บในขวดทึบ ปิดสนิท'],
+  use:'ฉีดใบเมื่อเริ่มมีแมลง/โรค ช่วงหลังย้ายปลูก หรือทุก 10–14 วัน',stages:['young','rest','induce','bud','fruit'],no:'ไม่ใช่ยาฆ่าแมลง ถ้าระบาดหนักต้องใช้วิธีอื่นร่วม'},
+ {k:'lab',t:'จุลินทรีย์แลคติก (LAB)',u:'ลิตร น้ำซาวข้าว',q:0.5,d:12,life:180,fol:500,soil:1000,
+  ing:q=>[['น้ำซาวข้าว (ล้างข้าวครั้งแรก)',q,'ลิตร'],['นมสดจืด',q*10,'ลิตร'],['น้ำตาลทรายแดง (ไว้ผสมเก็บ)',q*10,'กก.']],
+  st:['ใส่น้ำซาวข้าวในโหล 2 ใน 3 ปิดผ้า ทิ้งไว้ 3–5 วันจนเปรี้ยว','ตักน้ำใสตรงกลาง ผสมนมสด 10 เท่า','ทิ้ง 5–7 วัน จะแยกเป็นก้อนนมด้านบน','ตักน้ำเหลืองใสด้านล่าง ผสมน้ำตาลเท่ากัน เก็บในที่เย็น'],
+  use:'ฉีดใบ 1:500 หรือรดดิน 1:1,000 ทุกสัปดาห์ ช่วยย่อยอินทรียวัตถุและแย่งพื้นที่เชื้อโรค',stages:['young','rest','fruit','cut'],no:''},
+ {k:'cmp',t:'ปุ๋ยหมักกอง',u:'กก. วัสดุสีเขียว',q:100,d:60,life:365,fol:0,soil:0,
+  ing:q=>[['วัสดุสีน้ำตาล (ฟาง ใบไม้แห้ง แกลบ)',q*3,'กก.'],['วัสดุสีเขียว (หญ้าสด เศษผัก มูลสัตว์)',q,'กก.'],['น้ำ','ให้ชื้นแบบบีบแล้วไม่หยด',''],['ไตรโคเดอร์มาหรือ LAB (ช่วยเร่ง)','ตามชอบ','']],
+  st:['กองสลับชั้นน้ำตาลกับเขียว ชั้นละ 10–20 ซม. กองสูงราว 1–1.5 ม.','รดน้ำทุกชั้นให้ชื้น','กลับกองทุก 7–10 วัน หรือเมื่อร้อนจัด','ใช้ได้เมื่อกองเย็นลง สีเข้ม กลิ่นเหมือนดิน (ประมาณ 2 เดือน)'],
+  use:'ใส่ 20–30 กก./ต้น/ปี ใต้ทรงพุ่ม หรือผสมชั้นบนของโคกใหม่',stages:['young','rest','cut'],no:''}];
+const BIOK=Object.fromEntries(BIO.map(b=>[b.k,b]));
+const bioBatches=()=>((S.data.meta.bio||{}).batches||[]).slice().sort((a,b)=>b.start.localeCompare(a.start));
+const amtTxt=v=>typeof v==='number'?nf.format(Math.round(v*100)/100):esc(v);
+function domStage(st){const c={};trees().forEach(t=>{const s=st[t.id];if(s)c[s.stage]=(c[s.stage]||0)+1});return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(x=>x[0])[0]||'rest'}
+function vBio(st){if(!ui.bio)ui.bio={k:'tri',q:'',tank:200};const B=ui.bio,R=BIOK[B.k]||BIO[0],q=+B.q>0?+B.q:R.q,ds=domStage(st),bb=bioBatches(),t0=today();
+  const rec=BIO.filter(b=>b.stages.includes(ds));
+  let h=`<div class="note" style="margin-bottom:16px"><span>สวนส่วนใหญ่อยู่ระยะ <b>${esc((ST[ds]||{}).t||ds)}</b> · ช่วงนี้ใช้ได้: ${rec.map(b=>esc(b.t.replace(/ \(.*\)/,''))).join(', ')||'–'}${ds==='induce'||ds==='bud'?' · งดน้ำหมักพืชและฮอร์โมนปลา (กระตุ้นใบ)':''}</span></div>`;
+  if(bb.length){h+=`<section class="sec" style="margin-top:0"><div class="sec-h"><h2>ที่กำลังหมัก/มีในสวน</h2></div><div class="panel"><ul class="list">${bb.map(x=>{const r=BIOK[x.k];if(!r)return '';const ready=addDays(x.start,r.d),exp=addDays(ready,r.life),dd=Math.round((pd(t0)-pd(x.start))/864e5),pc=Math.max(0,Math.min(100,dd/r.d*100));
+    const s=t0<ready?['warn','หมักอยู่ อีก '+Math.round((pd(ready)-pd(t0))/864e5)+' วัน']:t0>exp?['bad','เกินอายุ']:['ok','พร้อมใช้'];
+    return `<li style="grid-template-columns:1fr auto"><div><div class="t">${esc(r.t)} <span class="badge ${s[0]}">${s[1]}</span></div><div class="s">เริ่ม ${fd(x.start)} · ${amtTxt(x.q)} ${esc(r.u)} · พร้อม ${fd(ready)} · ใช้ได้ถึง ${fd(exp)}${x.note?' · '+esc(x.note):''}</div>${t0<ready?`<div class="prog"><i style="width:${pc}%"></i></div>`:''}</div><div>${S.canWrite?`<button class="ib" data-act="biodel" data-id="${x.id}" aria-label="ลบ">×</button>`:''}</div></li>`}).join('')}</ul></div></section>`}
+  h+=`<section class="sec"><div class="sec-h"><h2>สูตรและตัวคำนวณ</h2></div><div class="seg" style="margin-bottom:12px">${BIO.map(b=>`<button data-act="biok" data-v="${b.k}" aria-pressed="${b.k===R.k}">${esc(b.t.replace(/ \(.*\)/,''))}</button>`).join('')}</div>
+  <div class="panel pad"><h3 style="margin:0 0 4px;font-size:18px">${esc(R.t)}</h3><p class="muted" style="margin:0 0 12px">หมัก ${R.d} วัน · เก็บได้ราว ${R.life>=365?Math.round(R.life/365)+' ปี':R.life+' วัน'}${R.fol?' · ฉีดใบ 1:'+nf.format(R.fol):''}${R.soil?' · รดดิน 1:'+nf.format(R.soil):''}</p>
+  <div class="grid2"><div class="fld"><label class="l" for="bioQ">จะทำเท่าไร (${esc(R.u)})</label><input class="f num" inputmode="decimal" id="bioQ" data-bio="q" value="${esc(B.q===''?R.q:B.q)}"></div>${R.fol||R.soil?`<div class="fld"><label class="l" for="bioT">ถังพ่น/ถังรด (ลิตร)</label><input class="f num" inputmode="decimal" id="bioT" data-bio="tank" value="${esc(B.tank)}"></div>`:''}</div>
+  <div id="bioRes">${bioResHTML(R,q,+B.tank||0)}</div>
+  <h4 style="margin:14px 0 6px">วิธีทำ</h4><ol style="margin:0;padding-left:20px">${R.st.map(s=>`<li style="margin-bottom:4px">${esc(s)}</li>`).join('')}</ol>
+  <h4 style="margin:14px 0 6px">วิธีใช้</h4><p style="margin:0">${esc(R.use)}</p>${R.no?`<p style="margin:8px 0 0"><span class="badge warn">ระวัง</span> ${esc(R.no)}</p>`:''}
+  ${S.canWrite?`<div class="row" style="margin-top:14px"><input class="f" id="bioNote" placeholder="หมายเหตุ เช่น ถังสีฟ้า" style="flex:1;min-width:160px"><button class="btn pri" data-act="biostart">เริ่มหมักวันนี้</button></div>`:''}</div></section>
+  <p class="muted" style="font-size:13.5px">น้ำหมักเป็นตัวเสริม ไม่แทนปุ๋ยหลักตามผลตรวจดิน · ผสมในถังเดียวกันได้: น้ำหมักพืช + สมุนไพร + LAB (ช่วงแตกใบ), แคลเซียม + สมุนไพร (ช่วงผล) · ลองพ่นต้นเดียวก่อนถ้าเพิ่งใช้ครั้งแรก</p>`;
+  return h}
+function bioResHTML(R,q,tank){const I=R.ing(q);let h=`<table class="fl-table" style="margin-bottom:6px"><tbody>${I.map(([n,v,u])=>`<tr><td style="padding:6px 0">${esc(n)}</td><td class="num" style="text-align:right;padding:6px 0;font-weight:700;white-space:nowrap">${amtTxt(v)} ${esc(u)}</td></tr>`).join('')}</tbody></table>`;
+  const d=[];if(tank>0){if(R.fol)d.push(`ฉีดใบ: ใส่ <b class="num">${nf.format(Math.round(tank*1000/R.fol))}</b> มล. ต่อน้ำ ${nf.format(tank)} ลิตร`);if(R.soil&&R.k!=='tri')d.push(`รดดิน: ใส่ <b class="num">${nf.format(Math.round(tank*1000/R.soil))}</b> มล. ต่อน้ำ ${nf.format(tank)} ลิตร`);if(R.k==='tri')d.push(`ผสมน้ำรด: เชื้อสด <b class="num">${nf.format(Math.round(tank/200*100)/100)}</b> กก. ต่อน้ำ ${nf.format(tank)} ลิตร`)}
+  return h+(d.length?`<p style="margin:6px 0 0">${d.join('<br>')}</p>`:'')}
+
+async function drAct(a,el){
+  if(a==='dxclear'){ui.dx={s:[],c:[],tree:''};render();return true}
+  if(a==='dxtree'){ui.dx={s:[],c:[],tree:el.dataset.id};ui.planTab='diag';closeSheet();if(location.hash==='#plan')render();else location.hash='plan';return true}
+  if(a==='dxsave'){const D=dxState(),id=($('#dxTree')||{}).value;if(!id)return toast('เลือกต้นก่อน'),true;const R=dxRun(D.s,D.c);if(!R.length)return true;
+    const sym=DXS.flatMap(g=>g[1]).filter(([k])=>D.s.includes(k)).map(x=>x[1]).join(', ');
+    const note='อาการ: '+sym+' | น่าจะเป็น: '+R.slice(0,2).map(x=>x.r[0]+' (มั่นใจ'+x.conf+')').join(', ')+' | เช็ก: '+R[0].r[4];
+    if(await put('works',uid(),{date:today(),type:'อื่นๆ',product:'ตรวจอาการ: '+R[0].r[0],rate:'',trees:[id],cost:0,uses:[],phi:0,every:0,useQty:0,note})){toast('บันทึกในประวัติต้นแล้ว');D.tree=id}return true}
+  if(a==='soilsave'){const t={id:uid(),date:($('#soDate')||{}).value||today(),plot:(($('#soPlot')||{}).value||'').trim()};let n=0;
+    SF.forEach(([k])=>{const v=(($('#so_'+k)||{}).value||'').trim().replace(',','.');t[k]=v===''?'':+v;if(v!==''&&!isNaN(+v))n++});
+    if(!n)return toast('ใส่ค่าอย่างน้อย 1 ช่อง'),true;if(t.pH!==''&&(t.pH<2||t.pH>10))return toast('ค่า pH ควรอยู่ระหว่าง 3–9'),true;
+    if(await put('meta','soil',{tests:[...soilTests(),t]}))toast('บันทึกผลตรวจดินแล้ว');return true}
+  if(a==='soildel'){if(await put('meta','soil',{tests:soilTests().filter(t=>t.id!==el.dataset.id)}))toast('ลบแล้ว');return true}
+  if(a==='biok'){ui.bio={...(ui.bio||{}),k:el.dataset.v,q:''};render();return true}
+  if(a==='biostart'){const B=ui.bio,R=BIOK[B.k];const q=+B.q>0?+B.q:R.q;if(await put('meta','bio',{batches:[...bioBatches(),{id:uid(),k:R.k,q,start:today(),note:(($('#bioNote')||{}).value||'').trim()}]}))toast('เริ่มหมักแล้ว พร้อมใช้ '+fd(addDays(today(),R.d)));return true}
+  if(a==='biodel'){if(await put('meta','bio',{batches:bioBatches().filter(x=>x.id!==el.dataset.id)}))toast('ลบแล้ว');return true}
+  if(a==='gobio'){ui.labTab='bio';if(location.hash==='#lab')render();else location.hash='lab';return true}
+  if(a==='gosafe'){ui.labTab='chems';if(location.hash==='#lab')render();else location.hash='lab';return true}
+  return false}
+document.addEventListener('change',e=>{const tg=e.target;if(!tg.dataset||tg.dataset.dx==null)return;const D=dxState(),arr=D[tg.dataset.dx];
+  if(tg.checked){if(!arr.includes(tg.value))arr.push(tg.value)}else D[tg.dataset.dx]=arr.filter(x=>x!==tg.value);const y=window.scrollY;render();window.scrollTo(0,y)});
+document.addEventListener('input',e=>{const tg=e.target;if(!tg.dataset||tg.dataset.bio==null)return;ui.bio[tg.dataset.bio]=tg.value;const R=BIOK[ui.bio.k];const b=$('#bioRes');if(b&&R)b.innerHTML=bioResHTML(R,+ui.bio.q>0?+ui.bio.q:R.q,+ui.bio.tank||0)});
+function bioHomeRows(){const t0=today();return bioBatches().map(x=>{const r=BIOK[x.k];if(!r)return null;const ready=addDays(x.start,r.d);return ready<=t0&&addDays(ready,3)>=t0?{x,r,ready}:null}).filter(Boolean)}
+const banBadge=c=>{const b=chemBan(c);return b?` <span class="badge ${b.lv}">${b.lv==='bad'?'ห้ามใช้ในไทย':'ใช้แบบมีเงื่อนไข'}</span>`:chemNoPhi(c)?' <span class="badge warn">ยังไม่ใส่ระยะเว้นก่อนตัด</span>':''};
+function drHomeHTML(){const I=safetyIssues().filter(i=>i.lv==='bad'),nP=safetyIssues().filter(i=>i.lv!=='bad').length,B=bioHomeRows();if(!I.length&&!nP&&!B.length)return '';
+  return `<section class="sec"><div class="sec-h"><h2>สารและน้ำหมัก</h2><a href="#lab" data-act="gosafe">ดูคลังสาร</a></div><div class="panel"><ul class="list">`+
+  I.map(i=>`<li class="click" data-act="gosafe"><div class="d"><span class="badge bad">ห้ามใช้</span></div><div><div class="t">${esc(i.t)}</div><div class="s">${esc(i.s)}</div></div><div></div></li>`).join('')+
+  (nP?`<li class="click" data-act="gosafe"><div class="d"><span class="badge warn">ต้องเช็ก</span></div><div><div class="t">สารเคมี ${nP} ตัวยังไม่ใส่ระยะเว้นก่อนตัด</div><div class="s">ใส่ตามฉลาก แอปจะเตือนถ้าวันตัดอยู่ในระยะเว้นยา</div></div><div></div></li>`:'')+
+  B.map(b=>`<li class="click" data-act="gobio"><div class="d"><span class="badge ok">พร้อมใช้</span></div><div><div class="t">${esc(b.r.t)}</div><div class="s">หมักครบ ${fd(b.ready,{day:'numeric',month:'short'})} · ${esc(b.r.use)}</div></div><div></div></li>`).join('')+`</ul></div></section>`}
+
 const VIEWS=[
  {k:'home',t:'ภาพรวม',i:'home'},{k:'trees',t:'ต้นไม้ในสวน',i:'tag',tm:'ต้นไม้'},{k:'work',t:'ฉีดยา/ปุ๋ย',i:'drop',tm:'งานสวน'},{k:'plan',t:'แผนงาน/อากาศ',i:'cal',tm:'แผน'},{k:'lab',t:'ห้องผสมยา',i:'flask',tm:'ผสมยา'},{k:'flower',t:'ทำดอก/ติดผล',i:'flower',tm:'ทำดอก'},{k:'money',t:'ขาย/บัญชี',i:'wallet',tm:'เงิน'}];
 const ui={view:'home',planTab:'plan',stageFilter:null,workFilter:'all',moneyTab:'sales',year:yearOf(today()),rowFilter:'all',labTab:'mix',chemToMix:false,workTab:'log',treeTab:'rows',mapEdit:false,mapSel:null};
@@ -1045,6 +1243,7 @@ function vHome(st){
    phi.map(t=>{const s=st[t.id],w=s.safeW;return `<li class="click" data-act="tree" data-id="${t.id}"><div class="d"><span class="badge bad">ระวังสารตกค้าง</span></div><div><div class="t">ต้น ${esc(t.no)} ถึงวันตัด ${fd(s.cutDate,{day:'numeric',month:'short'})} ก่อนพ้นระยะเว้นยา</div><div class="s">${esc(w.type)}${w.product?' · '+esc(w.product):''} เมื่อ ${fd(w.date,{day:'numeric',month:'short'})} ต้องเว้น ${w.phi} วัน · ตัดได้ตั้งแต่ ${fd(s.safe,{day:'numeric',month:'short'})}</div></div><div>${tagHTML(t,st,{open:false,size:'sm'})}</div></li>`}).join('')+
    due.map(x=>`<li class="click" data-act="repeat" data-id="${x.w.id}"><div class="d"><span class="badge ${x.left<0?'bad':'warn'}">${dueTxt(x.left)}</span></div><div><div class="t">ถึงรอบ ${esc(x.w.type)}${x.w.product?' · '+esc(x.w.product):''}</div><div class="s">ทำทุก ${x.w.every} วัน · ครั้งล่าสุด ${fd(x.w.date,{day:'numeric',month:'short'})}${S.canWrite?' · แตะเพื่อจดว่าทำแล้ว':''}</div></div><div></div></li>`).join('')+
    low.map(o=>`<li class="click" data-act="gostock"><div class="d"><span class="badge warn">ใกล้หมด</span></div><div><div class="t">${esc(o.item)}</div><div class="s">เหลือ ${nf.format(o.left)} ${esc(o.unit||'')} จากที่ซื้อ ${nf.format(o.inQ)}</div></div><div></div></li>`).join('')+`</ul></div></section>`}
+  h+=drHomeHTML();
   h+=homePlanHTML(st);
   h+=`<section class="sec"><div class="sec-h"><h2>ศัตรูพืชช่วงนี้</h2><a href="#plan" data-act="gopest">${esc(SEASON[+today().slice(5,7)-1])} · ดูทั้งปี</a></div><div class="panel">${pestCardHTML(st,3)}</div></section>`;
   h+=gapsHTML(st);
@@ -1169,6 +1368,7 @@ function mixCalc(m){
   if(A_same(rows))warns.push({lv:'warn',a:'',b:'',msg:'มีสารชื่อซ้ำในสูตร'});
   const act=rows.filter(r=>r.f.k!=='ADJ'&&r.f.k!=='FERT').length;
   if(act>=4)warns.push({lv:'warn',a:'',b:'',msg:`ผสมยา ${act} ตัวในถังเดียว เสี่ยงตกตะกอนหรือใบไหม้ ลองผสมในขวดเล็กก่อน`});
+  rows.forEach(r=>{const b=chemBan(r.c);if(b)warns.unshift({lv:b.lv,ban:1,a:'',b:'',msg:r.c.name+': '+b.name+' '+b.why})});
   if(rows.some(r=>r.f.k==='OTHER'))warns.push({lv:'warn',a:'',b:'',msg:'มีสารที่ยังไม่ระบุชนิดสูตร ลำดับการเติมอาจไม่ตรง ดูฉลาก'});
   const known=rows.filter(r=>r.cost!=null),cost=known.reduce((a,r)=>a+r.cost,0),missing=rows.filter(r=>r.amt&&r.cost==null);
   const phiRow=rows.filter(r=>+r.c.phi>0).sort((a,b)=>b.c.phi-a.c.phi)[0];
@@ -1176,10 +1376,10 @@ function mixCalc(m){
     perL:total?cost/total:0,per20:total?cost/total*20:0,perTank:tanks?cost/tanks:0,perTreeCost:total&&perTree?cost/total*perTree:0,treesPerTank:perTree?tank/perTree:0};
 }
 function A_same(rows){const n=rows.map(r=>r.c.id);return new Set(n).size!==n.length}
-function vLab(){
-  let h=`<div class="top"><div><h1>ห้องผสมยา</h1><p>สำหรับผสมยาฉีดพ่นในถัง เลือกสารที่จะใส่ แอปจะเรียงลำดับการเติม เช็คสารที่ไม่ควรผสมกัน และคิดต้นทุนต่อถังให้</p></div>${S.canWrite&&ui.labTab==='chems'?`<button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button>`:''}</div>`;
-  h+=`<div class="seg" style="margin-bottom:16px">${[['mix','ผสม / คำนวณ'],['calc','เทียบ % ยา'],['recipes','สูตรที่บันทึก ('+Object.keys(S.data.recipes).length+')'],['chems','คลังสาร ('+Object.keys(S.data.chems).length+')']].map(([k,t])=>`<button data-act="labtab" data-v="${k}" aria-pressed="${ui.labTab===k}">${t}</button>`).join('')}</div>`;
-  return h+(ui.labTab==='calc'?vCalc('ai'):ui.labTab==='recipes'?vRecipes():ui.labTab==='chems'?vChems():vMixer());
+function vLab(st){
+  let h=`<div class="top"><div><h1>ห้องผสมยา</h1><p>${ui.labTab==='bio'?'สูตรน้ำหมักและชีวภัณฑ์ทำเองในสวน คำนวณวัตถุดิบ จดวันหมัก และบอกอัตราผสมต่อถัง':'สำหรับผสมยาฉีดพ่นในถัง เลือกสารที่จะใส่ แอปจะเรียงลำดับการเติม เช็คสารที่ไม่ควรผสมกัน และคิดต้นทุนต่อถังให้'}</p></div>${S.canWrite&&ui.labTab==='chems'?`<button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button>`:''}</div>`;
+  h+=`<div class="seg" style="margin-bottom:16px">${[['mix','ผสม / คำนวณ'],['calc','เทียบ % ยา'],['recipes','สูตรที่บันทึก ('+Object.keys(S.data.recipes).length+')'],['chems','คลังสาร ('+Object.keys(S.data.chems).length+')'],['bio','น้ำหมัก/ชีวภัณฑ์']].map(([k,t])=>`<button data-act="labtab" data-v="${k}" aria-pressed="${ui.labTab===k}">${t}</button>`).join('')}</div>`;
+  return h+(ui.labTab==='calc'?vCalc('ai'):ui.labTab==='recipes'?vRecipes():ui.labTab==='chems'?safetyPanelHTML()+vChems():ui.labTab==='bio'?vBio(st||treeState()):vMixer());
 }
 function emptyChems(){return `<div class="panel empty"><h3>ยังไม่มีสารในคลัง</h3><p>เพิ่มยา ปุ๋ยทางใบ สารจับใบที่ใช้ บอกชนิดสูตร (ผง เม็ด น้ำข้น น้ำมัน) และราคาต่อขวด/ถุง แอปจะใช้ข้อมูลนี้เรียงลำดับและคิดต้นทุน</p>${S.canWrite?`<div class="row" style="justify-content:center"><button class="btn pri" data-act="new" data-kind="chems">${ic('plus')}เพิ่มสาร</button><button class="btn" data-act="starter">ใส่รายชื่อสารที่ใช้บ่อย</button></div>`:''}</div>`}
 function vMixer(){
@@ -1210,7 +1410,7 @@ function mixResult(){
   if(!r.rows.length)return `<div class="panel empty"><h3>ผลการผสมจะขึ้นตรงนี้</h3><p>เลือกสารทางซ้าย ใส่อัตราตามฉลาก แล้วจะเห็นลำดับการเติม ปริมาณต่อถัง และต้นทุน</p></div>`;
   const all=r.tanks>1;
   let h=`<div class="panel"><div class="res-top"><div><span>น้ำรวม</span><br><b>${nf.format(r.total)} ลิตร</b></div><span style="text-align:right">${r.tanks} ถัง × ${nf.format(r.tank)} ลิตร<br>${esc(ratioTxt(r.tank/r.base))} (สูตร ${nf.format(r.base)} ลิตร)</span></div><div class="pad">`;
-  if(r.warns.length)h+=`<ul class="warns">${r.warns.map(w=>`<li class="${w.lv}"><span class="badge ${w.lv==='bad'?'bad':'warn'}">${w.lv==='bad'?'ไม่ควรผสม':'ระวัง'}</span><span>${w.a?`<b>${esc(w.a)}</b> + <b>${esc(w.b)}</b>: `:''}${esc(w.msg)}</span></li>`).join('')}</ul>`;
+  if(r.warns.length)h+=`<ul class="warns">${r.warns.map(w=>`<li class="${w.lv}"><span class="badge ${w.lv==='bad'?'bad':'warn'}">${w.ban?(w.lv==='bad'?'ห้ามใช้':'มีเงื่อนไข'):w.lv==='bad'?'ไม่ควรผสม':'ระวัง'}</span><span>${w.a?`<b>${esc(w.a)}</b> + <b>${esc(w.b)}</b>: `:''}${esc(w.msg)}</span></li>`).join('')}</ul>`;
   h+=`<h3 style="font-size:16px;margin:0 0 4px">ลำดับการเติม <span class="muted" style="font-weight:400">(ต่อ 1 ถัง${all?' · ตัวเลขเล็กคือรวมทุกถัง':''})</span></h3><ol class="steps">
    <li class="water"><div><b>เติมน้ำประมาณครึ่งถัง</b><div class="s">แล้วเปิดเครื่องกวนหรือคนตลอดการผสม</div></div><div class="q">${nf.format(r1(r.tank/2))} ลิตร</div></li>
    ${r.order.map(x=>`<li><div><b>${esc(x.c.name)}</b> <span class="badge">${esc(x.f.sh)}</span><div class="s">${esc(x.f.tip)}</div></div><div class="q">${x.amt&&Math.abs(r.tank-r.base)>1e-9?`<div class="s" style="font-family:var(--font);font-weight:400">สูตร ${fmtAmt(x.amt,x.unit)} →</div>`:''}${x.amt?fmtAmt(x.per,x.unit):'<span class="muted" style="font-size:15px">ใส่อัตรา</span>'}${all&&x.amt?`<div class="s" style="font-family:var(--font);font-weight:400">รวม ${fmtAmt(x.all,x.unit)}</div>`:''}</div></li>`).join('')}
@@ -1291,7 +1491,7 @@ function vChems(){
   const ch=chemList();if(!ch.length)return emptyChems();
   const grp={};ch.forEach(c=>{const k=(c.aiName||'').trim();const v=aiCost(c);if(k&&v!=null)(grp[k]=grp[k]||[]).push({id:c.id,v})});
   const best=new Set(Object.values(grp).filter(a=>a.length>1).map(a=>a.sort((x,y)=>x.v-y.v)[0].id));
-  return `<div class="panel"><ul class="list">${ch.map(c=>`<li class="click" data-act="edit" data-c="chems" data-id="${c.id}" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.name)} <span class="badge">${esc((FORM[c.form]||FORM.OTHER).sh)}</span>${npkOf(c)?` <span class="badge">${npkOf(c).join('-')}</span>`:''}${parseAI(c)?` <span class="badge">${parseAI(c)}%${c.aiName?' '+esc(c.aiName):''}</span>`:''}${best.has(c.id)?' <span class="badge ok">คุ้มสุดในกลุ่มตัวยาเดียวกัน</span>':''}</div><div class="s">${(c.tags||[]).map(t=>esc(TAG[t]||t)).join(' · ')}${c.rate?' · อัตรา '+nf.format(c.rate)+' '+esc(c.rateUnit||'')+'/20 ลิตร':''}${+c.phi?' · เว้น '+c.phi+' วัน':''}${(c.notMix||[]).length?' · ห้ามผสมกับ '+c.notMix.map(i=>S.data.chems[i]?esc(S.data.chems[i].name):'').filter(Boolean).join(', '):''}</div></div><div class="muted" style="text-align:right;font-size:14px">${priceTxt(c)||'<span style="color:var(--out)">ยังไม่มีราคา</span>'}${aiCost(c)!=null?`<div>ตัวยาจริง ${baht(aiCost(c)*(pricePer(c).d==='v'?1:1))} บาท/${pricePer(c).d==='v'?'ซีซี':'กรัม'}</div>`:''}</div></li>`).join('')}</ul></div>
+  return `<div class="panel"><ul class="list">${ch.map(c=>`<li class="click" data-act="edit" data-c="chems" data-id="${c.id}" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.name)} <span class="badge">${esc((FORM[c.form]||FORM.OTHER).sh)}</span>${npkOf(c)?` <span class="badge">${npkOf(c).join('-')}</span>`:''}${parseAI(c)?` <span class="badge">${parseAI(c)}%${c.aiName?' '+esc(c.aiName):''}</span>`:''}${best.has(c.id)?' <span class="badge ok">คุ้มสุดในกลุ่มตัวยาเดียวกัน</span>':''}${banBadge(c)}</div><div class="s">${(c.tags||[]).map(t=>esc(TAG[t]||t)).join(' · ')}${c.rate?' · อัตรา '+nf.format(c.rate)+' '+esc(c.rateUnit||'')+'/20 ลิตร':''}${+c.phi?' · เว้น '+c.phi+' วัน':''}${(c.notMix||[]).length?' · ห้ามผสมกับ '+c.notMix.map(i=>S.data.chems[i]?esc(S.data.chems[i].name):'').filter(Boolean).join(', '):''}</div></div><div class="muted" style="text-align:right;font-size:14px">${priceTxt(c)||'<span style="color:var(--out)">ยังไม่มีราคา</span>'}${aiCost(c)!=null?`<div>ตัวยาจริง ${baht(aiCost(c)*(pricePer(c).d==='v'?1:1))} บาท/${pricePer(c).d==='v'?'ซีซี':'กรัม'}</div>`:''}</div></li>`).join('')}</ul></div>
   <p class="muted" style="font-size:13.5px">ชนิดสูตรดูได้จากฉลาก เช่น 80% WP = ผง, 25% SC = น้ำข้น, 2.5% EC = น้ำมัน · ราคาถ้าไม่ใส่ จะใช้ราคาล่าสุดจากสต็อกที่ชื่อตรงกัน</p>`;
 }
 
@@ -1511,7 +1711,7 @@ function treeSheet(id){
   const yl={};list('flowers').filter(f=>f.stage==='cut'&&(f.trees||[]).includes(id)&&(+f.yieldKg||+f.yieldN)).forEach(f=>{const y=yearOf(f.date);const o=yl[y]=yl[y]||{n:0,kg:0};o.n+=+f.yieldN||0;o.kg+=+f.yieldKg||0});
   const yk=Object.keys(yl).sort().reverse().slice(0,4);
   openSheet(`ต้นเบอร์ ${esc(t.no)}`,`<div class="row" style="gap:18px;align-items:center;margin-bottom:18px">${tagHTML(t,st,{size:'lg',open:false})}<div><div style="font-size:18px;font-weight:700"><span class="dot st-${s.stage}"></span>${ST[s.stage].t}</div><div class="muted">${esc(t.variety||'')} · ${t.kind==='young'?'ต้นเล็ก':'ให้ผลแล้ว'}${t.row?' · แถว '+esc(t.row):''}${t.planted?' · ปลูก '+esc(t.planted):''}</div>${s.cutDate?`<div style="margin-top:4px"><b class="num" style="font-size:22px">${s.left<0?'เลยวันตัด '+(-s.left)+' วัน':'อีก '+s.left+' วันตัด'}</b> <span class="muted">(${fd(s.cutDate)})</span></div>`:''}${s.inPhi?`<div style="margin-top:6px"><span class="badge ${s.phiWarn?'bad':'warn'}">อยู่ในระยะเว้นยา ตัดได้ตั้งแต่ ${fd(s.safe)}</span></div>`:''}${t.note?`<div class="muted">${esc(t.note)}</div>`:''}</div></div>
-  ${S.canWrite?`<div class="row" style="margin-bottom:16px"><button type="button" class="btn" data-act="new" data-kind="works" data-tree="${id}">${ic('drop')}จดงานสวนต้นนี้</button><button type="button" class="btn" data-act="new" data-kind="flowers" data-tree="${id}">${ic('flower')}จดระยะดอกต้นนี้</button><button type="button" class="btn" data-act="edit" data-c="trees" data-id="${id}">แก้ไขข้อมูลต้น</button></div>`:''}
+  ${S.canWrite?`<div class="row" style="margin-bottom:16px"><button type="button" class="btn" data-act="new" data-kind="works" data-tree="${id}">${ic('drop')}จดงานสวนต้นนี้</button><button type="button" class="btn" data-act="new" data-kind="flowers" data-tree="${id}">${ic('flower')}จดระยะดอกต้นนี้</button><button type="button" class="btn" data-act="dxtree" data-id="${id}">ตรวจอาการต้นนี้</button><button type="button" class="btn" data-act="edit" data-c="trees" data-id="${id}">แก้ไขข้อมูลต้น</button></div>`:''}
   ${yk.length?`<h3 style="font-size:16px;margin:0 0 8px">ผลผลิตแต่ละปี</h3><div class="panel sum3 lastw" style="--n:${yk.length};margin-bottom:18px">${yk.map(y=>`<div><span>ปี ${be(y)}</span><b>${yl[y].kg?nf.format(yl[y].kg)+' กก.':'–'}</b><span>${yl[y].n?nf.format(yl[y].n)+' ลูก':''}</span></div>`).join('')}</div>`:''}
   <div class="sec-h"><h3 style="font-size:16px;margin:0">รูปถ่าย</h3>${S.canWrite&&S.mode!=='loading'?`<label class="btn" style="min-height:40px">${ic('camera')}เพิ่มรูป<input type="file" accept="image/*" data-photo="${id}" hidden></label>`:''}</div>
   <div class="photos" id="photos" style="margin-bottom:18px"><p class="muted">กำลังโหลดรูป…</p></div>
@@ -1562,7 +1762,7 @@ sheet.addEventListener('submit',async e=>{
     ok=await put('money',id,{...prev,date:g('date')||today(),dir:g('dir'),cat:g('cat'),amount:a,note:g('note'),crop:g('crop')||(g('cat')==='ขายมังคุด'?'มังคุด':'ทั้งสวน')})}
   else if(c==='chems'){if(!g('name')){toast('ใส่ชื่อสาร');btn.disabled=false;btn.textContent='บันทึก';return}
     ok=await put('chems',id,{...prev,name:g('name'),form:g('form')||'OTHER',tags:fd_.getAll('tag'),notMix:fd_.getAll('nm'),rate:+g('rate')||null,rateUnit:g('rateUnit'),phi:+g('phi')||0,packSize:+g('packSize')||null,packUnit:g('packUnit'),packPrice:+g('packPrice')||null,npk:g('npk'),ai:+g('ai')||null,aiName:g('aiName'),note:g('note')});
-    if(ok&&ui.chemToMix){ui.mix.items=(ui.mix.items||[]).filter(r=>r.pid);ui.mix.items.push({pid:id,amt:+g('rate')||'',unit:g('rateUnit')||'ซีซี'});saveMix()}ui.chemToMix=false}
+    if(ok&&ui.chemToMix){ui.mix.items=(ui.mix.items||[]).filter(r=>r.pid);ui.mix.items.push({pid:id,amt:+g('rate')||'',unit:g('rateUnit')||'ซีซี'});saveMix()}ui.chemToMix=false;if(ok){const bb=bannedOf(g('name')+' '+g('aiName'));if(bb&&bb.lv==='bad')setTimeout(()=>toast('คำเตือน: '+bb.name+' '+bb.why),1600)}}
   else if(c==='stock'){const q=+g('qty');if(!g('item')||!(q>0)){toast('ใส่ชื่อของและจำนวน');btn.disabled=false;btn.textContent='บันทึก';return}
     ok=await put('stock',id,{...prev,date:g('date')||today(),item:g('item'),qty:q,unit:g('unit'),kind:g('kind'),cost:+g('cost')||0,note:g('note')})}
   else if(c==='trees'){if(!g('no')){toast('ใส่เบอร์ต้น');btn.disabled=false;btn.textContent='บันทึก';return}
@@ -1578,6 +1778,7 @@ sheet.addEventListener('submit',async e=>{
 document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
   if(await planAct(a,el))return;
+  if(await drAct(a,el))return;
   if(/^mb/.test(a)&&mbAct(a,el))return;
   if(await homeAct(a,el))return;
   if(a==='quick')return quick();
