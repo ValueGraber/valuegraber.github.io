@@ -201,7 +201,7 @@
   let span = 72;
   /* ---------- risk rules, position size and the time machine
      (ideas from github.com/Jakeschincariol/day-trader-skill, MIT: trader-budget, trader-risk, trader-timemachine) ---------- */
-  const RULES = { maxLoss: 20, maxDay: 50, maxTrades: 3, minRR: 1.3 }; /* 0.01 lot of gold moves $1 per $1, and a normal 1h stop is $10–20 */
+  const RULES = { maxLoss: 20, maxDay: 50, maxTrades: 3, minRR: 1.3, wkLoss: 100, moLoss: 200, streak: 2, revenge: 60 }; /* 0.01 lot of gold moves $1 per $1, and a normal 1h stop is $10–20 */
   const rules = () => ({ ...RULES, ...(D.set.rules || {}) });
   /* the stop decides the size: lot = money you accept to lose ÷ (stop distance × ounces per lot), rounded down to 0.01 */
   const sizeLot = (risk) => (risk > 0 ? Math.floor((rules().maxLoss / (risk * D.set.cs)) * 100 + 1e-9) / 100 : null);
@@ -209,6 +209,20 @@
   const dayState = (list) => { const t = bkDay(Date.now());
     return { n: list.filter((x) => bkDay(x.at) === t).length, pl: list.filter((x) => x.exit != null && bkDay(x.closedAt) === t).reduce((a, x) => a + plOf(x), 0),
       open: list.filter((x) => x.exit == null).reduce((a, x) => a + riskOf(x), 0) }; };
+  /* circuit breaker (money-master 2.5): losing streak → 24 h cooldown, weekly / monthly loss caps, no entry within N minutes of a loss */
+  const weekStart = (t) => { const d = new Date(new Date(t).toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; };
+  const breaker = (list) => {
+    const r = rules(), now = Date.now(), out = [], cl = list.filter((x) => x.exit != null).sort((a, b) => a.closedAt - b.closedAt);
+    let st = 0; for (let i = cl.length - 1; i >= 0 && plOf(cl[i]) < 0; i--) st++;
+    const last = cl[cl.length - 1];
+    if (st >= r.streak && last && now - last.closedAt < 24 * 3600e3) out.push({ k: 'cool', msg: `แพ้ติดกัน ${st} ไม้ พักเทรดถึง ${hm(last.closedAt + 24 * 3600e3)}` });
+    const wk = cl.filter((x) => x.closedAt >= weekStart(now).getTime()).reduce((a, x) => a + plOf(x), 0);
+    if (wk <= -r.wkLoss) out.push({ k: 'week', msg: `สัปดาห์นี้ขาดทุน ${usd(wk)} ถึงเพดาน $${f2(r.wkLoss)} หยุดถึงวันจันทร์หน้า` });
+    const mk = bkDay(now).slice(0, 7), mo = cl.filter((x) => bkDay(x.closedAt).startsWith(mk)).reduce((a, x) => a + plOf(x), 0);
+    if (mo <= -r.moLoss) out.push({ k: 'month', msg: `เดือนนี้ขาดทุน ${usd(mo)} ถึงเพดาน $${f2(r.moLoss)} หยุดถึงต้นเดือนหน้า` });
+    if (last && plOf(last) < 0 && now - last.closedAt < r.revenge * 60e3) out.push({ k: 'revenge', msg: `เพิ่งแพ้เมื่อ ${Math.round((now - last.closedAt) / 60e3)} นาทีก่อน รอให้ครบ ${r.revenge} นาที กันเทรดแก้แค้น` });
+    return { out, st, wk, mo, last };
+  };
   /* every rule that fails is listed; paper entries are blocked, real ones are saved with a warning */
   const check = (o, list) => {
     const r = rules(), bl = [], wn = [], dir = o.side === 'buy' ? 1 : -1, risk = o.sl ? Math.abs(o.entry - o.sl) : 0, loss = risk * o.lot * D.set.cs;
@@ -218,6 +232,8 @@
     else if (risk && Math.abs(o.tp - o.entry) / risk < r.minRR - 1e-9) bl.push(`TP:SL = ${(Math.abs(o.tp - o.entry) / risk).toFixed(2)} ต่ำกว่าขั้นต่ำ ${r.minRR}`);
     const d = dayState(list); if (d.n >= r.maxTrades) bl.push(`วันนี้เข้าไปแล้ว ${d.n} ไม้ ครบโควตา ${r.maxTrades} ไม้ต่อวัน`);
     const worst = Math.max(0, -d.pl) + d.open + loss; if (worst > r.maxDay + 0.01) bl.push(`ถ้าไม้นี้โดน SL วันนี้อาจเสียรวม $${f2(worst)} เกินเพดาน $${f2(r.maxDay)} ต่อวัน`);
+    const br = breaker(list); br.out.forEach((x) => bl.push(x.msg));
+    if (br.last && plOf(br.last) < 0 && o.lot > br.last.lot + 1e-9) bl.push(`ไม้ก่อนหน้าแพ้ (${br.last.lot} lot) ห้ามเพิ่มขนาดเป็น ${o.lot} lot`);
     if (wkend(Date.now())) wn.push('เสาร์-อาทิตย์ ตลาดทองจริงปิด');
     return { ok: !bl.length, bl, wn };
   };
@@ -279,7 +295,9 @@
     const box = $('rk-today'); if (!box) return; const r = rules();
     const line = (k, list) => { const d = dayState(list), left = r.maxDay - Math.max(0, -d.pl) - d.open;
       const p = el('p', 'rk-l'); p.append(el('b', null, k), el('span', null, ` เข้าแล้ว ${d.n}/${r.maxTrades} ไม้ · ปิดแล้ว ${usd(d.pl)} · ความเสี่ยงไม้ที่เปิด $${f2(d.open)} · เสียได้อีก `), el('b', left > 0 ? 'pos' : 'neg', '$' + f2(Math.max(0, left)))); return p; };
-    box.replaceChildren(line('ไม้จริงวันนี้:', D.tx), line('ไม้กระดาษของคุณวันนี้:', P().tx.filter((x) => x.src === 'man')));
+    const brk = (k, list) => { const b = breaker(list); const p = el('p', 'rk-l ' + (b.out.length ? 'neg' : 'pos'));
+      p.append(el('b', null, k), el('span', null, ' ' + (b.out.length ? b.out.map((x) => x.msg).join(' · ') : `พร้อมเทรด · สัปดาห์นี้ ${usd(b.wk)} / เพดาน $${f2(r.wkLoss)} · เดือนนี้ ${usd(b.mo)} / $${f2(r.moLoss)}`))); return p; };
+    box.replaceChildren(line('ไม้จริงวันนี้:', D.tx), brk('สถานะไม้จริง:', D.tx), line('ไม้กระดาษของคุณวันนี้:', P().tx.filter((x) => x.src === 'man')), brk('สถานะไม้กระดาษ:', P().tx.filter((x) => x.src === 'man')));
   };
 
   /* ---------- TradingView-style chart: lightweight-charts 4.2.3 (TradingView's open-source library) loaded on demand;
@@ -473,7 +491,7 @@
   const prefill = (s) => {
     $('gt-side').value = s ? s.side : 'buy'; $('gt-entry').value = s ? s.entry.toFixed(2) : live != null ? live.toFixed(2) : '';
     $('gt-sl').value = s ? s.sl.toFixed(2) : ''; $('gt-tp').value = s ? s.tp.toFixed(2) : ''; if (s) { const lt = sizeLot(Math.abs(s.entry - s.sl)); if (lt >= 0.01) $('gt-lot').value = lt; } sizeHint(); $('gt-at').value = ''; $('gt-note').value = s ? 'ตามสัญญาณระบบ' : '';
-    $('gt-form').dataset.sig = s ? '1' : ''; $('gt-msg').textContent = 'แก้ราคาเข้าให้ตรงกับใน MT5 แล้วกดบันทึก';
+    $('gt-form').dataset.sig = s ? '1' : ''; $('gt-setup').value = s ? strat() : 'man'; $('gt-msg').textContent = 'แก้ราคาเข้าให้ตรงกับใน MT5 แล้วกดบันทึก';
     if (window.VGNav) window.VGNav.go('scan', 'gtj');
     setTimeout(() => { const f = $('gt-form'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('gt-entry').focus(); } }, 120);
   };
@@ -484,7 +502,7 @@
     if (!(entry > 0) || !(lot > 0)) { $('gt-msg').textContent = 'ใส่ราคาเข้าและขนาด lot ก่อน'; return; }
     if (sl && (side === 'buy' ? sl >= entry : sl <= entry)) { $('gt-msg').textContent = side === 'buy' ? 'ซื้อ: SL ต้องต่ำกว่าราคาเข้า' : 'ขาย: SL ต้องสูงกว่าราคาเข้า'; return; }
     const at = $('gt-at').value ? new Date($('gt-at').value).getTime() : Date.now();
-    const c = check({ side, entry, sl, tp, lot }, D.tx), x = { id: uid(), side, at, entry, lot, sl, tp, note: $('gt-note').value.trim(), sig: $('gt-form').dataset.sig === '1' };
+    const c = check({ side, entry, sl, tp, lot }, D.tx), x = { id: uid(), side, at, entry, lot, sl, sl0: sl, tp, note: $('gt-note').value.trim(), sig: $('gt-form').dataset.sig === '1', setup: $('gt-setup').value || 'man' };
     if (!c.ok) x.rule = c.bl; D.tx.push(x);
     D.set.lot = lot; save(); $('gt-form').dataset.sig = ''; ['gt-entry', 'gt-sl', 'gt-tp', 'gt-at', 'gt-note'].forEach((k) => { $(k).value = ''; }); sizeHint();
     $('gt-msg').textContent = c.ok ? 'บันทึกแล้ว ผ่านกฎทุกข้อ' : 'บันทึกแล้ว แต่ไม้นี้ผิดกฎ: ' + c.bl.join(' · '); drawAll();
@@ -565,6 +583,44 @@
   const stats = (list) => { const p = list.map((x) => plOf(x)); const w = p.filter((v) => v > 0), l = p.filter((v) => v <= 0);
     const gw = w.reduce((a, v) => a + v, 0), gl = -l.reduce((a, v) => a + v, 0);
     return { n: p.length, net: gw - gl, win: p.length ? w.length / p.length : null, pf: gl ? gw / gl : null, aw: w.length ? gw / w.length : null, al: l.length ? -gl / l.length : null }; };
+  const r0 = (x) => Math.abs(x.entry - (x.sl0 ?? x.sl ?? x.entry)) * x.lot * D.set.cs; /* money at risk when the trade was opened */
+  const rOf = (x) => { const k = r0(x); return k > 0 ? plOf(x) / k : null; };
+  const SESS = [['เอเชีย 07–14', 7, 14], ['ลอนดอน 14–19', 14, 19], ['นิวยอร์ก 19–24', 19, 24], ['กลางคืน 00–07', 0, 7]];
+  const sessOf = (t) => { const h = bkHour(t); return (SESS.find(([, a, b]) => h >= a && h < b) || SESS[3])[0]; };
+  const setupOf = (x, pp) => (pp ? srcName(x.src) : x.setup ? (STRATS[x.setup] ? STRATS[x.setup].name : 'เข้าเอง') : x.sig ? 'ตามสัญญาณ' : 'เข้าเอง');
+  const deep = (list) => { const rs = list.map(rOf).filter((v) => v != null); const exp = rs.length ? rs.reduce((a, v) => a + v, 0) / rs.length : null;
+    let eq = 0, pk = 0, dd = 0; [...list].sort((a, b) => a.closedAt - b.closedAt).forEach((x) => { eq += plOf(x); pk = Math.max(pk, eq); dd = Math.min(dd, eq - pk); });
+    return { exp, nR: rs.length, dd }; };
+  const groupTable = (list, keyFn, title) => {
+    const g = {}; list.forEach((x) => { const k = keyFn(x); (g[k] = g[k] || []).push(x); });
+    const tb = el('table', 'tr-table'), hd = el('tr'); [title, 'ไม้', 'ชนะ', 'เฉลี่ย R', 'กำไร'].forEach((h) => hd.append(el('th', null, h)));
+    const th = el('thead'); th.append(hd); tb.append(th); const bd = el('tbody');
+    Object.entries(g).sort((a, b) => b[1].length - a[1].length).forEach(([k, xs]) => { const s2 = stats(xs), d2 = deep(xs), tr = el('tr'); const td = (v, c) => tr.append(el('td', c || null, v));
+      td(k); td(String(s2.n)); td(Math.round(s2.win * 100) + '%'); td(d2.exp == null ? '–' : `${sgn(d2.exp)}${Math.abs(d2.exp).toFixed(2)}R`, tone(d2.exp)); td(usd(s2.net), tone(s2.net)); bd.append(tr); });
+    tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); return w;
+  };
+  const drawStats = (c, pp) => {
+    const box = $('gt-stats'); if (!box) return; box.replaceChildren();
+    if (!c.length) { box.append(el('div', 'empty', 'ยังไม่มีไม้ที่ปิด สถิติจะขึ้นเมื่อมีไม้')); return; }
+    const s = stats(c), d = deep(c);
+    box.append(el('p', 'rk-l', `ทั้งหมด ${s.n} ไม้ · ค่าคาดหวัง ${d.exp == null ? '–' : `${sgn(d.exp)}${Math.abs(d.exp).toFixed(2)}R ต่อไม้`} · Profit factor ${s.pf == null ? '–' : s.pf.toFixed(2)} · ลดลงหนักสุดจากจุดสูง ${usd(d.dd)}`));
+    if (s.n < 30) box.append(el('p', 'pf-hint', `ตัวอย่างยังน้อย (${s.n}/30 ไม้) ตัวเลขยังเชื่อไม่ได้มาก`));
+    box.append(el('h4', null, 'แยกตามท่า'), groupTable(c, (x) => setupOf(x, pp), 'ท่า'), el('h4', null, 'แยกตามช่วงเวลาที่เข้า (เวลาไทย)'), groupTable(c, (x) => sessOf(x.at), 'ช่วง'));
+    /* last 7 days review: process first */
+    const wk = c.filter((x) => Date.now() - x.closedAt < 7 * 86400e3).sort((a, b) => a.at - b.at), all = [...c].sort((a, b) => a.closedAt - b.closedAt);
+    const tags = []; let revenge = 0, creep = 0;
+    wk.forEach((x) => { const prev = all.filter((y) => y.closedAt <= x.at).pop(); if (prev && plOf(prev) < 0) { if (x.at - prev.closedAt < rules().revenge * 60e3) revenge++; if (x.lot > prev.lot + 1e-9) creep++; } });
+    const broke = wk.filter((x) => x.rule && x.rule.length).length;
+    if (revenge) tags.push(`เข้าไม้ใหม่เร็วหลังแพ้ ${revenge} ครั้ง (เสี่ยงเทรดแก้แค้น)`); if (creep) tags.push(`เพิ่มขนาดไม้หลังแพ้ ${creep} ครั้ง`); if (broke) tags.push(`ไม้ผิดกฎ ${broke} ไม้`);
+    const ws = stats(wk), wd = deep(wk), next = [];
+    if (broke || revenge || creep) next.push('2 ไม้ถัดไปใช้ความเสี่ยงครึ่งเดียว (ตั้ง "ยอมเสียต่อไม้" ลดลงครึ่งหนึ่งชั่วคราว)');
+    if (revenge) next.push(`หลังแพ้ รออย่างน้อย ${rules().revenge} นาทีก่อนเข้าไม้ใหม่`);
+    if (wd.exp != null && wd.exp < 0 && ws.n >= 5) next.push('ค่าคาดหวังติดลบ: ย้อนดูท่าที่ขาดทุนในตารางด้านบน แล้วเทรดเฉพาะท่าที่เป็นบวกในโหมดกระดาษก่อน');
+    if (!next.length) next.push('ทำตามแผนเดิม กระบวนการดีแล้ว ผลแพ้ชนะช่วงสั้นเป็นเรื่องปกติ');
+    box.append(el('h4', null, 'ทบทวน 7 วันล่าสุด'), el('p', 'rk-l', wk.length ? `${ws.n} ไม้ · ${usd(ws.net)} · ชนะ ${Math.round(ws.win * 100)}% · ${wd.exp == null ? '' : `${sgn(wd.exp)}${Math.abs(wd.exp).toFixed(2)}R ต่อไม้`}` : 'ไม่มีไม้ที่ปิดใน 7 วัน'));
+    box.append(el('p', null, tags.length ? 'สิ่งที่เจอ: ' + tags.join(' · ') : 'ไม่เจอพฤติกรรมเสี่ยงจากข้อมูลที่มี'));
+    const ul = el('ul', 'gt-next'); next.forEach((t) => ul.append(el('li', null, t))); box.append(el('b', null, 'กฎชั่วคราวสำหรับรอบหน้า'), ul);
+  };
   const drawDash = () => {
     const box = $('gt-cal'); if (!box) return;
     const pp = dsrc === 'paper', c = pp ? pClosed() : closedTx(), m = c.filter((x) => bkDay(x.closedAt).startsWith(ym)), s = stats(m), all = stats(c);
@@ -591,6 +647,7 @@
     if (selDay) { const list = byDay[selDay] || []; const net = list.reduce((a, x) => a + plOf(x), 0);
       dl.append(el('h4', null, `${new Date(selDay + 'T12:00').toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' })} · ${usd(net)} (${thb(net)})`));
       if (!list.length) dl.append(el('div', 'empty', 'วันนี้ไม่มีไม้ที่ปิด')); list.forEach((x) => dl.append(row(x, false, pp))); }
+    drawStats(c, pp);
   };
   const drawAll = () => { drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
 
@@ -636,8 +693,8 @@
     };
     $('gp-autolot').checked = P().autoLot !== false; $('gp-lot').disabled = $('gp-autolot').checked;
     $('gp-autolot').addEventListener('change', (ev) => { P().autoLot = ev.target.checked; $('gp-lot').disabled = ev.target.checked; save(); });
-    const rk = [['rk-loss', 'maxLoss'], ['rk-day', 'maxDay'], ['rk-n', 'maxTrades'], ['rk-rr', 'minRR']];
-    rk.forEach(([id, k]) => { $(id).value = rules()[k]; $(id).addEventListener('change', () => { const v = +$(id).value; if (v > 0) { D.set.rules = { ...(D.set.rules || {}), [k]: k === 'maxTrades' ? Math.round(v) : v }; save(); drawAll(); } else $(id).value = rules()[k]; }); });
+    const rk = [['rk-loss', 'maxLoss'], ['rk-day', 'maxDay'], ['rk-n', 'maxTrades'], ['rk-rr', 'minRR'], ['rk-wk', 'wkLoss'], ['rk-mo', 'moLoss'], ['rk-st', 'streak'], ['rk-rv', 'revenge']];
+    rk.forEach(([id, k]) => { $(id).value = rules()[k]; $(id).addEventListener('change', () => { const v = +$(id).value; if (v > 0) { D.set.rules = { ...(D.set.rules || {}), [k]: k === 'maxTrades' || k === 'streak' || k === 'revenge' ? Math.round(v) : v }; save(); drawAll(); } else $(id).value = rules()[k]; }); });
     ['gt-entry', 'gt-sl'].forEach((k) => $(k).addEventListener('input', sizeHint)); sizeHint();
     $('tm-run').addEventListener('click', () => { tmFrom = null; tmGo(); });
     $('gp-buy').addEventListener('click', () => trade('buy')); $('gp-sell').addEventListener('click', () => trade('sell'));

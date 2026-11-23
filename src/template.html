@@ -1094,6 +1094,7 @@ tr.editing td { background: var(--accent-soft); }
 .gt-rule { color: var(--brick); } .gt-block { color: var(--brick); margin: 0; font-size: 14px; }
 .gp-chk { flex-direction: row !important; align-items: center; gap: 8px; display: flex; }
 .rk-l { margin: 8px 0; font-size: 15px; }
+#gt-stats h4 { margin: 16px 0 6px; font-size: 15px; } .gt-h3 { margin: 28px 0 8px; font-size: 18px; } .gt-next { margin: 6px 0 0; padding-left: 20px; }
 @media (max-width: 640px) { .tm-row { grid-template-columns: 7.5em 1fr 3.8em; font-size: 13px; } }
 .gt-pdh, .gt-pdl { stroke: var(--foil); stroke-width: 1.6; stroke-dasharray: 4 3; }
 .gt-ln.pd { border-color: var(--foil); }
@@ -1478,6 +1479,7 @@ body.gt-noscroll { overflow: hidden; }
         <label>ขนาด (lot) <input class="inp" id="gt-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
         <label>ตัดขาดทุน SL <input class="inp" id="gt-sl" type="number" step="any" min="0" inputmode="decimal"></label>
         <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="asia">เบรกกรอบเอเชีย</option><option value="sweep">กวาดสต็อป</option><option value="ema">EMA ย่อ</option><option value="man" selected>เข้าเอง</option></select></label>
         <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
       </div>
       <p class="pf-hint" id="gt-size"></p>
@@ -1497,15 +1499,21 @@ body.gt-noscroll { overflow: hidden; }
     <div id="gt-cal"></div>
     <p class="pf-hint">นับกำไรขาดทุนเข้าวันที่ปิดไม้ (เวลาไทย) แตะวันเพื่อดูไม้ของวันนั้น ตัวเลขบาทคิดจากเรตวันนี้</p>
     <div id="gt-day"></div>
+    <h3 class="gt-h3">สถิติและทบทวน</h3>
+    <div id="gt-stats"></div>
   </section>
 
   <section id="gtr" data-sub="gtr">
-    <p class="sec-note">ตั้งครั้งเดียว ระบบคิด lot ให้จากเงินที่ยอมเสีย และตรวจทุกไม้ก่อนเข้า ไม้กระดาษที่ผิดกฎจะเปิดไม่ได้ ไม้จริงยังจดได้แต่ติดป้าย "ผิดกฎ" ไว้ บอทไม่ติดกฎนี้</p>
+    <p class="sec-note">ตั้งครั้งเดียว ระบบคิด lot ให้จากเงินที่ยอมเสีย ตรวจทุกไม้ก่อนเข้า และสั่งพักเมื่อแพ้ติดกันหรือขาดทุนถึงเพดาน ไม้กระดาษที่ผิดกฎจะเปิดไม่ได้ ไม้จริงยังจดได้แต่ติดป้าย "ผิดกฎ" ไว้ บอทไม่ติดกฎนี้</p>
     <div class="pf-form f2">
       <label>ยอมเสียต่อไม้ (USD) <input class="inp" id="rk-loss" type="number" step="any" min="0" inputmode="decimal"></label>
       <label>ขาดทุนสูงสุดต่อวัน (USD) <input class="inp" id="rk-day" type="number" step="any" min="0" inputmode="decimal"></label>
       <label>เข้าได้สูงสุดต่อวัน (ไม้) <input class="inp" id="rk-n" type="number" step="1" min="1" inputmode="numeric"></label>
       <label>TP:SL ขั้นต่ำ (เช่น 1.3) <input class="inp" id="rk-rr" type="number" step="0.1" min="0" inputmode="decimal"></label>
+      <label>ขาดทุนสูงสุดต่อสัปดาห์ (USD) <input class="inp" id="rk-wk" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>ขาดทุนสูงสุดต่อเดือน (USD) <input class="inp" id="rk-mo" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label>แพ้ติดกันกี่ไม้ให้พัก 24 ชม. <input class="inp" id="rk-st" type="number" step="1" min="1" inputmode="numeric"></label>
+      <label>หลังแพ้ ห้ามเข้าไม้ใหม่กี่นาที <input class="inp" id="rk-rv" type="number" step="1" min="0" inputmode="numeric"></label>
     </div>
     <div id="rk-today"></div>
   </section>
