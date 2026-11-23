@@ -1183,6 +1183,19 @@ body.gt-noscroll { overflow: hidden; }
 details.how { margin: 4px 4px 16px; max-width: 64ch; }
 details.how summary { cursor: pointer; color: var(--accent); font-size: 14px; width: fit-content; list-style-position: inside; }
 details.how .sec-note { margin: 6px 0 0; }
+
+/* gold signal: which strategy and which conditions */
+.gt-sh { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.gt-chip { font-size: 14px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
+.gt-ch { display: block; color: var(--ink-2); font-size: 14px; margin-top: 8px; }
+.gt-cond { margin: 4px 0 8px; padding: 0; list-style: none; }
+.gt-cond li { position: relative; padding: 2px 0 2px 22px; font-size: 15px; }
+.gt-cond li::before { content: "✓"; position: absolute; left: 2px; color: var(--jade); font-weight: 700; }
+.gt-oth { margin: 10px 0 4px; }
+.gt-orow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.gt-orow > span:first-child { font-weight: 600; min-width: 9em; }
+.gt-orow .muted { color: var(--ink-2); }
+.gt-orow .btn-line { margin-left: auto; }
 </style>
 </head>
 <body>
@@ -5246,7 +5259,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = 'df8c8a4a0c';
+  const BUILD = '8108728047';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -6454,6 +6467,13 @@ const SPC = (() => {
     st: { name: 'Supertrend กลับตัว', fn: sigSt, lines: (I) => [I.st.map((v, k) => (I.sd[k] === -1 ? v : null)), I.st.map((v, k) => (I.sd[k] === 1 ? v : null))], why: (s) => `เส้น Supertrend พลิกเป็น${s.side === 'buy' ? 'ขาขึ้น' : 'ขาลง'} (${px(s.lvl)}) ตรงกับเทรนด์ใหญ่ 20 วัน`,
       wait: (I, i) => `Supertrend ตอนนี้${I.sd[i] === 1 ? 'ขาขึ้น' : 'ขาลง'} เส้นอยู่ที่ ${px(I.st[i])} · เทรนด์ใหญ่${bars[i].c > I.e480[i] ? 'ขึ้น รอเส้นพลิกขึ้นแล้วซื้อ' : 'ลง รอเส้นพลิกลงแล้วขาย'}` },
   };
+  /* which conditions fired, with the numbers, for the signal card */
+  const COND = {
+    dip: (s, J, i) => { const b = s.side === 'buy'; return [`ราคา ${px(s.entry)} ${b ? 'เหนือ' : 'ใต้'}เส้นเฉลี่ย 20 วัน (${px(J.e480[i])}) = เทรนด์ใหญ่${b ? 'ขึ้น' : 'ลง'}`, `EMA 50 (${px(J.e50[i])}) ${b ? 'เหนือ' : 'ใต้'} EMA 200 (${px(J.e200[i])})`, `RSI 2 = ${Math.round(J.r2[i])} ${b ? 'ต่ำกว่า 8 (ย่อแรง)' : 'สูงกว่า 92 (เด้งแรง)'}`]; },
+    brk: (s, J, i) => { const b = s.side === 'buy'; return [`แท่งปิดที่ ${px(s.entry)} ${b ? 'ทะลุจุดสูงสุด' : 'หลุดจุดต่ำสุด'}ของ 20 ชม. (${px(s.lvl)}) เป็นแท่งแรก`, `EMA 50 (${px(J.e50[i])}) ${b ? 'เหนือ' : 'ใต้'} EMA 200 (${px(J.e200[i])}) = เทรนด์${b ? 'ขึ้น' : 'ลง'}`, 'แท่งปิดในช่วง 14:00–01:00 น.']; },
+    st: (s, J, i) => { const b = s.side === 'buy'; return [`เส้น Supertrend พลิกเป็น${b ? 'ขาขึ้น' : 'ขาลง'} (${px(s.lvl)})`, `ราคา ${px(s.entry)} ${b ? 'เหนือ' : 'ใต้'}เส้นเฉลี่ย 20 วัน (${px(J.e480[i])})`]; },
+  };
+  const TAGS = { dip: 'RSI2', brk: 'เบรก20', st: 'ST' };
   const OLD = { asia: 'เบรกกรอบเอเชีย (เลิกใช้)', sweep: 'กวาดสต็อป (เลิกใช้)', ema: 'EMA ย่อ (เลิกใช้)' };
   /* filters: trade only with the 20-day trend (1h EMA 480), skip the US jobs report window (first Friday, 18:00–22:00 Thai) */
   const nfpBlock = (t) => { const d = new Date(t + 7 * 3600e3), h = d.getUTCHours(); return d.getUTCDay() === 5 && d.getUTCDate() <= 7 && h >= 18 && h <= 21; };
@@ -6792,7 +6812,7 @@ const SPC = (() => {
     const dur = TFH[tf] * 3600e3, mk = [], seen = new Set();
     if (tf !== '1d') S.forEach((sg) => { const t = sg.t - 1; let lo = 0, hi = b.length - 1, j = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (b[m].t <= t) { j = m; lo = m + 1; } else hi = m - 1; }
       if (j < 0 || t >= b[j].t + dur || seen.has(j)) return; seen.add(j);
-      mk.push({ time: ts(b[j].t), position: sg.side === 'buy' ? 'belowBar' : 'aboveBar', color: sg.side === 'buy' ? LW.up : LW.dn, shape: sg.side === 'buy' ? 'arrowUp' : 'arrowDown', text: sg.side === 'buy' ? 'Buy' : 'Sell' }); });
+      mk.push({ time: ts(b[j].t), position: sg.side === 'buy' ? 'belowBar' : 'aboveBar', color: sg.side === 'buy' ? LW.up : LW.dn, shape: sg.side === 'buy' ? 'arrowUp' : 'arrowDown', text: (sg.side === 'buy' ? 'Buy ' : 'Sell ') + (TAGS[strat()] || '') }); });
     LW.cs.setMarkers(mk);
     LW.pls.forEach((p) => LW.cs.removePriceLine(p)); LW.pls = [];
     [...openTx(), ...pOpen()].forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
@@ -6881,8 +6901,9 @@ const SPC = (() => {
     const s = lastSig(), tr = trendNow();
     const card = el('div', 'gt-sig' + (s ? ' ' + s.side : ''));
     if (s) {
-      card.append(el('b', null, s.side === 'buy' ? 'สัญญาณซื้อ (Buy)' : 'สัญญาณขาย (Sell)'),
-        el('p', null, `${STRATS[strat()].name} · แท่งปิด ${hm(s.t)} · ${STRATS[strat()].why(s)}`));
+      const hd = el('div', 'gt-sh'); hd.append(el('b', null, s.side === 'buy' ? 'สัญญาณซื้อ (Buy)' : 'สัญญาณขาย (Sell)'), el('span', 'gt-chip', 'ท่า: ' + STRATS[strat()].name));
+      card.append(hd, el('p', null, `แท่งปิด ${hm(s.t)}` + (COND[strat()] ? '' : ` · ${STRATS[strat()].why(s)}`)));
+      if (COND[strat()] && s.i != null) { const ul = el('ul', 'gt-cond'); COND[strat()](s, I, s.i).forEach((t) => ul.append(el('li', null, t))); card.append(el('small', 'gt-ch', 'เข้าเงื่อนไขครบทุกข้อ:'), ul); }
       const g = el('div', 'gt-lv'); [['เข้า', s.entry], ['ตัดขาดทุน (SL)', s.sl], ['ทำกำไร (TP)', s.tp]].forEach(([k, p]) => { const d = el('div'); d.append(el('small', null, k + (OFF() ? ' MT5' : '')), el('span', null, px(p + OFF()))); g.append(d); });
       const lot = sizeLot(Math.abs(s.entry - s.sl)), rr = Math.abs(s.tp - s.entry) / Math.abs(s.entry - s.sl), risk = Math.abs(s.entry - s.sl) * (lot || 0) * D.set.cs;
       card.append(g, el('p', 'pf-hint', lot >= 0.01 ? `lot ที่เหมาะ ${lot} (ยอมเสียไม้ละ $${f2(rules().maxLoss)}): ถ้าโดน SL เสีย ${usd(-risk)} (${thb(-risk)}) ถ้าถึง TP ได้ ${usd(risk * rr)} · TP:SL = ${rr.toFixed(2)}` : `SL ไกลเกินไปสำหรับเงินที่ยอมเสียไม้ละ $${f2(rules().maxLoss)} แม้ 0.01 lot ก็เสียเกิน`));
@@ -6899,10 +6920,17 @@ const SPC = (() => {
       card.append(el('b', null, 'ยังไม่มีสัญญาณ รอก่อน'));
       if (tr && tr.wk) card.append(el('p', null, 'วันเสาร์-อาทิตย์ ตลาดทองจริงปิด ราคา PAXG ยังขยับได้ แต่ระบบไม่ให้สัญญาณ'));
       else if (tr) card.append(el('p', null, STRATS[strat()].wait(I, bars.length - 1)));
-      const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุด: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
+      const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุดของท่า${STRATS[strat()].name}: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
       const b = el('button', 'btn-line', 'จดไม้เอง'); b.type = 'button'; b.addEventListener('click', () => prefill(null)); card.append(b);
     }
     box.append(card);
+    /* the other strategies: say which one has a signal so nothing is missed */
+    const oth = el('div', 'gt-oth'); oth.append(el('small', 'gt-ch', 'ท่าอื่นตอนนี้'));
+    Object.keys(STRATS).filter((k) => k !== strat()).forEach((k) => { const L = SS[k] || [], q = L[L.length - 1], on1 = q && bars.length - 1 - q.i <= 2 && !q.out;
+      const r = el('div', 'gt-orow'); r.append(el('span', null, STRATS[k].name), el('span', on1 ? (q.side === 'buy' ? 'pos' : 'neg') : 'muted', on1 ? `มีสัญญาณ${q.side === 'buy' ? 'ซื้อ' : 'ขาย'} (แท่ง ${hm(q.t)})` : 'ไม่มีสัญญาณ'));
+      if (on1) { const b = el('button', 'btn-line sm', 'ดูท่านี้'); b.type = 'button'; b.addEventListener('click', () => { D.set.strat = k; document.querySelectorAll('#gt-strat button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === k))); S = SS[k] || []; save(); drawChart(); drawNow(); }); r.append(b); }
+      oth.append(r); });
+    box.append(oth);
     /* back-test */
     const done = S.filter((x) => x.out), w = done.filter((x) => x.R > 0), gw = w.reduce((a, x) => a + x.R, 0), gl = -done.filter((x) => x.R <= 0).reduce((a, x) => a + x.R, 0);
     const days = bars.length ? Math.round((bars[bars.length - 1].t - bars[0].t) / 86400e3) : 0;

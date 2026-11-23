@@ -1183,6 +1183,19 @@ body.gt-noscroll { overflow: hidden; }
 details.how { margin: 4px 4px 16px; max-width: 64ch; }
 details.how summary { cursor: pointer; color: var(--accent); font-size: 14px; width: fit-content; list-style-position: inside; }
 details.how .sec-note { margin: 6px 0 0; }
+
+/* gold signal: which strategy and which conditions */
+.gt-sh { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.gt-chip { font-size: 14px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
+.gt-ch { display: block; color: var(--ink-2); font-size: 14px; margin-top: 8px; }
+.gt-cond { margin: 4px 0 8px; padding: 0; list-style: none; }
+.gt-cond li { position: relative; padding: 2px 0 2px 22px; font-size: 15px; }
+.gt-cond li::before { content: "✓"; position: absolute; left: 2px; color: var(--jade); font-weight: 700; }
+.gt-oth { margin: 10px 0 4px; }
+.gt-orow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.gt-orow > span:first-child { font-weight: 600; min-width: 9em; }
+.gt-orow .muted { color: var(--ink-2); }
+.gt-orow .btn-line { margin-left: auto; }
 </style>
 </head>
 <body>
