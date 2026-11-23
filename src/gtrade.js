@@ -19,15 +19,34 @@
   const blank = () => ({ tx: [], set: { lot: 0.01, cs: 100, strat: 'dip', spread: 0.3, slip: 0.1, comm: 0, htf: false, nfp: true } });
   const pblank = () => ({ start: 1000, lot: 0.01, be: true, auto: { dip: true }, since: { dip: Date.now() }, tx: [] });
   const norm = (j) => { const pp = (j && j.paper) || {};
-    return { tx: Array.isArray(j && j.tx) ? j.tx : [], set: { ...blank().set, ...((j && j.set) || {}) },
+    return { tx: Array.isArray(j && j.tx) ? j.tx : [], del: Array.isArray(j && j.del) ? j.del.slice(-500) : [], su: (j && j.su) || 0, set: { ...blank().set, ...((j && j.set) || {}) },
       paper: (() => { const q = { ...pblank(), ...pp, auto: { ...(pp.auto || pblank().auto) }, since: { ...(pp.since || pblank().since) }, tx: Array.isArray(pp.tx) ? pp.tx : [] };
         if (q.auto.dip === undefined) { ['asia', 'sweep', 'ema'].forEach((k) => delete q.auto[k]); q.auto.dip = true; q.since.dip = Date.now(); } return q; })() }; };
   const P = () => D.paper;
   const OFF = () => (isFinite(D.set.off) ? +D.set.off : 0); /* MT5 price − PAXG price, set by Mon from his broker's quote */
   const SPD = () => (D.set.spread >= 0 ? D.set.spread : 0.3); /* broker spread, USD per ounce (setting) */
   let D = norm(null); try { D = norm(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { /* defaults */ }
+  setTimeout(() => prime(), 0); /* prime is defined below */
   try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!raw || !raw.paper || !raw.paper.auto || raw.paper.auto.dip === undefined) localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } /* pin the bot start time */
-  const save = (sync = true) => { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } if (sync && window.VGSync) window.VGSync.push('portfolios'); };
+  /* sync safety (2026-11-24): the account holds one document for all devices, so a save from another open device or tab used to overwrite trades
+     logged here. Every trade now carries u (last change time), deletions leave their id in del, and settings carry su / paper.su; copies are merged
+     item by item (newest wins) instead of replaced. */
+  const seen = new Map();
+  const pj = () => { const { tx, su, ...r } = P(); return JSON.stringify(r); };
+  const prime = () => { seen.clear(); [...D.tx, ...P().tx].forEach((x) => { const { u, ...r } = x; seen.set(x.id, JSON.stringify(r)); }); seen.set('$set', JSON.stringify(D.set)); seen.set('$p', pj()); };
+  const stamp = () => { const now = Date.now();
+    [...D.tx, ...P().tx].forEach((x) => { const { u, ...r } = x, j = JSON.stringify(r); if (seen.get(x.id) !== j) { x.u = now; seen.set(x.id, j); } });
+    const sj = JSON.stringify(D.set); if (seen.get('$set') !== sj) { D.su = now; seen.set('$set', sj); }
+    const q = pj(); if (seen.get('$p') !== q) { P().su = now; seen.set('$p', q); } };
+  const gone = (ids) => { D.del = [...D.del, ...ids].slice(-500); };
+  const mergeDoc = (r, l) => { r = norm(r); l = norm(l); const del = new Set([...r.del, ...l.del]);
+    const pick = (a, b) => { const m = new Map(); [...a, ...b].forEach((x) => { if (!x || !x.id) return; const o = m.get(x.id); if (!o || (x.u || 0) > (o.u || 0)) m.set(x.id, x); });
+      return [...m.values()].filter((x) => !del.has(x.id)).sort((x, y) => (x.at || 0) - (y.at || 0)); };
+    const rp = r.paper, lp = l.paper, pNew = (lp.su || 0) > (rp.su || 0);
+    return { tx: pick(r.tx, l.tx), del: [...del].slice(-500), su: Math.max(r.su, l.su), set: (l.su || 0) > (r.su || 0) ? { ...r.set, ...l.set } : { ...l.set, ...r.set },
+      paper: { ...(pNew ? { ...rp, ...lp } : { ...lp, ...rp }), su: Math.max(rp.su || 0, lp.su || 0), tx: pick(rp.tx, lp.tx) } }; };
+  const sig = (d) => JSON.stringify([d.tx.map((x) => x.id + ':' + (x.u || 0)), d.paper.tx.map((x) => x.id + ':' + (x.u || 0)), d.del.length, d.su, d.paper.su || 0]);
+  const save = (sync = true) => { stamp(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } if (sync && window.VGSync) window.VGSync.push('portfolios'); };
 
   const fx = () => (window.VG && window.VG.fx) || 33;
   const f2 = (v) => Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -627,7 +646,7 @@
     else if (isOpen) { const h = hit(x); if (h) act.append(el('span', 'gt-flag ' + (h === 'tp' ? 'pos' : 'neg'), h === 'tp' ? 'ราคาถึง TP แล้ว' : 'ราคาถึง SL แล้ว'));
       const c = el('button', 'btn-line', 'ปิดไม้'); c.type = 'button'; c.addEventListener('click', () => closeRow(x, r)); act.append(c); }
     else { const u = el('button', 'btn-line', 'เปิดกลับ'); u.type = 'button'; u.addEventListener('click', () => { delete x.exit; delete x.closedAt; delete x.out; delete x.fee; save(); drawAll(); }); act.append(u); }
-    const d = el('button', 'btn-line', 'ลบ'); d.type = 'button'; d.addEventListener('click', () => { if (!confirm('ลบไม้นี้?')) return; if (paper) P().tx = P().tx.filter((y) => y.id !== x.id); else D.tx = D.tx.filter((y) => y.id !== x.id); save(); drawAll(); }); act.append(d);
+    const d = el('button', 'btn-line', 'ลบ'); d.type = 'button'; d.addEventListener('click', () => { if (!confirm('ลบไม้นี้?')) return; gone([x.id]); if (paper) P().tx = P().tx.filter((y) => y.id !== x.id); else D.tx = D.tx.filter((y) => y.id !== x.id); save(); drawAll(); }); act.append(d);
     r.append(act); return r;
   };
   const drawOpen = () => {
@@ -798,7 +817,7 @@
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
-    $('gp-reset').addEventListener('click', () => { if (!confirm('ลบไม้กระดาษทั้งหมดแล้วเริ่มใหม่?')) return; P().tx = []; Object.keys(P().auto).forEach((k) => { P().since[k] = Date.now(); }); save(); drawAll(); });
+    $('gp-reset').addEventListener('click', () => { if (!confirm('ลบไม้กระดาษทั้งหมดแล้วเริ่มใหม่?')) return; gone(P().tx.map((x) => x.id)); P().tx = []; Object.keys(P().auto).forEach((k) => { P().since[k] = Date.now(); }); save(); drawAll(); });
     let rw = null; window.addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(drawChart, 200); });
     setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) { poll(); if (loaded && !$('gt-chart').firstChild) drawChart(); const c = tfc[tf]; if (tf !== '1h' && c && c.b && Date.now() - c.at > 30e3) tfLoad(tf); } }, 2000);
     drawAll();
@@ -806,11 +825,12 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
   window.VGGT = {
     get: () => D,
-    replace: (c) => { D = norm(c); save(false); if ($('gt-lot')) { $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs; $('gp-lot').value = P().lot; $('gp-start').value = P().start; } if (bars.length) recalc(); drawAll(); },
-    merge: (c) => { const by = (a, b) => { const ids = new Set(a.map((x) => x.id)); return [...a, ...b.filter((x) => !ids.has(x.id))]; };
-      const tx = by(c.tx || [], D.tx), cp = (c.paper || {}), ptx = by(cp.tx || [], P().tx);
-      return { extra: tx.length - (c.tx || []).length + ptx.length - (cp.tx || []).length,
-        doc: { tx, set: { ...D.set, ...(c.set || {}) }, paper: { ...P(), ...cp, auto: { ...P().auto, ...(cp.auto || {}) }, since: { ...P().since, ...(cp.since || {}) }, tx: ptx } } }; },
+    /* a copy arrived from the account: merge it with this device's copy; push back if this device had something the account lacked */
+    sync: (c) => { const r = norm(c), m = norm(mergeDoc(r, D)), push = sig(m) !== sig(r); D = m; prime(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ }
+      if ($('gt-lot')) { $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs; $('gp-lot').value = P().lot; $('gp-start').value = P().start; } if (bars.length) recalc(); drawAll();
+      if (push && window.VGSync) window.VGSync.push('portfolios'); },
+    replace: (c) => { D = norm(c); prime(); save(false); if ($('gt-lot')) { $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs; $('gp-lot').value = P().lot; $('gp-start').value = P().start; } if (bars.length) recalc(); drawAll(); },
+    merge: (c) => { const r = norm(c), m = mergeDoc(r, D); return { extra: Math.max(0, m.tx.length - r.tx.length) + Math.max(0, m.paper.tx.length - r.paper.tx.length), doc: m }; },
     _test: { btRun, sumR, lbAnalyze, nfpBlock, tmRun, check, sizeLot, ind, sigDip, sigBrk, sigSt, test, settle: () => settle(), D: () => D },
   };
 })();

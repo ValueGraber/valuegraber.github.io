@@ -5170,12 +5170,12 @@ if (FB && window.VGPort) {
     portfolios: {
       label: 'พอร์ต',
       payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { spot: window.VGTrade.trade() } : {}), ...(window.VGGT ? { gt: window.VGGT.get() } : {}) }); },
-      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.spot) window.VGTrade.replace(c.spot); if (window.VGGT && c.gt) window.VGGT.replace(c.gt); },
+      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.spot) window.VGTrade.replace(c.spot); if (window.VGGT && c.gt) window.VGGT.sync(c.gt); },
       empty: () => { window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]); if (window.VGTrade) window.VGTrade.replace({}); if (window.VGGT) window.VGGT.replace({}); },
       local: () => { const d = window.VGPort.get(); const tn = (window.VGTrade ? window.VGTrade.trade().tx.length : 0) + (window.VGGT ? window.VGGT.get().tx.length : 0); return { n: d.tx.length + tn, has: d.tx.length > 0 || tn > 0 || (window.VGWatch && window.VGWatch.get().length > 0) }; },
       merge: (c) => { const l = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : []; const tx = byId(c.tx || [], l.tx);
         const trM = window.VGTrade ? (() => { const m = window.VGTrade.merge(c.spot || {}); return { extra: m.extra, doc: { spot: m.doc } }; })() : { extra: 0, doc: {} };
-        if (window.VGGT) { const g = window.VGGT.merge(c.gt || {}); trM.extra += g.extra; trM.doc.gt = g.doc; }
+        if (window.VGGT) { const g = window.VGGT.merge(c.gt || {}); trM.extra += g.extra; trM.doc.gt = g.doc; if (JSON.stringify(g.doc.tx) !== JSON.stringify((c.gt || {}).tx || []) || JSON.stringify(g.doc.paper.tx) !== JSON.stringify(((c.gt || {}).paper || {}).tx || [])) trM.extra = Math.max(trM.extra, 1); }
         return { extra: tx.length - (c.tx || []).length + trM.extra, changed: tx.length !== (c.tx || []).length || trM.extra > 0 || lw.some((s) => !(c.watch || []).includes(s)),
           doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])], ...trM.doc } }; },
     },
