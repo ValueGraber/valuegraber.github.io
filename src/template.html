@@ -1094,6 +1094,10 @@ tr.editing td { background: var(--accent-soft); }
 .gt-rule { color: var(--brick); } .gt-block { color: var(--brick); margin: 0; font-size: 14px; }
 .gp-chk { flex-direction: row !important; align-items: center; gap: 8px; display: flex; }
 .rk-l { margin: 8px 0; font-size: 15px; }
+.fc-strip { margin-bottom: 12px; } .fc-opt { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
+.fc-svg { width: 100%; height: auto; display: block; margin: 4px 0 8px; }
+.fc-band { fill: var(--jade-soft); opacity: .8; } .fc-line { fill: none; stroke: var(--jade); stroke-width: 2.2; } .fc-zero { stroke: var(--brick); stroke-dasharray: 4 4; } .fc-tick { stroke: var(--chart-grid); } .fc-ax { font: 11px var(--num); fill: var(--ink-3); }
+.fc-h { margin: 14px 0 6px; font-size: 15px; } .fc-up { list-style: none; padding: 0; margin: 0; } .fc-up li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; } .fc-up b { font-family: var(--num); white-space: nowrap; }
 #gt-stats h4 { margin: 16px 0 6px; font-size: 15px; } .gt-h3 { margin: 28px 0 8px; font-size: 18px; } .gt-next { margin: 6px 0 0; padding-left: 20px; }
 @media (max-width: 640px) { .tm-row { grid-template-columns: 7.5em 1fr 3.8em; font-size: 13px; } }
 .gt-pdh, .gt-pdl { stroke: var(--foil); stroke-width: 1.6; stroke-dasharray: 4 3; }
@@ -1835,6 +1839,11 @@ body.gt-noscroll { overflow: hidden; }
     <div class="mc-grid" id="mc-grid"></div>
     <div class="mc-leg"><span><i class="dot-paid"></i>จ่ายแล้ว / ได้รับแล้ว</span><span><i class="dot-due"></i>ยังไม่ถึงวันจ่าย</span><span><i class="dot-late"></i>เลยวันแล้ว ยังไม่จ่าย</span><span><i class="dot-inc"></i>รายรับที่จะเข้า</span></div>
     <div class="mc-day" id="mc-day" hidden></div>
+  </section>
+  <section class="panel" style="margin-bottom:16px" data-sub="nw" id="fc-panel">
+    <div class="ph"><div><h3>เงินสดล่วงหน้า 90 วัน</h3><p>เริ่มจากเงินในบัญชีและเงินสดวันนี้ หักบิล ค่างวดหนี้ และค่าใช้จ่ายทั่วไปเฉลี่ย บวกรายรับประจำ ดูว่าวันไหนเงินจะตึงหรือติดลบ</p></div></div>
+    <label class="mini fc-opt"><input type="checkbox" id="fc-var"> นับรายรับไม่ประจำเฉลี่ย 3 เดือนด้วย</label>
+    <div id="fc-box"></div>
   </section>
   <section class="panel" data-sub="nw">
     <div class="ph"><div><h3>ทรัพย์สินหลังหักหนี้ แต่ละเดือน</h3><p>ทรัพย์สินทั้งหมดหักหนี้แล้ว ระบบจดยอดของแต่ละเดือนไว้ให้เองทุกครั้งที่เปิดหน้านี้</p></div></div>
@@ -3208,7 +3217,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       const set = el('div', 'wal-set'); const w = M.wal[k] || {};
       const vi = el('input', 'inp'); vi.type = 'number'; vi.step = 'any'; vi.inputMode = 'decimal'; vi.id = 'wal-v-' + k; vi.placeholder = 'ยอดตั้งต้น'; vi.value = w.v != null ? w.v : ''; vi.setAttribute('aria-label', 'ยอดตั้งต้น ' + WNAME[k]);
       const di = el('input', 'inp'); di.type = 'date'; di.id = 'wal-d-' + k; di.value = w.at || today(); di.setAttribute('aria-label', 'นับตั้งแต่วันที่');
-      const upd = () => { if (vi.value === '' || !isFinite(+vi.value)) delete M.wal[k]; else M.wal[k] = { v: +vi.value, at: di.value || today() }; save(); drawWal(); };
+      const upd = () => { if (vi.value === '' || !isFinite(+vi.value)) delete M.wal[k]; else M.wal[k] = { v: +vi.value, at: di.value || today() }; save(); drawWal(); drawFc(); };
       vi.addEventListener('change', upd); di.addEventListener('change', () => { if (M.wal[k]) upd(); });
       set.append(el('span', 'mini', 'ยอดตั้งต้น ณ เช้าวันที่'), di, vi); c.append(set); box.append(c);
     });
@@ -3300,6 +3309,55 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       const bal = +x.bal || 0; const prin = Math.max(0, amt - bal * (+x.apr || 0) / 1200); x.bal = Math.max(0, Math.round((bal - prin) * 100) / 100); }
     save(); drawDebts(true); refreshNW(); refresh();
   };
+  /* ---------- cash forecast (money-master 6): start balance today → scheduled bills/debts/incomes + average variable spending, low/base/high ---------- */
+  const addDays = (d, k) => { const x = new Date(d + 'T00:00:00'); x.setDate(x.getDate() + k); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+  const cashFc = () => {
+    const t0 = today(), end = addDays(t0, 90), b = walBal('bank', t0), c = walBal('cash', t0);
+    if (b == null && c == null) return null;
+    const start = (b || 0) + (c || 0), ev = {}, push = (d, v, name) => { (ev[d] = ev[d] || []).push({ v, name }); };
+    let m = ymOf(t0); const upcoming = [];
+    for (let k = 0; k < 4; k++, m = ymShift(m, 1)) schedule(m).forEach((it) => {
+      if (it.st === 'paid' || !(it.amt > 0)) return;
+      /* an overdue item that already shows up as a matching entry this month was paid without ticking it: don't count it twice */
+      if (it.d < t0 && M.entries.some((e) => ymOf(e.date) === ymOf(it.d) && (e.kind === 'in') === (it.type === 'inc') && Math.abs(e.amount - it.amt) <= it.amt * 0.05)) return;
+      const d = it.d <= t0 ? addDays(t0, 1) : it.d; if (d > end) return;
+      const v = it.type === 'inc' ? it.amt : -it.amt; push(d, v, it.name + (it.d < t0 ? ' (เลยกำหนด)' : '')); upcoming.push({ d, v, name: it.name, late: it.d < t0 });
+    });
+    const fixed = new Set([...M.bills.map(billCat), 'ผ่อนชำระหนี้']), rate = [0, 0, 0], inc = [0, 0, 0];
+    M.entries.forEach((e) => { const age = (new Date(t0) - new Date(e.date)) / 86400000; if (age < 0 || age >= 90) return; const w = Math.floor(age / 30);
+      if ((e.kind === 'out' || e.kind === 'sav') && !fixed.has(e.cat)) rate[w] += e.amount; else if (e.kind === 'in' && !e.sal) inc[w] += e.amount; });
+    const daily = rate.map((x) => x / 30), base = daily.reduce((a, x) => a + x, 0) / 3, hi = Math.max(...daily), lo = Math.min(...daily);
+    const vin = $('fc-var') && $('fc-var').checked ? inc.reduce((a, x) => a + x, 0) / 90 : 0;
+    const run = (spend) => { const pts = []; let v = start, min = { v: start, d: t0 }, neg = null;
+      for (let i = 1; i <= 90; i++) { const d = addDays(t0, i); v += vin - spend; (ev[d] || []).forEach((x) => { v += x.v; }); pts.push({ d, v }); if (v < min.v) min = { v, d }; if (v < 0 && !neg) neg = d; }
+      return { pts, min, neg }; };
+    return { t0, start, b, c, base: run(base), low: run(hi), high: run(lo), daily: base, hi, vin, upcoming: upcoming.sort((x, y) => (x.d < y.d ? -1 : 1)) };
+  };
+  const drawFc = () => {
+    const box = $('fc-box'); if (!box) return; box.replaceChildren(); const f = cashFc();
+    if (!f) { box.append(el('p', 'pf-hint', 'ตั้งยอดเงินในบัญชีและเงินสดในส่วน "กระเป๋าเงิน" ก่อน แล้วระบบจะคาดการณ์ให้')); return; }
+    const dTH = (d) => new Date(d + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+    const at = (r, n) => r.pts[n - 1].v, tile = (k, v, h, cl) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v ' + (cl || ''), v), el('div', 'h', h)); return d; };
+    const strip = el('div', 'strip fc-strip');
+    strip.append(tile('เงินพร้อมใช้วันนี้', baht(f.start), `บัญชี ${baht(f.b || 0)} · เงินสด ${baht(f.c || 0)}`),
+      ...[30, 60, 90].map((n) => tile(`อีก ${n} วัน`, baht(at(f.base, n)), `แย่สุด ${baht(at(f.low, n))} · ดีสุด ${baht(at(f.high, n))}`, at(f.base, n) < 0 ? 'neg' : '')));
+    box.append(strip);
+    /* chart: base line with low–high band, zero line */
+    const all = [...f.low.pts, ...f.high.pts].map((p) => p.v).concat(f.start, 0); let mn = Math.min(...all), mx = Math.max(...all); if (mx === mn) mx = mn + 1;
+    const W = 600, H = 170, x = (i) => (i / 90) * (W - 8) + 4, y = (v) => 8 + ((mx - v) / (mx - mn)) * (H - 24);
+    const line = (r) => [`${x(0)},${y(f.start)}`, ...r.pts.map((p, i) => `${x(i + 1)},${y(p.v)}`)].join(' ');
+    const band = line(f.high) + ' ' + [...f.low.pts].reverse().map((p, i) => `${x(90 - i)},${y(p.v)}`).join(' ') + ` ${x(0)},${y(f.start)}`;
+    box.insertAdjacentHTML('beforeend', `<svg class="fc-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟเงินสดล่วงหน้า 90 วัน"><polygon points="${band}" class="fc-band"/><line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" class="fc-zero"/><polyline points="${line(f.base)}" class="fc-line"/>${[30, 60].map((n) => `<line x1="${x(n)}" x2="${x(n)}" y1="0" y2="${H - 14}" class="fc-tick"/><text x="${x(n) + 3}" y="${H - 3}" class="fc-ax">${n} วัน</text>`).join('')}</svg>`);
+    const notes = [];
+    if (f.base.neg) notes.push(['neg', `ตามค่าเฉลี่ย เงินจะติดลบราว ${dTH(f.base.neg)} ต้องหาเงินเข้าหรือลดรายจ่ายก่อนวันนั้น`]);
+    else if (f.low.neg) notes.push(['neg', `ถ้าใช้จ่ายเท่าเดือนที่หนักสุด เงินอาจติดลบราว ${dTH(f.low.neg)}`]);
+    notes.push(['', `จุดต่ำสุดใน 90 วัน: ${baht(f.base.min.v)} วันที่ ${dTH(f.base.min.d)} · ใช้จ่ายทั่วไปเฉลี่ยวันละ ${baht(f.daily)} (เดือนที่หนักสุด ${baht(f.hi)}/วัน)${f.vin ? ` · นับรายรับไม่ประจำวันละ ${baht(f.vin)}` : ' · ยังไม่นับรายรับไม่ประจำ'}`]);
+    notes.forEach(([c, t]) => box.append(el('p', 'pf-hint ' + c, t)));
+    const up = f.upcoming.slice(0, 8); if (up.length) { const ul = el('ul', 'fc-up');
+      up.forEach((u) => { const li = el('li'); li.append(el('span', null, dTH(u.d) + ' · ' + u.name + (u.late ? ' (เลยกำหนด)' : '')), el('b', u.v < 0 ? 'neg' : 'pos', (u.v < 0 ? '−' : '+') + baht(Math.abs(u.v)))); ul.append(li); });
+      box.append(el('h4', 'fc-h', 'รายการที่จะมาถึง'), ul); }
+  };
+  { const fv = $('fc-var'); if (fv) { try { fv.checked = localStorage.getItem('vg-fcvar') === '1'; } catch (e) { /* ignore */ } fv.addEventListener('change', () => { try { localStorage.setItem('vg-fcvar', fv.checked ? '1' : '0'); } catch (e) { /* ignore */ } drawFc(); }); } }
   const unpay = (it) => { const k = it.type === 'inc' ? 'got' : 'paid'; it.o[k] = it.o[k].filter((x) => x !== it.d); save(); refresh(); };
   const drawCal = () => {
     $('mc-month').textContent = ymTH(ym);
@@ -3685,7 +3743,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
 
   /* ---------- render ---------- */
   const refreshNW = () => { drawNW(); };
-  const refresh = () => { if (!shown) return; snapshot(); drawNW(); drawFxNote(); drawPL(); drawBudget(); drawGoals(); drawEmerg(); drawDebts(); drawIncomes(); drawBills(); drawFixedStrip(); drawRet(); };
+  const refresh = () => { if (!shown) return; snapshot(); drawNW(); drawFc(); drawFxNote(); drawPL(); drawBudget(); drawGoals(); drawEmerg(); drawDebts(); drawIncomes(); drawBills(); drawFixedStrip(); drawRet(); };
   const rebuildAll = () => { drawAccounts(); drawDebts(true); drawBills(true); drawIncomes(true); drawGoals(true); buildRet(); drawChips(); };
   document.addEventListener('vg:view', (e) => { shown = e.detail === 'money'; if (shown) { rebuildAll(); refresh(); } });
   document.addEventListener('vg:ready', () => { if (shown) { drawAccounts(); refresh(); } });
