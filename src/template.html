@@ -1408,7 +1408,7 @@ body.gt-noscroll { overflow: hidden; }
   <section id="gtc" data-sub="gtc">
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
     <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
-    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="asia" aria-pressed="false">เบรกกรอบเอเชีย</button><button type="button" data-k="sweep" aria-pressed="true">กวาดสต็อป</button><button type="button" data-k="ema" aria-pressed="false">EMA ย่อ</button></div></div>
+    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button><button type="button" data-k="st" aria-pressed="false">Supertrend</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
     <div id="gt-now"></div>
     <div class="gt-wrap" id="gt-wrap">
@@ -1422,24 +1422,25 @@ body.gt-noscroll { overflow: hidden; }
       <div class="gt-rsi" id="gt-rsi" hidden></div>
       <div class="gt-tv" id="gt-tv" hidden></div>
       <p class="pf-hint gt-read" id="gt-read"></p>
-      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบเอเชีย หรือจุดสูง/ต่ำเมื่อวาน</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบ 20 ชม. หรือเส้น Supertrend</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
     </div>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
-      <h4>กวาดสต็อป (Liquidity sweep)</h4><ul>
-      <li>คนส่วนใหญ่วาง SL ไว้เลยจุดสูงและจุดต่ำของเมื่อวาน รายใหญ่มักดันราคาไปกินสต็อปตรงนั้นก่อนแล้วราคากลับตัว</li>
-      <li>ขาย: วันนี้ราคาทะลุจุดสูงของเมื่อวานครั้งแรก แต่แท่งนั้นปิดกลับลงมาใต้เส้น เป็นแท่งแดง และมีไส้ด้านบนยาวอย่างน้อย 35% ของแท่ง</li>
-      <li>ซื้อ: กลับด้านกันที่จุดต่ำของเมื่อวาน</li>
-      <li>SL เลยปลายไส้ไปนิด (0.1 ATR) อย่างน้อย 0.5 ATR และไม่เกิน 3 ATR · TP = 2 เท่าของ SL · ดูได้ 24 ชม. วันใหม่เริ่ม 05:00 น. เวลาไทย (ตลาดนิวยอร์กปิด) เว้นเสาร์-อาทิตย์</li></ul>
-      <h4>เบรกกรอบเอเชีย (Asian range breakout)</h4><ul>
-      <li>ช่วง 07:00–14:00 น. เวลาไทย ตลาดเอเชียเปิด ทองมักแกว่งแคบ ระบบจดจุดสูงสุดและต่ำสุดของช่วงนี้เป็นกรอบ</li>
-      <li>หลัง 14:00 น. ลอนดอนเปิด เงินก้อนใหญ่เข้า แท่ง 1 ชม. แรกที่ปิดเหนือขอบบน = ซื้อ ปิดใต้ขอบล่าง = ขาย วันละไม่เกิน 1 ไม้ นับถึง 22:00 น.</li>
-      <li>SL ที่กลางกรอบ (อย่างน้อย 0.5 ATR) · TP = 2 เท่าของ SL · ข้ามวันที่กรอบกว้างเกิน 4 ATR (ราคาวิ่งไปแล้ว) และเว้นเสาร์-อาทิตย์</li></ul>
-      <h4>EMA ย่อ</h4><ul>
-      <li>ซื้อ: EMA 20 อยู่เหนือ EMA 50 และ EMA 50 ชี้ขึ้น (ขาขึ้น) ราคาย่อลงมาแตะ EMA 20 ในสองแท่งล่าสุด แล้วแท่งที่เพิ่งปิดเป็นแท่งเขียว ปิดเหนือ EMA 20 และสูงกว่าแท่งก่อน RSI อยู่ระหว่าง 45–70</li>
-      <li>ขาย: กลับด้านกัน (ขาลง ราคาเด้งขึ้นแตะ EMA 20 แล้วปิดต่ำกว่า RSI 30–55)</li>
-      <li>ดูเฉพาะแท่งที่ปิดช่วง 13:00–24:00 น. เวลาไทย (ตลาดลอนดอนและนิวยอร์ก) ไม่ต้องเฝ้ากลางดึก</li>
-      <li>SL ห่างจากราคาเข้า 1.5 เท่าของค่าแกว่งเฉลี่ย (ATR 14) และ TP 2 เท่า ถ้าไม่ถึงทั้งคู่ใน 48 ชม. ถือว่าปิดที่ราคาตอนนั้น</li>
+      <p>ทั้ง 3 ท่าเลือกจากการทดสอบกราฟจริง 3 ปี (ต.ค. 2566–พ.ย. 2569) หักค่า spread และ slippage ไม้ละ $0.40 แล้ว ท่าอื่นที่ลอง (Bollinger squeeze, Fair Value Gap, Inside bar) ผลไม่นิ่งหรือติดลบ จึงไม่ใส่</p>
+      <h4>ย่อในเทรนด์ (RSI 2)</h4><ul>
+      <li>ซื้อ: ราคาอยู่เหนือเส้นเฉลี่ย 20 วัน (EMA 480 แท่ง) และ EMA 50 อยู่เหนือ EMA 200 แล้ว RSI 2 แท่งลงต่ำกว่า 8 (ย่อแรงชั่วคราว)</li>
+      <li>ขาย: กลับด้าน (ขาลง และ RSI 2 เกิน 92)</li>
+      <li>SL และ TP ห่าง 1.5 ATR เท่ากัน ชนะราว 46% ของไม้ · ทดสอบ 578 ไม้ เฉลี่ย +0.08 เท่าของความเสี่ยงต่อไม้ บวกทุกปี</li></ul>
+      <h4>เบรกกรอบ 20 ชม. (Donchian breakout)</h4><ul>
+      <li>ซื้อ: แท่งปิดทะลุจุดสูงสุดของ 20 แท่งก่อนหน้าเป็นแท่งแรก และ EMA 50 อยู่เหนือ EMA 200 · ขาย: กลับด้าน</li>
+      <li>ดูเฉพาะแท่งที่ปิด 14:00–01:00 น. (ลอนดอนและนิวยอร์ก) · SL 1.5 ATR · TP 3 ATR (2 เท่าของ SL)</li>
+      <li>ชนะราว 40% แต่ได้มากกว่าเสีย · ทดสอบ 293 ไม้ เฉลี่ย +0.10 เท่าของความเสี่ยงต่อไม้ บวกทุกปี</li></ul>
+      <h4>Supertrend กลับตัว</h4><ul>
+      <li>เส้น Supertrend (ATR 10 × 3) พลิกจากขาลงเป็นขาขึ้น และราคาอยู่เหนือเส้น 20 วัน = ซื้อ · กลับด้าน = ขาย</li>
+      <li>SL ที่เส้น Supertrend (0.5–3 ATR) · TP 2 เท่าของ SL</li>
+      <li>ทดสอบ 209 ไม้ เฉลี่ย +0.06 เท่าของความเสี่ยงต่อไม้ บวกทุกปีแต่ช่วงหลังอ่อนลง</li></ul>
+      <ul><li>ข้อได้เปรียบทั้ง 3 ท่าบาง (ราว 0.06–0.10R ต่อไม้) ช่วงทดสอบทองเป็นขาขึ้นเกือบตลอด ท่าซื้อจึงได้เปรียบ ถ้าตลาดเปลี่ยนผลอาจต่างออกไป</li>
+      <li>ไม่ถึง TP หรือ SL ใน 48 ชม. ถือว่าปิดที่ราคาตอนนั้น · เว้นเสาร์-อาทิตย์</li>
       <li>ราคามาจาก PAXG (ทองโทเคน 1 ออนซ์) ซึ่งใกล้ XAUUSD แต่ต่างจากโบรกได้ไม่กี่ดอลลาร์ ตอนเข้าไม้ให้ใช้ราคาจริงใน MT5</li>
     </ul></div></details>
     <div class="alert">สัญญาณเป็นการคำนวณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ผลย้อนหลังไม่รับประกันอนาคต XAUUSD มีเลเวอเรจ ขาดทุนได้เร็วกว่าซื้อทองจริง ตั้ง SL ทุกไม้</div>
@@ -1478,7 +1479,7 @@ body.gt-noscroll { overflow: hidden; }
     </section>
     <section class="panel">
       <div class="ph"><h3>บอทเทรดกระดาษ 24 ชม.</h3></div>
-      <div class="gp-auto"><label><input type="checkbox" id="gp-a-asia"> บอทเบรกกรอบเอเชีย</label><label><input type="checkbox" id="gp-a-sweep"> บอทกวาดสต็อป</label><label><input type="checkbox" id="gp-a-ema"> บอท EMA ย่อ</label>
+      <div class="gp-auto"><label><input type="checkbox" id="gp-a-dip"> บอทย่อในเทรนด์</label><label><input type="checkbox" id="gp-a-brk"> บอทเบรก 20 ชม.</label><label><input type="checkbox" id="gp-a-st"> บอท Supertrend</label>
         <label><input type="checkbox" id="gp-be"> เลื่อน SL มาที่จุดเข้าเมื่อกำไรเท่าความเสี่ยง (ทุกไม้กระดาษ)</label></div>
       <p class="pf-hint">บอทเปิดไม้เองทุกครั้งที่มีสัญญาณ นับตั้งแต่ตอนที่ติ๊กเปิด แข่งกับไม้ที่คุณกดเอง ดูอันดับในตาราง</p>
       <div id="gp-board"></div>
@@ -1504,7 +1505,7 @@ body.gt-noscroll { overflow: hidden; }
         <label>ขนาด (lot) <input class="inp" id="gt-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
         <label>ตัดขาดทุน SL <input class="inp" id="gt-sl" type="number" step="any" min="0" inputmode="decimal"></label>
         <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="asia">เบรกกรอบเอเชีย</option><option value="sweep">กวาดสต็อป</option><option value="ema">EMA ย่อ</option><option value="man" selected>เข้าเอง</option></select></label>
+        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="dip">ย่อในเทรนด์ (RSI 2)</option><option value="brk">เบรกกรอบ 20 ชม.</option><option value="st">Supertrend กลับตัว</option><option value="man" selected>เข้าเอง</option></select></label>
         <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
       </div>
       <p class="pf-hint" id="gt-size"></p>

@@ -78,3 +78,4 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Scan (calcs.js): momentum factor, fair3/mos3 (DCF/comps/Graham), flags, earnDays; signal uses mos3 + momentum≥40 + no flags. Sheet shows แรงส่ง bar + warnings.
 - Track record: tools/picks.js (workflow step) appends docs/picks.json; section `#track` (drawTrack/loadTrack) vs SPY (VG.spyNow).
 - หุ้นเทรด page: src/swing.js (/*SWING*/), section `#sx`; Minervini 8 conditions from history.json weekly closes, regime SPY vs 40w MA, setups bo/pb, sizing in localStorage vg-swing-v1. Test: VGSwingX._compute().
+- 2026-11-23 gold strategies replaced: dip (RSI 2 in trend), brk (20-bar Donchian), st (Supertrend flip). Old keys asia/sweep/ema kept only as names in `OLD` for old journal/paper rows. Picked with docs/lab.html (hidden page, open in a browser: `lab.html?y=3`, fetches Binance and prints stats for candidate rules incl. squeeze/fvg/inside that failed).
