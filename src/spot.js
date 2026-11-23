@@ -15,7 +15,7 @@
   const unit = (a) => (isGold(a) ? 'ออนซ์' : 'เหรียญ');
   const G = { buy: ['buy', 'ราคาดี ทยอยซื้อได้'], knife: ['watch', 'ถูกแต่ยังร่วง แบ่งซื้อทีละน้อย'], dca: ['', 'ราคาปกติ ซื้อสะสมตามแผน'], wait: ['watch', 'แพงขึ้นมาแล้ว ซื้อน้อยลง รอย่อ'], hot: ['trap', 'ร้อนแรง ไม่ควรซื้อเพิ่ม'] };
   const H = { good: ['buy', 'ควรถือรอ'], ok: ['', 'ถือได้ ยังไม่ชัด'], weak: ['trap', 'ไม่ควรถือรอ'] };
-  let set = { week: 1000 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
+  let set = { week: 1000, tpct: 15, res: 0 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) { /* ignore */ } };
 
   const bars = {}, live = {}, tt = {}; let ws = null, on = false, lastTick = 0, lastPoll = 0, err = '', loaded = false;
@@ -31,7 +31,9 @@
   const nameOf = (a) => { const x = [...ASSETS, ...NAMES].find((y) => y[0] === a); return x ? (isGold(a) ? x[1] : `${a} · ${x[1]}`) : a; };
 
   /* ---------- data ---------- */
-  const loadBars = async (a) => { const k = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000`)).map(kl); const f = k.pop(); bars[a] = k; live[a] = f ? f.c : k[k.length - 1].c; tt[a] = SPC.timingTest(k, isGold(a)); };
+  const loadBars = async (a) => { let k = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000`)).map(kl);
+    /* page back to ~6.5 years (PAXG lists from 2019) so the timing test covers a gold bear stretch too */
+    for (let n = 0; n < 2 && k.length; n++) { try { const o = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000&endTime=${k[0].t - 1}`)).map(kl); if (!o.length) break; k = [...o, ...k]; } catch (e) { break; } } const f = k.pop(); bars[a] = k; live[a] = f ? f.c : k[k.length - 1].c; tt[a] = SPC.timingTest(k, isGold(a)); };
   const loadAll = async () => { for (let i = 0; i < ASSETS.length; i += 5) await Promise.all(ASSETS.slice(i, i + 5).map(([a]) => loadBars(a).catch(() => {}))); loaded = true; };
   const start = async () => {
     on = true; err = '';
@@ -94,6 +96,20 @@
     const l = el('a', 'btn ghost sm', 'กราฟ'); l.href = chart(a); l.target = '_blank'; l.rel = 'noopener noreferrer';
     const b = el('button', amt ? 'btn-solid sm' : 'btn-line sm', 'จดการซื้อ'); b.type = 'button';
     b.addEventListener('click', () => { if (window.VGTrade) window.VGTrade.prefill({ type: 'buy', s: a, amt: amt || set.week, pxUsd: s.px }); });
+    if (isGold(a)) {
+      /* money-master 3.4: gold as a share of everything you own, rebalanced inside a ±5-point band; reserve cash for deep dips */
+      const gTHB = window.VGTrade && window.VGTrade.goldTHB ? window.VGTrade.goldTHB() : 0, mon = window.VGMoney && window.VGMoney.summary ? window.VGMoney.summary() : null;
+      const accs = window.VGMoney ? window.VGMoney.get().accounts || [] : [], hasAcc = accs.some((x) => x.type === 'gold');
+      if (mon && (mon.a || gTHB)) {
+        const tot = (mon.a || 0) + (hasAcc ? 0 : gTHB), w = tot ? gTHB / tot : 0, tgt = set.tpct / 100, gap = tgt * tot - gTHB;
+        const txt = `ทองในพอร์ตทอง ${thb(gTHB)} = ${(w * 100).toFixed(1)}% ของทรัพย์สินรวม ${thb(tot)} (เป้า ${set.tpct}% ±5)` +
+          (w > tgt + 0.05 ? ` · เกินเป้า แบ่งขายราว ${thb(-gap)} ให้กลับสู่เป้า` : w < tgt - 0.05 ? (s.g === 'hot' ? ' · ต่ำกว่าเป้า แต่ราคาร้อนแรง รอย่อก่อนค่อยเติม' : ` · ต่ำกว่าเป้า เติมได้อีกราว ${thb(gap)} ทยอยตามจังหวะ`) : ' · อยู่ในกรอบเป้า') +
+          (hasAcc ? ' · มีบัญชีทองในแท็บเงินด้วย อาจนับซ้ำ' : '');
+        c.append(el('p', 'sw-size', txt));
+      }
+      if (set.res > 0) { const k = s.dd >= 0.15 ? Math.min(3, Math.floor((s.dd - 0.15) / 0.05) + 1) : 0;
+        c.append(el('p', 'sw-size', k ? `ลงจากจุดสูงสุด ${Math.round(s.dd * 100)}% ใช้เงินสำรองได้ถึงก้อนที่ ${k}/3 (ก้อนละ ${thb(set.res / 3)}) ถ้ายังไม่ได้ใช้` : `เงินสำรองซื้อตอนร่วง ${thb(set.res)} ใช้เมื่อราคาลงจากจุดสูงสุด 15%, 20%, 25% ขั้นละ 1/3 (ตอนนี้ลง ${Math.round(s.dd * 100)}%)`)); }
+    }
     act.append(l, b); c.append(act); return c;
   };
   const draw = () => {
@@ -121,6 +137,8 @@
   const setup = () => {
     const w = $('sw-week'); if (!w) return; w.value = set.week;
     w.addEventListener('change', () => { const v = +w.value; if (v >= 0) { set.week = v; keep(); draw(); } else w.value = set.week; });
+    [['sw-tpct', 'tpct'], ['sw-res', 'res']].forEach(([id, k]) => { const x = $(id); if (!x) return; x.value = set[k]; x.addEventListener('change', () => { const v = +x.value; if (v >= 0) { set[k] = v; keep(); draw(); } else x.value = set[k]; }); });
+    document.addEventListener('vg:data', () => { if (loaded) draw(); });
     document.addEventListener('vg:ready', draw);
     setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) poll(); }, 2000);
     draw(); drawTest();

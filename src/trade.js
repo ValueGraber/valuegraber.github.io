@@ -289,6 +289,7 @@
 
   window.VGTrade = {
     trade: () => T, prefill,
+    goldTHB: () => { const r = value(book()).rows.GOLD; return r ? r.v : 0; },
     equityTHB: () => { if (!T.tx.some((x) => x.type === 'dep')) return 0; return value(book()).eq; },
     replace: (c) => { T = norm(c); save(false); setupFees(); buildSym(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
     merge: (c) => { const ids = new Set((c.tx || []).map((x) => x.id)); const tx = [...(c.tx || []), ...T.tx.filter((x) => !ids.has(x.id))];

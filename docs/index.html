@@ -1334,6 +1334,8 @@ body.gt-noscroll { overflow: hidden; }
     <p class="sec-note">ทองแบบ spot ซื้อสะสมแล้วถือยาว ระบบดูกราฟรายวันแล้วบอกว่า <b>ตอนนี้ราคาน่าซื้อไหม</b> และ <b>ควรถือรอไหม</b> พร้อมยอดที่ควรซื้อครั้งนี้ ด้านล่างคือพอร์ตทองของคุณ</p>
     <div class="controls sw-set">
       <label class="mini">งบซื้อสะสมปกติต่อครั้ง (บาท) <input class="inp" id="sw-week" type="number" step="any" min="0" inputmode="decimal"></label>
+      <label class="mini">เป้าทองต่อทรัพย์สินรวม (%) <input class="inp" id="sw-tpct" type="number" step="1" min="0" max="100" inputmode="decimal"></label>
+      <label class="mini">เงินสำรองซื้อตอนร่วง (บาท) <input class="inp" id="sw-res" type="number" step="any" min="0" inputmode="decimal"></label>
     </div>
     <p class="pf-hint" id="sw-status">กำลังโหลด…</p>
     <div id="sw-top"></div>
@@ -1385,7 +1387,7 @@ body.gt-noscroll { overflow: hidden; }
   </section>
 
   <section id="swlog" data-sub="swlog">
-    <p class="sec-note">ลองย้อนหลังราว 2.7 ปี: ถ้าทุกวันซื้อเท่ากัน เทียบกับซื้อตามจังหวะ (ราคาดี ×2, ถูกแต่ยังร่วง ×1.5, ปกติ ×1, แพงขึ้น ×0.5, ร้อนแรงไม่ซื้อ) ต้นทุนเฉลี่ยต่อหน่วยต่างกันแค่ไหน ตัวเลขบวกคือซื้อตามจังหวะได้ของถูกกว่า ผลในอดีตไม่ได้บอกอนาคต</p>
+    <p class="sec-note">ลองย้อนหลังราว 6 ปี: ถ้าทุกวันซื้อเท่ากัน เทียบกับซื้อตามจังหวะ (ราคาดี ×2, ถูกแต่ยังร่วง ×1.5, ปกติ ×1, แพงขึ้น ×0.5, ร้อนแรงไม่ซื้อ) ต้นทุนเฉลี่ยต่อหน่วยต่างกันแค่ไหน ตัวเลขบวกคือซื้อตามจังหวะได้ของถูกกว่า ผลในอดีตไม่ได้บอกอนาคต</p>
     <div id="sw-log"></div>
   </section>
 
@@ -3979,7 +3981,7 @@ dash.calc('sectors', {
         ['debt', 'หนี้สิน', 'ยอดหนี้ และวิธีปิดหนี้ที่เสียดอกเบี้ยน้อย', false], ['retire', 'เกษียณ', 'ต้องมีเงินเท่าไหร่ถึงจะหยุดทำงานได้', false]]]],
     invest: [['mine', 'พอร์ตของฉัน', 'port', [['sum'], ['check', 'สัญญาณขาย', 'หุ้นที่ถืออยู่ถึงเวลาขายหรือยัง', true]]],
       ['find', 'หาหุ้น', 'scan', [['picks'], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
-      ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 2.7 ปี', false]]],
+      ['gold', 'ทอง', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
       ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
@@ -5098,7 +5100,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = 'f238ddaf18';
+  const BUILD = 'b5cf93a7d7';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -5192,7 +5194,7 @@ const SPC = (() => {
   const unit = (a) => (isGold(a) ? 'ออนซ์' : 'เหรียญ');
   const G = { buy: ['buy', 'ราคาดี ทยอยซื้อได้'], knife: ['watch', 'ถูกแต่ยังร่วง แบ่งซื้อทีละน้อย'], dca: ['', 'ราคาปกติ ซื้อสะสมตามแผน'], wait: ['watch', 'แพงขึ้นมาแล้ว ซื้อน้อยลง รอย่อ'], hot: ['trap', 'ร้อนแรง ไม่ควรซื้อเพิ่ม'] };
   const H = { good: ['buy', 'ควรถือรอ'], ok: ['', 'ถือได้ ยังไม่ชัด'], weak: ['trap', 'ไม่ควรถือรอ'] };
-  let set = { week: 1000 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
+  let set = { week: 1000, tpct: 15, res: 0 }; try { set = { ...set, ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) }; } catch (e) { /* defaults */ }
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) { /* ignore */ } };
 
   const bars = {}, live = {}, tt = {}; let ws = null, on = false, lastTick = 0, lastPoll = 0, err = '', loaded = false;
@@ -5208,7 +5210,9 @@ const SPC = (() => {
   const nameOf = (a) => { const x = [...ASSETS, ...NAMES].find((y) => y[0] === a); return x ? (isGold(a) ? x[1] : `${a} · ${x[1]}`) : a; };
 
   /* ---------- data ---------- */
-  const loadBars = async (a) => { const k = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000`)).map(kl); const f = k.pop(); bars[a] = k; live[a] = f ? f.c : k[k.length - 1].c; tt[a] = SPC.timingTest(k, isGold(a)); };
+  const loadBars = async (a) => { let k = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000`)).map(kl);
+    /* page back to ~6.5 years (PAXG lists from 2019) so the timing test covers a gold bear stretch too */
+    for (let n = 0; n < 2 && k.length; n++) { try { const o = (await get(`klines?symbol=${pair(a)}&interval=1d&limit=1000&endTime=${k[0].t - 1}`)).map(kl); if (!o.length) break; k = [...o, ...k]; } catch (e) { break; } } const f = k.pop(); bars[a] = k; live[a] = f ? f.c : k[k.length - 1].c; tt[a] = SPC.timingTest(k, isGold(a)); };
   const loadAll = async () => { for (let i = 0; i < ASSETS.length; i += 5) await Promise.all(ASSETS.slice(i, i + 5).map(([a]) => loadBars(a).catch(() => {}))); loaded = true; };
   const start = async () => {
     on = true; err = '';
@@ -5271,6 +5275,20 @@ const SPC = (() => {
     const l = el('a', 'btn ghost sm', 'กราฟ'); l.href = chart(a); l.target = '_blank'; l.rel = 'noopener noreferrer';
     const b = el('button', amt ? 'btn-solid sm' : 'btn-line sm', 'จดการซื้อ'); b.type = 'button';
     b.addEventListener('click', () => { if (window.VGTrade) window.VGTrade.prefill({ type: 'buy', s: a, amt: amt || set.week, pxUsd: s.px }); });
+    if (isGold(a)) {
+      /* money-master 3.4: gold as a share of everything you own, rebalanced inside a ±5-point band; reserve cash for deep dips */
+      const gTHB = window.VGTrade && window.VGTrade.goldTHB ? window.VGTrade.goldTHB() : 0, mon = window.VGMoney && window.VGMoney.summary ? window.VGMoney.summary() : null;
+      const accs = window.VGMoney ? window.VGMoney.get().accounts || [] : [], hasAcc = accs.some((x) => x.type === 'gold');
+      if (mon && (mon.a || gTHB)) {
+        const tot = (mon.a || 0) + (hasAcc ? 0 : gTHB), w = tot ? gTHB / tot : 0, tgt = set.tpct / 100, gap = tgt * tot - gTHB;
+        const txt = `ทองในพอร์ตทอง ${thb(gTHB)} = ${(w * 100).toFixed(1)}% ของทรัพย์สินรวม ${thb(tot)} (เป้า ${set.tpct}% ±5)` +
+          (w > tgt + 0.05 ? ` · เกินเป้า แบ่งขายราว ${thb(-gap)} ให้กลับสู่เป้า` : w < tgt - 0.05 ? (s.g === 'hot' ? ' · ต่ำกว่าเป้า แต่ราคาร้อนแรง รอย่อก่อนค่อยเติม' : ` · ต่ำกว่าเป้า เติมได้อีกราว ${thb(gap)} ทยอยตามจังหวะ`) : ' · อยู่ในกรอบเป้า') +
+          (hasAcc ? ' · มีบัญชีทองในแท็บเงินด้วย อาจนับซ้ำ' : '');
+        c.append(el('p', 'sw-size', txt));
+      }
+      if (set.res > 0) { const k = s.dd >= 0.15 ? Math.min(3, Math.floor((s.dd - 0.15) / 0.05) + 1) : 0;
+        c.append(el('p', 'sw-size', k ? `ลงจากจุดสูงสุด ${Math.round(s.dd * 100)}% ใช้เงินสำรองได้ถึงก้อนที่ ${k}/3 (ก้อนละ ${thb(set.res / 3)}) ถ้ายังไม่ได้ใช้` : `เงินสำรองซื้อตอนร่วง ${thb(set.res)} ใช้เมื่อราคาลงจากจุดสูงสุด 15%, 20%, 25% ขั้นละ 1/3 (ตอนนี้ลง ${Math.round(s.dd * 100)}%)`)); }
+    }
     act.append(l, b); c.append(act); return c;
   };
   const draw = () => {
@@ -5298,6 +5316,8 @@ const SPC = (() => {
   const setup = () => {
     const w = $('sw-week'); if (!w) return; w.value = set.week;
     w.addEventListener('change', () => { const v = +w.value; if (v >= 0) { set.week = v; keep(); draw(); } else w.value = set.week; });
+    [['sw-tpct', 'tpct'], ['sw-res', 'res']].forEach(([id, k]) => { const x = $(id); if (!x) return; x.value = set[k]; x.addEventListener('change', () => { const v = +x.value; if (v >= 0) { set[k] = v; keep(); draw(); } else x.value = set[k]; }); });
+    document.addEventListener('vg:data', () => { if (loaded) draw(); });
     document.addEventListener('vg:ready', draw);
     setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) poll(); }, 2000);
     draw(); drawTest();
@@ -5602,6 +5622,7 @@ const SPC = (() => {
 
   window.VGTrade = {
     trade: () => T, prefill,
+    goldTHB: () => { const r = value(book()).rows.GOLD; return r ? r.v : 0; },
     equityTHB: () => { if (!T.tx.some((x) => x.type === 'dep')) return 0; return value(book()).eq; },
     replace: (c) => { T = norm(c); save(false); setupFees(); buildSym(); const b = $('tr-targets'); if (b) { b.replaceChildren(); delete b.dataset.built; } draw(); },
     merge: (c) => { const ids = new Set((c.tx || []).map((x) => x.id)); const tx = [...(c.tx || []), ...T.tx.filter((x) => !ids.has(x.id))];
