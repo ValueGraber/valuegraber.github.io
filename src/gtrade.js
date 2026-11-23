@@ -14,14 +14,14 @@
   const API = 'https://data-api.binance.vision/api/v3/', WS = 'wss://data-stream.binance.vision/ws/paxgusdt@kline_1h';
   const KEY = 'valuegrab-gtrade-v1';
   const SLK = 1.5, TPK = 2, MAXH = 48; /* stop and target in ATRs, give up after 48 hours */
-  const blank = () => ({ tx: [], set: { lot: 0.01, cs: 100, strat: 'sweep' } });
+  const blank = () => ({ tx: [], set: { lot: 0.01, cs: 100, strat: 'sweep', spread: 0.3, slip: 0.1, comm: 0, htf: false, nfp: true } });
   const pblank = () => ({ start: 1000, lot: 0.01, be: true, auto: { sweep: true }, since: { sweep: Date.now() }, tx: [] });
   const norm = (j) => { const pp = (j && j.paper) || {};
     return { tx: Array.isArray(j && j.tx) ? j.tx : [], set: { ...blank().set, ...((j && j.set) || {}) },
       paper: (() => { const q = { ...pblank(), ...pp, auto: { ...(pp.auto || pblank().auto) }, since: { ...(pp.since || pblank().since) }, tx: Array.isArray(pp.tx) ? pp.tx : [] };
         if (q.auto.asia === undefined) { q.auto.asia = true; q.since.asia = Date.now(); } return q; })() }; };
   const P = () => D.paper;
-  const SPREAD = 0.3; /* simulated broker spread, USD per ounce */
+  const SPD = () => (D.set.spread >= 0 ? D.set.spread : 0.3); /* broker spread, USD per ounce (setting) */
   let D = norm(null); try { D = norm(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { /* defaults */ }
   try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!raw || !raw.paper || !raw.paper.auto || raw.paper.auto.asia === undefined) localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } /* pin the bot start time */
   const save = (sync = true) => { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } if (sync && window.VGSync) window.VGSync.push('portfolios'); };
@@ -51,7 +51,7 @@
     for (let i = 1; i < b.length; i++) { const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c));
       a = i <= n ? a + tr / n : (a * (n - 1) + tr) / n; if (i >= n) o[i] = a; } return o; };
   const wkend = (t) => { const d = new Date(t + 2 * 3600e3).getUTCDay(); return d === 6 || d === 0; }; /* XAUUSD closed: Sat 05:00 → Mon 05:00 Thai */
-  const ind = (b) => { const c = b.map((x) => x.c); const o = { e20: ema(c, 20), e50: ema(c, 50), rsi: rsi(c), atr: atr(b), pdh: [], pdl: [], hiB: [], loB: [], ah: [], al: [], ab: [] };
+  const ind = (b) => { const c = b.map((x) => x.c); const o = { e20: ema(c, 20), e50: ema(c, 50), e480: ema(c, 480), rsi: rsi(c), atr: atr(b), pdh: [], pdl: [], hiB: [], loB: [], ah: [], al: [], ab: [] };
     let cur = null, ph = null, pl = null, hh = -Infinity, ll = Infinity;
     b.forEach((x, i) => { o.pdh[i] = o.pdl[i] = null; if (wkend(x.t)) return; const k = Math.floor((x.t + 2 * 3600e3) / 86400e3);
       if (k !== cur) { if (cur != null) { ph = hh; pl = ll; } cur = k; hh = -Infinity; ll = Infinity; }
@@ -99,6 +99,11 @@
     sweep: { name: 'กวาดสต็อป', fn: sigSweep, lines: (I) => [I.pdh, I.pdl], why: (s) => (s.side === 'buy' ? `ราคาทะลุจุดต่ำของเมื่อวาน (${px(s.lvl)}) ลงไปกวาดสต็อป แล้วดีดกลับขึ้นมาปิดเหนือเส้นในแท่งเดียว` : `ราคาทะลุจุดสูงของเมื่อวาน (${px(s.lvl)}) ขึ้นไปกวาดสต็อป แล้วโดนตบกลับลงมาปิดใต้เส้นในแท่งเดียว`) },
     ema: { name: 'EMA ย่อ', fn: sigEma, why: (s) => (s.side === 'buy' ? 'ขาขึ้น ราคาย่อแตะเส้น EMA 20 แล้วเด้งกลับขึ้น' : 'ขาลง ราคาเด้งแตะเส้น EMA 20 แล้วกลับลง') },
   };
+  /* filters: trade only with the 20-day trend (1h EMA 480), skip the US jobs report window (first Friday, 18:00–22:00 Thai) */
+  const nfpBlock = (t) => { const d = new Date(t + 7 * 3600e3), h = d.getUTCHours(); return d.getUTCDay() === 5 && d.getUTCDate() <= 7 && h >= 18 && h <= 21; };
+  const filt = (fn) => (b, I, i) => { const x = fn(b, I, i); if (!x) return null;
+    if (D.set.htf && I.e480 && I.e480[i] != null && (x.side === 'buy' ? b[i].c < I.e480[i] : b[i].c > I.e480[i])) return null;
+    if (D.set.nfp && nfpBlock(b[i].t)) return null; return x; };
   const strat = () => (STRATS[D.set.strat] ? D.set.strat : 'sweep');
   /* walk the bars: one simulated trade at a time; stop and target hit in the same bar counts as a loss */
   const test = (b, I, fn) => {
@@ -122,7 +127,7 @@
   let bars = [], form = null, live = null, I = null, S = [], SS = {}, on = false, ws = null, lastTick = 0, err = '', loaded = false, polling = false;
   const kl = (a) => ({ t: a[0], o: +a[1], h: +a[2], l: +a[3], c: +a[4] });
   const get = (u) => fetch(API + u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
-  const recalc = () => { const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, STRATS[k].fn); }); S = SS[strat()];
+  const recalc = () => { const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, filt(STRATS[k].fn)); }); S = SS[strat()];
     if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
   const load = async () => { const k = (await get('klines?symbol=PAXGUSDT&interval=1h&limit=1000')).map(kl); form = k.pop() || null; bars = k; live = form ? form.c : bars[bars.length - 1].c; recalc(); loaded = true; };
   const start = async () => {
@@ -159,7 +164,7 @@
   const atrNow = () => (I && I.atr[bars.length - 1]) || 5;
   const paperOpen = (side, o = {}) => {
     const base = o.entry ?? live; if (base == null) return null; const dir = side === 'buy' ? 1 : -1, a = atrNow();
-    const entry = base + (dir * SPREAD) / 2, sl = o.sl ?? entry - dir * SLK * a, tp = o.tp ?? entry + dir * TPK * a;
+    const entry = base + (dir * SPD()) / 2, sl = o.sl ?? entry - dir * SLK * a, tp = o.tp ?? entry + dir * TPK * a;
     const x = { id: uid(), src: o.src || 'man', side, at: o.at || Date.now(), entry, lot: o.lot || P().lot, sl0: sl, sl, tp }; if (o.sid) x.sid = o.sid;
     P().tx.push(x); return x;
   };
@@ -177,7 +182,7 @@
         if (P().be && risk && (dir > 0 ? b.h >= x.entry + risk : b.l <= x.entry - risk)) sl = x.entry;
       }
       if (x.exit == null && live != null) {
-        const bid = live - SPREAD / 2, ask = live + SPREAD / 2, q = dir > 0 ? bid : ask; /* a buy closes at the bid, a sell at the ask */
+        const bid = live - SPD() / 2, ask = live + SPD() / 2, q = dir > 0 ? bid : ask; /* a buy closes at the bid, a sell at the ask */
         if (dir > 0 ? q <= sl : q >= sl) close(sl, Date.now(), sl === x.sl0 ? 'sl' : 'be'); else if (dir > 0 ? q >= x.tp : q <= x.tp) close(x.tp, Date.now(), 'tp');
         else if (P().be && risk && (dir > 0 ? q >= x.entry + risk : q <= x.entry - risk)) sl = x.entry;
       }
@@ -188,6 +193,8 @@
   const autoTrade = () => {
     let ch = false;
     Object.keys(STRATS).forEach((k) => { if (!P().auto[k]) return; const since = P().since[k] || 0;
+      const done = P().tx.filter((x) => x.src === k && x.exit != null), rs = done.map((x) => { const r = Math.abs(x.entry - x.sl0) * x.lot * D.set.cs; return r > 0 ? plOf(x) / r : 0; });
+      if (rs.length >= 30 && rs.reduce((a, v) => a + v, 0) / rs.length < 0) { P().auto[k] = false; P().off = { ...(P().off || {}), [k]: Date.now() }; ch = true; return; }
       (SS[k] || []).forEach((s) => { const sid = k + ':' + s.t; if (s.t <= since || P().tx.some((x) => x.sid === sid)) return;
         paperOpen(s.side, { entry: s.entry, sl: s.sl, tp: s.tp, src: k, sid, at: s.t }); ch = true; }); });
     return ch;
@@ -195,7 +202,7 @@
   const srcName = (k) => (k === 'man' ? 'คุณ' : STRATS[k] ? 'บอท ' + STRATS[k].name : k);
   const pOpen = () => P().tx.filter((x) => x.exit == null).sort((a, b) => b.at - a.at);
   const pClosed = () => P().tx.filter((x) => x.exit != null).sort((a, b) => b.closedAt - a.closedAt);
-  const qtyFloat = (x) => { const q = x.side === 'buy' ? live - SPREAD / 2 : live + SPREAD / 2; return live == null ? null : plOf(x, q); };
+  const qtyFloat = (x) => { const q = x.side === 'buy' ? live - SPD() / 2 : live + SPD() / 2; return live == null ? null : plOf(x, q); };
 
   /* ---------- chart ---------- */
   let span = 72;
@@ -272,7 +279,7 @@
   let tmFrom = null;
   const tmGo = async () => {
     const m = $('tm-msg'), out = $('tm-out'); if (live == null || !bars.length) { m.textContent = 'ยังโหลดราคาไม่เสร็จ'; return; }
-    const side = $('tm-side').value, dir = side === 'buy' ? 1 : -1, a = atrNow(), entry = +$('tm-entry').value || live + (dir * SPREAD) / 2;
+    const side = $('tm-side').value, dir = side === 'buy' ? 1 : -1, a = atrNow(), entry = +$('tm-entry').value || live + (dir * SPD()) / 2;
     const sl = +$('tm-sl').value || entry - dir * SLK * a, tp = +$('tm-tp').value || entry + dir * TPK * a, H = +$('tm-h').value || 24;
     if ((entry - sl) * dir <= 0 || (tp - entry) * dir <= 0) { m.textContent = side === 'buy' ? 'Buy: SL ต้องต่ำกว่าราคาเข้า และ TP สูงกว่า' : 'Sell: SL ต้องสูงกว่าราคาเข้า และ TP ต่ำกว่า'; return; }
     m.textContent = 'กำลังโหลดประวัติราคาและเล่นอนาคต…'; const T0 = await tmLoad(); if (!T0) { m.textContent = 'โหลดประวัติราคาไม่สำเร็จ'; return; }
@@ -298,6 +305,76 @@
     const brk = (k, list) => { const b = breaker(list); const p = el('p', 'rk-l ' + (b.out.length ? 'neg' : 'pos'));
       p.append(el('b', null, k), el('span', null, ' ' + (b.out.length ? b.out.map((x) => x.msg).join(' · ') : `พร้อมเทรด · สัปดาห์นี้ ${usd(b.wk)} / เพดาน $${f2(r.wkLoss)} · เดือนนี้ ${usd(b.mo)} / $${f2(r.moLoss)}`))); return p; };
     box.replaceChildren(line('ไม้จริงวันนี้:', D.tx), brk('สถานะไม้จริง:', D.tx), line('ไม้กระดาษของคุณวันนี้:', P().tx.filter((x) => x.src === 'man')), brk('สถานะไม้กระดาษ:', P().tx.filter((x) => x.src === 'man')));
+  };
+
+  /* ---------- long back-test (money-master 2.6): years of 1h bars, real costs, yearly split, in/out-of-sample, SL/TP sensitivity ---------- */
+  let LB = null, lbBusy = false;
+  const lbLoad = async (years, msg) => {
+    const need = Math.round(years * 365 * 24); let all = bars.slice(), guard = 0;
+    while (all.length < need && guard++ < 80) { const r = (await get(`klines?symbol=PAXGUSDT&interval=1h&limit=1000&endTime=${all[0].t - 1}`)).map(kl); if (!r.length) break; all = [...r, ...all]; msg(`กำลังโหลดกราฟย้อนหลัง ${Math.round((all.length / 24 / 365) * 10) / 10} ปี…`); }
+    return all;
+  };
+  const btRun = (b, I, fn, o) => {
+    const cost = (D.set.spread || 0) + (D.set.slip || 0) + (D.set.comm || 0) / (D.set.cs || 100), out = []; let i = 60;
+    while (i < b.length) {
+      const s0 = fn(b, I, i); if (!s0) { i++; continue; } const dir = s0.side === 'buy' ? 1 : -1, risk = Math.abs(s0.entry - s0.sl) * o.slMul, sl = s0.entry - dir * risk, tp = s0.entry + dir * Math.abs(s0.tp - s0.entry) * o.tpMul;
+      let exit = null, j = i + 1;
+      for (; j < b.length && j <= i + MAXH; j++) { const y = b[j]; if (dir > 0 ? y.l <= sl : y.h >= sl) { exit = sl; break; } if (dir > 0 ? y.h >= tp : y.l <= tp) { exit = tp; break; } if (j === i + MAXH) { exit = y.c; break; } }
+      if (exit == null) break; out.push({ t: b[i].t, R: ((exit - s0.entry) * dir - cost) / risk }); i = j + 1;
+    }
+    return out;
+  };
+  const sumR = (xs) => { const n = xs.length, w = xs.filter((x) => x.R > 0), gw = w.reduce((a, x) => a + x.R, 0), gl = -xs.filter((x) => x.R <= 0).reduce((a, x) => a + x.R, 0);
+    let eq = 0, pk = 0, dd = 0; xs.forEach((x) => { eq += x.R; pk = Math.max(pk, eq); dd = Math.min(dd, eq - pk); });
+    return { n, win: n ? w.length / n : 0, exp: n ? (gw - gl) / n : 0, pf: gl ? gw / gl : null, dd, tot: gw - gl }; };
+  const lbAnalyze = (b, I, k) => {
+    const fn = filt(STRATS[k].fn), base = btRun(b, I, fn, { slMul: 1, tpMul: 1 }), S0 = sumR(base);
+    const cut = b[Math.floor(b.length * 0.7)].t, IS = sumR(base.filter((x) => x.t < cut)), OOS = sumR(base.filter((x) => x.t >= cut));
+    const yrs = {}; base.forEach((x) => { const y = new Date(x.t).getUTCFullYear(); (yrs[y] = yrs[y] || []).push(x); });
+    const years = Object.entries(yrs).map(([y, xs]) => ({ y, ...sumR(xs) })), posY = years.filter((y) => y.tot > 0).length;
+    const grid = []; [0.75, 1, 1.25].forEach((sm) => [0.8, 1, 1.2].forEach((tm) => grid.push({ sm, tm, exp: sumR(btRun(b, I, fn, { slMul: sm, tpMul: tm })).exp })));
+    const plateau = grid.filter((g) => g.exp > 0).length, why = [];
+    if (S0.n < 100) why.push(`ไม้น้อย (${S0.n} < 100)`); if (S0.exp <= 0.05) why.push('ค่าคาดหวังหลังหักต้นทุนไม่ถึง +0.05R');
+    if (!(OOS.exp > 0 && OOS.exp >= 0.5 * IS.exp)) why.push('ช่วงทดสอบท้าย (30% หลัง) แย่กว่าช่วงแรกมาก');
+    if (posY < years.length * 0.6) why.push(`กำไรแค่ ${posY}/${years.length} ปี`); if (plateau < 6) why.push(`ขยับ SL/TP แล้วบวกแค่ ${plateau}/9 แบบ`);
+    const verdict = S0.exp <= 0 ? 'ทิ้ง' : why.length === 0 ? 'ใช้ได้' : why.length <= 2 ? 'ต้องปรับ' : 'ทิ้ง';
+    return { k, S0, IS, OOS, years, grid, plateau, why, verdict };
+  };
+  const lbGo = async () => {
+    if (lbBusy || !bars.length) return; lbBusy = true; const msg = (t) => { $('lb-msg').textContent = t; };
+    try {
+      const yrs = +$('lb-years').value || 5; if (!LB || LB.years < yrs) { const b = await lbLoad(yrs, msg); LB = { years: yrs, b, I: null }; }
+      msg('กำลังคำนวณ…'); await new Promise((r) => setTimeout(r, 30));
+      const b = LB.b; LB.I = LB.I || ind(b); LB.res = Object.keys(STRATS).map((k) => lbAnalyze(b, LB.I, k)); LB.span = [b[0].t, b[b.length - 1].t];
+      msg(''); drawLB();
+    } catch (e) { msg('โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+    lbBusy = false;
+  };
+  const drawLB = () => {
+    const box = $('lb-out'); if (!box || !LB || !LB.res) return; box.replaceChildren();
+    const f2r = (v) => `${sgn(v)}${Math.abs(v).toFixed(2)}R`, cost = (D.set.spread || 0) + (D.set.slip || 0) + (D.set.comm || 0) / (D.set.cs || 100);
+    box.append(el('p', 'pf-hint', `ช่วงข้อมูล ${new Date(LB.span[0]).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })} – ${new Date(LB.span[1]).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })} · ต้นทุนต่อไม้ $${cost.toFixed(2)}/ออนซ์ (สเปรด + ราคาคลาด + ค่าคอม) · ${D.set.htf ? 'ตามเทรนด์ 20 วัน · ' : ''}${D.set.nfp ? 'เว้นช่วงข่าวจ้างงานสหรัฐฯ' : 'ไม่เว้นข่าว'}`));
+    LB.res.forEach((r) => {
+      const c = el('div', 'lb-card ' + (r.verdict === 'ใช้ได้' ? 'ok' : r.verdict === 'ต้องปรับ' ? 'mid' : 'bad'));
+      c.append(el('b', null, `${STRATS[r.k].name}: ${r.verdict}`),
+        el('p', null, `${r.S0.n} ไม้ · ชนะ ${Math.round(r.S0.win * 100)}% · เฉลี่ย ${f2r(r.S0.exp)} ต่อไม้ · PF ${r.S0.pf == null ? '–' : r.S0.pf.toFixed(2)} · รวม ${f2r(r.S0.tot)} · ติดลบสะสมหนักสุด ${f2r(r.S0.dd)}`),
+        el('p', 'pf-hint', `70% แรก ${f2r(r.IS.exp)} ต่อไม้ · 30% หลัง ${f2r(r.OOS.exp)} ต่อไม้ · ขยับ SL/TP 9 แบบ บวก ${r.plateau} แบบ · ปีที่กำไร ${r.years.filter((y) => y.tot > 0).length}/${r.years.length}`));
+      if (r.why.length) c.append(el('p', 'pf-hint', 'เหตุผล: ' + r.why.join(' · ')));
+      const tb = el('table', 'tr-table'), hd = el('tr'); ['ปี', 'ไม้', 'ชนะ', 'เฉลี่ย', 'รวม'].forEach((h) => hd.append(el('th', null, h))); const th = el('thead'); th.append(hd); tb.append(th);
+      const bd = el('tbody'); r.years.forEach((y) => { const tr = el('tr'); [String(+y.y + 543), String(y.n), Math.round(y.win * 100) + '%', f2r(y.exp), f2r(y.tot)].forEach((v, i) => tr.append(el('td', i >= 3 ? tone(i === 3 ? y.exp : y.tot) : null, v))); bd.append(tr); });
+      tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); c.append(w); box.append(c);
+    });
+    box.append(el('p', 'pf-hint', 'ทดสอบด้วยราคา PAXG (ใกล้ XAUUSD) ถ้า SL กับ TP โดนในแท่งเดียวกันนับเป็นแพ้ ครบ 48 ชม. ปิดที่ราคาปิด ผลอดีตไม่รับประกันอนาคต'));
+  };
+  /* expectancy calculator with a 10,000-month simulation */
+  const calcGo = () => {
+    const w = (+$('cc-w').value || 0) / 100, aw = +$('cc-aw').value || 0, al = +$('cc-al').value || 0, n = Math.round(+$('cc-n').value || 0), risk = +$('cc-r').value || 0, out = $('cc-out');
+    if (!(w > 0 && w < 1 && aw > 0 && al > 0 && n > 0 && risk > 0)) { out.textContent = 'ใส่ตัวเลขให้ครบ'; return; }
+    const exp = w * aw - (1 - w) * al, R = rng(19), months = []; let neg = 0;
+    for (let m = 0; m < 10000; m++) { let t = 0; for (let i = 0; i < n; i++) t += R() < w ? aw : -al; months.push(t * risk); if (t < 0) neg++; }
+    months.sort((a, b) => a - b); const q = (f) => months[Math.floor(f * 9999)];
+    out.replaceChildren(el('b', exp > 0 ? 'pos' : 'neg', `ค่าคาดหวัง ${sgn(exp)}${Math.abs(exp).toFixed(2)}R ต่อไม้ → เฉลี่ยเดือนละ ${usd(exp * n * risk)} (${thb(exp * n * risk)})`),
+      el('p', null, `จำลอง 10,000 เดือน: เดือนที่ขาดทุน ${Math.round((neg / 100))}% · 90% ของเดือนอยู่ระหว่าง ${usd(q(0.05))} ถึง ${usd(q(0.95))} · จุดเท่าทุนต้องชนะอย่างน้อย ${Math.round((al / (aw + al)) * 100)}%`));
   };
 
   /* ---------- TradingView-style chart: lightweight-charts 4.2.3 (TradingView's open-source library) loaded on demand;
@@ -465,7 +542,7 @@
       const bx = el('div', 'gt-act'); const b = el('button', 'btn-solid', 'เข้าไม้นี้ (จริง)'); b.type = 'button'; b.addEventListener('click', () => prefill(s));
       const b2 = el('button', 'btn-line', 'เทรดกระดาษไม้นี้'); b2.type = 'button';
       const warn = el('p', 'gt-block'); warn.hidden = true;
-      b2.addEventListener('click', () => { if (live == null) return; const e = live + ((s.side === 'buy' ? 1 : -1) * SPREAD) / 2, lt = P().autoLot !== false ? sizeLot(Math.abs(e - s.sl)) : P().lot;
+      b2.addEventListener('click', () => { if (live == null) return; const e = live + ((s.side === 'buy' ? 1 : -1) * SPD()) / 2, lt = P().autoLot !== false ? sizeLot(Math.abs(e - s.sl)) : P().lot;
         const c = check({ side: s.side, entry: e, sl: s.sl, tp: s.tp, lot: lt || 0 }, P().tx.filter((x) => x.src === 'man'));
         if (!(lt >= 0.01) || !c.ok) { warn.hidden = false; warn.textContent = 'ไม่ผ่านด่านตรวจ: ' + (lt >= 0.01 ? c.bl : ['SL ไกลเกินเงินที่ยอมเสีย']).join(' · '); return; }
         const x = paperOpen(s.side, { sl: s.sl, tp: s.tp, lot: lt }); if (x) { save(); drawAll(); if (window.VGNav) window.VGNav.go('scan', 'gtp'); } });
@@ -532,7 +609,7 @@
     top.append(left, right); r.append(top);
     const act = el('div', 'gt-act');
     if (paper) { if (isOpen) { const c = el('button', 'btn-line', 'ปิดตอนนี้'); c.type = 'button';
-        c.addEventListener('click', () => { if (live == null) return; x.exit = x.side === 'buy' ? live - SPREAD / 2 : live + SPREAD / 2; x.closedAt = Date.now(); x.out = 'man'; save(); drawAll(); }); act.append(c); } }
+        c.addEventListener('click', () => { if (live == null) return; x.exit = x.side === 'buy' ? live - SPD() / 2 : live + SPD() / 2; x.closedAt = Date.now(); x.out = 'man'; save(); drawAll(); }); act.append(c); } }
     else if (isOpen) { const h = hit(x); if (h) act.append(el('span', 'gt-flag ' + (h === 'tp' ? 'pos' : 'neg'), h === 'tp' ? 'ราคาถึง TP แล้ว' : 'ราคาถึง SL แล้ว'));
       const c = el('button', 'btn-line', 'ปิดไม้'); c.type = 'button'; c.addEventListener('click', () => closeRow(x, r)); act.append(c); }
     else { const u = el('button', 'btn-line', 'เปิดกลับ'); u.type = 'button'; u.addEventListener('click', () => { delete x.exit; delete x.closedAt; delete x.out; delete x.fee; save(); drawAll(); }); act.append(u); }
@@ -562,8 +639,8 @@
       tile('เงินปลอมในพอร์ต', '$' + f2(bal), `เริ่ม $${f2(P().start)} · ${sgn(bal - P().start)}${Math.abs(((bal - P().start) / P().start) * 100).toFixed(1)}%`, tone(bal - P().start)),
       tile('ยังไม่ปิด', usd(fl), `${o.length} ไม้`, tone(fl)),
       tile('ชนะ', st.win == null ? '–' : Math.round(st.win * 100) + '%', `${st.n} ไม้ที่ปิดแล้ว`),
-      tile('ราคาตอนนี้', live == null ? '–' : px(live), live == null ? '' : `ซื้อ ${px(live + SPREAD / 2)} · ขาย ${px(live - SPREAD / 2)}`));
-    $('gp-buy').textContent = live == null ? 'Buy' : `Buy ${px(live + SPREAD / 2)}`; $('gp-sell').textContent = live == null ? 'Sell' : `Sell ${px(live - SPREAD / 2)}`;
+      tile('ราคาตอนนี้', live == null ? '–' : px(live), live == null ? '' : `ซื้อ ${px(live + SPD() / 2)} · ขาย ${px(live - SPD() / 2)}`));
+    $('gp-buy').textContent = live == null ? 'Buy' : `Buy ${px(live + SPD() / 2)}`; $('gp-sell').textContent = live == null ? 'Sell' : `Sell ${px(live - SPD() / 2)}`;
     if (!box.contains(document.activeElement)) { box.replaceChildren(); if (!o.length) box.append(el('div', 'empty', 'ไม่มีไม้กระดาษที่เปิดอยู่')); o.forEach((x) => box.append(row(x, true, true))); }
     const cb = $('gp-closed'); cb.replaceChildren(); if (!c.length) cb.append(el('div', 'empty', 'ยังไม่มีไม้กระดาษที่ปิดแล้ว'));
     c.slice(0, 20).forEach((x) => cb.append(row(x, false, true))); if (c.length > 20) cb.append(el('p', 'pf-hint', `แสดง 20 ไม้ล่าสุดจาก ${c.length} ไม้ ดูรายวันได้ที่ปฏิทิน (เลือก "กระดาษ")`));
@@ -572,7 +649,7 @@
     const th = el('thead'); th.append(hd); tb.append(th); const bd = el('tbody');
     ['man', ...Object.keys(STRATS)].forEach((k) => {
       const s2 = stats(c.filter((x) => x.src === k)), tr = el('tr'); const td = (v, cl) => tr.append(el('td', cl || null, v));
-      td(srcName(k) + (k !== 'man' && !P().auto[k] ? ' (ปิดอยู่)' : '')); td(String(s2.n)); td(s2.win == null ? '–' : Math.round(s2.win * 100) + '%'); td(usd(s2.net), tone(s2.net));
+      td(srcName(k) + (k !== 'man' && !P().auto[k] ? (P().off && P().off[k] ? ' (ระบบปิดให้: 30 ไม้แล้วยังติดลบ)' : ' (ปิดอยู่)') : '')); td(String(s2.n)); td(s2.win == null ? '–' : Math.round(s2.win * 100) + '%'); td(usd(s2.net), tone(s2.net));
       if (k === 'man') td('–'); else { const d = (SS[k] || []).filter((x) => x.out), w = d.filter((x) => x.R > 0).length, r = d.reduce((a, x) => a + x.R, 0); td(d.length ? `ชนะ ${Math.round((w / d.length) * 100)}% · ${sgn(r)}${Math.abs(r).toFixed(1)}R` : '–', tone(r)); }
       bd.append(tr); });
     tb.append(bd); const w = el('div', 'tr-scroll'); w.append(tb); $('gp-board').replaceChildren(w);
@@ -652,7 +729,7 @@
   const drawAll = () => { drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
 
   /* ---------- wiring ---------- */
-  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtr'];
+  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtbt', 'gtr'];
   const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && SUBS.some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const csv = () => {
     const rows = [['เข้า', 'ปิด', 'ฝั่ง', 'lot', 'ราคาเข้า', 'SL', 'TP', 'ราคาปิด', 'ค่าคอม USD', 'กำไร USD', 'บันทึก']];
@@ -681,7 +758,7 @@
     const trade = (side) => {
       const sl0 = +$('gp-sl').value || null, tp0 = +$('gp-tp').value || null, m = $('gp-msg'), auto = $('gp-autolot').checked;
       if (live == null) { m.textContent = 'ยังโหลดราคาไม่เสร็จ'; return; }
-      const e = live + (side === 'buy' ? SPREAD / 2 : -SPREAD / 2), dir = side === 'buy' ? 1 : -1, a = atrNow(), sl = sl0 ?? e - dir * SLK * a, tp = tp0 ?? e + dir * TPK * a;
+      const e = live + (side === 'buy' ? SPD() / 2 : -SPD() / 2), dir = side === 'buy' ? 1 : -1, a = atrNow(), sl = sl0 ?? e - dir * SLK * a, tp = tp0 ?? e + dir * TPK * a;
       const lot = auto ? sizeLot(Math.abs(e - sl)) : +$('gp-lot').value;
       if (!(lot >= 0.01)) { m.textContent = auto ? `SL ห่าง $${f2(Math.abs(e - sl))} ไกลเกิน แม้ 0.01 lot ก็เสียเกินไม้ละ $${f2(rules().maxLoss)} ลองตั้ง SL ใกล้ขึ้น` : 'ใส่ขนาด lot ก่อน'; return; }
       if (sl && (side === 'buy' ? sl >= e : sl <= e)) { m.textContent = side === 'buy' ? 'Buy: SL ต้องต่ำกว่าราคาตอนนี้' : 'Sell: SL ต้องสูงกว่าราคาตอนนี้'; return; }
@@ -697,6 +774,9 @@
     rk.forEach(([id, k]) => { $(id).value = rules()[k]; $(id).addEventListener('change', () => { const v = +$(id).value; if (v > 0) { D.set.rules = { ...(D.set.rules || {}), [k]: k === 'maxTrades' || k === 'streak' || k === 'revenge' ? Math.round(v) : v }; save(); drawAll(); } else $(id).value = rules()[k]; }); });
     ['gt-entry', 'gt-sl'].forEach((k) => $(k).addEventListener('input', sizeHint)); sizeHint();
     $('tm-run').addEventListener('click', () => { tmFrom = null; tmGo(); });
+    $('lb-run').addEventListener('click', lbGo); $('cc-run').addEventListener('click', calcGo);
+    [['cs-spread', 'spread'], ['cs-slip', 'slip'], ['cs-comm', 'comm']].forEach(([id, k]) => { $(id).value = D.set[k] ?? blank().set[k]; $(id).addEventListener('change', () => { const v = +$(id).value; if (v >= 0) { D.set[k] = v; save(); recalc(); drawAll(); drawLB(); } else $(id).value = D.set[k]; }); });
+    [['f-htf', 'htf'], ['f-nfp', 'nfp']].forEach(([id, k]) => { $(id).checked = D.set[k] ?? blank().set[k]; $(id).addEventListener('change', () => { D.set[k] = $(id).checked; save(); if (bars.length) recalc(); drawAll(); if (LB && LB.res) lbGo(); }); });
     $('gp-buy').addEventListener('click', () => trade('buy')); $('gp-sell').addEventListener('click', () => trade('sell'));
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
@@ -714,6 +794,6 @@
       const tx = by(c.tx || [], D.tx), cp = (c.paper || {}), ptx = by(cp.tx || [], P().tx);
       return { extra: tx.length - (c.tx || []).length + ptx.length - (cp.tx || []).length,
         doc: { tx, set: { ...D.set, ...(c.set || {}) }, paper: { ...P(), ...cp, auto: { ...P().auto, ...(cp.auto || {}) }, since: { ...P().since, ...(cp.since || {}) }, tx: ptx } } }; },
-    _test: { tmRun, check, sizeLot, ind, sigEma, sigSweep, test, settle: () => settle(), D: () => D },
+    _test: { btRun, sumR, lbAnalyze, nfpBlock, tmRun, check, sizeLot, ind, sigEma, sigSweep, test, settle: () => settle(), D: () => D },
   };
 })();
