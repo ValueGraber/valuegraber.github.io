@@ -10,6 +10,8 @@ const d3p = path.join(__dirname, 'node_modules/d3/dist/d3.min.js');
     await ctx.route('**/*', (r) => {
       const u = r.request().url();
       if (u.includes('gstatic.com/firebasejs/')) return r.fulfill({ body: fs.readFileSync(path.join(__dirname, 'mockfb', u.split('/').pop())), contentType: 'application/javascript' });
+      const lwp = path.join(__dirname, 'node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.js');
+      if (u.includes('lightweight-charts') && fs.existsSync(lwp)) return r.fulfill({ body: fs.readFileSync(lwp), contentType: 'application/javascript' });
       if (u.includes('d3.min.js') && fs.existsSync(d3p)) return r.fulfill({ body: fs.readFileSync(d3p), contentType: 'application/javascript' });
       if (u.startsWith('http://t/')) {
         const f = path.join(docs, new URL(u).pathname); if (!fs.existsSync(f)) return r.fulfill({ status: 404, body: '' });

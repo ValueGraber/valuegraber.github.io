@@ -1089,6 +1089,18 @@ tr.editing td { background: var(--accent-soft); }
 .gt-cross { stroke: var(--ink-3); stroke-width: 1; }
 .gt-pdh, .gt-pdl { stroke: var(--foil); stroke-width: 1.6; stroke-dasharray: 4 3; }
 .gt-ln.pd { border-color: var(--foil); }
+.gt-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 8px; }
+.gt-tools .seg button { padding: 6px 10px; font-size: 14px; } .gt-fs { margin-left: auto; padding: 7px 12px; font-size: 14px; }
+.gt-chart.lw { height: 380px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.gt-rsi { height: 110px; background: var(--surface); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); overflow: hidden; }
+.gt-tv { height: 560px; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); display: grid; place-items: center; }
+.gt-tv > div { width: 100%; height: 100%; }
+.gt-tv[hidden], .gt-rsi[hidden], .gt-tools [hidden] { display: none; }
+.gt-wrap.gt-full { position: fixed; inset: 0; z-index: 3000; background: var(--bg); padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+.gt-full .gt-tools { margin: 0 0 6px; } .gt-full .gt-chart { flex: 1 1 auto; min-height: 0; height: auto; } .gt-full .gt-tv { flex: 1 1 auto; height: auto; }
+.gt-full .gt-rsi { height: 18vh; flex: none; } .gt-full .gt-leg { display: none; } .gt-full .gt-read { margin: 4px 0 0; }
+body.gt-noscroll { overflow: hidden; }
+@media (max-width: 640px) { .gt-chart.lw { height: 320px; } .gt-rsi { height: 96px; } .gt-tv { height: 480px; } }
 .gt-bar.gt-sbar { justify-content: flex-start; margin: 4px 0 12px; }
 .gp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .gp-btns button { border: 0; border-radius: var(--radius-lg); padding: 14px 8px; font: 600 17px var(--num); color: #fff; cursor: pointer; }
@@ -1365,10 +1377,19 @@ tr.editing td { background: var(--accent-soft); }
     <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="asia" aria-pressed="false">เบรกกรอบเอเชีย</button><button type="button" data-k="sweep" aria-pressed="true">กวาดสต็อป</button><button type="button" data-k="ema" aria-pressed="false">EMA ย่อ</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
     <div id="gt-now"></div>
-    <div class="gt-bar"><div class="seg" id="gt-span" role="group" aria-label="ช่วงกราฟ"><button type="button" data-n="48" aria-pressed="false">2 วัน</button><button type="button" data-n="72" aria-pressed="true">3 วัน</button><button type="button" data-n="168" aria-pressed="false">1 สัปดาห์</button><button type="button" data-n="336" aria-pressed="false">2 สัปดาห์</button></div></div>
-    <div class="gt-chart" id="gt-chart"></div>
-    <p class="pf-hint gt-read" id="gt-read"></p>
-    <p class="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบเอเชีย หรือจุดสูง/ต่ำเมื่อวาน</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+    <div class="gt-wrap" id="gt-wrap">
+      <div class="gt-tools">
+        <div class="seg" id="gt-mode" role="group" aria-label="แบบกราฟ"><button type="button" data-m="sys" aria-pressed="true">กราฟระบบ</button><button type="button" data-m="tv" aria-pressed="false">TradingView</button></div>
+        <div class="seg" id="gt-tf" role="group" aria-label="ไทม์เฟรม" hidden><button type="button" data-tf="15m" aria-pressed="false">15น.</button><button type="button" data-tf="1h" aria-pressed="true">1ชม.</button><button type="button" data-tf="4h" aria-pressed="false">4ชม.</button><button type="button" data-tf="1d" aria-pressed="false">วัน</button></div>
+        <div class="seg" id="gt-span" role="group" aria-label="ช่วงกราฟ"><button type="button" data-n="48" aria-pressed="false">2 วัน</button><button type="button" data-n="72" aria-pressed="true">3 วัน</button><button type="button" data-n="168" aria-pressed="false">1 สัปดาห์</button><button type="button" data-n="336" aria-pressed="false">2 สัปดาห์</button></div>
+        <button class="btn-line gt-fs" type="button" id="gt-fs">⛶ เต็มจอ</button>
+      </div>
+      <div class="gt-chart" id="gt-chart"></div>
+      <div class="gt-rsi" id="gt-rsi" hidden></div>
+      <div class="gt-tv" id="gt-tv" hidden></div>
+      <p class="pf-hint gt-read" id="gt-read"></p>
+      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบเอเชีย หรือจุดสูง/ต่ำเมื่อวาน</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+    </div>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
       <h4>กวาดสต็อป (Liquidity sweep)</h4><ul>

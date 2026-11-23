@@ -1089,6 +1089,18 @@ tr.editing td { background: var(--accent-soft); }
 .gt-cross { stroke: var(--ink-3); stroke-width: 1; }
 .gt-pdh, .gt-pdl { stroke: var(--foil); stroke-width: 1.6; stroke-dasharray: 4 3; }
 .gt-ln.pd { border-color: var(--foil); }
+.gt-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 8px; }
+.gt-tools .seg button { padding: 6px 10px; font-size: 14px; } .gt-fs { margin-left: auto; padding: 7px 12px; font-size: 14px; }
+.gt-chart.lw { height: 380px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.gt-rsi { height: 110px; background: var(--surface); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); overflow: hidden; }
+.gt-tv { height: 560px; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); display: grid; place-items: center; }
+.gt-tv > div { width: 100%; height: 100%; }
+.gt-tv[hidden], .gt-rsi[hidden], .gt-tools [hidden] { display: none; }
+.gt-wrap.gt-full { position: fixed; inset: 0; z-index: 3000; background: var(--bg); padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+.gt-full .gt-tools { margin: 0 0 6px; } .gt-full .gt-chart { flex: 1 1 auto; min-height: 0; height: auto; } .gt-full .gt-tv { flex: 1 1 auto; height: auto; }
+.gt-full .gt-rsi { height: 18vh; flex: none; } .gt-full .gt-leg { display: none; } .gt-full .gt-read { margin: 4px 0 0; }
+body.gt-noscroll { overflow: hidden; }
+@media (max-width: 640px) { .gt-chart.lw { height: 320px; } .gt-rsi { height: 96px; } .gt-tv { height: 480px; } }
 .gt-bar.gt-sbar { justify-content: flex-start; margin: 4px 0 12px; }
 .gp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .gp-btns button { border: 0; border-radius: var(--radius-lg); padding: 14px 8px; font: 600 17px var(--num); color: #fff; cursor: pointer; }
@@ -1365,10 +1377,19 @@ tr.editing td { background: var(--accent-soft); }
     <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="asia" aria-pressed="false">เบรกกรอบเอเชีย</button><button type="button" data-k="sweep" aria-pressed="true">กวาดสต็อป</button><button type="button" data-k="ema" aria-pressed="false">EMA ย่อ</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
     <div id="gt-now"></div>
-    <div class="gt-bar"><div class="seg" id="gt-span" role="group" aria-label="ช่วงกราฟ"><button type="button" data-n="48" aria-pressed="false">2 วัน</button><button type="button" data-n="72" aria-pressed="true">3 วัน</button><button type="button" data-n="168" aria-pressed="false">1 สัปดาห์</button><button type="button" data-n="336" aria-pressed="false">2 สัปดาห์</button></div></div>
-    <div class="gt-chart" id="gt-chart"></div>
-    <p class="pf-hint gt-read" id="gt-read"></p>
-    <p class="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบเอเชีย หรือจุดสูง/ต่ำเมื่อวาน</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+    <div class="gt-wrap" id="gt-wrap">
+      <div class="gt-tools">
+        <div class="seg" id="gt-mode" role="group" aria-label="แบบกราฟ"><button type="button" data-m="sys" aria-pressed="true">กราฟระบบ</button><button type="button" data-m="tv" aria-pressed="false">TradingView</button></div>
+        <div class="seg" id="gt-tf" role="group" aria-label="ไทม์เฟรม" hidden><button type="button" data-tf="15m" aria-pressed="false">15น.</button><button type="button" data-tf="1h" aria-pressed="true">1ชม.</button><button type="button" data-tf="4h" aria-pressed="false">4ชม.</button><button type="button" data-tf="1d" aria-pressed="false">วัน</button></div>
+        <div class="seg" id="gt-span" role="group" aria-label="ช่วงกราฟ"><button type="button" data-n="48" aria-pressed="false">2 วัน</button><button type="button" data-n="72" aria-pressed="true">3 วัน</button><button type="button" data-n="168" aria-pressed="false">1 สัปดาห์</button><button type="button" data-n="336" aria-pressed="false">2 สัปดาห์</button></div>
+        <button class="btn-line gt-fs" type="button" id="gt-fs">⛶ เต็มจอ</button>
+      </div>
+      <div class="gt-chart" id="gt-chart"></div>
+      <div class="gt-rsi" id="gt-rsi" hidden></div>
+      <div class="gt-tv" id="gt-tv" hidden></div>
+      <p class="pf-hint gt-read" id="gt-read"></p>
+      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบเอเชีย หรือจุดสูง/ต่ำเมื่อวาน</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+    </div>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
       <h4>กวาดสต็อป (Liquidity sweep)</h4><ul>
@@ -4913,7 +4934,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '1d8435e947';
+  const BUILD = 'b7c2ac7e25';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -6045,7 +6066,7 @@ const SPC = (() => {
     if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
   const load = async () => { const k = (await get('klines?symbol=PAXGUSDT&interval=1h&limit=1000')).map(kl); form = k.pop() || null; bars = k; live = form ? form.c : bars[bars.length - 1].c; recalc(); loaded = true; };
   const start = async () => {
-    on = true; err = '';
+    on = true; err = ''; loadLW();
     try {
       await load(); drawAll(); if (!on) return;
       ws = new WebSocket(WS);
@@ -6118,8 +6139,93 @@ const SPC = (() => {
 
   /* ---------- chart ---------- */
   let span = 72;
+  /* ---------- TradingView-style chart: lightweight-charts 4.2.3 (TradingView's open-source library) loaded on demand;
+     pan, pinch/wheel zoom, crosshair, timeframes 15m/1h/4h/1d, RSI pane synced below. The SVG chart below stays as the fallback.
+     Mode 'tv' embeds the real TradingView widget (OANDA:XAUUSD, drawing tools) instead. ---------- */
+  const LWURL = 'https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js';
+  let lwState = 'none', LW = null, tf = '1h', mode = 'sys'; const TFH = { '15m': 0.25, '1h': 1, '4h': 4, '1d': 24 }, tfc = {};
+  const loadLW = () => {
+    if (lwState !== 'none') return; if (window.LightweightCharts) { lwState = 'ok'; $('gt-tf').hidden = mode === 'tv'; return; }
+    lwState = 'loading'; const sc = document.createElement('script'); sc.src = LWURL;
+    sc.onload = () => { lwState = window.LightweightCharts ? 'ok' : 'fail'; if (lwState === 'ok') $('gt-tf').hidden = mode === 'tv'; drawChart(); };
+    sc.onerror = () => { lwState = 'fail'; drawChart(); }; document.head.append(sc);
+  };
+  const tfLoad = async (k) => {
+    const c = (tfc[k] = tfc[k] || {}); if (c.busy) return; c.busy = true;
+    try { const r = (await get(`klines?symbol=PAXGUSDT&interval=${k}&limit=${c.b ? 5 : 1000}`)).map(kl);
+      if (!c.b) c.b = r; else r.forEach((x) => { const j = c.b.findIndex((y) => y.t === x.t); if (j >= 0) c.b[j] = x; else if (x.t > c.b[c.b.length - 1].t) c.b.push(x); });
+      c.I = ind(c.b); } catch (e) { /* retry on the next round */ }
+    c.at = Date.now(); c.busy = false; drawChart();
+  };
+  const tfData = () => {
+    if (tf === '1h') return { b: form ? [...bars, form] : bars, I };
+    const c = tfc[tf]; if (!c || !c.b) { tfLoad(tf); return null; }
+    const b = c.b.slice(), L = b[b.length - 1]; if (live != null && L) b[b.length - 1] = { ...L, c: live, h: Math.max(L.h, live), l: Math.min(L.l, live) };
+    return { b, I: c.I };
+  };
+  const cssv = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const ts = (t) => Math.floor(t / 1000) + 7 * 3600; /* shift so the axis reads Thai time */
+  const readOut = (b, J, k) => { const x = b[k]; if (!x) return; const r = J.rsi[k];
+    $('gt-read').textContent = `${hm(x.t)} · เปิด ${px(x.o)} สูง ${px(x.h)} ต่ำ ${px(x.l)} ปิด ${px(x.c)} · EMA20 ${px(J.e20[k])} EMA50 ${px(J.e50[k])} · RSI ${r != null ? r.toFixed(0) : '–'}`; };
+  const lwSpan = () => { if (!LW || !LW.d) return; const n = LW.d.b.length, k = Math.max(40, Math.round(span / TFH[tf])); LW.ch.timeScale().setVisibleLogicalRange({ from: n - k, to: n + 3 }); };
+  const lwBuild = () => {
+    const L = window.LightweightCharts, box = $('gt-chart'), rb = $('gt-rsi'); box.innerHTML = ''; box.classList.add('lw'); rb.hidden = false; rb.innerHTML = '';
+    const base = () => ({ autoSize: true, layout: { background: { type: 'solid', color: cssv('--surface') || '#fff' }, textColor: cssv('--ink-3') || '#667', fontFamily: 'Chivo Mono, ui-monospace, monospace', fontSize: 11 },
+      grid: { vertLines: { color: cssv('--chart-grid') }, horzLines: { color: cssv('--chart-grid') } },
+      rightPriceScale: { borderColor: cssv('--line'), minimumWidth: 66 }, timeScale: { borderColor: cssv('--line'), timeVisible: true, secondsVisible: false, rightOffset: 4 },
+      crosshair: { mode: L.CrosshairMode.Normal }, localization: { priceFormatter: (p) => p.toFixed(2) } });
+    const ch = L.createChart(box, base()), rc = L.createChart(rb, { ...base(), timeScale: { visible: false, rightOffset: 4 } });
+    const up = cssv('--jade'), dn = cssv('--brick'), quiet = { priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false };
+    const cs = ch.addCandlestickSeries({ upColor: up, downColor: dn, wickUpColor: up, wickDownColor: dn, borderVisible: false, priceFormat: { type: 'price', precision: 2, minMove: 0.01 } });
+    const e20 = ch.addLineSeries({ color: cssv('--ochre'), lineWidth: 2, ...quiet }), e50 = ch.addLineSeries({ color: cssv('--cover'), lineWidth: 2, ...quiet });
+    const lvO = { color: cssv('--foil'), lineWidth: 2, lineStyle: L.LineStyle.Dashed, lineType: L.LineType.WithSteps, ...quiet }; const lh = ch.addLineSeries(lvO), ll = ch.addLineSeries(lvO);
+    const rs = rc.addLineSeries({ color: cssv('--cover'), lineWidth: 2, priceLineVisible: false, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) });
+    rc.priceScale('right').applyOptions({ scaleMargins: { top: 0.06, bottom: 0.06 } });
+    [30, 70].forEach((v) => rs.createPriceLine({ price: v, color: cssv('--ink-3'), lineWidth: 1, lineStyle: L.LineStyle.Dashed, axisLabelVisible: true }));
+    let sync = false; const link = (a, b2) => a.timeScale().subscribeVisibleLogicalRangeChange((r) => { if (sync || !r) return; sync = true; b2.timeScale().setVisibleLogicalRange(r); sync = false; });
+    link(ch, rc); link(rc, ch);
+    const cross = (prm) => { if (!LW || !LW.d) return; const k = prm && prm.time != null ? LW.idx.get(prm.time) : undefined; readOut(LW.d.b, LW.d.I, k ?? LW.d.b.length - 1); };
+    ch.subscribeCrosshairMove(cross); rc.subscribeCrosshairMove(cross);
+    LW = { L, ch, rc, cs, e20, e50, lh, ll, rs, pls: [], key: '', idx: new Map(), d: null, up, dn };
+  };
+  const lwDraw = () => {
+    const d = tfData(); if (!d || !d.b.length || !d.I) return; if (!LW) lwBuild();
+    const { b, I: J } = d, key = tf + ':' + strat(); LW.d = d; LW.idx = new Map(b.map((x, i) => [ts(x.t), i]));
+    const toL = (arr) => b.map((x, i) => (arr[i] == null ? { time: ts(x.t) } : { time: ts(x.t), value: arr[i] }));
+    LW.cs.setData(b.map((x) => ({ time: ts(x.t), open: x.o, high: x.h, low: x.l, close: x.c })));
+    LW.e20.setData(toL(J.e20)); LW.e50.setData(toL(J.e50)); LW.rs.setData(toL(J.rsi));
+    const LV = TFH[tf] <= 1 && STRATS[strat()].lines ? STRATS[strat()].lines(J) : null; LW.lh.setData(LV ? toL(LV[0]) : []); LW.ll.setData(LV ? toL(LV[1]) : []);
+    const dur = TFH[tf] * 3600e3, mk = [], seen = new Set();
+    if (tf !== '1d') S.forEach((sg) => { const t = sg.t - 1; let lo = 0, hi = b.length - 1, j = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (b[m].t <= t) { j = m; lo = m + 1; } else hi = m - 1; }
+      if (j < 0 || t >= b[j].t + dur || seen.has(j)) return; seen.add(j);
+      mk.push({ time: ts(b[j].t), position: sg.side === 'buy' ? 'belowBar' : 'aboveBar', color: sg.side === 'buy' ? LW.up : LW.dn, shape: sg.side === 'buy' ? 'arrowUp' : 'arrowDown', text: sg.side === 'buy' ? 'Buy' : 'Sell' }); });
+    LW.cs.setMarkers(mk);
+    LW.pls.forEach((p) => LW.cs.removePriceLine(p)); LW.pls = [];
+    [...openTx(), ...pOpen()].forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
+    if (LW.key !== key) { LW.key = key; lwSpan(); }
+    readOut(b, J, b.length - 1);
+  };
+  /* the real TradingView widget */
+  let tvDone = false;
+  const showTV = () => {
+    const box = $('gt-tv'); if (tvDone) return; tvDone = true;
+    const go = () => { if (!window.TradingView) { tvDone = false; box.textContent = 'โหลด TradingView ไม่สำเร็จ'; return; } box.innerHTML = '<div id="gt-tvw" style="height:100%"></div>';
+      new window.TradingView.widget({ autosize: true, symbol: 'OANDA:XAUUSD', interval: '60', timezone: 'Asia/Bangkok', theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light', style: '1', locale: 'th_TH',
+        allow_symbol_change: true, withdateranges: true, hide_side_toolbar: false, studies: ['MAExp@tv-basicstudies', 'RSI@tv-basicstudies'], container_id: 'gt-tvw' }); };
+    if (window.TradingView) go(); else { box.textContent = 'กำลังโหลด TradingView…'; const sc = document.createElement('script'); sc.src = 'https://s3.tradingview.com/tv.js'; sc.onload = go;
+      sc.onerror = () => { tvDone = false; box.textContent = 'โหลด TradingView ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ต)'; }; document.head.append(sc); }
+  };
+  const setMode = (m) => {
+    mode = m; const tv = m === 'tv'; $('gt-tv').hidden = !tv; ['gt-chart', 'gt-read', 'gt-span', 'gt-leg'].forEach((k) => { $(k).hidden = tv; });
+    $('gt-rsi').hidden = tv || !LW; $('gt-tf').hidden = tv || lwState !== 'ok';
+    document.querySelectorAll('#gt-mode button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.m === m)));
+    if (tv) showTV(); else drawChart();
+  };
+
   const drawChart = () => {
-    const box = $('gt-chart'); if (!box) return;
+    const box = $('gt-chart'); if (!box || mode === 'tv') return;
+    if (lwState === 'ok' && window.LightweightCharts) { try { lwDraw(); return; } catch (e) { lwState = 'fail'; LW = null; box.classList.remove('lw'); $('gt-rsi').hidden = true; $('gt-tf').hidden = true; tf = '1h'; } }
+    if (LW) { LW = null; box.classList.remove('lw'); $('gt-rsi').hidden = true; }
     const all = form ? [...bars, form] : bars;
     if (!all.length || !I) { box.innerHTML = ''; return; }
     const W = Math.max(300, box.clientWidth || 600), R = 58, H1 = 250, H2 = 74, GAP = 22, H = H1 + GAP + H2 + 18;
@@ -6350,7 +6456,11 @@ const SPC = (() => {
     $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs;
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
     $('gt-add').addEventListener('click', add); $('gt-csv').addEventListener('click', csv);
-    document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawChart(); }));
+    document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
+    document.querySelectorAll('#gt-tf button').forEach((b) => b.addEventListener('click', () => { tf = b.dataset.tf; document.querySelectorAll('#gt-tf button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawChart(); }));
+    document.querySelectorAll('#gt-mode button').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.m)));
+    const fs = (v) => { const w = $('gt-wrap'), on2 = w.classList.toggle('gt-full', v); $('gt-fs').textContent = on2 ? '✕ ปิดเต็มจอ' : '⛶ เต็มจอ'; document.body.classList.toggle('gt-noscroll', on2); if (!LW) drawChart(); };
+    $('gt-fs').addEventListener('click', () => fs()); document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && $('gt-wrap').classList.contains('gt-full')) fs(false); });
     $('gt-prev').addEventListener('click', () => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 2, 1); ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; selDay = null; drawDash(); });
     $('gt-next').addEventListener('click', () => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m, 1); ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; selDay = null; drawDash(); });
     const segOn = (id, v) => document.querySelectorAll(`#${id} button`).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === v)));
@@ -6374,7 +6484,7 @@ const SPC = (() => {
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
     $('gp-reset').addEventListener('click', () => { if (!confirm('ลบไม้กระดาษทั้งหมดแล้วเริ่มใหม่?')) return; P().tx = []; Object.keys(P().auto).forEach((k) => { P().since[k] = Date.now(); }); save(); drawAll(); });
     let rw = null; window.addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(drawChart, 200); });
-    setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) { poll(); if (loaded && !$('gt-chart').firstChild) drawChart(); } }, 2000);
+    setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) { poll(); if (loaded && !$('gt-chart').firstChild) drawChart(); const c = tfc[tf]; if (tf !== '1h' && c && c.b && Date.now() - c.at > 30e3) tfLoad(tf); } }, 2000);
     drawAll();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
