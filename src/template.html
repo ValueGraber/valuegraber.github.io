@@ -1135,7 +1135,12 @@ body.gt-noscroll { overflow: hidden; }
 .gt-chart.lw { position: relative; } .gt-zones { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 3; }
 .gt-ln.e20 { border-top-style: solid; border-color: var(--ochre); } .gt-ln.e50 { border-top-style: solid; border-color: var(--accent); } .gt-ln.eq { border-top-style: dotted; border-color: var(--ink-3); }
 .gt-box { width: 16px; height: 10px; display: inline-block; border: 1px solid var(--jade); background: color-mix(in srgb, var(--jade) 28%, transparent); }
-.gt-box.fvg { border-style: dashed; background: color-mix(in srgb, var(--jade) 10%, transparent); }
+.gt-box.sup { border-color: var(--jade); background: color-mix(in srgb, var(--jade) 22%, transparent); } .gt-box.res { border-color: var(--brick); background: color-mix(in srgb, var(--brick) 22%, transparent); }
+.gt-srg h5 { margin: 10px 0 4px; font-size: 14px; } .gt-srg h5.pos { color: var(--jade); } .gt-srg h5.neg { color: var(--brick); }
+.gt-srr { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0 8px 10px; border-left: 3px solid var(--jade); margin: 4px 0; }
+.gt-srr.res { border-left-color: var(--brick); } .gt-srr.in { border-left-color: var(--ink-3); } .gt-srr b { font: 600 14px var(--num); display: block; } .gt-srr small { font-size: 12px; color: var(--ink-3); }
+.gt-srd { font: 13px var(--num); color: var(--ink-2); white-space: nowrap; }
+.gt-srnow { font: 600 13px var(--num); color: var(--ink); text-align: center; padding: 6px; margin: 6px 0; border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); }
 .gt-sq { width: 9px; height: 9px; display: inline-block; background: var(--jade); box-shadow: 11px 0 0 var(--brick); margin-right: 11px; }
 .gt-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--ink-2); }
 .gt-cond li.no { color: var(--ink-3); } .gt-cond li.no::before { content: "–"; color: var(--ink-3); }
@@ -1503,7 +1508,7 @@ details.how .sec-note { margin: 6px 0 0; }
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
     <div class="gt-book real" id="gt-book" role="status"></div>
     <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
-    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button><button type="button" data-k="st" aria-pressed="false">Supertrend</button><button type="button" data-k="smc" aria-pressed="false">SMC</button></div></div>
+    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
     <div class="controls gt-off"><label class="mini">ราคาใน MT5 ตอนนี้ <input class="inp" id="gt-mt5" type="number" step="0.01" min="0" inputmode="decimal"></label><button class="btn-line sm" type="button" id="gt-mt5-set">ตั้ง</button><button class="btn-line sm" type="button" id="gt-mt5-clr">ล้าง</button></div>
     <p class="pf-hint" id="gt-offmsg"></p>
@@ -1577,7 +1582,7 @@ details.how .sec-note { margin: 6px 0 0; }
     </section>
     <section class="panel">
       <div class="ph"><h3>บอทเทรดกระดาษ 24 ชม.</h3></div>
-      <div class="gp-auto"><label><input type="checkbox" id="gp-a-dip"> บอทย่อในเทรนด์</label><label><input type="checkbox" id="gp-a-brk"> บอทเบรก 20 ชม.</label><label><input type="checkbox" id="gp-a-st"> บอท Supertrend</label><label><input type="checkbox" id="gp-a-smc"> บอท SMC</label>
+      <div class="gp-auto"><label><input type="checkbox" id="gp-a-dip"> บอทย่อในเทรนด์</label><label><input type="checkbox" id="gp-a-brk"> บอทเบรก 20 ชม.</label>
         <label><input type="checkbox" id="gp-be"> เลื่อน SL มาที่จุดเข้าเมื่อกำไรเท่าความเสี่ยง (ทุกไม้กระดาษ)</label></div>
       <p class="pf-hint">บอทเปิดไม้เองทุกครั้งที่มีสัญญาณ นับตั้งแต่ตอนที่ติ๊กเปิด แข่งกับไม้ที่คุณกดเอง ดูอันดับในตาราง</p>
       <div id="gp-board"></div>
