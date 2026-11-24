@@ -1163,6 +1163,7 @@ body.gt-noscroll { overflow: hidden; }
 .ga-row small { display: block; color: var(--ink-3); font-size: 12px; } .ga-row span { font-family: var(--num); font-size: 13px; }
 .ga-pl { font: 600 14px var(--num); white-space: nowrap; } .ga-pl.pos { color: var(--jade); } .ga-pl.neg { color: var(--brick); }
 .gt-chk { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); font-size: 13px; line-height: 1.6; }
+.gt-devs { font-size: 13px; margin: 6px 0 0; } .gt-devs .neg { color: var(--brick); } .gt-devs .pos { color: var(--jade); } .gt-devs .muted { color: var(--ink-3); }
 .gt-chk b { font-weight: 600; } .gt-chk .neg { color: var(--brick); } .gt-chk .pos { color: var(--jade); }
 .gt-book { display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--ink); background: var(--surface); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 10px 14px; margin: 4px 0 10px; }
 body[data-page=gtpp] .gt-off, body[data-page=gtpp] #gt-offmsg { display: none; } /* MT5 price offset only matters for real trades */
@@ -1615,7 +1616,7 @@ details.how .sec-note { margin: 6px 0 0; }
       </div>
       <p class="pf-hint" id="gt-size"></p>
       <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
-      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
+      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-devs" class="gt-devs"></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
     </section>
     <section class="panel">
       <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
@@ -5329,7 +5330,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '1fb6cf719b';
+  const BUILD = '369a71cd55'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7419,7 +7420,13 @@ const SPC = (() => {
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
     const syncLine = () => { const e = $('gt-sync'); if (!e) return; const Y = window.VGSync, on = Y && Y.on && Y.on();
       e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()}${Y.id && Y.id() ? ` (รหัสบัญชี ${Y.id()})` : ''} · ไม้จริงในเครื่องนี้ ${D.tx.length} ไม้ · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
-      e.classList.toggle('neg', !on); $('gt-pull').hidden = !on; };
+      e.classList.toggle('neg', !on); $('gt-pull').hidden = !on;
+      /* the other devices on this account, from their own notes: version, trade count, last save */
+      const dv = $('gt-devs'); if (!dv) return; const V = window.VGDevs ? window.VGDevs() : null; dv.replaceChildren(); if (!on || !V) return;
+      const others = Object.entries(V.all).filter(([k]) => k !== V.me).sort((x, y) => (y[1].at || 0) - (x[1].at || 0)).slice(0, 4);
+      if (!others.length) { dv.append(el('div', 'muted', 'ยังไม่เห็นเครื่องอื่นส่งข้อมูลมา ถ้าอีกเครื่องเปิดเว็บค้างไว้ ให้ปิดแท็บแล้วเปิดใหม่ (คอมกด Ctrl+F5) ระบบจะเริ่มเห็นกัน')); return; }
+      others.forEach(([, x]) => { const old = x.ver && window.VG_BUILD && x.ver !== window.VG_BUILD, diff = x.n !== D.tx.length;
+        dv.append(el('div', old || diff ? 'neg' : 'pos', `${x.name}: มีไม้จริง ${x.n} ไม้ · บันทึกล่าสุด ${hm(x.at)}${old ? ' · เป็นเว็บรุ่นเก่า ให้ปิดแท็บแล้วเปิดใหม่' : ''}${!old && diff ? ` · ไม่ตรงกับเครื่องนี้ (${D.tx.length} ไม้) กด "ตรวจและซิงค์ตอนนี้"` : ''}`)); }); };
     setInterval(() => { if (!document.hidden) syncLine(); }, 2000); syncLine(); /* was gated on the chart's live flag, so the journal tab kept showing 'not signed in' */
     $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'), o = $('gt-chk'); b.disabled = true; o.hidden = false; o.textContent = 'กำลังตรวจกับบัญชี…';
       let r; try { r = window.VGSync.check ? await window.VGSync.check() : { err: 'ระบบบัญชียังไม่พร้อม' }; } catch (e) { r = { err: 'ต่อบัญชีไม่ได้: ' + (e.code || e.message) }; }
@@ -7514,18 +7521,27 @@ if (FB && window.VGPort) {
   const hhmm = () => new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
   const byId = (a, b) => { const ids = new Set(a.map((x) => x.id)); return [...a, ...b.filter((x) => !ids.has(x.id))]; };
   /* what each synced document holds, how to read it from the page, and how to merge a device's local copy into the account the first time */
+  /* each device writes a small note into the account (dev.<id>: name, app version, gold real-trade count, time), so one device can see
+     whether the other is saving and on which version — the gold journal shows it under the save button */
+  const devId = (() => { try { let v = localStorage.getItem('vg-dev'); if (!v) { v = Math.random().toString(36).slice(2, 8); localStorage.setItem('vg-dev', v); } return v; } catch (e) { return 'x'; } })();
+  const devName = (() => { const u = navigator.userAgent, os = /iPhone|iPad/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac/.test(u) ? 'Mac' : 'เครื่องอื่น';
+    const app = window.matchMedia && matchMedia('(display-mode: standalone)').matches ? 'แอพ' : /Edg\//.test(u) ? 'Edge' : /CriOS|Chrome\//.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'เบราว์เซอร์'; return os + ' ' + app; })();
+  let devs = {}; window.VGDevs = () => ({ me: devId, all: devs });
+  const mine = () => ({ name: devName, ver: window.VG_BUILD || '', n: window.VGGT ? window.VGGT.get().tx.length : 0, at: Date.now() });
   const STORES = {
     portfolios: {
       label: 'พอร์ต',
-      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { spot: window.VGTrade.trade() } : {}), ...(window.VGGT ? { gt: window.VGGT.get() } : {}) }); },
-      apply: (c) => { window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.spot) window.VGTrade.replace(c.spot); if (window.VGGT && c.gt) window.VGGT.sync(c.gt); },
+      payload: () => { const d = window.VGPort.get(); return clean({ tx: d.tx, targets: d.targets || {}, band: d.band || 5, watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { spot: window.VGTrade.trade() } : {}), ...(window.VGGT ? { gt: window.VGGT.get() } : {}), dev: { ...devs, [devId]: mine() } }); },
+      apply: (c) => { if (c.dev && typeof c.dev === 'object') devs = { ...c.dev }; window.VGPort.replace({ tx: c.tx || [], targets: c.targets || {}, band: c.band || 5 }); if (window.VGWatch && Array.isArray(c.watch)) window.VGWatch.set(c.watch); if (window.VGTrade && c.spot) window.VGTrade.replace(c.spot); if (window.VGGT && c.gt) window.VGGT.sync(c.gt);
+        /* keep this device's note honest: if its count in the account is out of date, save once (converges, no loop) */
+        if (window.VGGT && window.VGSync && window.VGSync.on()) { const me = (c.dev || {})[devId]; if (!me || me.n !== window.VGGT.get().tx.length) setTimeout(() => window.VGSync.push('portfolios'), 800); } },
       empty: () => { window.VGPort.replace({ tx: [], targets: {}, band: 5 }); if (window.VGWatch) window.VGWatch.set([]); if (window.VGTrade) window.VGTrade.replace({}); if (window.VGGT) window.VGGT.replace({}); },
       local: () => { const d = window.VGPort.get(); const tn = (window.VGTrade ? window.VGTrade.trade().tx.length : 0) + (window.VGGT ? window.VGGT.get().tx.length : 0); return { n: d.tx.length + tn, has: d.tx.length > 0 || tn > 0 || (window.VGWatch && window.VGWatch.get().length > 0) }; },
       merge: (c) => { const l = window.VGPort.get(); const lw = window.VGWatch ? window.VGWatch.get() : []; const tx = byId(c.tx || [], l.tx);
         const trM = window.VGTrade ? (() => { const m = window.VGTrade.merge(c.spot || {}); return { extra: m.extra, doc: { spot: m.doc } }; })() : { extra: 0, doc: {} };
         if (window.VGGT) { const g = window.VGGT.merge(c.gt || {}); trM.extra += g.extra; trM.doc.gt = g.doc; if (JSON.stringify(g.doc.tx) !== JSON.stringify((c.gt || {}).tx || []) || JSON.stringify(g.doc.paper.tx) !== JSON.stringify(((c.gt || {}).paper || {}).tx || [])) trM.extra = Math.max(trM.extra, 1); }
         return { extra: tx.length - (c.tx || []).length + trM.extra, changed: tx.length !== (c.tx || []).length || trM.extra > 0 || lw.some((s) => !(c.watch || []).includes(s)),
-          doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])], ...trM.doc } }; },
+          doc: { tx, targets: { ...(l.targets || {}), ...(c.targets || {}) }, band: c.band || l.band || 5, watch: [...new Set([...(c.watch || []), ...lw])], ...trM.doc, dev: { ...(c.dev || {}), [devId]: mine() } } }; },
     },
     business: {
       label: 'ข้อมูลธุรกิจ',
@@ -7596,7 +7612,7 @@ if (FB && window.VGPort) {
           if (m.changed) { S.apply(m.doc); await F.setDoc(s.ref, { ...m.doc, updated: F.serverTimestamp() }); if (m.extra) note = `รวม${S.label}ในเครื่องนี้อีก ${m.extra} รายการเข้ากับบัญชีแล้ว`; }
           else S.apply(snap.data());
         }
-        s.ok = true; let first = true;
+        s.ok = true; let first = true; if (k === 'portfolios') setTimeout(() => push('portfolios'), 1500);
         s.unsub = F.onSnapshot(s.ref, (x) => {
           if (first) { first = false; return; }
           if (x.metadata.hasPendingWrites || !x.exists()) return;

@@ -984,7 +984,13 @@
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
     const syncLine = () => { const e = $('gt-sync'); if (!e) return; const Y = window.VGSync, on = Y && Y.on && Y.on();
       e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()}${Y.id && Y.id() ? ` (รหัสบัญชี ${Y.id()})` : ''} · ไม้จริงในเครื่องนี้ ${D.tx.length} ไม้ · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
-      e.classList.toggle('neg', !on); $('gt-pull').hidden = !on; };
+      e.classList.toggle('neg', !on); $('gt-pull').hidden = !on;
+      /* the other devices on this account, from their own notes: version, trade count, last save */
+      const dv = $('gt-devs'); if (!dv) return; const V = window.VGDevs ? window.VGDevs() : null; dv.replaceChildren(); if (!on || !V) return;
+      const others = Object.entries(V.all).filter(([k]) => k !== V.me).sort((x, y) => (y[1].at || 0) - (x[1].at || 0)).slice(0, 4);
+      if (!others.length) { dv.append(el('div', 'muted', 'ยังไม่เห็นเครื่องอื่นส่งข้อมูลมา ถ้าอีกเครื่องเปิดเว็บค้างไว้ ให้ปิดแท็บแล้วเปิดใหม่ (คอมกด Ctrl+F5) ระบบจะเริ่มเห็นกัน')); return; }
+      others.forEach(([, x]) => { const old = x.ver && window.VG_BUILD && x.ver !== window.VG_BUILD, diff = x.n !== D.tx.length;
+        dv.append(el('div', old || diff ? 'neg' : 'pos', `${x.name}: มีไม้จริง ${x.n} ไม้ · บันทึกล่าสุด ${hm(x.at)}${old ? ' · เป็นเว็บรุ่นเก่า ให้ปิดแท็บแล้วเปิดใหม่' : ''}${!old && diff ? ` · ไม่ตรงกับเครื่องนี้ (${D.tx.length} ไม้) กด "ตรวจและซิงค์ตอนนี้"` : ''}`)); }); };
     setInterval(() => { if (!document.hidden) syncLine(); }, 2000); syncLine(); /* was gated on the chart's live flag, so the journal tab kept showing 'not signed in' */
     $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'), o = $('gt-chk'); b.disabled = true; o.hidden = false; o.textContent = 'กำลังตรวจกับบัญชี…';
       let r; try { r = window.VGSync.check ? await window.VGSync.check() : { err: 'ระบบบัญชียังไม่พร้อม' }; } catch (e) { r = { err: 'ต่อบัญชีไม่ได้: ' + (e.code || e.message) }; }
