@@ -986,7 +986,14 @@
       e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()}${Y.id && Y.id() ? ` (รหัสบัญชี ${Y.id()})` : ''} · ไม้จริงในเครื่องนี้ ${D.tx.length} ไม้ · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
       e.classList.toggle('neg', !on); $('gt-pull').hidden = !on; };
     setInterval(() => { if (!document.hidden) syncLine(); }, 2000); syncLine(); /* was gated on the chart's live flag, so the journal tab kept showing 'not signed in' */
-    $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'); b.disabled = true; try { await window.VGSync.pull('portfolios'); } catch (e) { /* status shows it */ } b.disabled = false; syncLine(); });
+    $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'), o = $('gt-chk'); b.disabled = true; o.hidden = false; o.textContent = 'กำลังตรวจกับบัญชี…';
+      let r; try { r = window.VGSync.check ? await window.VGSync.check() : { err: 'ระบบบัญชียังไม่พร้อม' }; } catch (e) { r = { err: 'ต่อบัญชีไม่ได้: ' + (e.code || e.message) }; }
+      b.disabled = false; o.replaceChildren(); const ln = (t, c) => { const d = el('div', c || null, t); o.append(d); };
+      if (r.err) ln(r.err, 'neg');
+      else { ln(`รหัสบัญชี ${r.id} · ในบัญชีมีไม้จริง ${r.cloud} ไม้ · เครื่องนี้มี ${r.local} ไม้`);
+        ln(`ไม้ที่มีแค่ในเครื่องนี้ ${r.onlyHere} · มีแค่ในบัญชี ${r.onlyCloud}${r.updated ? ` · บัญชีอัปเดตล่าสุด ${r.updated.toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} น.` : ''}`);
+        ln(r.saved ? `รวมกันแล้ว ตอนนี้เครื่องนี้มี ${r.after} ไม้ และบันทึกขึ้นบัญชีแล้ว (ขนาดข้อมูล ${r.sendKb} KB)` : `รวมในเครื่องแล้ว (${r.after} ไม้) แต่บันทึกขึ้นบัญชีไม่สำเร็จ: ${r.code} · ขนาดข้อมูล ${r.sendKb} KB`, r.saved ? 'pos' : 'neg'); }
+      syncLine(); });
     $('gt-add').addEventListener('click', add); $('gt-csv').addEventListener('click', csv);
     document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
     document.querySelectorAll('#gt-tf button').forEach((b) => b.addEventListener('click', () => { tf = b.dataset.tf; document.querySelectorAll('#gt-tf button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawChart(); }));

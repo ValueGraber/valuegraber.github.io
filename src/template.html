@@ -1162,6 +1162,8 @@ body.gt-noscroll { overflow: hidden; }
 .ga-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--line); }
 .ga-row small { display: block; color: var(--ink-3); font-size: 12px; } .ga-row span { font-family: var(--num); font-size: 13px; }
 .ga-pl { font: 600 14px var(--num); white-space: nowrap; } .ga-pl.pos { color: var(--jade); } .ga-pl.neg { color: var(--brick); }
+.gt-chk { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); font-size: 13px; line-height: 1.6; }
+.gt-chk b { font-weight: 600; } .gt-chk .neg { color: var(--brick); } .gt-chk .pos { color: var(--jade); }
 .gt-book { display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--ink); background: var(--surface); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 10px 14px; margin: 4px 0 10px; }
 body[data-page=gtpp] .gt-off, body[data-page=gtpp] #gt-offmsg { display: none; } /* MT5 price offset only matters for real trades */
 .gt-book b { display: block; font-size: 16px; } .gt-book span { font-size: 13px; color: var(--ink-2); }
@@ -1613,7 +1615,7 @@ details.how .sec-note { margin: 6px 0 0; }
       </div>
       <p class="pf-hint" id="gt-size"></p>
       <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
-      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ดึงข้อมูลจากเครื่องอื่น</button></div>
+      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
     </section>
     <section class="panel">
       <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
@@ -5205,6 +5207,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     location.replace(location.pathname + '?v=' + j.v + location.hash);
   }).catch(() => {});
   check(); let last = Date.now();
+  setInterval(() => { const a = document.activeElement; if (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return; last = Date.now(); check(); }, 10 * 60e3);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - last > 60e3) { last = Date.now(); check(); } });
 })();
 /*SPOTCORE*/
@@ -5289,7 +5292,16 @@ if (FB && window.VGPort) {
     const pull = async (k = 'portfolios') => { const s = st[k]; if (!s || !s.ref || !s.ok) return false; const x = await F.getDoc(s.ref);
       if (x.exists()) { const m = STORES[k].merge(x.data()); STORES[k].apply(m.changed ? m.doc : x.data()); if (m.changed) push(k); } status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
     let uidNow = '';
-    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, id: () => uidNow.slice(-4).toUpperCase(), state: () => $('a-state').textContent };
+    const check = async () => { const s = st.portfolios; if (!s || !s.ref || !s.ok) return { err: 'ยังไม่ได้ล็อกอิน หรือโหลดข้อมูลจากบัญชีไม่สำเร็จ' };
+      const x = await F.getDoc(s.ref), c = x.exists() ? x.data() : {}, cg = (c.gt && c.gt.tx) || [], lg = window.VGGT ? window.VGGT.get().tx : [];
+      const ci = new Set(cg.map((t) => t.id)), li = new Set(lg.map((t) => t.id)), up = c.updated && c.updated.toDate ? c.updated.toDate() : null;
+      const r = { cloud: cg.length, local: lg.length, onlyHere: lg.filter((t) => !ci.has(t.id)).length, onlyCloud: cg.filter((t) => !li.has(t.id)).length, updated: up, kb: Math.round(JSON.stringify(c).length / 1024), id: uidNow.slice(-4).toUpperCase() };
+      const m = STORES.portfolios.merge(c); STORES.portfolios.apply(m.changed ? m.doc : c); clearTimeout(s.timer);
+      const pl = STORES.portfolios.payload(); r.sendKb = Math.round(JSON.stringify(pl).length / 1024);
+      try { s.last = canon(pl); await F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() }); s.err = null; s.fail = false; r.saved = true; status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); }
+      catch (e) { console.warn(e); r.saved = false; r.code = e.code || e.message || 'unknown'; s.fail = true; }
+      r.after = window.VGGT ? window.VGGT.get().tx.length : 0; return r; };
+    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, check, id: () => uidNow.slice(-4).toUpperCase(), state: () => $('a-state').textContent };
     /* a phone app comes back from the background with a sleeping listener, and a failed save stays only on the device:
        on return / reconnect, pull the account copy (merged, never replaced) and retry any failed save */
     let away = 0; const wake = () => { Object.keys(STORES).forEach((k) => { const s = st[k]; if (!s.ok) return; pull(k).catch((e) => console.warn(e)).then(() => { if (s.fail) push(k); }); }); };
