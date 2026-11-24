@@ -1081,8 +1081,8 @@ tr.editing td { background: var(--accent-soft); }
 .gt-ax { font: 11px var(--num); fill: var(--ink-3); }
 .gt-w { stroke-width: 1; } .gt-w.u { stroke: var(--jade); } .gt-w.d { stroke: var(--brick); }
 .gt-b.u { fill: var(--jade); } .gt-b.d { fill: var(--brick); }
-.gt-e20 { fill: none; stroke: var(--ochre); stroke-width: 1.6; } .gt-e50 { fill: none; stroke: var(--cover); stroke-width: 1.6; }
-.gt-rsi { fill: none; stroke: var(--cover); stroke-width: 1.4; }
+.gt-e20 { fill: none; stroke: var(--ochre); stroke-width: 1.6; } .gt-e50 { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+.gt-rsi { fill: none; stroke: var(--accent); stroke-width: 1.4; }
 .gt-sb { fill: var(--jade); } .gt-ss { fill: var(--brick); }
 .gt-le { stroke: var(--ink); stroke-dasharray: 5 4; } .gt-lsl { stroke: var(--brick); stroke-dasharray: 2 3; stroke-width: 1.4; } .gt-ltp { stroke: var(--jade); stroke-dasharray: 2 3; stroke-width: 1.4; }
 .gt-last { stroke: var(--foil-ink); stroke-dasharray: 1 3; } .gt-lastb { fill: var(--foil-ink); } .gt-lastt { font: 600 11px var(--num); fill: #fff; }
@@ -1126,9 +1126,31 @@ body.gt-noscroll { overflow: hidden; }
 .gp-buy { background: var(--jade); } .gp-sell { background: var(--brick); }
 .gp-btns button:active { transform: translateY(1px); }
 .gp-auto { display: grid; gap: 8px; margin-bottom: 8px; } .gp-auto label { display: flex; gap: 8px; align-items: center; font-size: 15px; }
-.gt-k20 { color: var(--ochre); } .gt-k50 { color: var(--cover); }
+.gt-k20 { color: var(--ochre); } .gt-k50 { color: var(--accent); }
 .gt-bar { display: flex; justify-content: flex-end; margin: 14px 0 8px; }
-.gt-read { font-family: var(--num); font-size: 12px; min-height: 1.4em; overflow-wrap: anywhere; }
+.gt-read { font-family: var(--num); font-size: 13px; min-height: 1.6em; display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; margin: 8px 2px 4px; color: var(--ink); }
+.gt-read b { font-family: var(--font, inherit); font-weight: 600; font-size: 13px; }
+.gt-read small { font-family: var(--font, inherit); font-size: 11px; color: var(--ink-3); margin-right: 2px; }
+.gt-read .pos { color: var(--jade); } .gt-read .neg { color: var(--brick); }
+.gt-chart.lw { position: relative; } .gt-zones { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 3; }
+.gt-ln.e20 { border-top-style: solid; border-color: var(--ochre); } .gt-ln.e50 { border-top-style: solid; border-color: var(--accent); } .gt-ln.eq { border-top-style: dotted; border-color: var(--ink-3); }
+.gt-box { width: 16px; height: 10px; display: inline-block; border: 1px solid var(--jade); background: color-mix(in srgb, var(--jade) 28%, transparent); }
+.gt-box.fvg { border-style: dashed; background: color-mix(in srgb, var(--jade) 10%, transparent); }
+.gt-sq { width: 9px; height: 9px; display: inline-block; background: var(--jade); box-shadow: 11px 0 0 var(--brick); margin-right: 11px; }
+.gt-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--ink-2); }
+.gt-cond li.no { color: var(--ink-3); } .gt-cond li.no::before { content: "–"; color: var(--ink-3); }
+.gt-cond li.h { padding-left: 0; margin-top: 6px; font-weight: 600; } .gt-cond li.h::before { content: none; }
+.gt-chip.gt-gA { color: var(--jade); border-color: var(--jade); } .gt-chip.gt-gC { color: var(--ink-3); }
+/* today posture: a passbook stamp + four facts */
+.gt-day { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-lg); padding: 12px 16px; margin: 10px 0 4px; }
+.gt-dayh { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.gt-stamp { font-weight: 700; font-size: 15px; padding: 3px 10px; border: 1.5px solid currentColor; border-radius: 6px; color: var(--jade); white-space: nowrap; }
+.gt-day.care .gt-stamp { color: var(--ochre); } .gt-day.stop .gt-stamp { color: var(--brick); }
+.gt-dayw { font-size: 14px; color: var(--ink-2); flex: 1 1 14em; }
+.gt-dayf { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 14px; margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.gt-dayf dt { font-size: 12px; color: var(--ink-3); } .gt-dayf dd { margin: 2px 0 0; font: 600 14px var(--num); } .gt-dayf dd.tx { font-family: var(--font); } .gt-dayf dd.pos { color: var(--jade); } .gt-dayf dd.neg { color: var(--brick); }
+.gt-dayn { margin: 10px 0 0; font-size: 13px; }
+@media (max-width: 640px) { .gt-dayf { grid-template-columns: 1fr 1fr; } .gt-fs { margin-left: 0; } }
 .gt-leg { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); margin: 6px 0; }
 .gt-leg span { display: inline-flex; align-items: center; gap: 6px; }
 .gt-tri { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; display: inline-block; }
@@ -1471,13 +1493,14 @@ details.how .sec-note { margin: 6px 0 0; }
         <div class="seg" id="gt-mode" role="group" aria-label="แบบกราฟ"><button type="button" data-m="sys" aria-pressed="true">กราฟระบบ</button><button type="button" data-m="tv" aria-pressed="false">TradingView</button></div>
         <div class="seg" id="gt-tf" role="group" aria-label="ไทม์เฟรม" hidden><button type="button" data-tf="15m" aria-pressed="false">15น.</button><button type="button" data-tf="1h" aria-pressed="true">1ชม.</button><button type="button" data-tf="4h" aria-pressed="false">4ชม.</button><button type="button" data-tf="1d" aria-pressed="false">วัน</button></div>
         <div class="seg" id="gt-span" role="group" aria-label="ช่วงกราฟ"><button type="button" data-n="48" aria-pressed="false">2 วัน</button><button type="button" data-n="72" aria-pressed="true">3 วัน</button><button type="button" data-n="168" aria-pressed="false">1 สัปดาห์</button><button type="button" data-n="336" aria-pressed="false">2 สัปดาห์</button></div>
+        <div class="seg gt-lay" id="gt-lay" role="group" aria-label="สิ่งที่แสดงบนกราฟ"><button type="button" data-l="ma" aria-pressed="true">เส้นเฉลี่ย</button><button type="button" data-l="zone" aria-pressed="true">โซน</button><button type="button" data-l="tag" aria-pressed="true">ป้าย</button></div>
         <button class="btn-line gt-fs" type="button" id="gt-fs">⛶ เต็มจอ</button>
       </div>
       <div class="gt-chart" id="gt-chart"></div>
       <div class="gt-rsi" id="gt-rsi" hidden></div>
       <div class="gt-tv" id="gt-tv" hidden></div>
       <p class="pf-hint gt-read" id="gt-read"></p>
-      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบ 20 ชม. / เส้น Supertrend / Order Block (SMC)</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+      <p class="gt-leg" id="gt-leg"></p>
     </div>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
@@ -5269,7 +5292,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '35816bba4b';
+  const BUILD = '9faa28f58d';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -6514,6 +6537,10 @@ const SPC = (() => {
       o.ah[i] = o.al[i] = null; o.ab[i] = done;
       if (h >= 7 && h < 14) { ah = Math.max(ah, x.h); al = Math.min(al, x.l); } else if (h >= 14 && ah > -Infinity) { o.ah[i] = ah; o.al[i] = al; if (x.c > ah || x.c < al) done = true; } });
     o.smc = smc(b, o.atr);
+    /* 4h structure (only fully closed 4h bars) → o.smc.h4[i]; used to grade SMC entries, not to block them */
+    { const g = [], idx = []; b.forEach((x, i) => { const k = Math.floor(x.t / 14400e3); let L = g[g.length - 1];
+        if (!L || L.k !== k) { L = { k, t: k * 14400e3, o: x.o, h: x.h, l: x.l, c: x.c, last: i }; g.push(L); } else { L.h = Math.max(L.h, x.h); L.l = Math.min(L.l, x.l); L.c = x.c; L.last = i; } idx[i] = g.length - 1; });
+      const M4 = g.length > 30 ? smc(g, atr(g)) : null; o.smc.h4 = b.map((x, i) => { if (!M4) return 0; const gi = idx[i], j = g[gi].last === i && x.t + 3600e3 === g[gi].t + 14400e3 ? gi : gi - 1; return j >= 0 ? M4.dir[j] : 0; }); }
     return o; };
 
   /* signals on closed bar i — rules match docs/lab.html, where they were tested on 3 years of 1h bars with costs */
@@ -6541,8 +6568,11 @@ const SPC = (() => {
     return null;
   };
   /* smc: Smart Money Concepts — see smc() above */
+  /* London 14–18, New York 19–24 Thai (bar close), when gold moves most */
+  const kzOf = (t) => { const h = new Date(t + 8 * 3600e3 - 1).getUTCHours(); return h >= 14 && h < 19 ? 'ลอนดอน' : h >= 19 || h === 0 ? 'นิวยอร์ก' : ''; };
   const sigSmc = (b, I, i) => { if (i < 60 || wkend(b[i].t) || !I.smc) return null; const q = I.smc.sig[i]; if (!q) return null;
-    return mk(q.side, b[i].c, q.risk, q.R, { lvl: q.side === 'buy' ? q.ob.top : q.ob.bot, ob: [q.ob.bot, q.ob.top], ev: q.ob.ev, eq: q.eq, swp: q.ob.sweep, fvg: q.ob.fvg, liqT: q.liqT }); };
+    const d = q.side === 'buy' ? 1 : -1, h4 = (I.smc.h4 && I.smc.h4[i]) || 0, kz = kzOf(b[i].t), pts = (h4 === d) + !!q.ob.sweep + !!q.ob.fvg + !!kz;
+    return mk(q.side, b[i].c, q.risk, q.R, { lvl: q.side === 'buy' ? q.ob.top : q.ob.bot, ob: [q.ob.bot, q.ob.top], ev: q.ob.ev, eq: q.eq, swp: q.ob.sweep, fvg: q.ob.fvg, liqT: q.liqT, h4, kz, grade: pts >= 3 ? 'A' : pts === 2 ? 'B' : 'C' }); };
   const evTh = (e) => (e === 'choch' ? 'CHoCH (เปลี่ยนเทรนด์)' : 'BOS (ไปต่อทางเดิม)');
   const STRATS = {
     dip: { name: 'ย่อในเทรนด์ (RSI 2)', fn: sigDip, why: (s) => (s.side === 'buy' ? `เทรนด์ใหญ่ขาขึ้น ราคาย่อลงแรงจน RSI 2 เหลือ ${Math.round(s.r)} มักเด้งกลับในไม่กี่ชั่วโมง` : `เทรนด์ใหญ่ขาลง ราคาเด้งแรงจน RSI 2 ขึ้นไป ${Math.round(s.r)} มักโดนขายกลับ`),
@@ -6557,7 +6587,7 @@ const SPC = (() => {
       wait: (I, i) => { const M = I.smc, d = M.dir[i], z = M.obs[M.obs.length - 1];
         if (!d) return 'ยังไม่เห็นโครงสร้างตลาดชัด รอให้ราคาเบรกจุดสวิงก่อน';
         const tr = d === 1 ? 'ขาขึ้น' : 'ขาลง';
-        if (z && z.end == null && !z.used && i - z.born <= 72) return `โครงสร้าง${tr} หลัง ${z.ev === 'choch' ? 'CHoCH' : 'BOS'} · รอราคา${d === 1 ? 'ย่อลง' : 'เด้งขึ้น'}มาแตะ Order Block ${px(z.bot)}–${px(z.top)} (เส้นประสีทอง) แล้วปิด${d === 1 ? 'เขียว = ซื้อ' : 'แดง = ขาย'}`;
+        if (z && z.end == null && !z.used && i - z.born <= 72) return `โครงสร้าง${tr} หลัง ${z.ev === 'choch' ? 'CHoCH' : 'BOS'} · รอราคา${d === 1 ? 'ย่อลง' : 'เด้งขึ้น'}มาแตะ Order Block ${px(z.bot)}–${px(z.top)} (กล่อง OB${d === 1 ? 'ซื้อสีเขียว' : 'ขายสีแดง'}บนกราฟ) แล้วปิด${d === 1 ? 'เขียว = ซื้อ' : 'แดง = ขาย'}`;
         return `โครงสร้าง${tr} แต่ Order Block ล่าสุดใช้ไปแล้วหรือหมดอายุ · รอ BOS/CHoCH ครั้งใหม่`; } },
   };
   /* which conditions fired, with the numbers, for the signal card */
@@ -6567,8 +6597,10 @@ const SPC = (() => {
     st: (s, J, i) => { const b = s.side === 'buy'; return [`เส้น Supertrend พลิกเป็น${b ? 'ขาขึ้น' : 'ขาลง'} (${px(s.lvl)})`, `ราคา ${px(s.entry)} ${b ? 'เหนือ' : 'ใต้'}เส้นเฉลี่ย 20 วัน (${px(J.e480[i])})`]; },
     smc: (s, J, i) => { const b = s.side === 'buy', o = [`โครงสร้าง${b ? 'ขาขึ้น' : 'ขาลง'}: ราคาปิด${b ? 'ทะลุจุดสวิงไฮ' : 'หลุดจุดสวิงโลว์'} = ${evTh(s.ev)}`,
       `ย่อกลับมาแตะ Order Block ${px(s.ob[0])}–${px(s.ob[1])} เป็นครั้งแรก`, `ราคาปิด ${px(s.entry)} อยู่โซน ${b ? 'Discount (ต่ำกว่า' : 'Premium (สูงกว่า'} 50% ของขา = ${px(s.eq)})`, `แท่งปิด${b ? 'เขียว (ผู้ซื้อกลับมา)' : 'แดง (ผู้ขายกลับมา)'}`];
-      if (s.swp) o.push(`โบนัส: ก่อนเบรกมีการกวาดสภาพคล่อง${b ? 'ใต้โลว์เดิม' : 'เหนือไฮเดิม'} (Liquidity sweep)`);
-      if (s.fvg) o.push('โบนัส: ขาที่เบรกทิ้ง FVG (ช่องว่างราคา) ไว้ = แรงจริง');
+      const dd = b ? 1 : -1; o.push({ t: `เกรด ${s.grade || '–'} (นับข้อเสริมด้านล่าง ครบ 3–4 = A, 2 = B, 0–1 = C)`, k: 'h' },
+        { t: `กราฟ 4 ชม. ${s.h4 === dd ? 'ไปทางเดียวกัน' : s.h4 ? 'สวนทาง' : 'ยังไม่ชัด'}`, k: s.h4 === dd ? '' : 'no' },
+        { t: `ก่อนเบรกกวาดสภาพคล่อง${b ? 'ใต้โลว์เดิม' : 'เหนือไฮเดิม'}`, k: s.swp ? '' : 'no' }, { t: 'ขาที่เบรกทิ้ง FVG (ช่องว่างราคา) ไว้', k: s.fvg ? '' : 'no' },
+        { t: s.kz ? `อยู่ในช่วงตลาด${s.kz} (ราคาวิ่งจริง)` : 'นอกช่วงลอนดอน/นิวยอร์ก', k: s.kz ? '' : 'no' });
       o.push(s.liqT ? `TP ที่${b ? 'ยอดไฮ' : 'ก้นโลว์'}ของขา (สภาพคล่องที่รออยู่)` : 'TP 2 เท่าของความเสี่ยง (ยอดขาไกลหรือใกล้เกินไป)'); return o; },
   };
   const TAGS = { dip: 'RSI2', brk: 'เบรก20', st: 'ST', smc: 'SMC' };
@@ -6877,8 +6909,43 @@ const SPC = (() => {
   };
   const cssv = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const ts = (t) => Math.floor(t / 1000) + 7 * 3600; /* shift so the axis reads Thai time */
-  const readOut = (b, J, k) => { const x = b[k]; if (!x) return; const r = J.rsi[k];
-    $('gt-read').textContent = `${hm(x.t)} · เปิด ${px(x.o)} สูง ${px(x.h)} ต่ำ ${px(x.l)} ปิด ${px(x.c)} · EMA20 ${px(J.e20[k])} EMA50 ${px(J.e50[k])} · RSI ${r != null ? r.toFixed(0) : '–'}`; };
+  const readOut = (b, J, k) => { const x = b[k]; if (!x) return; const r = J.rsi[k], pv = b[k - 1], ch = pv ? ((x.c - pv.c) / pv.c) * 100 : 0, o = $('gt-read'); o.replaceChildren();
+    const it = (k2, v, c) => { const sp = el('span', c || null); sp.append(el('small', null, k2), ' ' + v); o.append(sp); };
+    o.append(el('b', null, hm(x.t))); it('ปิด', `${px(x.c)} ${ch >= 0 ? '▲' : '▼'}${Math.abs(ch).toFixed(2)}%`, ch > 0 ? 'pos' : ch < 0 ? 'neg' : ''); it('สูง', px(x.h)); it('ต่ำ', px(x.l));
+    if (lay().ma) { it('EMA20', px(J.e20[k]), 'gt-k20'); it('EMA50', px(J.e50[k]), 'gt-k50'); } it('RSI', r != null ? r.toFixed(0) : '–', r > 70 ? 'neg' : r < 30 ? 'pos' : ''); };
+  /* chart layers Mon can switch off (kept on this device) */
+  const LAYK = 'vg-gtlay', lay = () => { try { return { ma: true, zone: true, tag: true, ...JSON.parse(localStorage.getItem(LAYK) || '{}') }; } catch (e) { return { ma: true, zone: true, tag: true }; } };
+  const setLay = (k, v) => { const o = lay(); o[k] = v; try { localStorage.setItem(LAYK, JSON.stringify(o)); } catch (e) { /* ignore */ } };
+  const drawLeg = () => { const g = $('gt-leg'); if (!g) return; const L = lay(), k = strat(), out = [];
+    const sw = (cls, t) => { const sp = el('span'); sp.append(el('i', cls), t); out.push(sp); };
+    sw('gt-tri up', 'สัญญาณซื้อ'); sw('gt-tri dn', 'สัญญาณขาย');
+    if (L.ma) { sw('gt-ln e20', 'EMA 20'); sw('gt-ln e50', 'EMA 50'); }
+    if (L.zone) { if (k === 'smc') { sw('gt-box ob', 'Order Block'); sw('gt-box fvg', 'FVG'); sw('gt-ln eq', 'กึ่งกลางขา (บนแดง = Premium, ล่างเขียว = Discount)'); } else if (k === 'brk') sw('gt-ln pd', 'กรอบ 20 ชม.'); else if (k === 'st') sw('gt-ln pd', 'เส้น Supertrend'); }
+    if (L.tag && k === 'smc') { sw('gt-sq', 'BOS / CHoCH'); sw('gt-dot', 'กวาดสภาพคล่อง'); }
+    sw('gt-ln le', 'ไม้ที่เปิดอยู่'); sw('gt-ln sl', 'SL'); sw('gt-ln tp', 'TP'); g.replaceChildren(...out); };
+  /* SMC zones drawn as boxes on a canvas over the chart: order blocks (solid tint), FVG (light tint, dashed edge), premium/discount of the current leg */
+  const zoneDraw = () => {
+    if (!LW || !LW.cv) return; const cv = LW.cv, box = $('gt-chart'), dpr = window.devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
+    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+    const d = LW.d; if (!d || strat() !== 'smc' || !lay().zone || !d.I || !d.I.smc || TFH[tf] > 1) return;
+    const { b } = d, M = d.I.smc, tsc = LW.ch.timeScale(), pw = tsc.width(), ph = LW.ch.paneSize ? LW.ch.paneSize().height : H - 28, n = b.length;
+    const X = (i) => { const v = tsc.logicalToCoordinate(i); return v == null ? null : v; }, Y = (p) => LW.cs.priceToCoordinate(p);
+    const vr = tsc.getVisibleLogicalRange(); if (!vr) return; const lo = Math.max(0, Math.floor(vr.from) - 1), hi = Math.min(n + 4, Math.ceil(vr.to) + 1);
+    const tags = []; c.save(); c.beginPath(); c.rect(0, 0, pw, ph); c.clip(); c.font = '600 11px ' + (cssv('--font') || 'sans-serif'); c.textBaseline = 'top';
+    const rect = (i0, i1, top, bot, col, a, dash, label, edge = true) => { const x0 = X(Math.max(i0, lo)), x1 = X(Math.min(i1, hi)), y0 = Y(top), y1 = Y(bot); if (x0 == null || x1 == null || y0 == null || y1 == null || x1 <= x0) return;
+      c.globalAlpha = a; c.fillStyle = col; c.fillRect(x0, y0, x1 - x0, Math.max(2, y1 - y0));
+      if (edge) { c.globalAlpha = 0.85; c.strokeStyle = col; c.lineWidth = 1; c.setLineDash(dash ? [4, 3] : []); c.strokeRect(x0 + 0.5, y0 + 0.5, x1 - x0 - 1, Math.max(2, y1 - y0) - 1); c.setLineDash([]); }
+      if (label && x1 - x0 > 60 && y1 - y0 > 12) { c.globalAlpha = 1; c.fillStyle = col; const lx = Math.max(x0, 0) + 4, lw = c.measureText(label).width;
+        if (!tags.some((q) => lx < q[0] + q[2] + 6 && q[0] < lx + lw + 6 && Math.abs(q[1] - y0) < 14)) { tags.push([lx, y0, lw]); c.fillText(label, lx, y0 + 2); } } c.globalAlpha = 1; };
+    const up = cssv('--jade'), dn = cssv('--brick'), p = b[n - 1].c, a = (d.I.atr[n - 1]) || 1;
+    /* premium / discount of the current leg: a faint wash, no border */
+    const z = M.obs[M.obs.length - 1]; if (z && M.rh[n - 1] != null) { const eq = M.eq[n - 1]; rect(z.k, n + 3, M.rh[n - 1], eq, dn, 0.045, false, '', false); rect(z.k, n + 3, eq, M.rl[n - 1], up, 0.045, false, '', false); }
+    /* only the live zones that matter: up to 2 each side of price, nearest first */
+    const pickN = (L, k) => [...L.filter((x) => x.bot > p).sort((x, y) => x.bot - y.bot).slice(0, k), ...L.filter((x) => x.bot <= p).sort((x, y) => y.top - x.top).slice(0, k)];
+    pickN(M.fvg.filter((f) => f.end == null && f.top - f.bot >= 0.25 * a && n - f.born <= 240), 2).forEach((f) => rect(f.i, n + 3, f.top, f.bot, f.dir === 1 ? up : dn, 0.1, true, 'FVG'));
+    pickN(M.obs.filter((o) => o.end == null && n - o.born <= 240), 2).forEach((o) => rect(o.i, n + 3, o.top, o.bot, o.dir === 1 ? up : dn, o.used ? 0.13 : 0.24, false, (o.dir === 1 ? 'OB ซื้อ' : 'OB ขาย') + (o.used ? ' · ใช้แล้ว' : '')));
+    c.restore(); };
   const lwSpan = () => { if (!LW || !LW.d) return; const n = LW.d.b.length, k = Math.max(40, Math.round(span / TFH[tf])); LW.ch.timeScale().setVisibleLogicalRange({ from: n - k, to: n + 3 }); };
   const lwBuild = () => {
     const L = window.LightweightCharts, box = $('gt-chart'), rb = $('gt-rsi'); box.innerHTML = ''; box.classList.add('lw'); rb.hidden = false; rb.innerHTML = '';
@@ -6889,39 +6956,41 @@ const SPC = (() => {
     const ch = L.createChart(box, base()), rc = L.createChart(rb, { ...base(), timeScale: { visible: false, rightOffset: 4 } });
     const up = cssv('--jade'), dn = cssv('--brick'), quiet = { priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false };
     const cs = ch.addCandlestickSeries({ upColor: up, downColor: dn, wickUpColor: up, wickDownColor: dn, borderVisible: false, priceFormat: { type: 'price', precision: 2, minMove: 0.01 } });
-    const e20 = ch.addLineSeries({ color: cssv('--ochre'), lineWidth: 2, ...quiet }), e50 = ch.addLineSeries({ color: cssv('--cover'), lineWidth: 2, ...quiet });
+    const e20 = ch.addLineSeries({ color: cssv('--ochre'), lineWidth: 2, ...quiet }), e50 = ch.addLineSeries({ color: cssv('--accent'), lineWidth: 2, ...quiet });
     const lvO = { color: cssv('--foil'), lineWidth: 2, lineStyle: L.LineStyle.Dashed, lineType: L.LineType.WithSteps, ...quiet }; const lh = ch.addLineSeries(lvO), ll = ch.addLineSeries(lvO);
     const eqS = ch.addLineSeries({ color: cssv('--ink-3'), lineWidth: 1, lineStyle: L.LineStyle.Dotted, lineType: L.LineType.WithSteps, ...quiet });
-    const rs = rc.addLineSeries({ color: cssv('--cover'), lineWidth: 2, priceLineVisible: false, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) });
+    const rs = rc.addLineSeries({ color: cssv('--accent'), lineWidth: 2, priceLineVisible: false, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) });
     rc.priceScale('right').applyOptions({ scaleMargins: { top: 0.06, bottom: 0.06 } });
     [30, 70].forEach((v) => rs.createPriceLine({ price: v, color: cssv('--ink-3'), lineWidth: 1, lineStyle: L.LineStyle.Dashed, axisLabelVisible: true }));
     let sync = false; const link = (a, b2) => a.timeScale().subscribeVisibleLogicalRangeChange((r) => { if (sync || !r) return; sync = true; b2.timeScale().setVisibleLogicalRange(r); sync = false; });
+    const cv = el('canvas', 'gt-zones'); box.append(cv); let raf = 0; const zq = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; zoneDraw(); }); };
+    ch.timeScale().subscribeVisibleLogicalRangeChange(zq); ch.subscribeCrosshairMove(zq); if (window.ResizeObserver) new ResizeObserver(zq).observe(box);
     link(ch, rc); link(rc, ch);
     const cross = (prm) => { if (!LW || !LW.d) return; const k = prm && prm.time != null ? LW.idx.get(prm.time) : undefined; readOut(LW.d.b, LW.d.I, k ?? LW.d.b.length - 1); };
     ch.subscribeCrosshairMove(cross); rc.subscribeCrosshairMove(cross);
-    LW = { L, ch, rc, cs, e20, e50, lh, ll, eqS, rs, pls: [], key: '', idx: new Map(), d: null, up, dn };
+    LW = { L, ch, rc, cs, e20, e50, lh, ll, eqS, rs, cv, zq, pls: [], key: '', idx: new Map(), d: null, up, dn };
   };
   const lwDraw = () => {
     const d = tfData(); if (!d || !d.b.length || !d.I) return; if (!LW) lwBuild();
     const { b, I: J } = d, key = tf + ':' + strat(); LW.d = d; LW.idx = new Map(b.map((x, i) => [ts(x.t), i]));
     const toL = (arr) => b.map((x, i) => (arr[i] == null ? { time: ts(x.t) } : { time: ts(x.t), value: arr[i] }));
     LW.cs.setData(b.map((x) => ({ time: ts(x.t), open: x.o, high: x.h, low: x.l, close: x.c })));
-    LW.e20.setData(toL(J.e20)); LW.e50.setData(toL(J.e50)); LW.rs.setData(toL(J.rsi));
-    const LV = TFH[tf] <= 1 && STRATS[strat()].lines ? STRATS[strat()].lines(J) : null; LW.lh.setData(LV ? toL(LV[0]) : []); LW.ll.setData(LV ? toL(LV[1]) : []);
-    const isSmc = strat() === 'smc' && J.smc; LW.eqS.setData(isSmc ? toL(J.smc.eq) : []);
+    const LY = lay(); LW.e20.setData(LY.ma ? toL(J.e20) : []); LW.e50.setData(LY.ma ? toL(J.e50) : []); LW.rs.setData(toL(J.rsi));
+    const LV = TFH[tf] <= 1 && LY.zone && strat() !== 'smc' && STRATS[strat()].lines ? STRATS[strat()].lines(J) : null; LW.lh.setData(LV ? toL(LV[0]) : []); LW.ll.setData(LV ? toL(LV[1]) : []);
+    const isSmc = strat() === 'smc' && J.smc && TFH[tf] <= 1; LW.eqS.setData(isSmc && LY.zone ? toL(J.smc.eq) : []);
     const dur = TFH[tf] * 3600e3, mk = [], seen = new Set();
     if (tf !== '1d') S.forEach((sg) => { const t = sg.t - 1; let lo = 0, hi = b.length - 1, j = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (b[m].t <= t) { j = m; lo = m + 1; } else hi = m - 1; }
       if (j < 0 || t >= b[j].t + dur || seen.has(j)) return; seen.add(j);
       mk.push({ time: ts(b[j].t), position: sg.side === 'buy' ? 'belowBar' : 'aboveBar', color: sg.side === 'buy' ? LW.up : LW.dn, shape: sg.side === 'buy' ? 'arrowUp' : 'arrowDown', text: (sg.side === 'buy' ? 'Buy ' : 'Sell ') + (TAGS[strat()] || '') }); });
-    if (isSmc) { const ink = cssv('--ink-2'), lim = Math.max(0, b.length - Math.round(400 / TFH[tf]) - 40);
-      J.smc.ev.forEach((e) => { if (e.i < lim) return; mk.push(e.type === 'sweep' ? { time: ts(b[e.i].t), position: e.dir === 1 ? 'belowBar' : 'aboveBar', color: ink, shape: 'circle', text: 'กวาด' }
+    if (isSmc && LY.tag) { const ink = cssv('--ink-2'), lim = Math.max(0, b.length - 400);
+      J.smc.ev.forEach((e) => { if (e.i < lim) return; mk.push(e.type === 'sweep' ? { time: ts(b[e.i].t), position: e.dir === 1 ? 'belowBar' : 'aboveBar', color: ink, shape: 'circle', text: '' }
         : { time: ts(b[e.i].t), position: e.dir === 1 ? 'aboveBar' : 'belowBar', color: e.dir === 1 ? LW.up : LW.dn, shape: 'square', text: e.type === 'choch' ? 'CHoCH' : 'BOS' }); });
       mk.sort((p, q) => p.time - q.time); }
     LW.cs.setMarkers(mk);
     LW.pls.forEach((p) => LW.cs.removePriceLine(p)); LW.pls = [];
     [...openTx(), ...pOpen()].forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
     if (LW.key !== key) { LW.key = key; lwSpan(); }
-    readOut(b, J, b.length - 1);
+    readOut(b, J, b.length - 1); drawLeg(); LW.zq();
   };
   /* the real TradingView widget */
   let tvDone = false;
@@ -6993,6 +7062,31 @@ const SPC = (() => {
     show(n - 1);
   };
 
+  /* ---------- today: open / careful / stop, from the market and Mon's own rules ---------- */
+  const sessNow = (t) => { const h = bkHour(t); return h >= 7 && h < 14 ? 'เอเชีย (ช่วงเงียบ)' : h >= 14 && h < 19 ? 'ลอนดอน' : h >= 19 ? 'นิวยอร์ก (แรงสุด)' : h < 4 ? 'ปลายนิวยอร์ก' : 'ตลาดเงียบ'; };
+  const posture = () => {
+    const now = Date.now(), r = rules(), d = dayState(D.tx), br = breaker(D.tx), stop = [], care = [], i = bars.length - 1;
+    if (wkend(now)) stop.push('ตลาดทองปิดเสาร์-อาทิตย์');
+    br.out.forEach((x) => stop.push(x.msg));
+    if (d.n >= r.maxTrades) stop.push(`เข้าครบ ${r.maxTrades} ไม้แล้ววันนี้`);
+    if (d.pl <= -r.maxDay) stop.push(`วันนี้เสียถึงเพดาน $${f2(r.maxDay)} แล้ว`);
+    if (nfpBlock(now) || nfpBlock(now + 3 * 3600e3)) care.push('ใกล้ช่วงข่าวจ้างงานสหรัฐ (NFP) ศุกร์แรกของเดือน');
+    let vol = null; if (I && i > 500) { const A = I.atr.slice(i - 480, i).filter((v) => v != null).sort((p, q) => p - q), med = A[A.length >> 1]; vol = I.atr[i] / med;
+      if (vol > 1.8) care.push(`ผันผวนสูงกว่าปกติ ${vol.toFixed(1)} เท่า SL จะกว้าง ลด lot`); }
+    const st = stop.length ? 'stop' : care.length ? 'care' : 'go';
+    return { st, why: stop.length ? stop : care, vol, d, r, sess: sessNow(now) };
+  };
+  const drawDay = (box) => {
+    const P0 = posture(), w = el('div', 'gt-day ' + P0.st), top = el('div', 'gt-dayh');
+    top.append(el('span', 'gt-stamp', P0.st === 'stop' ? 'พักวันนี้' : P0.st === 'care' ? 'เทรดได้ แต่ระวัง' : 'เทรดได้'), el('span', 'gt-dayw', P0.why.length ? P0.why.join(' · ') : 'ไม่มีอะไรขวาง เข้าได้ตามสัญญาณและแผน'));
+    const f = el('dl', 'gt-dayf'), it = (k, v, c) => { const x = el('div'); x.append(el('dt', null, k), el('dd', c || null, v)); f.append(x); };
+    it('ช่วงตลาด', P0.sess, 'tx'); it('ความผันผวน', P0.vol == null ? '–' : P0.vol > 1.8 ? 'สูง' : P0.vol < 0.6 ? 'เงียบ' : 'ปกติ', P0.vol > 1.8 ? 'neg tx' : 'tx');
+    it('ไม้จริงวันนี้', `${P0.d.n}/${P0.r.maxTrades}`); it('กำไรวันนี้', usd(P0.d.pl), tone(P0.d.pl));
+    w.append(top, f);
+    const n = el('p', 'pf-hint gt-dayn'); n.append('ระบบรู้แค่ข่าว NFP ก่อนเข้าไม้เช็กข่าวใหญ่ (CPI, FOMC) ใน ');
+    const a = el('a', null, 'ปฏิทินข่าว'); a.href = 'https://www.forexfactory.com/calendar'; a.target = '_blank'; a.rel = 'noopener'; n.append(a, ' · หยุด 30 นาทีก่อนและหลังข่าว'); w.append(n);
+    box.append(w); };
+
   /* ---------- SMC overview: structure, premium/discount, order blocks, FVG, liquidity ---------- */
   const smcPanel = () => {
     const wrap = el('div', 'gt-smc'), M = I && I.smc, i = bars.length - 1; wrap.append(el('small', 'gt-ch', 'ภาพรวม SMC ตอนนี้ (แท่ง 1 ชม.)'));
@@ -7001,6 +7095,7 @@ const SPC = (() => {
     const ago = (j) => { const h = i - j; return h < 1 ? 'แท่งล่าสุด' : h < 48 ? `${h} ชม.ก่อน` : `${Math.round(h / 24)} วันก่อน`; };
     const E = M.ev.filter((e) => e.type !== 'sweep'), e = E[E.length - 1], d = M.dir[i];
     row('โครงสร้าง', d ? `${d === 1 ? 'ขาขึ้น' : 'ขาลง'} · ล่าสุด ${e.type === 'choch' ? 'CHoCH' : 'BOS'} ที่ ${px(e.lvl)} (${ago(e.i)})` : 'ยังไม่ชัด', d === 1 ? 'pos' : d === -1 ? 'neg' : 'muted');
+    const h4 = M.h4 ? M.h4[i] : 0; row('กราฟ 4 ชม.', h4 ? (h4 === 1 ? 'ขาขึ้น' : 'ขาลง') + (d && h4 !== d ? ' · สวนกับ 1 ชม. ระวัง' : ' · ไปทางเดียวกัน') : 'ยังไม่ชัด', h4 === 1 ? 'pos' : h4 === -1 ? 'neg' : 'muted');
     const rh = M.rh[i], rl = M.rl[i];
     if (rh != null && rh > rl) { const f = Math.min(1, Math.max(0, (p - rl) / (rh - rl))), z = f > 0.5 ? 'Premium (ฝั่งแพง)' + (d === -1 ? ' = โซนรอขาย' : ' = อย่าไล่ซื้อ') : 'Discount (ฝั่งถูก)' + (d === 1 ? ' = โซนรอซื้อ' : ' = อย่าไล่ขาย');
       row('โซนราคา', `${z} · อยู่ที่ ${Math.round(f * 100)}% ของขา ${px(rl)}–${px(rh)} · กึ่งกลาง ${px((rh + rl) / 2)}`, f > 0.5 ? 'neg' : 'pos');
@@ -7020,7 +7115,10 @@ const SPC = (() => {
     const j = all1(), up1 = [untH && `สวิงไฮ ${px(untH.p)}`, eqH && `Equal highs ${px(eqH.p)}`, I.pdh[j] > p && `ไฮเมื่อวาน ${px(I.pdh[j])}`].filter(Boolean), dn1 = [untL && `สวิงโลว์ ${px(untL.p)}`, eqL && `Equal lows ${px(eqL.p)}`, I.pdl[j] < p && `โลว์เมื่อวาน ${px(I.pdl[j])}`].filter(Boolean);
     row('สภาพคล่องด้านบน', up1.length ? up1.join(' · ') : 'ไม่มีในระยะนี้'); row('สภาพคล่องด้านล่าง', dn1.length ? dn1.join(' · ') : 'ไม่มีในระยะนี้');
     const sw = M.ev.filter((x) => x.type === 'sweep').pop(); if (sw && i - sw.i <= 24) row('กวาดสภาพคล่องล่าสุด', `${sw.dir === 1 ? 'กวาดโลว์' : 'กวาดไฮ'} ${px(sw.lvl)} แล้วปิดกลับ (${ago(sw.i)}) · มัก${sw.dir === 1 ? 'เด้งขึ้น' : 'ย่อลง'}ต่อ`, sw.dir === 1 ? 'pos' : 'neg');
-    wrap.append(el('p', 'pf-hint', `ATR ${px(a)} · บนกราฟ: สี่เหลี่ยม BOS/CHoCH = โครงสร้างเบรก, วงกลม "กวาด" = กวาดสภาพคล่อง, เส้นประทอง = Order Block ที่รอเข้า, เส้นจุด = กึ่งกลางขา (Premium/Discount) · เป็นการประมาณ ไม่ใช่คำแนะนำการลงทุน`));
+    const G = (SS.smc || []).filter((x) => x.out); if (G.length) { const gs = ['A', 'B', 'C'].map((g) => { const L = G.filter((x) => x.grade === g); if (!L.length) return `${g} ยังไม่มี`;
+        const w = L.filter((x) => x.R > 0).length, sr = L.reduce((q, x) => q + x.R, 0); return `${g} ${L.length} ไม้ ชนะ ${Math.round((w / L.length) * 100)}% รวม ${sgn(sr)}${Math.abs(sr).toFixed(1)}R`; });
+      row('ย้อนหลังแยกเกรด', gs.join(' · ') + (G.length < 30 ? ' (ไม้ยังน้อย อย่าเพิ่งเชื่อ)' : '')); }
+    wrap.append(el('p', 'pf-hint', `ATR ${px(a)} · บนกราฟ: สี่เหลี่ยม BOS/CHoCH = โครงสร้างเบรก, วงกลม "กวาด" = กวาดสภาพคล่อง, กล่องสี = Order Block (ทึบ) กับ FVG (โปร่ง), เส้นจุด = กึ่งกลางขา (Premium/Discount) · เป็นการประมาณ ไม่ใช่คำแนะนำการลงทุน`));
     return wrap; };
 
   /* ---------- signal card ---------- */
@@ -7032,12 +7130,13 @@ const SPC = (() => {
     st.textContent = err || (!loaded ? 'กำลังโหลดกราฟ…' : `ราคาตอนนี้ $${px(live)} ต่อออนซ์${OFF() ? ` · ใน MT5 ≈ $${px(live + OFF())}` : ''} · อัปเดต ${hhmm(lastTick || Date.now())} น.`);
     drawOff();
     box.replaceChildren(); if (!loaded) return;
+    drawDay(box);
     const s = lastSig(), tr = trendNow();
     const card = el('div', 'gt-sig' + (s ? ' ' + s.side : ''));
     if (s) {
-      const hd = el('div', 'gt-sh'); hd.append(el('b', null, s.side === 'buy' ? 'สัญญาณซื้อ (Buy)' : 'สัญญาณขาย (Sell)'), el('span', 'gt-chip', 'ท่า: ' + STRATS[strat()].name));
+      const hd = el('div', 'gt-sh'); hd.append(el('b', null, s.side === 'buy' ? 'สัญญาณซื้อ (Buy)' : 'สัญญาณขาย (Sell)'), el('span', 'gt-chip', 'ท่า: ' + STRATS[strat()].name)); if (s.grade) hd.append(el('span', 'gt-chip gt-g' + s.grade, 'เกรด ' + s.grade));
       card.append(hd, el('p', null, `แท่งปิด ${hm(s.t)}` + (COND[strat()] ? '' : ` · ${STRATS[strat()].why(s)}`)));
-      if (COND[strat()] && s.i != null) { const ul = el('ul', 'gt-cond'); COND[strat()](s, I, s.i).forEach((t) => ul.append(el('li', null, t))); card.append(el('small', 'gt-ch', 'เข้าเงื่อนไขครบทุกข้อ:'), ul); }
+      if (COND[strat()] && s.i != null) { const ul = el('ul', 'gt-cond'); COND[strat()](s, I, s.i).forEach((t) => ul.append(typeof t === 'string' ? el('li', null, t) : el('li', t.k || null, t.t))); card.append(el('small', 'gt-ch', 'เข้าเงื่อนไขครบทุกข้อ:'), ul); }
       const g = el('div', 'gt-lv'); [['เข้า', s.entry], ['ตัดขาดทุน (SL)', s.sl], ['ทำกำไร (TP)', s.tp]].forEach(([k, p]) => { const d = el('div'); d.append(el('small', null, k + (OFF() ? ' MT5' : '')), el('span', null, px(p + OFF()))); g.append(d); });
       const lot = sizeLot(Math.abs(s.entry - s.sl)), rr = Math.abs(s.tp - s.entry) / Math.abs(s.entry - s.sl), risk = Math.abs(s.entry - s.sl) * (lot || 0) * D.set.cs;
       card.append(g, el('p', 'pf-hint', lot >= 0.01 ? `lot ที่เหมาะ ${lot} (ยอมเสียไม้ละ $${f2(rules().maxLoss)}): ถ้าโดน SL เสีย ${usd(-risk)} (${thb(-risk)}) ถ้าถึง TP ได้ ${usd(risk * rr)} · TP:SL = ${rr.toFixed(2)}` : `SL ไกลเกินไปสำหรับเงินที่ยอมเสียไม้ละ $${f2(rules().maxLoss)} แม้ 0.01 lot ก็เสียเกิน`));
@@ -7266,6 +7365,8 @@ const SPC = (() => {
     document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
     document.querySelectorAll('#gt-tf button').forEach((b) => b.addEventListener('click', () => { tf = b.dataset.tf; document.querySelectorAll('#gt-tf button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawChart(); }));
     document.querySelectorAll('#gt-mode button').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.m)));
+    { const L0 = lay(); document.querySelectorAll('#gt-lay button').forEach((b) => { b.setAttribute('aria-pressed', String(!!L0[b.dataset.l]));
+      b.addEventListener('click', () => { const v = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(v)); setLay(b.dataset.l, v); drawChart(); drawLeg(); }); }); drawLeg(); }
     const fs = (v) => { const w = $('gt-wrap'), on2 = w.classList.toggle('gt-full', v); $('gt-fs').textContent = on2 ? '✕ ปิดเต็มจอ' : '⛶ เต็มจอ'; document.body.classList.toggle('gt-noscroll', on2); if (!LW) drawChart(); };
     $('gt-fs').addEventListener('click', () => fs()); document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && $('gt-wrap').classList.contains('gt-full')) fs(false); });
     $('gt-prev').addEventListener('click', () => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 2, 1); ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; selDay = null; drawDash(); });
