@@ -42,7 +42,8 @@
   const gone = (ids) => { D.del = [...D.del, ...ids].slice(-500); };
   const mergeDoc = (r, l) => { r = norm(r); l = norm(l); const del = new Set([...r.del, ...l.del]);
     const pick = (a, b) => { const m = new Map(); [...a, ...b].forEach((x) => { if (!x || !x.id) return; const o = m.get(x.id); if (!o || (x.u || 0) > (o.u || 0)) m.set(x.id, x); });
-      return [...m.values()].filter((x) => !del.has(x.id)).sort((x, y) => (x.at || 0) - (y.at || 0)); };
+      const bySid = new Map(); return [...m.values()].filter((x) => !del.has(x.id)).sort((x, y) => (x.at || 0) - (y.at || 0) || (x.id < y.id ? -1 : 1))
+        .filter((x) => { if (!x.sid) return true; if (bySid.has(x.sid)) return false; bySid.set(x.sid, 1); return true; }); }; /* both devices' bots may open the same signal */
     const rp = r.paper, lp = l.paper, pNew = (lp.su || 0) > (rp.su || 0);
     return { tx: pick(r.tx, l.tx), del: [...del].slice(-500), su: Math.max(r.su, l.su), set: (l.su || 0) > (r.su || 0) ? { ...r.set, ...l.set } : { ...l.set, ...r.set },
       paper: { ...(pNew ? { ...rp, ...lp } : { ...lp, ...rp }), su: Math.max(rp.su || 0, lp.su || 0), tx: pick(rp.tx, lp.tx) } }; };
@@ -247,7 +248,7 @@
       ws.onmessage = (m) => {
         let d; try { d = JSON.parse(m.data); } catch (e) { return; } const k = d && d.k; if (!k) return;
         live = +k.c; lastTick = Date.now(); const b = { t: k.t, o: +k.o, h: +k.h, l: +k.l, c: +k.c };
-        if (k.x) { if (!bars.length || b.t > bars[bars.length - 1].t) { bars.push(b); if (bars.length > 1000) bars.shift(); } form = null; recalc(); drawAll(); return; }
+        if (k.x) { if (!bars.length || b.t > bars[bars.length - 1].t) { bars.push(b); if (bars.length > 1000) bars.shift(); } form = null; recalc(); autoDraw(); return; }
         if (form && b.t > form.t && !bars.some((x) => x.t === form.t)) bars.push(form);
         form = b; later();
       };
@@ -258,10 +259,17 @@
   const poll = async () => {
     if (!on || !loaded || polling || Date.now() - lastTick < 60e3) return; polling = true;
     try { const k = (await get('klines?symbol=PAXGUSDT&interval=1h&limit=3')).map(kl); const f = k.pop();
-      k.forEach((b) => { if (b.t > bars[bars.length - 1].t) bars.push(b); }); form = f; live = f.c; lastTick = Date.now() - 30e3; recalc(); drawAll(); } catch (e) { /* next round */ }
+      k.forEach((b) => { if (b.t > bars[bars.length - 1].t) bars.push(b); }); form = f; live = f.c; lastTick = Date.now() - 30e3; recalc(); autoDraw(); } catch (e) { /* next round */ }
     polling = false;
   };
-  let tm = null; const later = () => { if (!tm) tm = setTimeout(() => { tm = null; recalc(); drawChart(); drawNow(); drawOpen(); drawPaper(); drawDash(); }, 1200); };
+  /* automatic redraws (price ticks, another device's save) wait while Mon is using the page: a tap in the last 4 s or a focused field.
+     Before 2026-11-24 every tick rebuilt the lists, so a form or button tapped on the phone vanished under the finger. */
+  let lastUse = 0; const inGt = (n) => !!(n && n.closest && n.closest('[data-sub^="gt"]'));
+  ['pointerdown', 'keydown', 'input'].forEach((ev) => document.addEventListener(ev, (e) => { if (inGt(e.target)) lastUse = Date.now(); }, true));
+  const busy = () => { const a = document.activeElement; return (inGt(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) || Date.now() - lastUse < 4000; };
+  let softT = null; const softDraw = () => { clearTimeout(softT); softT = null; if (busy()) { softT = setTimeout(softDraw, 1200); return; } drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
+  const autoDraw = () => { drawChart(); softDraw(); };
+  let tm = null; const later = () => { if (!tm) tm = setTimeout(() => { tm = null; recalc(); autoDraw(); }, 1200); };
 
   /* ---------- trades ---------- */
   const plOf = (x, exit) => { const p = exit ?? x.exit; if (p == null) return null; return (p - x.entry) * (x.side === 'buy' ? 1 : -1) * x.lot * (D.set.cs || 100) - (x.fee || 0); };
@@ -810,7 +818,8 @@
     const ok = el('button', 'btn-solid', 'ยืนยันปิดไม้'); ok.type = 'button';
     ok.addEventListener('click', () => { const p = +i1.value; if (!(p > 0)) return; x.exit = p; x.fee = +i2.value || 0; x.closedAt = i3.value ? new Date(i3.value).getTime() : Date.now();
       x.out = x.tp && Math.abs(p - x.tp) < 0.01 ? 'tp' : x.sl && Math.abs(p - x.sl) < 0.01 ? 'sl' : 'man'; save(); drawAll(); });
-    const act = el('div', 'pf-actions wide'); act.append(ok, pv); f.append(l1, l2, l3, act); row.append(f);
+    const no = el('button', 'btn-line', 'ยกเลิก'); no.type = 'button'; no.addEventListener('click', () => { f.remove(); drawOpen(); });
+    const act = el('div', 'pf-actions wide'); act.append(ok, no, pv); f.append(l1, l2, l3, act); row.append(f); i1.focus({ preventScroll: true });
   };
   const row = (x, isOpen, paper) => {
     const r = el('div', 'gt-row'); const top = el('div', 'gt-rt');
@@ -832,7 +841,7 @@
     r.append(act); return r;
   };
   const drawOpen = () => {
-    const box = $('gt-open'); if (!box) return; if (box.querySelector('.gt-close input:focus')) return;
+    const box = $('gt-open'); if (!box) return; if (box.querySelector('.gt-close')) return; /* a close form is open: leave it until confirmed or cancelled */
     const o = openTx(); box.replaceChildren();
     if (!o.length) { box.append(el('div', 'empty', 'ไม่มีไม้ที่เปิดอยู่')); return; }
     const tot = o.reduce((a, x) => a + (plOf(x, live) || 0), 0);
@@ -1017,7 +1026,8 @@
     _t: { ind, test, sigSmc },
     /* a copy arrived from the account: merge it with this device's copy; push back if this device had something the account lacked */
     sync: (c) => { const r = norm(c), m = norm(mergeDoc(r, D)), push = sig(m) !== sig(r); D = m; prime(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ }
-      if ($('gt-lot')) { $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs; $('gp-lot').value = P().lot; $('gp-start').value = P().start; } if (bars.length) recalc(); drawAll();
+      if ($('gt-lot')) [['gt-lot', D.set.lot], ['gt-cs', D.set.cs], ['gp-lot', P().lot], ['gp-start', P().start]].forEach(([k, v]) => { if (document.activeElement !== $(k)) $(k).value = v; });
+      if (bars.length) recalc(); autoDraw();
       if (push && window.VGSync) window.VGSync.push('portfolios'); },
     replace: (c) => { D = norm(c); prime(); save(false); if ($('gt-lot')) { $('gt-lot').value = D.set.lot; $('gt-cs').value = D.set.cs; $('gp-lot').value = P().lot; $('gp-start').value = P().start; } if (bars.length) recalc(); drawAll(); },
     merge: (c) => { const r = norm(c), m = mergeDoc(r, D); return { extra: Math.max(0, m.tx.length - r.tx.length) + Math.max(0, m.paper.tx.length - r.paper.tx.length), doc: m }; },
