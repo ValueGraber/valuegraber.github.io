@@ -5292,7 +5292,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '9faa28f58d';
+  const BUILD = '64cd9c02e5';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7357,9 +7357,9 @@ const SPC = (() => {
     $('gt-mt5-clr').addEventListener('click', () => { $('gt-mt5').value = ''; setOff(0); });
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
     const syncLine = () => { const e = $('gt-sync'); if (!e) return; const Y = window.VGSync, on = Y && Y.on && Y.on();
-      e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()} · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
+      e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()}${Y.id && Y.id() ? ` (รหัสบัญชี ${Y.id()})` : ''} · ไม้จริงในเครื่องนี้ ${D.tx.length} ไม้ · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
       e.classList.toggle('neg', !on); $('gt-pull').hidden = !on; };
-    setInterval(() => { if (on) syncLine(); }, 2000); syncLine();
+    setInterval(() => { if (!document.hidden) syncLine(); }, 2000); syncLine(); /* was gated on the chart's live flag, so the journal tab kept showing 'not signed in' */
     $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'); b.disabled = true; try { await window.VGSync.pull('portfolios'); } catch (e) { /* status shows it */ } b.disabled = false; syncLine(); });
     $('gt-add').addEventListener('click', add); $('gt-csv').addEventListener('click', csv);
     document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
@@ -7491,12 +7491,19 @@ if (FB && window.VGPort) {
     const push = (k = 'portfolios') => {
       const s = st[k]; if (!s || !s.ref || !s.ok) return; clearTimeout(s.timer); status('กำลังบันทึก…');
       s.timer = setTimeout(() => { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
-        .then(() => { s.err = null; status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
-        .catch((e) => { console.warn(e); s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้`; status(''); }); }, 600);
+        .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
+        .catch((e) => { console.warn(e); s.fail = true; s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); }); }, 600);
     };
     /* fetch the account copy now and merge it in (gold trading merges per trade, see gtrade.js sync) */
-    const pull = async (k = 'portfolios') => { const s = st[k]; if (!s || !s.ref || !s.ok) return false; const x = await F.getDoc(s.ref); if (x.exists()) STORES[k].apply(x.data()); status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
-    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, state: () => $('a-state').textContent };
+    const pull = async (k = 'portfolios') => { const s = st[k]; if (!s || !s.ref || !s.ok) return false; const x = await F.getDoc(s.ref);
+      if (x.exists()) { const m = STORES[k].merge(x.data()); STORES[k].apply(m.changed ? m.doc : x.data()); if (m.changed) push(k); } status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
+    let uidNow = '';
+    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, id: () => uidNow.slice(-4).toUpperCase(), state: () => $('a-state').textContent };
+    /* a phone app comes back from the background with a sleeping listener, and a failed save stays only on the device:
+       on return / reconnect, pull the account copy (merged, never replaced) and retry any failed save */
+    let away = 0; const wake = () => { Object.keys(STORES).forEach((k) => { const s = st[k]; if (!s.ok) return; pull(k).catch((e) => console.warn(e)).then(() => { if (s.fail) push(k); }); }); };
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') away = Date.now(); else if (away && Date.now() - away > 20e3) wake(); });
+    window.addEventListener('online', wake); window.addEventListener('pageshow', (e) => { if (e.persisted) wake(); });
     document.addEventListener('vg:watch', () => push('portfolios'));
 
     const attach = async (k, uid) => {
@@ -7523,6 +7530,7 @@ if (FB && window.VGPort) {
     A.onAuthStateChanged(auth, async (u) => {
       Object.values(st).forEach((s) => { if (s.unsub) s.unsub(); s.unsub = null; s.ref = null; s.ok = false; s.err = null; });
       $('acct-out').hidden = !!u; $('acct-in').hidden = !u;
+      uidNow = u ? u.uid : '';
       if (!u) return;
       $('a-who').textContent = u.email || u.displayName || 'ของคุณ'; msg(''); status('กำลังโหลดข้อมูลจากบัญชี…');
       const notes = []; for (const k of Object.keys(STORES)) { const n = await attach(k, u.uid); if (n) notes.push(n); }
