@@ -1142,6 +1142,10 @@ body.gt-noscroll { overflow: hidden; }
 .gt-cond li.h { padding-left: 0; margin-top: 6px; font-weight: 600; } .gt-cond li.h::before { content: none; }
 .gt-chip.gt-gA { color: var(--jade); border-color: var(--jade); } .gt-chip.gt-gC { color: var(--ink-3); }
 /* today posture: a passbook stamp + four facts */
+.gt-book { display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--ink); background: var(--surface); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 10px 14px; margin: 4px 0 10px; }
+body[data-page=gtpp] .gt-off, body[data-page=gtpp] #gt-offmsg { display: none; } /* MT5 price offset only matters for real trades */
+.gt-book b { display: block; font-size: 16px; } .gt-book span { font-size: 13px; color: var(--ink-2); }
+.gt-book.paper { border-left-color: var(--ochre); background: color-mix(in srgb, var(--ochre) 9%, var(--surface)); } .gt-book.paper b { color: var(--ochre); }
 .gt-day { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-lg); padding: 12px 16px; margin: 10px 0 4px; }
 .gt-dayh { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
 .gt-stamp { font-weight: 700; font-size: 15px; padding: 3px 10px; border: 1.5px solid currentColor; border-radius: 6px; color: var(--jade); white-space: nowrap; }
@@ -1482,6 +1486,7 @@ details.how .sec-note { margin: 6px 0 0; }
 
   <section id="gtc" data-sub="gtc">
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
+    <div class="gt-book real" id="gt-book" role="status"></div>
     <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
     <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button><button type="button" data-k="st" aria-pressed="false">Supertrend</button><button type="button" data-k="smc" aria-pressed="false">SMC</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
@@ -3996,14 +4001,15 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
       ['gold', 'ทองถือยาว', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
-      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
+      ['gt', 'เทรดจริง', 'scan', [['gtc'], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้าใน MT5 ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุนไม้จริง', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
+      ['gtpp', 'เทรดกระดาษ', 'scan', [['gtc'], ['gtp', 'ไม้กระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtd', 'สรุปกำไรขาดทุนไม้กระดาษ', 'ปฏิทินรายวัน อัตราชนะ แยกตามท่าและบอท', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ', false], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
   };
   /* invest has many pages: a first row of 4 groups, then the pages of the chosen group */
-  const CATS = { invest: [['ov', 'ภาพรวม', ['ov']], ['stk', 'หุ้น', ['mine', 'find', 'sxp', 'plan', 'log']], ['gld', 'ทอง', ['gold', 'gt']], ['opt', 'ออปชั่น', ['opt']]] };
+  const CATS = { invest: [['ov', 'ภาพรวม', ['ov']], ['stk', 'หุ้น', ['mine', 'find', 'sxp', 'plan', 'log']], ['gld', 'ทอง', ['gold', 'gt', 'gtpp']], ['opt', 'ออปชั่น', ['opt']]] };
   const catOf = (tab, page) => (CATS[tab] || []).find((c) => c[2].includes(page));
   const TABS = ['home', 'money', 'invest', 'biz'], VIEWS = ['home', 'money', 'scan', 'port', 'biz'];
   let ACC = {}; try { ACC = JSON.parse(localStorage.getItem('vg-acc') || '{}') || {}; } catch (e) { /* ignore */ }
@@ -4026,7 +4032,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   };
   const apply = () => {
     const { tab } = cur; const p = findPage(tab, cur.page); const v = p ? p[2] : 'home';
-    VIEWS.forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v; document.body.dataset.tab = tab;
+    VIEWS.forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v; document.body.dataset.tab = tab; document.body.dataset.page = cur.page || '';
     document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === tab)));
     subnav.hidden = !p; subnav.querySelectorAll('button[data-s]').forEach((b) => b.setAttribute('aria-pressed', String(!!p && b.dataset.s === p[0])));
     const c = p && catOf(tab, p[0]); subnav.classList.toggle('two', !!c);
@@ -4072,7 +4078,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   };
   const show = (v, sub) => open(...resolve(v, sub));
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => open(b.dataset.v)));
-  window.VGNav = { go: (v, sub) => show(v, sub) };
+  window.VGNav = { go: (v, sub) => show(v, sub), open: (tab, page, focus) => open(tab, page, focus), page: () => cur.page };
 
   /* invest overview: one screen, each row says what to look at today and opens that page */
   const drawOv = () => {
@@ -4099,7 +4105,8 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     let G = null; try { G = window.VGGT ? window.VGGT.get() : null; } catch (e) { /* ignore */ }
     if (G) { const open1 = (G.tx || []).filter((x) => x.exit == null).length, pp = G.paper && G.paper.tx ? G.paper.tx.filter((x) => x.exit == null).length : 0;
       const SN = { dip: 'ย่อในเทรนด์', brk: 'เบรก 20 ชม.', st: 'Supertrend', smc: 'SMC' };
-      s2.append(row('เทรดทอง XAUUSD', `ท่าที่ดู: ${SN[G.set && G.set.strat] || SN.dip}${pp ? ` · เทรดกระดาษเปิด ${pp} ไม้` : ''}`, open1 ? `ไม้จริงเปิด ${open1}` : 'ดูสัญญาณ', open1 ? 'wn' : '', 'gt')); }
+      s2.append(row('เทรดทองจริง', `ท่าที่ดู: ${SN[G.set && G.set.strat] || SN.dip} · ไม้ที่เข้าใน MT5`, open1 ? `เปิดอยู่ ${open1} ไม้` : 'ดูสัญญาณ', open1 ? 'wn' : '', 'gt'));
+      s2.append(row('เทรดทองกระดาษ', 'เงินปลอมและบอท 24 ชม.', pp ? `เปิดอยู่ ${pp} ไม้` : '', '', 'gtpp')); }
     const s3 = sec('อื่นๆ');
     s3.append(row('ออปชั่น', 'สัญญาณ แผนเทรด และเทรดจำลอง', '', '', 'opt'));
     box.append(el('p', 'pf-hint', 'ตัวเลขทั้งหมดเป็นการประมาณ ไม่ใช่คำแนะนำการลงทุน'));

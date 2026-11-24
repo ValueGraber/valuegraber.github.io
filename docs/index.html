@@ -1142,6 +1142,10 @@ body.gt-noscroll { overflow: hidden; }
 .gt-cond li.h { padding-left: 0; margin-top: 6px; font-weight: 600; } .gt-cond li.h::before { content: none; }
 .gt-chip.gt-gA { color: var(--jade); border-color: var(--jade); } .gt-chip.gt-gC { color: var(--ink-3); }
 /* today posture: a passbook stamp + four facts */
+.gt-book { display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--ink); background: var(--surface); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 10px 14px; margin: 4px 0 10px; }
+body[data-page=gtpp] .gt-off, body[data-page=gtpp] #gt-offmsg { display: none; } /* MT5 price offset only matters for real trades */
+.gt-book b { display: block; font-size: 16px; } .gt-book span { font-size: 13px; color: var(--ink-2); }
+.gt-book.paper { border-left-color: var(--ochre); background: color-mix(in srgb, var(--ochre) 9%, var(--surface)); } .gt-book.paper b { color: var(--ochre); }
 .gt-day { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-lg); padding: 12px 16px; margin: 10px 0 4px; }
 .gt-dayh { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
 .gt-stamp { font-weight: 700; font-size: 15px; padding: 3px 10px; border: 1.5px solid currentColor; border-radius: 6px; color: var(--jade); white-space: nowrap; }
@@ -1482,6 +1486,7 @@ details.how .sec-note { margin: 6px 0 0; }
 
   <section id="gtc" data-sub="gtc">
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
+    <div class="gt-book real" id="gt-book" role="status"></div>
     <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
     <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button><button type="button" data-k="st" aria-pressed="false">Supertrend</button><button type="button" data-k="smc" aria-pressed="false">SMC</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
@@ -4128,14 +4133,15 @@ dash.calc('sectors', {
       ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
       ['gold', 'ทองถือยาว', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
-      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtp', 'เทรดกระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้า ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุน', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
+      ['gt', 'เทรดจริง', 'scan', [['gtc'], ['gtj', 'ไม้จริงของฉัน', 'จดไม้ที่เข้าใน MT5 ดูกำไรขาดทุนสด และปิดไม้', true], ['gtd', 'สรุปกำไรขาดทุนไม้จริง', 'ปฏิทินกำไรขาดทุนรายวัน และอัตราชนะ', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'กฎความเสี่ยงและขนาดไม้', 'เงินที่ยอมเสียต่อไม้ เพดานต่อวัน และโควตาไม้', false]]],
+      ['gtpp', 'เทรดกระดาษ', 'scan', [['gtc'], ['gtp', 'ไม้กระดาษ', 'กดเทรดด้วยเงินปลอม และบอทเทรดตามสัญญาณ 24 ชม.', true], ['gtd', 'สรุปกำไรขาดทุนไม้กระดาษ', 'ปฏิทินรายวัน อัตราชนะ แยกตามท่าและบอท', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ', false], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'แต่ละท่าทำเงินได้จริงไหม เมื่อหักต้นทุนแล้ว', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
       ['log', 'บันทึก', 'port', [['add']]]],
     biz: [['main', 'สรุปและจด', 'biz', [['sum'], ['add']]], ['docs', 'เอกสารและสต็อก', 'biz', [['inv'], ['prod']]], ['tax', 'ภาษี', 'biz', [['tax']]]],
   };
   /* invest has many pages: a first row of 4 groups, then the pages of the chosen group */
-  const CATS = { invest: [['ov', 'ภาพรวม', ['ov']], ['stk', 'หุ้น', ['mine', 'find', 'sxp', 'plan', 'log']], ['gld', 'ทอง', ['gold', 'gt']], ['opt', 'ออปชั่น', ['opt']]] };
+  const CATS = { invest: [['ov', 'ภาพรวม', ['ov']], ['stk', 'หุ้น', ['mine', 'find', 'sxp', 'plan', 'log']], ['gld', 'ทอง', ['gold', 'gt', 'gtpp']], ['opt', 'ออปชั่น', ['opt']]] };
   const catOf = (tab, page) => (CATS[tab] || []).find((c) => c[2].includes(page));
   const TABS = ['home', 'money', 'invest', 'biz'], VIEWS = ['home', 'money', 'scan', 'port', 'biz'];
   let ACC = {}; try { ACC = JSON.parse(localStorage.getItem('vg-acc') || '{}') || {}; } catch (e) { /* ignore */ }
@@ -4158,7 +4164,7 @@ dash.calc('sectors', {
   };
   const apply = () => {
     const { tab } = cur; const p = findPage(tab, cur.page); const v = p ? p[2] : 'home';
-    VIEWS.forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v; document.body.dataset.tab = tab;
+    VIEWS.forEach((k) => { $('view-' + k).hidden = k !== v; }); document.body.dataset.view = v; document.body.dataset.tab = tab; document.body.dataset.page = cur.page || '';
     document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === tab)));
     subnav.hidden = !p; subnav.querySelectorAll('button[data-s]').forEach((b) => b.setAttribute('aria-pressed', String(!!p && b.dataset.s === p[0])));
     const c = p && catOf(tab, p[0]); subnav.classList.toggle('two', !!c);
@@ -4204,7 +4210,7 @@ dash.calc('sectors', {
   };
   const show = (v, sub) => open(...resolve(v, sub));
   document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => open(b.dataset.v)));
-  window.VGNav = { go: (v, sub) => show(v, sub) };
+  window.VGNav = { go: (v, sub) => show(v, sub), open: (tab, page, focus) => open(tab, page, focus), page: () => cur.page };
 
   /* invest overview: one screen, each row says what to look at today and opens that page */
   const drawOv = () => {
@@ -4231,7 +4237,8 @@ dash.calc('sectors', {
     let G = null; try { G = window.VGGT ? window.VGGT.get() : null; } catch (e) { /* ignore */ }
     if (G) { const open1 = (G.tx || []).filter((x) => x.exit == null).length, pp = G.paper && G.paper.tx ? G.paper.tx.filter((x) => x.exit == null).length : 0;
       const SN = { dip: 'ย่อในเทรนด์', brk: 'เบรก 20 ชม.', st: 'Supertrend', smc: 'SMC' };
-      s2.append(row('เทรดทอง XAUUSD', `ท่าที่ดู: ${SN[G.set && G.set.strat] || SN.dip}${pp ? ` · เทรดกระดาษเปิด ${pp} ไม้` : ''}`, open1 ? `ไม้จริงเปิด ${open1}` : 'ดูสัญญาณ', open1 ? 'wn' : '', 'gt')); }
+      s2.append(row('เทรดทองจริง', `ท่าที่ดู: ${SN[G.set && G.set.strat] || SN.dip} · ไม้ที่เข้าใน MT5`, open1 ? `เปิดอยู่ ${open1} ไม้` : 'ดูสัญญาณ', open1 ? 'wn' : '', 'gt'));
+      s2.append(row('เทรดทองกระดาษ', 'เงินปลอมและบอท 24 ชม.', pp ? `เปิดอยู่ ${pp} ไม้` : '', '', 'gtpp')); }
     const s3 = sec('อื่นๆ');
     s3.append(row('ออปชั่น', 'สัญญาณ แผนเทรด และเทรดจำลอง', '', '', 'opt'));
     box.append(el('p', 'pf-hint', 'ตัวเลขทั้งหมดเป็นการประมาณ ไม่ใช่คำแนะนำการลงทุน'));
@@ -5292,7 +5299,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '412ba47044';
+  const BUILD = 'a4aae6a6c9';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -6462,118 +6469,152 @@ const SPC = (() => {
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const sideTh = (s) => (s === 'buy' ? 'ซื้อ (Buy)' : 'ขาย (Sell)');
 
-  /* ---------- indicators ---------- */
-  const ema = (v, n) => { const k = 2 / (n + 1); const o = []; let e = null; v.forEach((x, i) => { e = e == null ? x : x * k + e * (1 - k); o[i] = i >= n - 1 ? e : null; }); return o; };
-  const rsi = (c, n = 14) => { const o = Array(c.length).fill(null); let g = 0, l = 0;
-    for (let i = 1; i < c.length; i++) { const d = c[i] - c[i - 1]; const up = Math.max(d, 0), dn = Math.max(-d, 0);
-      if (i <= n) { g += up / n; l += dn / n; } else { g = (g * (n - 1) + up) / n; l = (l * (n - 1) + dn) / n; }
-      if (i >= n) o[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l); } return o; };
-  const atr = (b, n = 14) => { const o = Array(b.length).fill(null); let a = 0;
-    for (let i = 1; i < b.length; i++) { const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c));
-      a = i <= n ? a + tr / n : (a * (n - 1) + tr) / n; if (i >= n) o[i] = a; } return o; };
-  /* SMC (Smart Money Concepts), all from closed bars only (no look-ahead):
-     swing highs/lows = fractal 3 bars each side (known 3 bars later); close past the last swing = BOS (same way) or CHoCH (trend flips);
-     order block = last opposite candle before the leg that broke structure (zone = its high–low, dead once a close goes through it);
-     FVG = 3-bar gap ≥ 0.1 ATR (filled when price trades through it); liquidity sweep = wick past the last swing that closes back inside;
-     equal highs/lows (within 0.15 ATR) = resting liquidity; premium/discount = above/below 50% of the current leg (leg low → highest high since the break).
-     Signal: structure up (after BOS/CHoCH), price taps the fresh bullish OB from that break within 72 bars, closes up (green bar) and still in discount →
-     buy; SL under the OB − 0.2 ATR (0.5–3 ATR), TP = the leg high (external liquidity) when that is 1.5–4R, else 2R. Mirror for sells. One entry per OB. */
-  const smc = (b, A) => {
-    const n = b.length, F = 3, o = { dir: Array(n).fill(0), eq: Array(n).fill(null), rh: Array(n).fill(null), rl: Array(n).fill(null), obT: Array(n).fill(null), obB: Array(n).fill(null), sig: Array(n).fill(null), ev: [], obs: [], fvg: [], liq: [], H: [], L: [] };
-    let sh = null, shI = -1, shDone = true, shSw = false, sl = null, slI = -1, slDone = true, slSw = false, dir = 0, act = null; const liveF = [], liveO = [];
-    for (let i = 0; i < n; i++) {
-      const x = b[i], a = A[i] || 0, j = i - F;
-      if (j >= F) { let isH = true, isL = true; for (let k = j - F; k <= j + F; k++) { if (k === j) continue; if (b[k].h >= b[j].h) isH = false; if (b[k].l <= b[j].l) isL = false; }
-        if (isH) { const pv = o.H[o.H.length - 1]; if (pv && a && Math.abs(pv.p - b[j].h) <= 0.15 * a && j - pv.i <= 120) o.liq.push({ side: 'h', p: Math.max(pv.p, b[j].h), i0: pv.i, i: j, at: i, end: null });
-          o.H.push({ p: b[j].h, i: j, at: i }); sh = b[j].h; shI = j; shDone = false; shSw = false; }
-        if (isL) { const pv = o.L[o.L.length - 1]; if (pv && a && Math.abs(pv.p - b[j].l) <= 0.15 * a && j - pv.i <= 120) o.liq.push({ side: 'l', p: Math.min(pv.p, b[j].l), i0: pv.i, i: j, at: i, end: null });
-          o.L.push({ p: b[j].l, i: j, at: i }); sl = b[j].l; slI = j; slDone = false; slSw = false; } }
-      /* fair value gaps: fill the old ones, then add a new one */
-      for (let q = liveF.length - 1; q >= 0; q--) { const f = liveF[q]; if (f.dir === 1 ? x.l <= f.bot : x.h >= f.top) { f.end = i; liveF.splice(q, 1); } }
-      if (i >= 2 && a) { const g = b[i - 2];
-        if (x.l > g.h && x.l - g.h >= 0.1 * a) { const f = { dir: 1, top: x.l, bot: g.h, i: i - 1, born: i, end: null }; o.fvg.push(f); liveF.push(f); }
-        if (x.h < g.l && g.l - x.h >= 0.1 * a) { const f = { dir: -1, top: g.l, bot: x.h, i: i - 1, born: i, end: null }; o.fvg.push(f); liveF.push(f); }
-        if (liveF.length > 40) liveF.shift(); }
-      /* liquidity: equal highs/lows taken, sweeps of the last swing */
-      o.liq.forEach((q) => { if (q.end == null && q.at < i && (q.side === 'h' ? x.h > q.p : x.l < q.p)) { q.end = i; q.swept = q.side === 'h' ? x.c < q.p : x.c > q.p; } });
-      if (sh != null && !shDone && !shSw && x.h > sh && x.c <= sh) { shSw = true; o.ev.push({ i, type: 'sweep', dir: -1, lvl: sh }); }
-      if (sl != null && !slDone && !slSw && x.l < sl && x.c >= sl) { slSw = true; o.ev.push({ i, type: 'sweep', dir: 1, lvl: sl }); }
-      /* order blocks die when a close goes through them */
-      for (let q = liveO.length - 1; q >= 0; q--) { const z = liveO[q]; if (z.born < i && (z.dir === 1 ? x.c < z.bot : x.c > z.top)) { z.end = i; liveO.splice(q, 1); } }
-      /* structure breaks */
-      const brk = (d) => { const lvl = d === 1 ? sh : sl, from = d === 1 ? shI : slI, type = dir === -d ? 'choch' : 'bos'; dir = d;
-        let k = from; for (let q = from; q <= i; q++) if (d === 1 ? b[q].l < b[k].l : b[q].h > b[k].h) k = q;
-        let ob = k; for (let q = k; q >= Math.max(0, k - 10); q--) if (d === 1 ? b[q].c < b[q].o : b[q].c > b[q].o) { ob = q; break; }
-        const ext = d === 1 ? b[k].l : b[k].h, prior = (d === 1 ? o.L : o.H).filter((z) => z.i < k && k - z.i <= 60 && z.at <= k).pop();
-        const sweep = !!prior && (d === 1 ? ext < prior.p : ext > prior.p);
-        let hi = -Infinity, lo = Infinity; for (let q = k; q <= i; q++) { hi = Math.max(hi, b[q].h); lo = Math.min(lo, b[q].l); }
-        const z = { dir: d, top: b[ob].h, bot: b[ob].l, i: ob, born: i, end: null, used: false, ev: type, k, sweep, lo, hi,
-          fvg: o.fvg.some((f) => f.dir === d && f.born > ob && f.born <= i) };
-        o.obs.push(z); liveO.push(z); if (liveO.length > 30) liveO.shift(); act = z; o.ev.push({ i, type, dir: d, lvl, from }); };
-      if (sh != null && !shDone && x.c > sh) { shDone = true; brk(1); }
-      else if (sl != null && !slDone && x.c < sl) { slDone = true; brk(-1); }
-      if (act) { act.hi = Math.max(act.hi, x.h); act.lo = Math.min(act.lo, x.l); }
-      /* entry: first tap of the fresh order block */
-      if (act && act.end == null && !act.used && act.born < i && i - act.born <= 72 && a) {
-        const z = act, eq = (z.hi + z.lo) / 2, d = z.dir;
-        const tap = d === 1 ? x.l <= z.top && x.c > z.bot && x.c > x.o && x.c <= eq : x.h >= z.bot && x.c < z.top && x.c < x.o && x.c >= eq;
-        if (tap) { z.used = true; const stop = d === 1 ? z.bot - 0.2 * a : z.top + 0.2 * a, risk = Math.min(Math.max(Math.abs(x.c - stop), 0.5 * a), 3 * a), tgt = d === 1 ? z.hi : z.lo, R0 = Math.abs(tgt - x.c) / risk;
-          o.sig[i] = { side: d === 1 ? 'buy' : 'sell', risk, R: R0 >= 1.5 && R0 <= 4 ? R0 : 2, ob: z, eq, liqT: R0 >= 1.5 && R0 <= 4 }; } }
-      o.dir[i] = dir; if (act) { o.rh[i] = act.hi; o.rl[i] = act.lo; o.eq[i] = (act.hi + act.lo) / 2; if (act.end == null && !act.used && i - act.born <= 72) { o.obT[i] = act.top; o.obB[i] = act.bot; } }
-    }
-    return o; };
-  const wkend = (t) => { const d = new Date(t + 2 * 3600e3).getUTCDay(); return d === 6 || d === 0; }; /* XAUUSD closed: Sat 05:00 → Mon 05:00 Thai */
-  const ind = (b) => { const c = b.map((x) => x.c); const o = { e20: ema(c, 20), e50: ema(c, 50), e200: ema(c, 200), e480: ema(c, 480), rsi: rsi(c), r2: rsi(c, 2), atr: atr(b), pdh: [], pdl: [], hiB: [], loB: [], ah: [], al: [], ab: [], dh: [], dl: [], st: [], sd: [] };
-    b.forEach((x, i) => { if (i < 20) { o.dh[i] = o.dl[i] = null; return; } let h = -Infinity, l = Infinity; for (let j = i - 20; j < i; j++) { h = Math.max(h, b[j].h); l = Math.min(l, b[j].l); } o.dh[i] = h; o.dl[i] = l; });
-    { const a10 = atr(b, 10); let up = null, dn = null, dir = 1; b.forEach((x, i) => { if (a10[i] == null) { o.st[i] = null; o.sd[i] = 0; return; } const m = (x.h + x.l) / 2, u = m + 3 * a10[i], d = m - 3 * a10[i];
-      up = up == null || u < up || b[i - 1].c > up ? u : up; dn = dn == null || d > dn || b[i - 1].c < dn ? d : dn; if (dir === 1 && x.c < dn) dir = -1; else if (dir === -1 && x.c > up) dir = 1; o.st[i] = dir === 1 ? dn : up; o.sd[i] = dir; }); }
-    let cur = null, ph = null, pl = null, hh = -Infinity, ll = Infinity;
-    b.forEach((x, i) => { o.pdh[i] = o.pdl[i] = null; if (wkend(x.t)) return; const k = Math.floor((x.t + 2 * 3600e3) / 86400e3);
-      if (k !== cur) { if (cur != null) { ph = hh; pl = ll; } cur = k; hh = -Infinity; ll = Infinity; }
-      o.pdh[i] = ph; o.pdl[i] = pl; o.hiB[i] = hh; o.loB[i] = ll; hh = Math.max(hh, x.h); ll = Math.min(ll, x.l); });
-    /* Asian range: high/low of the bars opening 07:00–13:00 Thai; usable from 14:00; ab = a bar already closed outside it today */
-    let ak = null, ah = -Infinity, al = Infinity, done = false;
-    b.forEach((x, i) => { const tt = x.t + 7 * 3600e3, k = Math.floor(tt / 86400e3), h = new Date(tt).getUTCHours();
-      if (k !== ak) { ak = k; ah = -Infinity; al = Infinity; done = false; }
-      o.ah[i] = o.al[i] = null; o.ab[i] = done;
-      if (h >= 7 && h < 14) { ah = Math.max(ah, x.h); al = Math.min(al, x.l); } else if (h >= 14 && ah > -Infinity) { o.ah[i] = ah; o.al[i] = al; if (x.c > ah || x.c < al) done = true; } });
-    o.smc = smc(b, o.atr);
-    /* 4h structure (only fully closed 4h bars) → o.smc.h4[i]; used to grade SMC entries, not to block them */
-    { const g = [], idx = []; b.forEach((x, i) => { const k = Math.floor(x.t / 14400e3); let L = g[g.length - 1];
-        if (!L || L.k !== k) { L = { k, t: k * 14400e3, o: x.o, h: x.h, l: x.l, c: x.c, last: i }; g.push(L); } else { L.h = Math.max(L.h, x.h); L.l = Math.min(L.l, x.l); L.c = x.c; L.last = i; } idx[i] = g.length - 1; });
-      const M4 = g.length > 30 ? smc(g, atr(g)) : null; o.smc.h4 = b.map((x, i) => { if (!M4) return 0; const gi = idx[i], j = g[gi].last === i && x.t + 3600e3 === g[gi].t + 14400e3 ? gi : gi - 1; return j >= 0 ? M4.dir[j] : 0; }); }
-    return o; };
+  /* ---------- pure calculation ----------
+     Everything from here to the end of CALC uses only its arguments, so the same source runs on the page and in a background worker
+     (CALC.toString() → Blob → Worker). Keep it free of D, the DOM and anything outside. */
+  const CALC = function () {
+    const MAXH = 48;
+    /* ---------- indicators ---------- */
+    const ema = (v, n) => { const k = 2 / (n + 1); const o = []; let e = null; v.forEach((x, i) => { e = e == null ? x : x * k + e * (1 - k); o[i] = i >= n - 1 ? e : null; }); return o; };
+    const rsi = (c, n = 14) => { const o = Array(c.length).fill(null); let g = 0, l = 0;
+      for (let i = 1; i < c.length; i++) { const d = c[i] - c[i - 1]; const up = Math.max(d, 0), dn = Math.max(-d, 0);
+        if (i <= n) { g += up / n; l += dn / n; } else { g = (g * (n - 1) + up) / n; l = (l * (n - 1) + dn) / n; }
+        if (i >= n) o[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l); } return o; };
+    const atr = (b, n = 14) => { const o = Array(b.length).fill(null); let a = 0;
+      for (let i = 1; i < b.length; i++) { const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c));
+        a = i <= n ? a + tr / n : (a * (n - 1) + tr) / n; if (i >= n) o[i] = a; } return o; };
+    /* SMC (Smart Money Concepts), all from closed bars only (no look-ahead):
+       swing highs/lows = fractal 3 bars each side (known 3 bars later); close past the last swing = BOS (same way) or CHoCH (trend flips);
+       order block = last opposite candle before the leg that broke structure (zone = its high–low, dead once a close goes through it);
+       FVG = 3-bar gap ≥ 0.1 ATR (filled when price trades through it); liquidity sweep = wick past the last swing that closes back inside;
+       equal highs/lows (within 0.15 ATR) = resting liquidity; premium/discount = above/below 50% of the current leg (leg low → highest high since the break).
+       Signal: structure up (after BOS/CHoCH), price taps the fresh bullish OB from that break within 72 bars, closes up (green bar) and still in discount →
+       buy; SL under the OB − 0.2 ATR (0.5–3 ATR), TP = the leg high (external liquidity) when that is 1.5–4R, else 2R. Mirror for sells. One entry per OB. */
+    const smc = (b, A) => {
+      const n = b.length, F = 3, o = { dir: Array(n).fill(0), eq: Array(n).fill(null), rh: Array(n).fill(null), rl: Array(n).fill(null), obT: Array(n).fill(null), obB: Array(n).fill(null), sig: Array(n).fill(null), ev: [], obs: [], fvg: [], liq: [], H: [], L: [] };
+      let sh = null, shI = -1, shDone = true, shSw = false, sl = null, slI = -1, slDone = true, slSw = false, dir = 0, act = null; const liveF = [], liveO = [];
+      for (let i = 0; i < n; i++) {
+        const x = b[i], a = A[i] || 0, j = i - F;
+        if (j >= F) { let isH = true, isL = true; for (let k = j - F; k <= j + F; k++) { if (k === j) continue; if (b[k].h >= b[j].h) isH = false; if (b[k].l <= b[j].l) isL = false; }
+          if (isH) { const pv = o.H[o.H.length - 1]; if (pv && a && Math.abs(pv.p - b[j].h) <= 0.15 * a && j - pv.i <= 120) o.liq.push({ side: 'h', p: Math.max(pv.p, b[j].h), i0: pv.i, i: j, at: i, end: null });
+            o.H.push({ p: b[j].h, i: j, at: i }); sh = b[j].h; shI = j; shDone = false; shSw = false; }
+          if (isL) { const pv = o.L[o.L.length - 1]; if (pv && a && Math.abs(pv.p - b[j].l) <= 0.15 * a && j - pv.i <= 120) o.liq.push({ side: 'l', p: Math.min(pv.p, b[j].l), i0: pv.i, i: j, at: i, end: null });
+            o.L.push({ p: b[j].l, i: j, at: i }); sl = b[j].l; slI = j; slDone = false; slSw = false; } }
+        /* fair value gaps: fill the old ones, then add a new one */
+        for (let q = liveF.length - 1; q >= 0; q--) { const f = liveF[q]; if (f.dir === 1 ? x.l <= f.bot : x.h >= f.top) { f.end = i; liveF.splice(q, 1); } }
+        if (i >= 2 && a) { const g = b[i - 2];
+          if (x.l > g.h && x.l - g.h >= 0.1 * a) { const f = { dir: 1, top: x.l, bot: g.h, i: i - 1, born: i, end: null }; o.fvg.push(f); liveF.push(f); }
+          if (x.h < g.l && g.l - x.h >= 0.1 * a) { const f = { dir: -1, top: g.l, bot: x.h, i: i - 1, born: i, end: null }; o.fvg.push(f); liveF.push(f); }
+          if (liveF.length > 40) liveF.shift(); }
+        /* liquidity: equal highs/lows taken, sweeps of the last swing */
+        o.liq.forEach((q) => { if (q.end == null && q.at < i && (q.side === 'h' ? x.h > q.p : x.l < q.p)) { q.end = i; q.swept = q.side === 'h' ? x.c < q.p : x.c > q.p; } });
+        if (sh != null && !shDone && !shSw && x.h > sh && x.c <= sh) { shSw = true; o.ev.push({ i, type: 'sweep', dir: -1, lvl: sh }); }
+        if (sl != null && !slDone && !slSw && x.l < sl && x.c >= sl) { slSw = true; o.ev.push({ i, type: 'sweep', dir: 1, lvl: sl }); }
+        /* order blocks die when a close goes through them */
+        for (let q = liveO.length - 1; q >= 0; q--) { const z = liveO[q]; if (z.born < i && (z.dir === 1 ? x.c < z.bot : x.c > z.top)) { z.end = i; liveO.splice(q, 1); } }
+        /* structure breaks */
+        const brk = (d) => { const lvl = d === 1 ? sh : sl, from = d === 1 ? shI : slI, type = dir === -d ? 'choch' : 'bos'; dir = d;
+          let k = from; for (let q = from; q <= i; q++) if (d === 1 ? b[q].l < b[k].l : b[q].h > b[k].h) k = q;
+          let ob = k; for (let q = k; q >= Math.max(0, k - 10); q--) if (d === 1 ? b[q].c < b[q].o : b[q].c > b[q].o) { ob = q; break; }
+          const ext = d === 1 ? b[k].l : b[k].h, prior = (d === 1 ? o.L : o.H).filter((z) => z.i < k && k - z.i <= 60 && z.at <= k).pop();
+          const sweep = !!prior && (d === 1 ? ext < prior.p : ext > prior.p);
+          let hi = -Infinity, lo = Infinity; for (let q = k; q <= i; q++) { hi = Math.max(hi, b[q].h); lo = Math.min(lo, b[q].l); }
+          const z = { dir: d, top: b[ob].h, bot: b[ob].l, i: ob, born: i, end: null, used: false, ev: type, k, sweep, lo, hi,
+            fvg: o.fvg.some((f) => f.dir === d && f.born > ob && f.born <= i) };
+          o.obs.push(z); liveO.push(z); if (liveO.length > 30) liveO.shift(); act = z; o.ev.push({ i, type, dir: d, lvl, from }); };
+        if (sh != null && !shDone && x.c > sh) { shDone = true; brk(1); }
+        else if (sl != null && !slDone && x.c < sl) { slDone = true; brk(-1); }
+        if (act) { act.hi = Math.max(act.hi, x.h); act.lo = Math.min(act.lo, x.l); }
+        /* entry: first tap of the fresh order block */
+        if (act && act.end == null && !act.used && act.born < i && i - act.born <= 72 && a) {
+          const z = act, eq = (z.hi + z.lo) / 2, d = z.dir;
+          const tap = d === 1 ? x.l <= z.top && x.c > z.bot && x.c > x.o && x.c <= eq : x.h >= z.bot && x.c < z.top && x.c < x.o && x.c >= eq;
+          if (tap) { z.used = true; const stop = d === 1 ? z.bot - 0.2 * a : z.top + 0.2 * a, risk = Math.min(Math.max(Math.abs(x.c - stop), 0.5 * a), 3 * a), tgt = d === 1 ? z.hi : z.lo, R0 = Math.abs(tgt - x.c) / risk;
+            o.sig[i] = { side: d === 1 ? 'buy' : 'sell', risk, R: R0 >= 1.5 && R0 <= 4 ? R0 : 2, ob: z, eq, liqT: R0 >= 1.5 && R0 <= 4 }; } }
+        o.dir[i] = dir; if (act) { o.rh[i] = act.hi; o.rl[i] = act.lo; o.eq[i] = (act.hi + act.lo) / 2; if (act.end == null && !act.used && i - act.born <= 72) { o.obT[i] = act.top; o.obB[i] = act.bot; } }
+      }
+      return o; };
+    const wkend = (t) => { const d = new Date(t + 2 * 3600e3).getUTCDay(); return d === 6 || d === 0; }; /* XAUUSD closed: Sat 05:00 → Mon 05:00 Thai */
+    const ind = (b) => { const c = b.map((x) => x.c); const o = { e20: ema(c, 20), e50: ema(c, 50), e200: ema(c, 200), e480: ema(c, 480), rsi: rsi(c), r2: rsi(c, 2), atr: atr(b), pdh: [], pdl: [], hiB: [], loB: [], ah: [], al: [], ab: [], dh: [], dl: [], st: [], sd: [] };
+      b.forEach((x, i) => { if (i < 20) { o.dh[i] = o.dl[i] = null; return; } let h = -Infinity, l = Infinity; for (let j = i - 20; j < i; j++) { h = Math.max(h, b[j].h); l = Math.min(l, b[j].l); } o.dh[i] = h; o.dl[i] = l; });
+      { const a10 = atr(b, 10); let up = null, dn = null, dir = 1; b.forEach((x, i) => { if (a10[i] == null) { o.st[i] = null; o.sd[i] = 0; return; } const m = (x.h + x.l) / 2, u = m + 3 * a10[i], d = m - 3 * a10[i];
+        up = up == null || u < up || b[i - 1].c > up ? u : up; dn = dn == null || d > dn || b[i - 1].c < dn ? d : dn; if (dir === 1 && x.c < dn) dir = -1; else if (dir === -1 && x.c > up) dir = 1; o.st[i] = dir === 1 ? dn : up; o.sd[i] = dir; }); }
+      let cur = null, ph = null, pl = null, hh = -Infinity, ll = Infinity;
+      b.forEach((x, i) => { o.pdh[i] = o.pdl[i] = null; if (wkend(x.t)) return; const k = Math.floor((x.t + 2 * 3600e3) / 86400e3);
+        if (k !== cur) { if (cur != null) { ph = hh; pl = ll; } cur = k; hh = -Infinity; ll = Infinity; }
+        o.pdh[i] = ph; o.pdl[i] = pl; o.hiB[i] = hh; o.loB[i] = ll; hh = Math.max(hh, x.h); ll = Math.min(ll, x.l); });
+      /* Asian range: high/low of the bars opening 07:00–13:00 Thai; usable from 14:00; ab = a bar already closed outside it today */
+      let ak = null, ah = -Infinity, al = Infinity, done = false;
+      b.forEach((x, i) => { const tt = x.t + 7 * 3600e3, k = Math.floor(tt / 86400e3), h = new Date(tt).getUTCHours();
+        if (k !== ak) { ak = k; ah = -Infinity; al = Infinity; done = false; }
+        o.ah[i] = o.al[i] = null; o.ab[i] = done;
+        if (h >= 7 && h < 14) { ah = Math.max(ah, x.h); al = Math.min(al, x.l); } else if (h >= 14 && ah > -Infinity) { o.ah[i] = ah; o.al[i] = al; if (x.c > ah || x.c < al) done = true; } });
+      o.smc = smc(b, o.atr);
+      /* 4h structure (only fully closed 4h bars) → o.smc.h4[i]; used to grade SMC entries, not to block them */
+      { const g = [], idx = []; b.forEach((x, i) => { const k = Math.floor(x.t / 14400e3); let L = g[g.length - 1];
+          if (!L || L.k !== k) { L = { k, t: k * 14400e3, o: x.o, h: x.h, l: x.l, c: x.c, last: i }; g.push(L); } else { L.h = Math.max(L.h, x.h); L.l = Math.min(L.l, x.l); L.c = x.c; L.last = i; } idx[i] = g.length - 1; });
+        const M4 = g.length > 30 ? smc(g, atr(g)) : null; o.smc.h4 = b.map((x, i) => { if (!M4) return 0; const gi = idx[i], j = g[gi].last === i && x.t + 3600e3 === g[gi].t + 14400e3 ? gi : gi - 1; return j >= 0 ? M4.dir[j] : 0; }); }
+      return o; };
 
-  /* signals on closed bar i — rules match docs/lab.html, where they were tested on 3 years of 1h bars with costs */
-  const mk = (side, e, risk, R, ex) => ({ side, entry: e, sl: side === 'buy' ? e - risk : e + risk, tp: side === 'buy' ? e + R * risk : e - R * risk, ...ex });
-  /* dip: short, sharp pullback inside a strong trend (Connors RSI 2) — buy when RSI(2) < 8 with price above the 20-day line (EMA 480) and EMA 50 > 200 */
-  const sigDip = (b, I, i) => {
-    if (i < 500 || wkend(b[i].t) || I.e480[i] == null) return null; const x = b[i], a = I.atr[i], r = I.r2[i];
-    if (x.c > I.e480[i] && I.e50[i] > I.e200[i] && r < 8) return mk('buy', x.c, 1.5 * a, 1, { r });
-    if (x.c < I.e480[i] && I.e50[i] < I.e200[i] && r > 92) return mk('sell', x.c, 1.5 * a, 1, { r });
-    return null;
+    /* signals on closed bar i — rules match docs/lab.html, where they were tested on 3 years of 1h bars with costs */
+    const mk = (side, e, risk, R, ex) => ({ side, entry: e, sl: side === 'buy' ? e - risk : e + risk, tp: side === 'buy' ? e + R * risk : e - R * risk, ...ex });
+    /* dip: short, sharp pullback inside a strong trend (Connors RSI 2) — buy when RSI(2) < 8 with price above the 20-day line (EMA 480) and EMA 50 > 200 */
+    const sigDip = (b, I, i) => {
+      if (i < 500 || wkend(b[i].t) || I.e480[i] == null) return null; const x = b[i], a = I.atr[i], r = I.r2[i];
+      if (x.c > I.e480[i] && I.e50[i] > I.e200[i] && r < 8) return mk('buy', x.c, 1.5 * a, 1, { r });
+      if (x.c < I.e480[i] && I.e50[i] < I.e200[i] && r > 92) return mk('sell', x.c, 1.5 * a, 1, { r });
+      return null;
+    };
+    /* brk: first close above the last 20 hours' high (below the low) with EMA 50 above (below) EMA 200, bar closing 14:00–01:00 Thai */
+    const sigBrk = (b, I, i) => {
+      if (i < 210 || wkend(b[i].t) || I.dh[i] == null) return null; const h = new Date(b[i].t + 8 * 3600e3 - 1).getUTCHours(); if (h < 14 && h > 1) return null; /* Thai hour at bar close (no DST) */
+      const x = b[i], p = b[i - 1], a = I.atr[i];
+      if (x.c > I.dh[i] && p.c <= I.dh[i - 1] && I.e50[i] > I.e200[i]) return mk('buy', x.c, 1.5 * a, 2, { lvl: I.dh[i] });
+      if (x.c < I.dl[i] && p.c >= I.dl[i - 1] && I.e50[i] < I.e200[i]) return mk('sell', x.c, 1.5 * a, 2, { lvl: I.dl[i] });
+      return null;
+    };
+    /* st: Supertrend (ATR 10 × 3) flips in the direction of the 20-day line; stop at the Supertrend line (0.5–3 ATR), target 2R */
+    const sigSt = (b, I, i) => {
+      if (i < 500 || wkend(b[i].t) || I.e480[i] == null) return null; const x = b[i], a = I.atr[i];
+      if (I.sd[i] === 1 && I.sd[i - 1] === -1 && x.c > I.e480[i]) return mk('buy', x.c, Math.min(Math.max(x.c - I.st[i], 0.5 * a), 3 * a), 2, { lvl: I.st[i] });
+      if (I.sd[i] === -1 && I.sd[i - 1] === 1 && x.c < I.e480[i]) return mk('sell', x.c, Math.min(Math.max(I.st[i] - x.c, 0.5 * a), 3 * a), 2, { lvl: I.st[i] });
+      return null;
+    };
+    /* smc: Smart Money Concepts — see smc() above */
+    /* London 14–18, New York 19–24 Thai (bar close), when gold moves most */
+    const kzOf = (t) => { const h = new Date(t + 8 * 3600e3 - 1).getUTCHours(); return h >= 14 && h < 19 ? 'ลอนดอน' : h >= 19 || h === 0 ? 'นิวยอร์ก' : ''; };
+    const sigSmc = (b, I, i) => { if (i < 60 || wkend(b[i].t) || !I.smc) return null; const q = I.smc.sig[i]; if (!q) return null;
+      const d = q.side === 'buy' ? 1 : -1, h4 = (I.smc.h4 && I.smc.h4[i]) || 0, kz = kzOf(b[i].t), pts = (h4 === d) + !!q.ob.sweep + !!q.ob.fvg + !!kz;
+      return mk(q.side, b[i].c, q.risk, q.R, { lvl: q.side === 'buy' ? q.ob.top : q.ob.bot, ob: [q.ob.bot, q.ob.top], ev: q.ob.ev, eq: q.eq, swp: q.ob.sweep, fvg: q.ob.fvg, liqT: q.liqT, h4, kz, grade: pts >= 3 ? 'A' : pts === 2 ? 'B' : 'C' }); };
+    /* filters: trade only with the 20-day trend (1h EMA 480), skip the US jobs report window (first Friday, 18:00–22:00 Thai) */
+    const nfpBlock = (t) => { const d = new Date(t + 7 * 3600e3), h = d.getUTCHours(); return d.getUTCDay() === 5 && d.getUTCDate() <= 7 && h >= 18 && h <= 21; };
+    const filtW = (fn, set) => (b, I, i) => { const x = fn(b, I, i); if (!x) return null;
+      if (set.htf && I.e480 && I.e480[i] != null && (x.side === 'buy' ? b[i].c < I.e480[i] : b[i].c > I.e480[i])) return null;
+      if (set.nfp && nfpBlock(b[i].t)) return null; return x; };
+    /* walk the bars: one simulated trade at a time; stop and target hit in the same bar counts as a loss */
+    const test = (b, I, fn) => {
+      const out = []; let i = 60;
+      while (i < b.length) {
+        const s = fn(b, I, i); if (!s) { i++; continue; }
+        const r = { ...s, i, t: b[i].t + 3600e3, out: null, exitI: null, exit: null }; const risk = Math.abs(s.entry - s.sl);
+        for (let j = i + 1; j < b.length && j <= i + MAXH; j++) {
+          const y = b[j]; const hitSL = s.side === 'buy' ? y.l <= s.sl : y.h >= s.sl; const hitTP = s.side === 'buy' ? y.h >= s.tp : y.l <= s.tp;
+          if (hitSL) { r.out = 'sl'; r.exit = s.sl; r.exitI = j; break; }
+          if (hitTP) { r.out = 'tp'; r.exit = s.tp; r.exitI = j; break; }
+          if (j === i + MAXH) { r.out = 'time'; r.exit = y.c; r.exitI = j; }
+        }
+        if (r.out) r.R = ((r.exit - s.entry) * (s.side === 'buy' ? 1 : -1)) / risk;
+        out.push(r); i = r.exitI != null ? r.exitI + 1 : b.length;
+      }
+      return out;
+    };
+    const SIG = { dip: sigDip, brk: sigBrk, st: sigSt, smc: sigSmc };
+    /* one full pass: indicators on closed bars + the forming bar, and every strategy's simulated trades on closed bars */
+    const all = (bars, form, set) => { const I = ind(form ? [...bars, form] : bars), SS = {}; Object.keys(SIG).forEach((k) => { SS[k] = test(bars, I, filtW(SIG[k], set)); }); return { I, SS }; };
+    return { ema, rsi, atr, smc, wkend, ind, mk, sigDip, sigBrk, sigSt, kzOf, sigSmc, nfpBlock, filtW, test, all, SIG };
   };
-  /* brk: first close above the last 20 hours' high (below the low) with EMA 50 above (below) EMA 200, bar closing 14:00–01:00 Thai */
-  const sigBrk = (b, I, i) => {
-    if (i < 210 || wkend(b[i].t) || I.dh[i] == null) return null; const h = new Date(b[i].t + 8 * 3600e3 - 1).getUTCHours(); if (h < 14 && h > 1) return null; /* Thai hour at bar close (no DST) */
-    const x = b[i], p = b[i - 1], a = I.atr[i];
-    if (x.c > I.dh[i] && p.c <= I.dh[i - 1] && I.e50[i] > I.e200[i]) return mk('buy', x.c, 1.5 * a, 2, { lvl: I.dh[i] });
-    if (x.c < I.dl[i] && p.c >= I.dl[i - 1] && I.e50[i] < I.e200[i]) return mk('sell', x.c, 1.5 * a, 2, { lvl: I.dl[i] });
-    return null;
-  };
-  /* st: Supertrend (ATR 10 × 3) flips in the direction of the 20-day line; stop at the Supertrend line (0.5–3 ATR), target 2R */
-  const sigSt = (b, I, i) => {
-    if (i < 500 || wkend(b[i].t) || I.e480[i] == null) return null; const x = b[i], a = I.atr[i];
-    if (I.sd[i] === 1 && I.sd[i - 1] === -1 && x.c > I.e480[i]) return mk('buy', x.c, Math.min(Math.max(x.c - I.st[i], 0.5 * a), 3 * a), 2, { lvl: I.st[i] });
-    if (I.sd[i] === -1 && I.sd[i - 1] === 1 && x.c < I.e480[i]) return mk('sell', x.c, Math.min(Math.max(I.st[i] - x.c, 0.5 * a), 3 * a), 2, { lvl: I.st[i] });
-    return null;
-  };
-  /* smc: Smart Money Concepts — see smc() above */
-  /* London 14–18, New York 19–24 Thai (bar close), when gold moves most */
-  const kzOf = (t) => { const h = new Date(t + 8 * 3600e3 - 1).getUTCHours(); return h >= 14 && h < 19 ? 'ลอนดอน' : h >= 19 || h === 0 ? 'นิวยอร์ก' : ''; };
-  const sigSmc = (b, I, i) => { if (i < 60 || wkend(b[i].t) || !I.smc) return null; const q = I.smc.sig[i]; if (!q) return null;
-    const d = q.side === 'buy' ? 1 : -1, h4 = (I.smc.h4 && I.smc.h4[i]) || 0, kz = kzOf(b[i].t), pts = (h4 === d) + !!q.ob.sweep + !!q.ob.fvg + !!kz;
-    return mk(q.side, b[i].c, q.risk, q.R, { lvl: q.side === 'buy' ? q.ob.top : q.ob.bot, ob: [q.ob.bot, q.ob.top], ev: q.ob.ev, eq: q.eq, swp: q.ob.sweep, fvg: q.ob.fvg, liqT: q.liqT, h4, kz, grade: pts >= 3 ? 'A' : pts === 2 ? 'B' : 'C' }); };
+  const { ema, rsi, atr, wkend, ind, sigDip, sigBrk, sigSt, kzOf, sigSmc, nfpBlock, filtW, test } = CALC();
+  const filt = (fn) => filtW(fn, D.set);
   const evTh = (e) => (e === 'choch' ? 'CHoCH (เปลี่ยนเทรนด์)' : 'BOS (ไปต่อทางเดิม)');
   const STRATS = {
     dip: { name: 'ย่อในเทรนด์ (RSI 2)', fn: sigDip, why: (s) => (s.side === 'buy' ? `เทรนด์ใหญ่ขาขึ้น ราคาย่อลงแรงจน RSI 2 เหลือ ${Math.round(s.r)} มักเด้งกลับในไม่กี่ชั่วโมง` : `เทรนด์ใหญ่ขาลง ราคาเด้งแรงจน RSI 2 ขึ้นไป ${Math.round(s.r)} มักโดนขายกลับ`),
@@ -6606,37 +6647,29 @@ const SPC = (() => {
   };
   const TAGS = { dip: 'RSI2', brk: 'เบรก20', st: 'ST', smc: 'SMC' };
   const OLD = { asia: 'เบรกกรอบเอเชีย (เลิกใช้)', sweep: 'กวาดสต็อป (เลิกใช้)', ema: 'EMA ย่อ (เลิกใช้)' };
-  /* filters: trade only with the 20-day trend (1h EMA 480), skip the US jobs report window (first Friday, 18:00–22:00 Thai) */
-  const nfpBlock = (t) => { const d = new Date(t + 7 * 3600e3), h = d.getUTCHours(); return d.getUTCDay() === 5 && d.getUTCDate() <= 7 && h >= 18 && h <= 21; };
-  const filt = (fn) => (b, I, i) => { const x = fn(b, I, i); if (!x) return null;
-    if (D.set.htf && I.e480 && I.e480[i] != null && (x.side === 'buy' ? b[i].c < I.e480[i] : b[i].c > I.e480[i])) return null;
-    if (D.set.nfp && nfpBlock(b[i].t)) return null; return x; };
   const strat = () => (STRATS[D.set.strat] ? D.set.strat : 'dip');
-  /* walk the bars: one simulated trade at a time; stop and target hit in the same bar counts as a loss */
-  const test = (b, I, fn) => {
-    const out = []; let i = 60;
-    while (i < b.length) {
-      const s = fn(b, I, i); if (!s) { i++; continue; }
-      const r = { ...s, i, t: b[i].t + 3600e3, out: null, exitI: null, exit: null }; const risk = Math.abs(s.entry - s.sl);
-      for (let j = i + 1; j < b.length && j <= i + MAXH; j++) {
-        const y = b[j]; const hitSL = s.side === 'buy' ? y.l <= s.sl : y.h >= s.sl; const hitTP = s.side === 'buy' ? y.h >= s.tp : y.l <= s.tp;
-        if (hitSL) { r.out = 'sl'; r.exit = s.sl; r.exitI = j; break; }
-        if (hitTP) { r.out = 'tp'; r.exit = s.tp; r.exitI = j; break; }
-        if (j === i + MAXH) { r.out = 'time'; r.exit = y.c; r.exitI = j; }
-      }
-      if (r.out) r.R = ((r.exit - s.entry) * (s.side === 'buy' ? 1 : -1)) / risk;
-      out.push(r); i = r.exitI != null ? r.exitI + 1 : b.length;
-    }
-    return out;
-  };
+  /* two books on two pages: เทรดจริง (page gt, Mon's MT5 trades) and เทรดกระดาษ (page gtpp, fake money + bots). The chart is shared. */
+  const book = () => (document.body.dataset.page === 'gtpp' ? 'paper' : 'real');
+  const goBook = (sub) => { const pg = book() === 'paper' ? 'gtpp' : 'gt'; if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', pg, sub); else if (window.VGNav) window.VGNav.go('scan', sub); };
 
   /* ---------- data ---------- */
   let bars = [], form = null, live = null, I = null, S = [], SS = {}, on = false, ws = null, lastTick = 0, err = '', loaded = false, polling = false;
   const kl = (a) => ({ t: a[0], o: +a[1], h: +a[2], l: +a[3], c: +a[4] });
   const get = (u) => fetch(API + u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
   let heavyKey = '', heavyAt = 0; const barKey = () => bars.length + ':' + (bars.length ? bars[bars.length - 1].t : 0) + ':' + (form ? form.t : 0);
-  const recalc = () => { heavyKey = barKey(); heavyAt = Date.now(); const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, filt(STRATS[k].fn)); }); S = SS[strat()];
-    if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
+  const after = () => { S = SS[strat()]; if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
+  const recalc = () => { heavyKey = barKey(); heavyAt = Date.now(); const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, filt(STRATS[k].fn)); }); after(); };
+  /* the same pass in a background worker, so the page never stalls when a bar closes; falls back to the page if workers are unavailable */
+  let WK = null, wkId = 0, wkBusy = false, wkAgain = false;
+  try { WK = new Worker(URL.createObjectURL(new Blob(['const C = (' + CALC.toString() + ')(); onmessage = (e) => { const d = e.data; try { postMessage({ id: d.id, ...C.all(d.bars, d.form, d.set) }); } catch (er) { postMessage({ id: d.id, err: String(er) }); } };'], { type: 'text/javascript' })));
+    WK.onerror = () => { WK = null; wkBusy = false; }; } catch (e) { WK = null; }
+  const recalcBg = () => {
+    if (!WK) { recalc(); autoDraw(); return; } if (wkBusy) { wkAgain = true; return; }
+    wkBusy = true; const id = ++wkId, key = barKey(); heavyKey = key; heavyAt = Date.now();
+    WK.onmessage = (e) => { wkBusy = false; const d = e.data;
+      if (d.err || d.id !== id) { recalc(); autoDraw(); } else if (barKey() === key) { I = d.I; SS = d.SS; after(); autoDraw(); }
+      if (wkAgain) { wkAgain = false; recalcBg(); } };
+    WK.postMessage({ id, bars, form, set: { htf: !!D.set.htf, nfp: !!D.set.nfp } }); };
   const load = async () => { const k = (await get('klines?symbol=PAXGUSDT&interval=1h&limit=1000')).map(kl); form = k.pop() || null; bars = k; live = form ? form.c : bars[bars.length - 1].c; recalc(); loaded = true; };
   const start = async () => {
     on = true; err = ''; loadLW();
@@ -6646,7 +6679,7 @@ const SPC = (() => {
       ws.onmessage = (m) => {
         let d; try { d = JSON.parse(m.data); } catch (e) { return; } const k = d && d.k; if (!k) return;
         live = +k.c; lastTick = Date.now(); const b = { t: k.t, o: +k.o, h: +k.h, l: +k.l, c: +k.c };
-        if (k.x) { if (!bars.length || b.t > bars[bars.length - 1].t) { bars.push(b); if (bars.length > 1000) bars.shift(); } form = null; recalc(); autoDraw(); return; }
+        if (k.x) { if (!bars.length || b.t > bars[bars.length - 1].t) { bars.push(b); if (bars.length > 1000) bars.shift(); } form = null; recalcBg(); return; }
         if (form && b.t > form.t && !bars.some((x) => x.t === form.t)) bars.push(form);
         form = b; later();
       };
@@ -6657,7 +6690,7 @@ const SPC = (() => {
   const poll = async () => {
     if (!on || !loaded || polling || Date.now() - lastTick < 60e3) return; polling = true;
     try { const k = (await get('klines?symbol=PAXGUSDT&interval=1h&limit=3')).map(kl); const f = k.pop();
-      k.forEach((b) => { if (b.t > bars[bars.length - 1].t) bars.push(b); }); form = f; live = f.c; lastTick = Date.now() - 30e3; recalc(); autoDraw(); } catch (e) { /* next round */ }
+      k.forEach((b) => { if (b.t > bars[bars.length - 1].t) bars.push(b); }); form = f; live = f.c; lastTick = Date.now() - 30e3; recalcBg(); } catch (e) { /* next round */ }
     polling = false;
   };
   /* automatic redraws (price ticks, another device's save) wait while Mon is using the page: a tap in the last 4 s or a focused field.
@@ -6665,14 +6698,15 @@ const SPC = (() => {
   let lastUse = 0; const inGt = (n) => !!(n && n.closest && n.closest('[data-sub^="gt"]'));
   ['pointerdown', 'keydown', 'input'].forEach((ev) => document.addEventListener(ev, (e) => { if (inGt(e.target)) lastUse = Date.now(); }, true));
   const busy = () => { const a = document.activeElement; return (inGt(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) || Date.now() - lastUse < 4000; };
-  let softT = null; const softDraw = () => { clearTimeout(softT); softT = null; if (busy()) { softT = setTimeout(softDraw, 1200); return; } drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
+  let softT = null; const softDraw = () => { clearTimeout(softT); softT = null; if (busy()) { softT = setTimeout(softDraw, 1200); return; } fullAt = Date.now(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
   const autoDraw = () => { drawChart(); softDraw(); };
   /* price ticks: the heavy work (indicators + 4 strategy backtests, ~20 ms on a computer, several times that on a phone) only runs when a bar
      closes or once a minute; a tick just moves the last candle, checks open trades against the live price and refreshes the numbers every 3 s */
-  let listAt = 0; const softLite = () => { if (busy()) return; listAt = Date.now(); drawNow(); drawOpen(); drawPaper(); };
+  /* numbers in place every 3 s (rows keep their buttons); the cards and lists are rebuilt at most every 30 s, never under a finger */
+  let listAt = 0, fullAt = 0; const softLite = () => { listAt = Date.now(); livePL(); if (Date.now() - fullAt > 30e3 && !busy()) { fullAt = Date.now(); drawNow(); drawOpen(); drawPaper(); } };
   const lightChart = () => { if (!LW || mode === 'tv' || lwState !== 'ok') return; const d = tfData(); if (!d || !d.b.length) return; const L = d.b[d.b.length - 1];
     try { LW.cs.update({ time: ts(L.t), open: L.o, high: L.h, low: L.l, close: L.c }); LW.zq(); } catch (e) { drawChart(); } };
-  const tick = () => { if (!I || barKey() !== heavyKey || Date.now() - heavyAt > 60e3) { recalc(); autoDraw(); return; }
+  const tick = () => { if (!I) { recalc(); autoDraw(); return; } if (barKey() !== heavyKey || Date.now() - heavyAt > 60e3) recalcBg();
     if (settle()) { save(); autoDraw(); return; } lightChart(); if (Date.now() - listAt > 3000) softLite(); };
   let tm = null; const later = () => { if (!tm) tm = setTimeout(() => { tm = null; tick(); }, 1200); };
 
@@ -6819,7 +6853,7 @@ const SPC = (() => {
     out.append(el('p', 'pf-hint', 'เป็นการจำลองจากแท่งราคาในอดีต ไม่ใช่คำทำนาย ข่าวใหญ่ทำให้ราคาวิ่งต่างจากที่เคยเกิดได้'));
   };
   const tmFill = (s, k) => { $('tm-side').value = s.side; $('tm-entry').value = ''; $('tm-sl').value = s.sl.toFixed(2); $('tm-tp').value = s.tp.toFixed(2); tmFrom = k || null;
-    if (window.VGNav) window.VGNav.go('scan', 'gttm'); setTimeout(() => { $('gttm').scrollIntoView({ behavior: 'smooth', block: 'start' }); tmGo(); }, 120); };
+    goBook('gttm'); setTimeout(() => { $('gttm').scrollIntoView({ behavior: 'smooth', block: 'start' }); tmGo(); }, 120); };
   const drawRules = () => {
     const box = $('rk-today'); if (!box) return; const r = rules();
     const line = (k, list) => { const d = dayState(list), left = r.maxDay - Math.max(0, -d.pl) - d.open;
@@ -6980,7 +7014,7 @@ const SPC = (() => {
     [30, 70].forEach((v) => rs.createPriceLine({ price: v, color: cssv('--ink-3'), lineWidth: 1, lineStyle: L.LineStyle.Dashed, axisLabelVisible: true }));
     let sync = false; const link = (a, b2) => a.timeScale().subscribeVisibleLogicalRangeChange((r) => { if (sync || !r) return; sync = true; b2.timeScale().setVisibleLogicalRange(r); sync = false; });
     const cv = el('canvas', 'gt-zones'); box.append(cv); let raf = 0; const zq = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; zoneDraw(); }); };
-    ch.timeScale().subscribeVisibleLogicalRangeChange(zq); ch.subscribeCrosshairMove(zq); if (window.ResizeObserver) new ResizeObserver(zq).observe(box);
+    ch.timeScale().subscribeVisibleLogicalRangeChange(zq); ['pointerup', 'wheel'].forEach((ev) => box.addEventListener(ev, zq, { passive: true })); /* not on crosshair moves: zones only move when the view does */ if (window.ResizeObserver) new ResizeObserver(zq).observe(box);
     link(ch, rc); link(rc, ch);
     const cross = (prm) => { if (!LW || !LW.d) return; const k = prm && prm.time != null ? LW.idx.get(prm.time) : undefined; readOut(LW.d.b, LW.d.I, k ?? LW.d.b.length - 1); };
     ch.subscribeCrosshairMove(cross); rc.subscribeCrosshairMove(cross);
@@ -7004,7 +7038,7 @@ const SPC = (() => {
       mk.sort((p, q) => p.time - q.time); }
     LW.cs.setMarkers(mk);
     LW.pls.forEach((p) => LW.cs.removePriceLine(p)); LW.pls = [];
-    [...openTx(), ...pOpen()].forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
+    (book() === 'paper' ? pOpen() : openTx()).forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
     if (LW.key !== key) { LW.key = key; lwSpan(); }
     readOut(b, J, b.length - 1); drawLeg(); LW.zq();
   };
@@ -7033,7 +7067,7 @@ const SPC = (() => {
     if (!all.length || !I) { box.innerHTML = ''; return; }
     const W = Math.max(300, box.clientWidth || 600), R = 58, H1 = 250, H2 = 74, GAP = 22, H = H1 + GAP + H2 + 18;
     const n = Math.min(span, all.length), s0 = all.length - n, v = all.slice(s0);
-    const opens = [...openTx(), ...pOpen()], LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
+    const opens = book() === 'paper' ? pOpen() : openTx(), LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
     let lo = Infinity, hi = -Infinity;
     v.forEach((b, k) => { lo = Math.min(lo, b.l, I.e50[s0 + k] ?? b.l); hi = Math.max(hi, b.h, I.e50[s0 + k] ?? b.h); });
     const rng0 = hi - lo; if (LV) v.forEach((b, k) => [LV[0][s0 + k], LV[1][s0 + k]].forEach((p) => { if (p != null && p > lo - rng0 * 0.5 && p < hi + rng0 * 0.5) { lo = Math.min(lo, p); hi = Math.max(hi, p); } }));
@@ -7081,23 +7115,23 @@ const SPC = (() => {
   /* ---------- today: open / careful / stop, from the market and Mon's own rules ---------- */
   const sessNow = (t) => { const h = bkHour(t); return h >= 7 && h < 14 ? 'เอเชีย (ช่วงเงียบ)' : h >= 14 && h < 19 ? 'ลอนดอน' : h >= 19 ? 'นิวยอร์ก (แรงสุด)' : h < 4 ? 'ปลายนิวยอร์ก' : 'ตลาดเงียบ'; };
   const posture = () => {
-    const now = Date.now(), r = rules(), d = dayState(D.tx), br = breaker(D.tx), stop = [], care = [], i = bars.length - 1;
+    const PB = book() === 'paper', now = Date.now(), r = rules(), d = dayState(PB ? P().tx : D.tx), stop = [], care = [], i = bars.length - 1;
     if (wkend(now)) stop.push('ตลาดทองปิดเสาร์-อาทิตย์');
-    br.out.forEach((x) => stop.push(x.msg));
-    if (d.n >= r.maxTrades) stop.push(`เข้าครบ ${r.maxTrades} ไม้แล้ววันนี้`);
-    if (d.pl <= -r.maxDay) stop.push(`วันนี้เสียถึงเพดาน $${f2(r.maxDay)} แล้ว`);
+    if (!PB) { breaker(D.tx).out.forEach((x) => stop.push(x.msg));
+      if (d.n >= r.maxTrades) stop.push(`เข้าครบ ${r.maxTrades} ไม้แล้ววันนี้`);
+      if (d.pl <= -r.maxDay) stop.push(`วันนี้เสียถึงเพดาน $${f2(r.maxDay)} แล้ว`); }
     if (nfpBlock(now) || nfpBlock(now + 3 * 3600e3)) care.push('ใกล้ช่วงข่าวจ้างงานสหรัฐ (NFP) ศุกร์แรกของเดือน');
     let vol = null; if (I && i > 500) { const A = I.atr.slice(i - 480, i).filter((v) => v != null).sort((p, q) => p - q), med = A[A.length >> 1]; vol = I.atr[i] / med;
       if (vol > 1.8) care.push(`ผันผวนสูงกว่าปกติ ${vol.toFixed(1)} เท่า SL จะกว้าง ลด lot`); }
     const st = stop.length ? 'stop' : care.length ? 'care' : 'go';
-    return { st, why: stop.length ? stop : care, vol, d, r, sess: sessNow(now) };
+    return { st, why: stop.length ? stop : care, vol, d, r, sess: sessNow(now), PB };
   };
   const drawDay = (box) => {
     const P0 = posture(), w = el('div', 'gt-day ' + P0.st), top = el('div', 'gt-dayh');
-    top.append(el('span', 'gt-stamp', P0.st === 'stop' ? 'พักวันนี้' : P0.st === 'care' ? 'เทรดได้ แต่ระวัง' : 'เทรดได้'), el('span', 'gt-dayw', P0.why.length ? P0.why.join(' · ') : 'ไม่มีอะไรขวาง เข้าได้ตามสัญญาณและแผน'));
+    top.append(el('span', 'gt-stamp', P0.st === 'stop' ? (P0.PB ? 'ตลาดปิด' : 'พักวันนี้') : P0.st === 'care' ? 'เทรดได้ แต่ระวัง' : 'เทรดได้'), el('span', 'gt-dayw', P0.why.length ? P0.why.join(' · ') : 'ไม่มีอะไรขวาง เข้าได้ตามสัญญาณและแผน'));
     const f = el('dl', 'gt-dayf'), it = (k, v, c) => { const x = el('div'); x.append(el('dt', null, k), el('dd', c || null, v)); f.append(x); };
     it('ช่วงตลาด', P0.sess, 'tx'); it('ความผันผวน', P0.vol == null ? '–' : P0.vol > 1.8 ? 'สูง' : P0.vol < 0.6 ? 'เงียบ' : 'ปกติ', P0.vol > 1.8 ? 'neg tx' : 'tx');
-    it('ไม้จริงวันนี้', `${P0.d.n}/${P0.r.maxTrades}`); it('กำไรวันนี้', usd(P0.d.pl), tone(P0.d.pl));
+    it(P0.PB ? 'ไม้กระดาษวันนี้' : 'ไม้จริงวันนี้', P0.PB ? String(P0.d.n) : `${P0.d.n}/${P0.r.maxTrades}`); it(P0.PB ? 'กำไรกระดาษวันนี้' : 'กำไรวันนี้', usd(P0.d.pl), tone(P0.d.pl));
     w.append(top, f);
     const n = el('p', 'pf-hint gt-dayn'); n.append('ระบบรู้แค่ข่าว NFP ก่อนเข้าไม้เช็กข่าวใหญ่ (CPI, FOMC) ใน ');
     const a = el('a', null, 'ปฏิทินข่าว'); a.href = 'https://www.forexfactory.com/calendar'; a.target = '_blank'; a.rel = 'noopener'; n.append(a, ' · หยุด 30 นาทีก่อนและหลังข่าว'); w.append(n);
@@ -7156,21 +7190,22 @@ const SPC = (() => {
       const g = el('div', 'gt-lv'); [['เข้า', s.entry], ['ตัดขาดทุน (SL)', s.sl], ['ทำกำไร (TP)', s.tp]].forEach(([k, p]) => { const d = el('div'); d.append(el('small', null, k + (OFF() ? ' MT5' : '')), el('span', null, px(p + OFF()))); g.append(d); });
       const lot = sizeLot(Math.abs(s.entry - s.sl)), rr = Math.abs(s.tp - s.entry) / Math.abs(s.entry - s.sl), risk = Math.abs(s.entry - s.sl) * (lot || 0) * D.set.cs;
       card.append(g, el('p', 'pf-hint', lot >= 0.01 ? `lot ที่เหมาะ ${lot} (ยอมเสียไม้ละ $${f2(rules().maxLoss)}): ถ้าโดน SL เสีย ${usd(-risk)} (${thb(-risk)}) ถ้าถึง TP ได้ ${usd(risk * rr)} · TP:SL = ${rr.toFixed(2)}` : `SL ไกลเกินไปสำหรับเงินที่ยอมเสียไม้ละ $${f2(rules().maxLoss)} แม้ 0.01 lot ก็เสียเกิน`));
-      const bx = el('div', 'gt-act'); const b = el('button', 'btn-solid', 'เข้าไม้นี้ (จริง)'); b.type = 'button'; b.addEventListener('click', () => prefill(s));
-      const b2 = el('button', 'btn-line', 'เทรดกระดาษไม้นี้'); b2.type = 'button';
+      const PB = book() === 'paper', bx = el('div', 'gt-act'); const b = el('button', 'btn-solid', 'จดไม้นี้ (เข้าใน MT5 แล้ว)'); b.type = 'button'; b.addEventListener('click', () => prefill(s));
+      const b2 = el('button', 'btn-solid', 'เปิดไม้กระดาษตามสัญญาณ'); b2.type = 'button';
       const warn = el('p', 'gt-block'); warn.hidden = true;
       b2.addEventListener('click', () => { if (live == null) return; const e = live + ((s.side === 'buy' ? 1 : -1) * SPD()) / 2, lt = P().autoLot !== false ? sizeLot(Math.abs(e - s.sl)) : P().lot;
         const c = check({ side: s.side, entry: e, sl: s.sl, tp: s.tp, lot: lt || 0 }, P().tx.filter((x) => x.src === 'man'));
         if (!(lt >= 0.01) || !c.ok) { warn.hidden = false; warn.textContent = 'ไม่ผ่านด่านตรวจ: ' + (lt >= 0.01 ? c.bl : ['SL ไกลเกินเงินที่ยอมเสีย']).join(' · '); return; }
-        const x = paperOpen(s.side, { sl: s.sl, tp: s.tp, lot: lt }); if (x) { save(); drawAll(); if (window.VGNav) window.VGNav.go('scan', 'gtp'); } });
+        const x = paperOpen(s.side, { sl: s.sl, tp: s.tp, lot: lt }); if (x) { save(); drawAll(); setTimeout(() => { const t = $('gp-open'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60); } });
       const b3 = el('button', 'btn-line', 'ไทม์แมชชีน'); b3.type = 'button'; b3.addEventListener('click', () => tmFill(s, strat()));
-      bx.append(b, b2, b3); card.append(bx, warn);
+      bx.append(PB ? b2 : b, b3); card.append(bx, warn);
     } else {
       card.append(el('b', null, 'ยังไม่มีสัญญาณ รอก่อน'));
       if (tr && tr.wk) card.append(el('p', null, 'วันเสาร์-อาทิตย์ ตลาดทองจริงปิด ราคา PAXG ยังขยับได้ แต่ระบบไม่ให้สัญญาณ'));
       else if (tr) card.append(el('p', null, STRATS[strat()].wait(I, bars.length - 1)));
       const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุดของท่า${STRATS[strat()].name}: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
-      const b = el('button', 'btn-line', 'จดไม้เอง'); b.type = 'button'; b.addEventListener('click', () => prefill(null)); card.append(b);
+      const b = el('button', 'btn-line', book() === 'paper' ? 'กดเทรดกระดาษเอง' : 'จดไม้เอง'); b.type = 'button';
+      b.addEventListener('click', () => { if (book() === 'paper') { const t = $('gp-buy'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' }); } else prefill(null); }); card.append(b);
     }
     box.append(card);
     if (strat() === 'smc') box.append(smcPanel());
@@ -7197,7 +7232,7 @@ const SPC = (() => {
     $('gt-side').value = s ? s.side : 'buy'; $('gt-entry').value = s ? (s.entry + OFF()).toFixed(2) : live != null ? (live + OFF()).toFixed(2) : '';
     $('gt-sl').value = s ? (s.sl + OFF()).toFixed(2) : ''; $('gt-tp').value = s ? (s.tp + OFF()).toFixed(2) : ''; if (s) { const lt = sizeLot(Math.abs(s.entry - s.sl)); if (lt >= 0.01) $('gt-lot').value = lt; } sizeHint(); $('gt-at').value = ''; $('gt-note').value = s ? 'ตามสัญญาณระบบ' : '';
     $('gt-form').dataset.sig = s ? '1' : ''; $('gt-setup').value = s ? strat() : 'man'; $('gt-msg').textContent = 'แก้ราคาเข้าให้ตรงกับใน MT5 แล้วกดบันทึก';
-    if (window.VGNav) window.VGNav.go('scan', 'gtj');
+    if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', 'gt', 'gtj'); else if (window.VGNav) window.VGNav.go('scan', 'gtj');
     setTimeout(() => { const f = $('gt-form'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); $('gt-entry').focus(); } }, 120);
   };
   const sizeHint = () => { const h = $('gt-size'); if (!h) return; const e = +$('gt-entry').value, sl = +$('gt-sl').value;
@@ -7234,7 +7269,7 @@ const SPC = (() => {
     if (paper) left.append(el('small', 'gt-note', srcName(x.src)));
     if (x.note) left.append(el('small', 'gt-note', x.note));
     if (x.rule && x.rule.length) left.append(el('small', 'gt-rule', 'ผิดกฎ: ' + x.rule.join(' · ')));
-    const p = isOpen ? (paper ? qtyFloat(x) : plOf(x, live)) : plOf(x); const right = el('div', 'gt-pl ' + tone(p)); right.append(el('b', null, usd(p)), el('small', null, thb(p) + (isOpen ? ' ยังไม่ปิด' : '')));
+    const p = isOpen ? (paper ? qtyFloat(x) : plOf(x, live)) : plOf(x); const right = el('div', 'gt-pl ' + tone(p)); right.append(el('b', null, usd(p)), el('small', null, thb(p) + (isOpen ? ' ยังไม่ปิด' : ''))); if (isOpen) { right.dataset.pl = x.id; right.dataset.bk = paper ? 'p' : 'r'; }
     top.append(left, right); r.append(top);
     const act = el('div', 'gt-act');
     if (paper) { if (isOpen) { const c = el('button', 'btn-line', 'ปิดตอนนี้'); c.type = 'button';
@@ -7245,12 +7280,18 @@ const SPC = (() => {
     const d = el('button', 'btn-line', 'ลบ'); d.type = 'button'; d.addEventListener('click', () => { if (!confirm('ลบไม้นี้?')) return; gone([x.id]); if (paper) P().tx = P().tx.filter((y) => y.id !== x.id); else D.tx = D.tx.filter((y) => y.id !== x.id); save(); drawAll(); }); act.append(d);
     r.append(act); return r;
   };
+  const totTxt = (v) => `กำไร/ขาดทุนที่ยังไม่ปิดรวม ${usd(v)} (${thb(v)}) ตามราคา PAXG`;
+  const livePL = () => {
+    document.querySelectorAll('#gt-open [data-pl], #gp-open [data-pl]').forEach((n) => { const pp = n.dataset.bk === 'p', x = (pp ? P().tx : D.tx).find((y) => y.id === n.dataset.pl); if (!x || x.exit != null) return;
+      const v = pp ? qtyFloat(x) : plOf(x, live); n.className = 'gt-pl ' + tone(v); n.firstChild.textContent = usd(v); n.lastChild.textContent = thb(v) + ' ยังไม่ปิด'; });
+    const t = document.querySelector('#gt-open .gt-tot'); if (t) { const v = openTx().reduce((a, x) => a + (plOf(x, live) || 0), 0); t.textContent = totTxt(v); t.className = 'pf-hint gt-tot ' + tone(v); }
+    if ($('gp-strip')) drawStrip(); };
   const drawOpen = () => {
     const box = $('gt-open'); if (!box) return; if (box.querySelector('.gt-close')) return; /* a close form is open: leave it until confirmed or cancelled */
     const o = openTx(); box.replaceChildren();
     if (!o.length) { box.append(el('div', 'empty', 'ไม่มีไม้ที่เปิดอยู่')); return; }
     const tot = o.reduce((a, x) => a + (plOf(x, live) || 0), 0);
-    box.append(el('p', 'pf-hint ' + tone(tot), `กำไร/ขาดทุนที่ยังไม่ปิดรวม ${usd(tot)} (${thb(tot)}) ตามราคา PAXG`));
+    box.append(el('p', 'pf-hint gt-tot ' + tone(tot), totTxt(tot)));
     o.forEach((x) => box.append(row(x, true)));
   };
   const drawClosed = () => {
@@ -7262,6 +7303,11 @@ const SPC = (() => {
 
   const drawPaper = () => {
     const box = $('gp-open'); if (!box) return;
+    drawStrip(); const o = pOpen(), c = pClosed();
+    if (!box.contains(document.activeElement)) { box.replaceChildren(); if (!o.length) box.append(el('div', 'empty', 'ไม่มีไม้กระดาษที่เปิดอยู่')); o.forEach((x) => box.append(row(x, true, true))); }
+    drawPaperRest(c);
+  };
+  const drawStrip = () => {
     const o = pOpen(), c = pClosed(), st = stats(c), fl = o.reduce((a, x) => a + (qtyFloat(x) || 0), 0), bal = P().start + st.net;
     const tile = (k, v, h, cl) => { const d = el('div'); d.append(el('div', 'k', k), el('div', 'v ' + (cl || ''), v), el('div', 'h', h)); return d; };
     $('gp-strip').replaceChildren(
@@ -7270,7 +7316,8 @@ const SPC = (() => {
       tile('ชนะ', st.win == null ? '–' : Math.round(st.win * 100) + '%', `${st.n} ไม้ที่ปิดแล้ว`),
       tile('ราคาตอนนี้', live == null ? '–' : px(live), live == null ? '' : `ซื้อ ${px(live + SPD() / 2)} · ขาย ${px(live - SPD() / 2)}`));
     $('gp-buy').textContent = live == null ? 'Buy' : `Buy ${px(live + SPD() / 2)}`; $('gp-sell').textContent = live == null ? 'Sell' : `Sell ${px(live - SPD() / 2)}`;
-    if (!box.contains(document.activeElement)) { box.replaceChildren(); if (!o.length) box.append(el('div', 'empty', 'ไม่มีไม้กระดาษที่เปิดอยู่')); o.forEach((x) => box.append(row(x, true, true))); }
+  };
+  const drawPaperRest = (c) => {
     const cb = $('gp-closed'); cb.replaceChildren(); if (!c.length) cb.append(el('div', 'empty', 'ยังไม่มีไม้กระดาษที่ปิดแล้ว'));
     c.slice(0, 20).forEach((x) => cb.append(row(x, false, true))); if (c.length > 20) cb.append(el('p', 'pf-hint', `แสดง 20 ไม้ล่าสุดจาก ${c.length} ไม้ ดูรายวันได้ที่ปฏิทิน (เลือก "กระดาษ")`));
     /* leaderboard */
@@ -7355,7 +7402,12 @@ const SPC = (() => {
       if (!list.length) dl.append(el('div', 'empty', 'วันนี้ไม่มีไม้ที่ปิด')); list.forEach((x) => dl.append(row(x, false, pp))); }
     drawStats(c, pp);
   };
-  const drawAll = () => { drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
+  const drawBook = () => { const e = $('gt-book'); if (!e) return; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
+    const t = el('div'); t.append(el('b', null, PB ? 'เทรดกระดาษ · เงินปลอม' : 'เทรดจริง · บัญชี MT5'),
+      el('span', null, PB ? `ฝึกกดเทรดและให้บอทลองท่า ไม่เกี่ยวกับเงินจริง · พอร์ตปลอม $${f2(P().start + stats(pClosed()).net)}` : 'จดไม้ที่เข้าใน MT5 กฎความเสี่ยงและด่านตรวจใช้กับหน้านี้'));
+    e.append(t); const src = $('gt-src'); if (src) { dsrc = PB ? 'paper' : 'real'; src.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === dsrc))); src.closest('.gt-bar').hidden = true; } };
+  document.addEventListener('vg:view', () => { if (!$('gt-book')) return; const k = book(); if (k === drawBook.k) return; drawBook.k = k; drawBook(); selDay = null; if (loaded) drawAll(); else { drawDash(); } });
+  const drawAll = () => { drawBook(); drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
 
   /* ---------- wiring ---------- */
   const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtbt', 'gtr'];
