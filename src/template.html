@@ -1198,6 +1198,13 @@ details.how .sec-note { margin: 6px 0 0; }
 .gt-orow > span:first-child { font-weight: 600; min-width: 9em; }
 .gt-orow .muted { color: var(--ink-2); }
 .gt-orow .btn-line { margin-left: auto; }
+/* SMC overview (เทรดทอง → SMC) */
+.gt-smc { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-lg); padding: 12px 16px; margin: 8px 0 4px; }
+.gt-smc .gt-orow > span:first-child { min-width: 8.5em; }
+.gt-smc .gt-orow > span:last-child { flex: 1 1 14em; }
+.gt-pdz { position: relative; height: 10px; border-radius: 5px; margin: 6px 0 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--jade) 35%, transparent) 0 50%, color-mix(in srgb, var(--brick) 35%, transparent) 50% 100%); }
+.gt-pdz i { position: absolute; top: -4px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--ink); }
+.gt-pdzl { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -1454,7 +1461,7 @@ details.how .sec-note { margin: 6px 0 0; }
   <section id="gtc" data-sub="gtc">
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
     <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
-    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button><button type="button" data-k="st" aria-pressed="false">Supertrend</button></div></div>
+    <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button><button type="button" data-k="st" aria-pressed="false">Supertrend</button><button type="button" data-k="smc" aria-pressed="false">SMC</button></div></div>
     <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
     <div class="controls gt-off"><label class="mini">ราคาใน MT5 ตอนนี้ <input class="inp" id="gt-mt5" type="number" step="0.01" min="0" inputmode="decimal"></label><button class="btn-line sm" type="button" id="gt-mt5-set">ตั้ง</button><button class="btn-line sm" type="button" id="gt-mt5-clr">ล้าง</button></div>
     <p class="pf-hint" id="gt-offmsg"></p>
@@ -1470,7 +1477,7 @@ details.how .sec-note { margin: 6px 0 0; }
       <div class="gt-rsi" id="gt-rsi" hidden></div>
       <div class="gt-tv" id="gt-tv" hidden></div>
       <p class="pf-hint gt-read" id="gt-read"></p>
-      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบ 20 ชม. หรือเส้น Supertrend</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
+      <p class="gt-leg" id="gt-leg"><span><i class="gt-tri up"></i>สัญญาณซื้อ</span><span><i class="gt-tri dn"></i>สัญญาณขาย</span><span><i class="gt-ln pd"></i>กรอบ 20 ชม. / เส้น Supertrend / Order Block (SMC)</span><span><i class="gt-ln le"></i>ราคาเข้าไม้ที่เปิดอยู่</span><span><i class="gt-ln sl"></i>SL</span><span><i class="gt-ln tp"></i>TP</span></p>
     </div>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
@@ -1527,7 +1534,7 @@ details.how .sec-note { margin: 6px 0 0; }
     </section>
     <section class="panel">
       <div class="ph"><h3>บอทเทรดกระดาษ 24 ชม.</h3></div>
-      <div class="gp-auto"><label><input type="checkbox" id="gp-a-dip"> บอทย่อในเทรนด์</label><label><input type="checkbox" id="gp-a-brk"> บอทเบรก 20 ชม.</label><label><input type="checkbox" id="gp-a-st"> บอท Supertrend</label>
+      <div class="gp-auto"><label><input type="checkbox" id="gp-a-dip"> บอทย่อในเทรนด์</label><label><input type="checkbox" id="gp-a-brk"> บอทเบรก 20 ชม.</label><label><input type="checkbox" id="gp-a-st"> บอท Supertrend</label><label><input type="checkbox" id="gp-a-smc"> บอท SMC</label>
         <label><input type="checkbox" id="gp-be"> เลื่อน SL มาที่จุดเข้าเมื่อกำไรเท่าความเสี่ยง (ทุกไม้กระดาษ)</label></div>
       <p class="pf-hint">บอทเปิดไม้เองทุกครั้งที่มีสัญญาณ นับตั้งแต่ตอนที่ติ๊กเปิด แข่งกับไม้ที่คุณกดเอง ดูอันดับในตาราง</p>
       <div id="gp-board"></div>
@@ -4068,7 +4075,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     s2.append(row('ทองถือยาว', gv ? 'ทองที่ถืออยู่ · จังหวะซื้อวันนี้ดูในหน้านี้' : 'จังหวะซื้อทองวันนี้ และงบซื้อรายสัปดาห์', gv ? baht(gv) : '', '', 'gold'));
     let G = null; try { G = window.VGGT ? window.VGGT.get() : null; } catch (e) { /* ignore */ }
     if (G) { const open1 = (G.tx || []).filter((x) => x.exit == null).length, pp = G.paper && G.paper.tx ? G.paper.tx.filter((x) => x.exit == null).length : 0;
-      const SN = { dip: 'ย่อในเทรนด์', brk: 'เบรก 20 ชม.', st: 'Supertrend' };
+      const SN = { dip: 'ย่อในเทรนด์', brk: 'เบรก 20 ชม.', st: 'Supertrend', smc: 'SMC' };
       s2.append(row('เทรดทอง XAUUSD', `ท่าที่ดู: ${SN[G.set && G.set.strat] || SN.dip}${pp ? ` · เทรดกระดาษเปิด ${pp} ไม้` : ''}`, open1 ? `ไม้จริงเปิด ${open1}` : 'ดูสัญญาณ', open1 ? 'wn' : '', 'gt')); }
     const s3 = sec('อื่นๆ');
     s3.append(row('ออปชั่น', 'สัญญาณ แผนเทรด และเทรดจำลอง', '', '', 'opt'));
