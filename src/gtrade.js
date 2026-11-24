@@ -237,7 +237,8 @@
   let bars = [], form = null, live = null, I = null, S = [], SS = {}, on = false, ws = null, lastTick = 0, err = '', loaded = false, polling = false;
   const kl = (a) => ({ t: a[0], o: +a[1], h: +a[2], l: +a[3], c: +a[4] });
   const get = (u) => fetch(API + u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
-  const recalc = () => { const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, filt(STRATS[k].fn)); }); S = SS[strat()];
+  let heavyKey = '', heavyAt = 0; const barKey = () => bars.length + ':' + (bars.length ? bars[bars.length - 1].t : 0) + ':' + (form ? form.t : 0);
+  const recalc = () => { heavyKey = barKey(); heavyAt = Date.now(); const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, filt(STRATS[k].fn)); }); S = SS[strat()];
     if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
   const load = async () => { const k = (await get('klines?symbol=PAXGUSDT&interval=1h&limit=1000')).map(kl); form = k.pop() || null; bars = k; live = form ? form.c : bars[bars.length - 1].c; recalc(); loaded = true; };
   const start = async () => {
@@ -269,7 +270,14 @@
   const busy = () => { const a = document.activeElement; return (inGt(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) || Date.now() - lastUse < 4000; };
   let softT = null; const softDraw = () => { clearTimeout(softT); softT = null; if (busy()) { softT = setTimeout(softDraw, 1200); return; } drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
   const autoDraw = () => { drawChart(); softDraw(); };
-  let tm = null; const later = () => { if (!tm) tm = setTimeout(() => { tm = null; recalc(); autoDraw(); }, 1200); };
+  /* price ticks: the heavy work (indicators + 4 strategy backtests, ~20 ms on a computer, several times that on a phone) only runs when a bar
+     closes or once a minute; a tick just moves the last candle, checks open trades against the live price and refreshes the numbers every 3 s */
+  let listAt = 0; const softLite = () => { if (busy()) return; listAt = Date.now(); drawNow(); drawOpen(); drawPaper(); };
+  const lightChart = () => { if (!LW || mode === 'tv' || lwState !== 'ok') return; const d = tfData(); if (!d || !d.b.length) return; const L = d.b[d.b.length - 1];
+    try { LW.cs.update({ time: ts(L.t), open: L.o, high: L.h, low: L.l, close: L.c }); LW.zq(); } catch (e) { drawChart(); } };
+  const tick = () => { if (!I || barKey() !== heavyKey || Date.now() - heavyAt > 60e3) { recalc(); autoDraw(); return; }
+    if (settle()) { save(); autoDraw(); return; } lightChart(); if (Date.now() - listAt > 3000) softLite(); };
+  let tm = null; const later = () => { if (!tm) tm = setTimeout(() => { tm = null; tick(); }, 1200); };
 
   /* ---------- trades ---------- */
   const plOf = (x, exit) => { const p = exit ?? x.exit; if (p == null) return null; return (p - x.entry) * (x.side === 'buy' ? 1 : -1) * x.lot * (D.set.cs || 100) - (x.fee || 0); };
