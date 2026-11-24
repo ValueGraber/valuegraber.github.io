@@ -1192,6 +1192,8 @@ details.how .sec-note { margin: 6px 0 0; }
 .gt-cond li { position: relative; padding: 2px 0 2px 22px; font-size: 15px; }
 .gt-cond li::before { content: "✓"; position: absolute; left: 2px; color: var(--jade); font-weight: 700; }
 .gt-oth { margin: 10px 0 4px; }
+.gt-sync { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.gt-sync .neg { color: var(--brick); }
 .gt-orow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 .gt-orow > span:first-child { font-weight: 600; min-width: 9em; }
 .gt-orow .muted { color: var(--ink-2); }
@@ -1556,6 +1558,7 @@ details.how .sec-note { margin: 6px 0 0; }
       </div>
       <p class="pf-hint" id="gt-size"></p>
       <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
+      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ดึงข้อมูลจากเครื่องอื่น</button></div>
     </section>
     <section class="panel">
       <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
@@ -5217,7 +5220,9 @@ if (FB && window.VGPort) {
         .then(() => { s.err = null; status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
         .catch((e) => { console.warn(e); s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้`; status(''); }); }, 600);
     };
-    window.VGSync = { push };
+    /* fetch the account copy now and merge it in (gold trading merges per trade, see gtrade.js sync) */
+    const pull = async (k = 'portfolios') => { const s = st[k]; if (!s || !s.ref || !s.ok) return false; const x = await F.getDoc(s.ref); if (x.exists()) STORES[k].apply(x.data()); status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
+    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, state: () => $('a-state').textContent };
     document.addEventListener('vg:watch', () => push('portfolios'));
 
     const attach = async (k, uid) => {

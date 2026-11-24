@@ -1192,6 +1192,8 @@ details.how .sec-note { margin: 6px 0 0; }
 .gt-cond li { position: relative; padding: 2px 0 2px 22px; font-size: 15px; }
 .gt-cond li::before { content: "✓"; position: absolute; left: 2px; color: var(--jade); font-weight: 700; }
 .gt-oth { margin: 10px 0 4px; }
+.gt-sync { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.gt-sync .neg { color: var(--brick); }
 .gt-orow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 .gt-orow > span:first-child { font-weight: 600; min-width: 9em; }
 .gt-orow .muted { color: var(--ink-2); }
@@ -1556,6 +1558,7 @@ details.how .sec-note { margin: 6px 0 0; }
       </div>
       <p class="pf-hint" id="gt-size"></p>
       <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
+      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ดึงข้อมูลจากเครื่องอื่น</button></div>
     </section>
     <section class="panel">
       <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
@@ -5259,7 +5262,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '4f12d1aaeb';
+  const BUILD = '0f96182734';
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7141,6 +7144,11 @@ const SPC = (() => {
     $('gt-mt5-set').addEventListener('click', mt); $('gt-mt5').addEventListener('keydown', (e) => { if (e.key === 'Enter') mt(); });
     $('gt-mt5-clr').addEventListener('click', () => { $('gt-mt5').value = ''; setOff(0); });
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
+    const syncLine = () => { const e = $('gt-sync'); if (!e) return; const Y = window.VGSync, on = Y && Y.on && Y.on();
+      e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()} · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
+      e.classList.toggle('neg', !on); $('gt-pull').hidden = !on; };
+    setInterval(() => { if (on) syncLine(); }, 2000); syncLine();
+    $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'); b.disabled = true; try { await window.VGSync.pull('portfolios'); } catch (e) { /* status shows it */ } b.disabled = false; syncLine(); });
     $('gt-add').addEventListener('click', add); $('gt-csv').addEventListener('click', csv);
     document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
     document.querySelectorAll('#gt-tf button').forEach((b) => b.addEventListener('click', () => { tf = b.dataset.tf; document.querySelectorAll('#gt-tf button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawChart(); }));
@@ -7271,7 +7279,9 @@ if (FB && window.VGPort) {
         .then(() => { s.err = null; status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
         .catch((e) => { console.warn(e); s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ ข้อมูลยังอยู่ในเครื่องนี้`; status(''); }); }, 600);
     };
-    window.VGSync = { push };
+    /* fetch the account copy now and merge it in (gold trading merges per trade, see gtrade.js sync) */
+    const pull = async (k = 'portfolios') => { const s = st[k]; if (!s || !s.ref || !s.ok) return false; const x = await F.getDoc(s.ref); if (x.exists()) STORES[k].apply(x.data()); status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
+    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, state: () => $('a-state').textContent };
     document.addEventListener('vg:watch', () => push('portfolios'));
 
     const attach = async (k, uid) => {

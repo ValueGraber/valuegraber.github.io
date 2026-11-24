@@ -777,6 +777,11 @@
     $('gt-mt5-set').addEventListener('click', mt); $('gt-mt5').addEventListener('keydown', (e) => { if (e.key === 'Enter') mt(); });
     $('gt-mt5-clr').addEventListener('click', () => { $('gt-mt5').value = ''; setOff(0); });
     $('gt-cs').addEventListener('change', () => { const v = +$('gt-cs').value; if (v > 0) { D.set.cs = v; save(); drawAll(); } else $('gt-cs').value = D.set.cs; });
+    const syncLine = () => { const e = $('gt-sync'); if (!e) return; const Y = window.VGSync, on = Y && Y.on && Y.on();
+      e.textContent = on ? `ซิงค์กับบัญชี ${Y.who()} · ${Y.state() || 'พร้อม'}` : 'ยังไม่ได้ล็อกอิน ไม้ที่จดอยู่ในเครื่องนี้เท่านั้น ล็อกอินบัญชีเดียวกันทั้งคอมและมือถือ (ปุ่มบนสุดของหน้าแรก)';
+      e.classList.toggle('neg', !on); $('gt-pull').hidden = !on; };
+    setInterval(() => { if (on) syncLine(); }, 2000); syncLine();
+    $('gt-pull').addEventListener('click', async () => { const b = $('gt-pull'); b.disabled = true; try { await window.VGSync.pull('portfolios'); } catch (e) { /* status shows it */ } b.disabled = false; syncLine(); });
     $('gt-add').addEventListener('click', add); $('gt-csv').addEventListener('click', csv);
     document.querySelectorAll('#gt-span button').forEach((b) => b.addEventListener('click', () => { span = +b.dataset.n; document.querySelectorAll('#gt-span button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (LW) lwSpan(); else drawChart(); }));
     document.querySelectorAll('#gt-tf button').forEach((b) => b.addEventListener('click', () => { tf = b.dataset.tf; document.querySelectorAll('#gt-tf button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawChart(); }));
