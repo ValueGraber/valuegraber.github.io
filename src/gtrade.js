@@ -245,7 +245,7 @@
   const OLD = { asia: 'เบรกกรอบเอเชีย (เลิกใช้)', sweep: 'กวาดสต็อป (เลิกใช้)', ema: 'EMA ย่อ (เลิกใช้)' };
   const strat = () => (STRATS[D.set.strat] ? D.set.strat : 'dip');
   /* two books on two pages: เทรดจริง (page gt, Mon's MT5 trades) and เทรดกระดาษ (page gtpp, fake money + bots). The chart is shared. */
-  const book = () => (document.body.dataset.page === 'gtpp' ? 'paper' : 'real');
+  const book = () => 'real'; /* paper page retired; kept so the book-aware code stays simple */
   const goBook = (sub) => { const pg = book() === 'paper' ? 'gtpp' : 'gt'; if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', pg, sub); else if (window.VGNav) window.VGNav.go('scan', sub); };
 
   /* ---------- data ---------- */
@@ -294,7 +294,7 @@
   let lastUse = 0; const inGt = (n) => !!(n && n.closest && n.closest('[data-sub^="gt"]'));
   ['pointerdown', 'keydown', 'input'].forEach((ev) => document.addEventListener(ev, (e) => { if (inGt(e.target)) lastUse = Date.now(); }, true));
   const busy = () => { const a = document.activeElement; return (inGt(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) || Date.now() - lastUse < 4000; };
-  let softT = null; const softDraw = () => { clearTimeout(softT); softT = null; if (busy()) { softT = setTimeout(softDraw, 1200); return; } fullAt = Date.now(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
+  let softT = null; const softDraw = () => { clearTimeout(softT); softT = null; if (busy()) { softT = setTimeout(softDraw, 1200); return; } fullAt = Date.now(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); drawIf(); };
   const autoDraw = () => { drawChart(); softDraw(); };
   /* price ticks: the heavy work (indicators + 4 strategy backtests, ~20 ms on a computer, several times that on a phone) only runs when a bar
      closes or once a minute; a tick just moves the last candle, checks open trades against the live price and refreshes the numbers every 3 s */
@@ -342,7 +342,8 @@
     });
     return ch;
   };
-  const autoTrade = () => {
+  const autoTrade = () => false; /* paper bots retired 2026-11-24 (replaced by "ถ้าเข้าทุกไม้"); old paper trades stay in the data */
+  const autoTradeOld = () => {
     let ch = false;
     Object.keys(STRATS).forEach((k) => { if (!P().auto[k]) return; const since = P().since[k] || 0;
       const done = P().tx.filter((x) => x.src === k && x.exit != null), rs = done.map((x) => { const r = Math.abs(x.entry - x.sl0) * x.lot * D.set.cs; return r > 0 ? plOf(x) / r : 0; });
@@ -497,7 +498,7 @@
     try {
       const yrs = +$('lb-years').value || 5; if (!LB || LB.years < yrs) { const b = await lbLoad(yrs, msg); LB = { years: yrs, b, I: null }; }
       msg('กำลังคำนวณ…'); await new Promise((r) => setTimeout(r, 30));
-      const b = LB.b; LB.I = LB.I || ind(b); LB.res = Object.keys(STRATS).map((k) => lbAnalyze(b, LB.I, k)); LB.span = [b[0].t, b[b.length - 1].t];
+      const b = LB.b; LB.I = LB.I || ind(b); LB.res = Object.keys(STRATS).map((k) => lbAnalyze(b, LB.I, k)); gaRun.c = {}; setTimeout(drawIf, 0); LB.span = [b[0].t, b[b.length - 1].t];
       msg(''); drawLB();
     } catch (e) { msg('โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง'); }
     lbBusy = false;
@@ -970,6 +971,57 @@
     box.append(el('p', null, tags.length ? 'สิ่งที่เจอ: ' + tags.join(' · ') : 'ไม่เจอพฤติกรรมเสี่ยงจากข้อมูลที่มี'));
     const ul = el('ul', 'gt-next'); next.forEach((t) => ul.append(el('li', null, t))); box.append(el('b', null, 'กฎชั่วคราวสำหรับรอบหน้า'), ul);
   };
+  /* ---------- ถ้าเข้าทุกไม้: every signal of every strategy, sized by Mon's risk per trade, after costs ---------- */
+  let gaK = null, gaSpan = 'recent';
+  const gaRun = (k) => {
+    const long = gaSpan === 'long' && LB && LB.b, b = long ? LB.b : bars; if (!b.length) return null;
+    const Iu = long ? (LB.I = LB.I || ind(LB.b)) : I; if (!Iu) return null;
+    const list = long ? (gaRun.c[k] = gaRun.c[k] && gaRun.c[k].b === b ? gaRun.c[k] : { b, v: test(b, Iu, filt(STRATS[k].fn)) }).v : SS[k] || [];
+    const cs = D.set.cs || 100, cost = (D.set.spread || 0) + (D.set.slip || 0) + (D.set.comm || 0) / cs, start = +D.set.gaStart > 0 ? +D.set.gaStart : 1000;
+    let bal = start, pk = start, dd = 0, skip = 0, w = 0; const tr = [], eq = [{ t: b[0].t, v: start }];
+    list.forEach((x) => { if (!x.out) return; const dir = x.side === 'buy' ? 1 : -1, lot = sizeLot(Math.abs(x.entry - x.sl)); if (!(lot >= 0.01)) { skip++; return; }
+      const pl = ((x.exit - x.entry) * dir - cost) * lot * cs; bal += pl; pk = Math.max(pk, bal); dd = Math.min(dd, bal - pk); if (pl > 0) w++;
+      const tx = b[x.exitI] ? b[x.exitI].t + 3600e3 : x.t; tr.push({ ...x, lot, pl, tx }); eq.push({ t: tx, v: bal }); });
+    eq.push({ t: b[b.length - 1].t + 3600e3, v: bal });
+    return { k, start, bal, net: bal - start, n: tr.length, win: tr.length ? w / tr.length : null, dd, skip, tr, eq, from: b[0].t, to: b[b.length - 1].t + 3600e3, open: list.find((x) => !x.out) };
+  };
+  gaRun.c = {};
+  const COLS = { dip: '--accent', brk: '--ochre', st: '--brick', smc: '--jade' };
+  const drawIf = () => {
+    const box = $('ga-out'); if (!box) return; if (!loaded) { box.replaceChildren(el('p', 'pf-hint', 'กำลังโหลดกราฟ…')); return; }
+    if (gaSpan === 'long' && !(LB && LB.b)) gaSpan = 'recent';
+    const sp = $('ga-span'); if (sp) { sp.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === gaSpan))); const lb = sp.querySelector('[data-k=long]'); lb.disabled = !(LB && LB.b); lb.textContent = LB && LB.b ? `ย้อนหลัง ${LB.years} ปี` : 'ย้อนหลังหลายปี'; }
+    const R = Object.keys(STRATS).map(gaRun).filter(Boolean); if (!R.length) return; if (!gaK || !STRATS[gaK]) gaK = strat();
+    const days = Math.round((R[0].to - R[0].from) / 86400e3), f0 = R[0].start, out = [];
+    out.push(el('p', 'pf-hint', `ช่วง ${new Date(R[0].from).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })} – ${new Date(R[0].to).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })} (${days} วัน) · เริ่ม $${f2(f0)} · ยอมเสียไม้ละ $${f2(rules().maxLoss)} · หักสเปรด ราคาคลาด ค่าคอมแล้ว`));
+    /* one row per strategy: tap to see its trades */
+    const lb = el('div', 'ga-board'); R.forEach((r) => { const t = el('button', 'ga-sr' + (r.k === gaK ? ' on' : '')); t.type = 'button'; t.setAttribute('aria-pressed', String(r.k === gaK));
+      const a = el('span', 'ga-sn'); const sw = el('i', 'ga-sw'); sw.style.background = cssv(COLS[r.k]); const nm = el('b'); nm.append(sw, STRATS[r.k].name);
+      a.append(nm, el('small', null, r.n ? `${r.n} ไม้ · ชนะ ${Math.round(r.win * 100)}%${r.dd < 0 ? ` · ร่วงหนักสุด ${usd(r.dd)}` : ''} · จบที่ $${f2(r.bal)}` : 'ไม่มีไม้ในช่วงนี้'));
+      const v = el('span', 'ga-sv ' + tone(r.net)); v.append(el('b', null, usd(r.net)), el('small', null, thb(r.net)));
+      t.append(a, v); t.addEventListener('click', () => { gaK = r.k; drawIf(); }); lb.append(t); });
+    out.push(lb);
+    /* equity curves */
+    const W = 640, H = 200, P0 = 6, all = R.flatMap((r) => r.eq.map((e) => e.v)), lo = Math.min(f0, ...all), hi = Math.max(f0, ...all), span = hi - lo || 1, t0 = R[0].from, t1 = R[0].to;
+    const X = (t) => P0 + ((t - t0) / (t1 - t0 || 1)) * (W - 2 * P0), Y = (v) => P0 + (1 - (v - lo) / span) * (H - 2 * P0), NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'ga-ch'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'เงินในพอร์ตตามเวลา ของแต่ละท่า');
+    const base = document.createElementNS(NS, 'line'); base.setAttribute('x1', P0); base.setAttribute('x2', W - P0); base.setAttribute('y1', Y(f0)); base.setAttribute('y2', Y(f0)); base.setAttribute('class', 'ga-base'); svg.append(base);
+    [...R.filter((r) => r.k !== gaK), ...R.filter((r) => r.k === gaK)].forEach((r) => { const pl = document.createElementNS(NS, 'polyline'); let d = '', last = f0;
+      r.eq.forEach((e) => { d += `${X(e.t).toFixed(1)},${Y(last).toFixed(1)} ${X(e.t).toFixed(1)},${Y(e.v).toFixed(1)} `; last = e.v; });
+      pl.setAttribute('points', d.trim()); pl.setAttribute('class', 'ga-ln' + (r.k === gaK ? ' on' : '')); pl.style.stroke = cssv(COLS[r.k]); svg.append(pl); });
+    const cw = el('div', 'ga-chw'); const ax = el('div', 'ga-ax'); ax.append(el('span', null, '$' + f2(hi)), el('span', null, '$' + f2(lo))); cw.append(svg, ax); out.push(cw);
+    const lg = el('p', 'gt-leg'); R.forEach((r) => { const sp2 = el('span'); const i2 = el('i', 'ga-sw'); i2.style.background = cssv(COLS[r.k]); sp2.append(i2, STRATS[r.k].name); lg.append(sp2); }); const sb = el('span'); sb.append(el('i', 'gt-ln eq'), 'เงินตั้งต้น'); lg.append(sb); out.push(lg);
+    /* trades of the chosen strategy */
+    const r = R.find((x) => x.k === gaK); const h = el('h4', 'ga-h', `ไม้ของท่า${STRATS[gaK].name} (${r.n} ไม้${r.skip ? ` · ข้าม ${r.skip} ไม้ที่ SL ไกลเกินเงินที่ยอมเสีย` : ''})`); out.push(h);
+    if (r.open) out.push(el('p', 'pf-hint', `ตอนนี้มีไม้ที่ยังไม่จบ: ${r.open.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(r.open.t)} ที่ ${px(r.open.entry)} (ไม่นับในผลรวม)`));
+    if (!r.tr.length) out.push(el('div', 'empty', 'ช่วงนี้ท่านี้ยังไม่มีไม้ที่จบ'));
+    const OUTT = { tp: 'ถึง TP', sl: 'โดน SL', time: 'ครบ 48 ชม.' }, ul = el('div', 'ga-list');
+    r.tr.slice().reverse().slice(0, 40).forEach((x) => { const rw = el('div', 'ga-row'); const a = el('div'); a.append(el('b', x.side === 'buy' ? 'pos' : 'neg', x.side === 'buy' ? 'ซื้อ' : 'ขาย'), el('span', null, ` ${x.lot} lot · ${px(x.entry)} → ${px(x.exit)}`), el('small', null, `${hm(x.t)} · ${OUTT[x.out] || x.out}`));
+      rw.append(a, el('b', 'ga-pl ' + tone(x.pl), usd(x.pl))); ul.append(rw); });
+    if (r.tr.length > 40) ul.append(el('p', 'pf-hint', `แสดง 40 ไม้ล่าสุดจาก ${r.tr.length} ไม้`)); out.push(ul);
+    const nShort = R.reduce((a, x) => a + x.n, 0) < 30 * R.length;
+    out.push(el('p', 'pf-hint', (gaSpan === 'recent' ? 'ช่วงนี้คือกราฟที่โหลดอยู่ราว 40 วัน ไม้ยังน้อย ผลแกว่งตามดวงได้มาก กด "ย้อนหลังหลายปี" หลังโหลดข้อมูลในหัวข้อทดสอบย้อนหลังด้านล่าง' : nShort ? 'ไม้ยังน้อย อย่าเพิ่งเชื่อผล' : 'ผลย้อนหลังไม่รับประกันอนาคต') + ' · เข้าที่ราคาปิดแท่งสัญญาณ ถ้า SL กับ TP โดนในแท่งเดียวกันนับว่าแพ้ · ไม่ใช่คำแนะนำการลงทุน'));
+    box.replaceChildren(...out); };
   const drawDash = () => {
     const box = $('gt-cal'); if (!box) return;
     const pp = dsrc === 'paper', c = pp ? pClosed() : closedTx(), m = c.filter((x) => bkDay(x.closedAt).startsWith(ym)), s = stats(m), all = stats(c);
@@ -998,15 +1050,15 @@
       if (!list.length) dl.append(el('div', 'empty', 'วันนี้ไม่มีไม้ที่ปิด')); list.forEach((x) => dl.append(row(x, false, pp))); }
     drawStats(c, pp);
   };
-  const drawBook = () => { const e = $('gt-book'); if (!e) return; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
+  const drawBook = () => { const e = $('gt-book'); if (!e) return; e.hidden = true; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
     const t = el('div'); t.append(el('b', null, PB ? 'เทรดกระดาษ · เงินปลอม' : 'เทรดจริง · บัญชี MT5'),
       el('span', null, PB ? `ฝึกกดเทรดและให้บอทลองท่า ไม่เกี่ยวกับเงินจริง · พอร์ตปลอม $${f2(P().start + stats(pClosed()).net)}` : 'จดไม้ที่เข้าใน MT5 กฎความเสี่ยงและด่านตรวจใช้กับหน้านี้'));
     e.append(t); const src = $('gt-src'); if (src) { dsrc = PB ? 'paper' : 'real'; src.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === dsrc))); src.closest('.gt-bar').hidden = true; } };
   document.addEventListener('vg:view', () => { if (!$('gt-book')) return; const k = book(); if (k === drawBook.k) return; drawBook.k = k; drawBook(); selDay = null; if (loaded) drawAll(); else { drawDash(); } });
-  const drawAll = () => { drawBook(); drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
+  const drawAll = () => { drawBook(); drawIf(); drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
 
   /* ---------- wiring ---------- */
-  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtbt', 'gtr'];
+  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtbt', 'gtr', 'gtall'];
   const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && SUBS.some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const csv = () => {
     const rows = [['เข้า', 'ปิด', 'ฝั่ง', 'lot', 'ราคาเข้า', 'SL', 'TP', 'ราคาปิด', 'ค่าคอม USD', 'กำไร USD', 'บันทึก']];
@@ -1068,6 +1120,8 @@
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
+    if ($('ga-start')) { $('ga-start').value = +D.set.gaStart > 0 ? D.set.gaStart : 1000; $('ga-start').addEventListener('change', () => { const v = +$('ga-start').value; if (v > 0) { D.set.gaStart = v; save(); drawIf(); } else $('ga-start').value = D.set.gaStart || 1000; }); }
+    document.querySelectorAll('#ga-span button').forEach((b) => b.addEventListener('click', () => { if (b.disabled) return; gaSpan = b.dataset.k; drawIf(); }));
     $('gp-reset').addEventListener('click', () => { if (!confirm('ลบไม้กระดาษทั้งหมดแล้วเริ่มใหม่?')) return; gone(P().tx.map((x) => x.id)); P().tx = []; Object.keys(P().auto).forEach((k) => { P().since[k] = Date.now(); }); save(); drawAll(); });
     let rw = null; window.addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(drawChart, 200); });
     setInterval(() => { const v = visible(); if (v && !on) start(); else if (!v && on) stop(); if (v) { poll(); if (loaded && !$('gt-chart').firstChild) drawChart(); const c = tfc[tf]; if (tf !== '1h' && c && c.b && Date.now() - c.at > 30e3) tfLoad(tf); } }, 2000);
