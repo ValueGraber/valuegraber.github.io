@@ -336,6 +336,37 @@
   };
   /* time machine: replay the next H hours 10,000 times from gold's own 1h bars at the same hour of day (±1 h, weekdays, ~4 months);
      each bar is its open/high/low/close over the previous close, scaled to the running price; stop checked before target */
+  /* ---------- market direction odds: of the past hours that looked like now, how many were higher N hours later ----------
+     "looked like now" = same 4 traits: price vs 20-day line (EMA 480), EMA 50 vs EMA 200, RSI 14 (<40 / 40–60 / >60), last 24 h up or down.
+     About 7 months of 1h bars; the raw rate is pulled toward the all-hours base rate by 20 pseudo-cases so a thin sample can't shout.
+     Overlapping windows make the samples less independent than the count suggests — shown as a guide, not a forecast. */
+  let TO = null, toBusy = false, toOld = null, toOldAt = 0, toH = 24;
+  try { toH = +localStorage.getItem('vg-gtdir') === 4 ? 4 : 24; } catch (e) { /* ignore */ }
+  const trendOdds = (b) => { const c = b.map((x) => x.c), e480 = ema(c, 480), e50 = ema(c, 50), e200 = ema(c, 200), r = rsi(c, 14), n = b.length;
+    const key = (i) => (e480[i] == null || e200[i] == null || r[i] == null || i < 24 ? null : (c[i] > e480[i] ? 'U' : 'D') + (e50[i] > e200[i] ? 'u' : 'd') + (r[i] < 40 ? 'L' : r[i] > 60 ? 'H' : 'M') + (c[i] > c[i - 24] ? '+' : '-'));
+    const now = key(n - 1), res = {}; if (!now) return null;
+    [4, 24].forEach((H) => { let up = 0, tot = 0, bu = 0, bt = 0; for (let i = 0; i < n - H; i++) { const k = key(i); if (!k || wkend(b[i].t) || b[i + H].t - b[i].t > H * 3600e3 * 3) continue; const u = c[i + H] > c[i]; bt++; if (u) bu++; if (k === now) { tot++; if (u) up++; } }
+      const base = bt ? bu / bt : 0.5; res[H] = { up, tot, base, p: (up + base * 20) / (tot + 20) }; });
+    return { res, days: Math.round((b[n - 1].t - b[0].t) / 864e5), f: { trend: c[n - 1] > e480[n - 1], cross: e50[n - 1] > e200[n - 1], rsi: r[n - 1], d24: c[n - 1] - c[n - 25] }, key: n + ':' + b[n - 1].t }; };
+  const toLoad = async () => { if (toBusy || bars.length < 100) return; const k0 = bars.length + ':' + bars[bars.length - 1].t; if (TO && TO.key === k0) return; toBusy = true;
+    try { if (!toOld || Date.now() - toOldAt > 6 * 3600e3) { let old = [], end = bars[0].t - 1;
+        for (let k = 0; k < 4; k++) { const r = (await get(`klines?symbol=PAXGUSDT&interval=1h&limit=1000&endTime=${end}`)).map(kl); if (!r.length) break; old = [...r, ...old]; end = r[0].t - 1; }
+        toOld = old; toOldAt = Date.now(); }
+      TO = trendOdds([...toOld.filter((x) => x.t < bars[0].t), ...bars]); if (TO) TO.key = k0; } catch (e) { TO = trendOdds(bars); if (TO) TO.key = k0; }
+    toBusy = false; drawDir(); const db = $('gt-dirc'); if (db) db.replaceWith(dirCard()); };
+  const dirTxt = (p) => (Math.abs(p - 0.5) < 0.05 ? 'พอๆ กัน (เหมือนโยนเหรียญ)' : Math.abs(p - 0.5) < 0.15 ? (p > 0.5 ? 'เอียงไปทางขึ้น' : 'เอียงไปทางลง') : p > 0.5 ? 'เอียงขึ้นชัด' : 'เอียงลงชัด');
+  const drawDir = () => { const g = $('gd-dir'); if (!g) return; const R = TO && TO.res[toH]; g.replaceChildren();
+    if (!R) { g.append(el('span', 'gd-dl', `${toH} ชม. กำลังคิด…`)); return; }
+    const u = Math.round(R.p * 100), bar = el('span', 'gd-db'), fu = el('i', 'up'); fu.style.width = u + '%'; bar.append(fu);
+    g.append(el('span', 'gd-dl', `${toH} ชม.`), el('b', 'pos', `▲${u}%`), bar, el('b', 'neg', `▼${100 - u}%`)); g.title = `แนวโน้ม ${toH} ชม.: ${dirTxt(R.p)} (แตะเพื่อสลับ 4/24 ชม.)`; };
+  const dirCard = () => { const w = el('div', 'gt-day gt-dirc'); w.id = 'gt-dirc'; w.append(el('small', 'gt-ch', 'แนวโน้มทิศทางตลาด (จากอดีตที่สภาพคล้ายตอนนี้)'));
+    if (!TO) { w.append(el('p', 'pf-hint', 'กำลังโหลดกราฟย้อนหลังเพื่อคำนวณ…')); return w; }
+    [4, 24].forEach((H) => { const R = TO.res[H], u = Math.round(R.p * 100), r = el('div', 'gt-dirr'), bar = el('div', 'gt-dirb'), fu = el('i'); fu.style.width = u + '%'; bar.append(fu);
+      r.append(el('span', 'gt-dirh', `อีก ${H} ชม.`), el('b', 'pos', `ขึ้น ${u}%`), bar, el('b', 'neg', `ลง ${100 - u}%`)); w.append(r);
+      w.append(el('p', 'gt-dirn', `${dirTxt(R.p)} · คล้ายตอนนี้ ${R.tot} ครั้ง ขึ้นจริง ${R.up} ครั้ง · ปกติทุกช่วงขึ้น ${Math.round(R.base * 100)}%`)); });
+    const F = TO.f; w.append(el('p', 'pf-hint', `สภาพตอนนี้: ราคา${F.trend ? 'เหนือ' : 'ใต้'}เส้น 20 วัน · EMA 50 ${F.cross ? 'เหนือ' : 'ใต้'} EMA 200 · RSI ${F.rsi != null ? F.rsi.toFixed(0) : '–'} · 24 ชม. ที่ผ่านมา${F.d24 >= 0 ? 'ขึ้น' : 'ลง'} $${f2(Math.abs(F.d24))} · ข้อมูล ${TO.days} วัน`));
+    w.append(el('p', 'pf-hint', 'เป็นสถิติจากอดีต ไม่ใช่คำทำนาย ตัวเลขใกล้ 50% แปลว่าเดาไม่ได้ ใช้ประกอบกับสัญญาณและแผน ไม่ใช่คำแนะนำการลงทุน'));
+    return w; };
   let tmPool = null, tmAt = 0;
   const tmLoad = async () => {
     if (tmPool && Date.now() - tmAt < 3600e3) return tmPool; if (!bars.length) return null;
@@ -689,7 +720,7 @@
     st.textContent = err || (!loaded ? 'กำลังโหลดกราฟ…' : `ราคาตอนนี้ $${px(live)} ต่อออนซ์${OFF() ? ` · ใน MT5 ≈ $${px(live + OFF())}` : ''} · อัปเดต ${hhmm(lastTick || Date.now())} น.`);
     drawOff();
     box.replaceChildren(); if (!loaded) return;
-    drawDay(box);
+    drawDay(box); box.append(dirCard()); toLoad();
     const s = lastSig(), tr = trendNow();
     const card = el('div', 'gt-sig' + (s ? ' ' + s.side : ''));
     if (s) {
@@ -1062,6 +1093,7 @@
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
     const gdTop = () => { const n = document.querySelector('.subnav:not([hidden])'); document.documentElement.style.setProperty('--gd-top', (n ? Math.round(n.getBoundingClientRect().height) : 0) + 'px'); };
     gdTop(); window.addEventListener('resize', gdTop); document.addEventListener('vg:view', () => setTimeout(gdTop, 50));
+    if ($('gd-dir')) $('gd-dir').addEventListener('click', () => { toH = toH === 24 ? 4 : 24; try { localStorage.setItem('vg-gtdir', String(toH)); } catch (e) { /* ignore */ } drawDir(); });
     if ($('gd-open')) $('gd-open').addEventListener('click', () => { if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', 'gt', 'gtj'); setTimeout(() => { const t = $('gt-open'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
     if ($('gq-buy')) { $('gq-buy').addEventListener('click', () => qAdd('buy')); $('gq-sell').addEventListener('click', () => qAdd('sell')); ['input', 'change'].forEach((ev) => { $('gq-px').addEventListener(ev, qHint); $('gq-lot').addEventListener(ev, qHint); }); }
     if ($('ga-start')) { $('ga-start').value = +D.set.gaStart > 0 ? D.set.gaStart : 1000; $('ga-start').addEventListener('change', () => { const v = +$('ga-start').value; if (v > 0) { D.set.gaStart = v; save(); drawIf(); } else $('ga-start').value = D.set.gaStart || 1000; }); }

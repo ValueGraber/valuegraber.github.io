@@ -1173,7 +1173,14 @@ body.gt-noscroll { overflow: hidden; }
 .gd-px { font: 700 15px var(--num); letter-spacing: -.01em; }
 .gd-row .gq-b small { font: 10.5px var(--num); line-height: 1.2; white-space: nowrap; opacity: .92; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .gd-i { height: 46px; padding: 4px 3px; font: 14px var(--num); text-align: center; border-radius: 12px; min-width: 0; } .gd-i::placeholder { font-size: 11.5px; }
-.gd-top { display: flex; align-items: center; gap: 10px; min-height: 0; } .gd-top:has(.gd-open.none):has(.gq-msg:empty) { display: none; }
+.gd-top { display: flex; align-items: center; gap: 10px; min-height: 0; flex-wrap: wrap; row-gap: 0; }
+.gd-dir { display: inline-flex; align-items: center; gap: 5px; border: 0; background: none; padding: 3px 2px 0; cursor: pointer; font: 600 12px var(--num); color: var(--ink-2); }
+.gd-dir .pos { color: var(--jade); } .gd-dir .neg { color: var(--brick); } .gd-dl { font-weight: 500; color: var(--ink-3); }
+.gd-db { display: inline-block; width: 46px; height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--brick) 70%, transparent); overflow: hidden; } .gd-db i { display: block; height: 100%; background: var(--jade); }
+.gd-open.none { display: none; }
+.gt-dirr { display: grid; grid-template-columns: 5.4em auto 1fr auto; gap: 8px; align-items: center; margin: 10px 0 2px; font-size: 14px; } .gt-dirr .pos { color: var(--jade); } .gt-dirr .neg { color: var(--brick); }
+.gt-dirh { color: var(--ink-2); font-size: 13px; white-space: nowrap; } .gt-dirb { height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--brick) 65%, transparent); overflow: hidden; } .gt-dirb i { display: block; height: 100%; background: var(--jade); }
+.gt-dirn { margin: 2px 0 6px; font-size: 12.5px; color: var(--ink-3); }
 .gd-open { border: 0; background: none; font: 600 12px var(--num); color: var(--ink-2); padding: 3px 2px 0; cursor: pointer; white-space: nowrap; }
 .gd-open.pos { color: var(--jade); } .gd-open.neg { color: var(--brick); }
 .gt-dock .gq-msg { flex: 1; min-width: 0; min-height: 0; margin: 0; padding-top: 3px; font-size: 12px; line-height: 1.3; text-align: right; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -1541,7 +1548,7 @@ details.how .sec-note { margin: 6px 0 0; }
         <input class="inp gd-i gd-lot" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal" aria-label="lot (ว่าง = คิดจากเงินที่ยอมเสีย)" title="lot (ว่าง = คิดจากเงินที่ยอมเสีย)">
         <button type="button" class="gq-b buy" id="gq-buy"><span class="gd-l"><b>Buy</b><span class="gd-px" id="gq-buy-p">–</span></span><small id="gq-buy-t"></small></button>
       </div>
-      <div class="gd-top"><button type="button" class="gd-open" id="gd-open">ยังไม่มีไม้เปิด</button><span class="gq-msg" id="gq-msg" role="status" aria-live="polite"></span></div>
+      <div class="gd-top"><button type="button" class="gd-dir" id="gd-dir" aria-label="แนวโน้มทิศทางตลาด แตะเพื่อสลับ 4 หรือ 24 ชั่วโมง"></button><button type="button" class="gd-open" id="gd-open">ยังไม่มีไม้เปิด</button><span class="gq-msg" id="gq-msg" role="status" aria-live="polite"></span></div>
     </div>
     <div class="gt-wrap" id="gt-wrap">
       <div class="gt-tools">
