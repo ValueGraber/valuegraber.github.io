@@ -4194,7 +4194,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     d.append(el('summary', null, 'วิธีอ่านหน้านี้')); const q = el('p', 'sec-note'); q.append(...n.childNodes); d.append(q); n.replaceWith(d); }));
 
   /* ---------- holdings (average cost) and the cash/fx ledger ---------- */
-  const sorted = () => [...db.tx].sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));
+  const txKey = (t) => t.date + (isSplit(t) ? '0' : '1') + t.id;
+  const byDate = (a, b) => txKey(a).localeCompare(txKey(b));
+  /* broker rounding (fractional shares, mostly after a split): a sale up to this much above the shares on record closes the position */
+  const slack = (held) => Math.max(0.001, Math.abs(held) * 0.005);
+  const sorted = () => [...db.tx].sort(byDate);
   const holdings = () => {
     const h = {}; let realized = 0; const realizedY = {};
     sorted().filter((t) => isTrade(t) || isSplit(t)).forEach((t) => {
@@ -4202,7 +4206,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       if (isSplit(t)) { x.shares *= ratioOf(t); return; }
       if (t.type === 'buy') { x.cost += t.shares * t.price + (t.fee || 0); x.shares += t.shares; }
       else {
-        const avg = x.shares > 0 ? x.cost / x.shares : 0; const n = Math.min(t.shares, x.shares); const g = n * t.price - (t.fee || 0) - avg * n;
+        const avg = x.shares > 0 ? x.cost / x.shares : 0; const n = Math.min(t.shares, x.shares); const sold = t.shares > x.shares && t.shares - x.shares <= slack(x.shares) ? t.shares : n; const g = sold * t.price - (t.fee || 0) - avg * n;
         realized += g; const y = t.date.slice(0, 4); realizedY[y] = (realizedY[y] || 0) + g; x.cost -= avg * n; x.shares -= n;
       }
     });
@@ -4788,13 +4792,20 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
     }
     if (err) return hint(err, true);
     const trial = old ? db.tx.map((t) => (t.id === old.id ? rec : t)) : [...db.tx, rec];
-    const held = {}; let bad = null;
+    const held = {}; let bad = null, badHad = 0, rounded = null;
     let noHold = null;
-    [...trial].filter((t) => isTrade(t) || isSplit(t)).sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id)).forEach((t) => {
+    [...trial].filter((t) => isTrade(t) || isSplit(t)).sort(byDate).forEach((t) => {
       if (isSplit(t)) { if (!((held[t.sym] || 0) > 1e-9) && t.id === rec.id) noHold = t; held[t.sym] = (held[t.sym] || 0) * ratioOf(t); return; }
-      held[t.sym] = (held[t.sym] || 0) + (t.type === 'buy' ? t.shares : -t.shares); if (held[t.sym] < -1e-9 && !bad) bad = t; });
+      const had = held[t.sym] || 0;
+      held[t.sym] = had + (t.type === 'buy' ? t.shares : -t.shares);
+      if (held[t.sym] < -1e-9) { if (-held[t.sym] <= slack(had)) { held[t.sym] = 0; if (t.id === rec.id) rounded = had; } else if (!bad) { bad = t; badHad = had; } } });
     if (noHold) return hint(`ยังไม่มีหุ้น ${noHold.sym} ในพอร์ต ณ วันที่ ${noHold.date} ต้องบันทึกการซื้อก่อนวันแตก/รวมหุ้น`, true);
-    if (bad) return hint(`ขาย ${bad.sym} เกินจำนวนที่ถืออยู่ ณ วันที่ ${bad.date} ตรวจจำนวนหรือวันที่อีกครั้ง`, true);
+    if (bad) {
+      const sp = trial.filter((t) => isSplit(t) && t.sym === bad.sym);
+      const late = sp.find((x) => x.date > bad.date);
+      return hint(`ขาย ${bad.sym} ${qty(bad.shares, 4)} หุ้น วันที่ ${bad.date} แต่ในแอปถืออยู่ ${qty(badHad, 4)} หุ้น ณ วันนั้น` + (late ? ` · วันแตกหุ้นที่จดไว้ (${late.date}) อยู่หลังวันขาย ให้แก้วันแตกหุ้นเป็นวันที่หุ้นเริ่มเทรดราคาใหม่ หรือก่อนวันขาย` : sp.length ? ' · ถ้าซื้อเพิ่มหลังแตกหุ้น ตรวจว่าวันแตกหุ้นไม่ได้อยู่หลังวันซื้อ' : ''), true);
+    }
+    if (rounded != null) done += ` (ในแอปมี ${qty(rounded, 4)} หุ้น ต่างจากโบรกเล็กน้อยจากการปัดเศษ นับเป็นขายหมดแล้ว)`;
     db.tx = trial; save(); if (old) endEdit(); else clearForm(); hint(done); render();
   });
 
