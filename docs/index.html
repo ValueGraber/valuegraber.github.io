@@ -1165,30 +1165,21 @@ body.gt-noscroll { overflow: hidden; }
 .gt-chk { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); font-size: 13px; line-height: 1.6; }
 .gt-devs { font-size: 13px; margin: 6px 0 0; } .gt-devs .neg { color: var(--brick); } .gt-devs .pos { color: var(--jade); } .gt-devs .muted { color: var(--ink-3); }
 .gt-chk b { font-weight: 600; } .gt-chk .neg { color: var(--brick); } .gt-chk .pos { color: var(--jade); }
-/* trade dock: fixed under the chart while on เทรดทอง, so price, Sell and Buy are always in reach */
-.gt-dock { display: none; }
-body[data-page="gt"] .gt-dock { display: block; position: fixed; z-index: 40; left: 50%; transform: translateX(-50%); bottom: 14px; width: min(760px, calc(100% - 24px));
-  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 30px rgba(10, 18, 38, .22); padding: 8px 10px 6px; }
-body[data-page="gt"] .fab, body[data-page="gt"] .fab-menu { display: none; }
-body[data-page="gt"] main { padding-bottom: 190px; }
-html:has(body[data-page="gt"]) { scroll-padding-bottom: 200px; }
-@media (max-width: 640px) { html:has(body[data-page="gt"]) { scroll-padding-bottom: calc(290px + env(safe-area-inset-bottom)); } }
-.gd-top { display: flex; align-items: center; gap: 10px; min-height: 26px; }
-.gd-open { border: 0; background: none; font: 600 13px var(--num); color: var(--ink-2); padding: 2px 4px; cursor: pointer; white-space: nowrap; }
+/* trade dock: a slim bar that sticks under the top menu while the chart is on screen */
+.gt-dock { position: sticky; top: var(--gd-top, 0px); z-index: 6; background: var(--bg); padding: 6px 0 4px; margin: 0 0 4px; }
+.gd-row { display: grid; grid-template-columns: minmax(0, 1fr) 92px 64px minmax(0, 1fr); gap: 6px; align-items: stretch; }
+.gd-row .gq-b { min-height: 46px; padding: 4px 6px; gap: 1px; border-radius: 12px; }
+.gd-l { display: flex; align-items: baseline; justify-content: center; gap: 6px; } .gd-l b { font-size: 14px; }
+.gd-px { font: 700 15px var(--num); letter-spacing: -.01em; }
+.gd-row .gq-b small { font: 10.5px var(--num); line-height: 1.2; white-space: nowrap; opacity: .92; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.gd-i { height: 46px; padding: 4px 3px; font: 14px var(--num); text-align: center; border-radius: 12px; min-width: 0; } .gd-i::placeholder { font-size: 11.5px; }
+.gd-top { display: flex; align-items: center; gap: 10px; min-height: 0; } .gd-top:has(.gd-open.none):has(.gq-msg:empty) { display: none; }
+.gd-open { border: 0; background: none; font: 600 12px var(--num); color: var(--ink-2); padding: 3px 2px 0; cursor: pointer; white-space: nowrap; }
 .gd-open.pos { color: var(--jade); } .gd-open.neg { color: var(--brick); }
-.gt-dock .gq-msg { flex: 1; min-width: 0; min-height: 0; margin: 0; font-size: 12px; line-height: 1.35; text-align: right; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.gd-row { display: grid; grid-template-columns: 1fr minmax(118px, 1.1fr) 1fr; gap: 8px; align-items: stretch; }
-.gd-row .gq-b { min-height: 76px; padding: 6px 4px; gap: 0; }
-.gd-px { font: 700 17px var(--num); letter-spacing: -.01em; }
-.gd-in { display: grid; gap: 4px; } .gd-in label { display: grid; gap: 1px; font-size: 11px; color: var(--ink-3); }
-.gd-in .inp { height: 34px; padding: 4px 8px; font: 15px var(--num); } .gd-in .inp::placeholder { font-size: 12px; }
-.gd-hint { margin: 4px 2px 0; font-size: 11px; color: var(--ink-3); text-align: center; }
-@media (max-width: 640px) {
-  body[data-page="gt"] .gt-dock { bottom: calc(74px + env(safe-area-inset-bottom)); width: calc(100% - 12px); border-radius: 16px; padding: 6px 8px 4px; }
-  body[data-page="gt"] { padding-bottom: calc(78px + 200px + env(safe-area-inset-bottom)); }
-  .gd-row { grid-template-columns: 1fr 112px 1fr; gap: 6px; } .gd-px { font-size: 16px; } .gd-hint { display: none; }
-  .gt-tools { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 8px -4px 6px; padding: 0 4px; } .gt-tools::-webkit-scrollbar { display: none; } .gt-tools > * { flex: none; }
-}
+.gt-dock .gq-msg { flex: 1; min-width: 0; min-height: 0; margin: 0; padding-top: 3px; font-size: 12px; line-height: 1.3; text-align: right; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+@media (max-width: 640px) { .gd-row { grid-template-columns: minmax(0, 1fr) 64px 46px minmax(0, 1fr); gap: 4px; } .gd-l { flex-direction: column; align-items: center; gap: 0; } .gd-l b { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; opacity: .9; }
+  .gd-px { font-size: 15px; } .gd-row .gq-b small { font-size: 9.5px; } .gd-row .gq-b { min-height: 54px; padding: 4px 3px; } .gd-i { height: 54px; }
+  .gt-tools { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 6px -4px 6px; padding: 0 4px; } .gt-tools::-webkit-scrollbar { display: none; } .gt-tools > * { flex: none; } }
 .gq-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 6px; }
 .gq-b { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; border: 0; border-radius: var(--radius-lg); color: #fff; font: inherit; cursor: pointer; padding: 8px; }
 .gq-b small { white-space: pre-line; line-height: 1.35; font-size: 11px; opacity: .9; } .gq-b b { font-size: 18px; letter-spacing: .02em; } .gq-b small { font: 12px var(--num); opacity: .92; text-align: center; }
@@ -1543,6 +1534,15 @@ details.how .sec-note { margin: 6px 0 0; }
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
     <div class="gt-book real" id="gt-book" role="status"></div>
     <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button></div></div>
+    <div class="gt-dock" id="gt-dock" role="region" aria-label="เข้าไม้">
+      <div class="gd-row">
+        <button type="button" class="gq-b sell" id="gq-sell"><span class="gd-l"><b>Sell</b><span class="gd-px" id="gq-sell-p">–</span></span><small id="gq-sell-t"></small></button>
+        <input class="inp gd-i" id="gq-px" type="number" step="any" min="0" inputmode="decimal" aria-label="ราคาเข้าใน MT5 (ว่าง = ราคาตลาด)" title="ราคาเข้าใน MT5 (ว่าง = ราคาตลาด)">
+        <input class="inp gd-i gd-lot" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal" aria-label="lot (ว่าง = คิดจากเงินที่ยอมเสีย)" title="lot (ว่าง = คิดจากเงินที่ยอมเสีย)">
+        <button type="button" class="gq-b buy" id="gq-buy"><span class="gd-l"><b>Buy</b><span class="gd-px" id="gq-buy-p">–</span></span><small id="gq-buy-t"></small></button>
+      </div>
+      <div class="gd-top"><button type="button" class="gd-open" id="gd-open">ยังไม่มีไม้เปิด</button><span class="gq-msg" id="gq-msg" role="status" aria-live="polite"></span></div>
+    </div>
     <div class="gt-wrap" id="gt-wrap">
       <div class="gt-tools">
         <div class="seg" id="gt-mode" role="group" aria-label="แบบกราฟ"><button type="button" data-m="sys" aria-pressed="true">กราฟระบบ</button><button type="button" data-m="tv" aria-pressed="false">TradingView</button></div>
@@ -1581,18 +1581,6 @@ details.how .sec-note { margin: 6px 0 0; }
       <li>ไม่ถึง TP หรือ SL ใน 48 ชม. ถือว่าปิดที่ราคาตอนนั้น · เว้นเสาร์-อาทิตย์</li>
       <li>ราคามาจาก PAXG (ทองโทเคน 1 ออนซ์) ซึ่งใกล้ XAUUSD แต่ต่างจากโบรกได้ไม่กี่ดอลลาร์ ตอนเข้าไม้ให้ใช้ราคาจริงใน MT5</li>
     </ul></div></details>
-    <div class="gt-dock" id="gt-dock" role="region" aria-label="เข้าไม้">
-      <div class="gd-top"><button type="button" class="gd-open" id="gd-open">ยังไม่มีไม้เปิด</button><span class="gq-msg" id="gq-msg" role="status" aria-live="polite"></span></div>
-      <div class="gd-row">
-        <button type="button" class="gq-b sell" id="gq-sell"><b>Sell</b><span class="gd-px" id="gq-sell-p">–</span><small id="gq-sell-t"></small></button>
-        <div class="gd-in">
-          <label>ราคาเข้า (MT5)<input class="inp" id="gq-px" type="number" step="any" min="0" inputmode="decimal" aria-describedby="gd-hint"></label>
-          <label>lot<input class="inp" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
-        </div>
-        <button type="button" class="gq-b buy" id="gq-buy"><b>Buy</b><span class="gd-px" id="gq-buy-p">–</span><small id="gq-buy-t"></small></button>
-      </div>
-      <p class="gd-hint" id="gd-hint">ว่างไว้ = ราคาตลาดตอนกด · SL 1.5 ATR · TP 2 เท่า · lot จากเงินที่ยอมเสีย</p>
-    </div>
     <div class="alert">สัญญาณเป็นการคำนวณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ผลย้อนหลังไม่รับประกันอนาคต XAUUSD มีเลเวอเรจ ขาดทุนได้เร็วกว่าซื้อทองจริง ตั้ง SL ทุกไม้</div>
   </section>
 
@@ -5380,7 +5368,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '7d07bb9c95'; window.VG_BUILD = BUILD;
+  const BUILD = '630118b03d'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7247,11 +7235,11 @@ const SPC = (() => {
     const dist = Math.abs(entry - sl), R = Math.max(2, rules().minRR || 0), tp = b ? entry + R * dist : entry - R * dist, want = +$('gq-lot').value, lot = want > 0 ? want : sizeLot(dist);
     return { side, entry, sl: Math.round(sl * 100) / 100, tp: Math.round(tp * 100) / 100, dist, R, why, lot, risk: lot >= 0.01 ? dist * lot * (D.set.cs || 100) : null }; };
   const qPx = () => { const v = +$('gq-px').value; return v > 0 ? v : live != null ? Math.round((live + OFF()) * 100) / 100 : null; };
-  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); $('gq-px').placeholder = live != null ? 'ตลาด' : '';
+  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); 
     const mk0 = live != null ? live + OFF() : null; $('gq-sell-p').textContent = mk0 != null ? px(mk0 - SPD() / 2) : '–'; $('gq-buy-p').textContent = mk0 != null ? px(mk0 + SPD() / 2) : '–';
-    const o = openTx(), g = $('gd-open'); if (g) { const v = o.reduce((a, x) => a + (plOf(x, live) || 0), 0); g.textContent = o.length ? `ไม้เปิด ${o.length} · ${usd(v)}` : 'ยังไม่มีไม้เปิด'; g.className = 'gd-open ' + (o.length ? tone(v) : ''); }
-    const lt = $('gq-lot'); if (lt && !lt.value) { const q0 = qPlan('buy', e); lt.placeholder = q0 && q0.lot >= 0.01 ? `${q0.lot} อัตโนมัติ` : 'อัตโนมัติ'; }
-    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${px(q.sl)}\nTP ${px(q.tp)}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
+    const o = openTx(), g = $('gd-open'); if (g) { const v = o.reduce((a, x) => a + (plOf(x, live) || 0), 0); g.textContent = o.length ? `ไม้เปิด ${o.length} · ${usd(v)}` : 'ยังไม่มีไม้เปิด'; g.className = 'gd-open ' + (o.length ? tone(v) : 'none'); }
+    const lt = $('gq-lot'); if (lt && !lt.value) { const q0 = qPlan('buy', e); lt.placeholder = q0 && q0.lot >= 0.01 ? String(q0.lot) : 'lot'; } $('gq-px').placeholder = 'ราคาเข้า';
+    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${Math.round(q.sl).toLocaleString('en-US')} · TP ${Math.round(q.tp).toLocaleString('en-US')}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
   const qAdd = (side) => { const typed = +$('gq-px').value, e = typed > 0 ? typed : live != null ? Math.round((live + OFF() + (side === 'buy' ? 1 : -1) * SPD() / 2) * 100) / 100 : null, q = qPlan(side, e), m = $('gq-msg'); if (!q) { m.className = 'gq-msg neg'; m.textContent = 'ใส่ราคาที่เข้าก่อน'; return; }
     if (!(q.lot >= 0.01)) { m.className = 'gq-msg neg'; m.textContent = `SL ห่าง $${f2(q.dist)} ไกลเกินเงินที่ยอมเสีย $${f2(rules().maxLoss)} ใส่ lot เองในช่อง lot ถ้ายังจะเข้า`; return; }
     D.tx.push({ id: uid(), side, at: Date.now(), entry: q.entry, lot: q.lot, sl: q.sl, sl0: q.sl, tp: q.tp, note: `SL ${q.why} · TP ${q.R}R (ตั้งอัตโนมัติ)`, setup: strat(), auto: 1 });
@@ -7463,7 +7451,7 @@ const SPC = (() => {
       if (!list.length) dl.append(el('div', 'empty', 'วันนี้ไม่มีไม้ที่ปิด')); list.forEach((x) => dl.append(row(x, false, pp))); }
     drawStats(c, pp);
   };
-  const drawBook = () => { const e = $('gt-book'); if (!e) return; e.hidden = true; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
+  const drawBook = () => { const e = $('gt-book'); if (!e) return; e.hidden = true; e.style.display = 'none'; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
     const t = el('div'); t.append(el('b', null, PB ? 'เทรดกระดาษ · เงินปลอม' : 'เทรดจริง · บัญชี MT5'),
       el('span', null, PB ? `ฝึกกดเทรดและให้บอทลองท่า ไม่เกี่ยวกับเงินจริง · พอร์ตปลอม $${f2(P().start + stats(pClosed()).net)}` : 'จดไม้ที่เข้าใน MT5 กฎความเสี่ยงและด่านตรวจใช้กับหน้านี้'));
     e.append(t); const src = $('gt-src'); if (src) { dsrc = PB ? 'paper' : 'real'; src.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === dsrc))); src.closest('.gt-bar').hidden = true; } };
@@ -7546,6 +7534,8 @@ const SPC = (() => {
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
+    const gdTop = () => { const n = document.querySelector('.subnav:not([hidden])'); document.documentElement.style.setProperty('--gd-top', (n ? Math.round(n.getBoundingClientRect().height) : 0) + 'px'); };
+    gdTop(); window.addEventListener('resize', gdTop); document.addEventListener('vg:view', () => setTimeout(gdTop, 50));
     if ($('gd-open')) $('gd-open').addEventListener('click', () => { if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', 'gt', 'gtj'); setTimeout(() => { const t = $('gt-open'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
     if ($('gq-buy')) { $('gq-buy').addEventListener('click', () => qAdd('buy')); $('gq-sell').addEventListener('click', () => qAdd('sell')); ['input', 'change'].forEach((ev) => { $('gq-px').addEventListener(ev, qHint); $('gq-lot').addEventListener(ev, qHint); }); }
     if ($('ga-start')) { $('ga-start').value = +D.set.gaStart > 0 ? D.set.gaStart : 1000; $('ga-start').addEventListener('change', () => { const v = +$('ga-start').value; if (v > 0) { D.set.gaStart = v; save(); drawIf(); } else $('ga-start').value = D.set.gaStart || 1000; }); }

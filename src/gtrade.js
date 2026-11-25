@@ -761,11 +761,11 @@
     const dist = Math.abs(entry - sl), R = Math.max(2, rules().minRR || 0), tp = b ? entry + R * dist : entry - R * dist, want = +$('gq-lot').value, lot = want > 0 ? want : sizeLot(dist);
     return { side, entry, sl: Math.round(sl * 100) / 100, tp: Math.round(tp * 100) / 100, dist, R, why, lot, risk: lot >= 0.01 ? dist * lot * (D.set.cs || 100) : null }; };
   const qPx = () => { const v = +$('gq-px').value; return v > 0 ? v : live != null ? Math.round((live + OFF()) * 100) / 100 : null; };
-  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); $('gq-px').placeholder = live != null ? 'ตลาด' : '';
+  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); 
     const mk0 = live != null ? live + OFF() : null; $('gq-sell-p').textContent = mk0 != null ? px(mk0 - SPD() / 2) : '–'; $('gq-buy-p').textContent = mk0 != null ? px(mk0 + SPD() / 2) : '–';
-    const o = openTx(), g = $('gd-open'); if (g) { const v = o.reduce((a, x) => a + (plOf(x, live) || 0), 0); g.textContent = o.length ? `ไม้เปิด ${o.length} · ${usd(v)}` : 'ยังไม่มีไม้เปิด'; g.className = 'gd-open ' + (o.length ? tone(v) : ''); }
-    const lt = $('gq-lot'); if (lt && !lt.value) { const q0 = qPlan('buy', e); lt.placeholder = q0 && q0.lot >= 0.01 ? `${q0.lot} อัตโนมัติ` : 'อัตโนมัติ'; }
-    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${px(q.sl)}\nTP ${px(q.tp)}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
+    const o = openTx(), g = $('gd-open'); if (g) { const v = o.reduce((a, x) => a + (plOf(x, live) || 0), 0); g.textContent = o.length ? `ไม้เปิด ${o.length} · ${usd(v)}` : 'ยังไม่มีไม้เปิด'; g.className = 'gd-open ' + (o.length ? tone(v) : 'none'); }
+    const lt = $('gq-lot'); if (lt && !lt.value) { const q0 = qPlan('buy', e); lt.placeholder = q0 && q0.lot >= 0.01 ? String(q0.lot) : 'lot'; } $('gq-px').placeholder = 'ราคาเข้า';
+    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${Math.round(q.sl).toLocaleString('en-US')} · TP ${Math.round(q.tp).toLocaleString('en-US')}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
   const qAdd = (side) => { const typed = +$('gq-px').value, e = typed > 0 ? typed : live != null ? Math.round((live + OFF() + (side === 'buy' ? 1 : -1) * SPD() / 2) * 100) / 100 : null, q = qPlan(side, e), m = $('gq-msg'); if (!q) { m.className = 'gq-msg neg'; m.textContent = 'ใส่ราคาที่เข้าก่อน'; return; }
     if (!(q.lot >= 0.01)) { m.className = 'gq-msg neg'; m.textContent = `SL ห่าง $${f2(q.dist)} ไกลเกินเงินที่ยอมเสีย $${f2(rules().maxLoss)} ใส่ lot เองในช่อง lot ถ้ายังจะเข้า`; return; }
     D.tx.push({ id: uid(), side, at: Date.now(), entry: q.entry, lot: q.lot, sl: q.sl, sl0: q.sl, tp: q.tp, note: `SL ${q.why} · TP ${q.R}R (ตั้งอัตโนมัติ)`, setup: strat(), auto: 1 });
@@ -977,7 +977,7 @@
       if (!list.length) dl.append(el('div', 'empty', 'วันนี้ไม่มีไม้ที่ปิด')); list.forEach((x) => dl.append(row(x, false, pp))); }
     drawStats(c, pp);
   };
-  const drawBook = () => { const e = $('gt-book'); if (!e) return; e.hidden = true; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
+  const drawBook = () => { const e = $('gt-book'); if (!e) return; e.hidden = true; e.style.display = 'none'; const PB = book() === 'paper'; e.className = 'gt-book ' + (PB ? 'paper' : 'real'); e.replaceChildren();
     const t = el('div'); t.append(el('b', null, PB ? 'เทรดกระดาษ · เงินปลอม' : 'เทรดจริง · บัญชี MT5'),
       el('span', null, PB ? `ฝึกกดเทรดและให้บอทลองท่า ไม่เกี่ยวกับเงินจริง · พอร์ตปลอม $${f2(P().start + stats(pClosed()).net)}` : 'จดไม้ที่เข้าใน MT5 กฎความเสี่ยงและด่านตรวจใช้กับหน้านี้'));
     e.append(t); const src = $('gt-src'); if (src) { dsrc = PB ? 'paper' : 'real'; src.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === dsrc))); src.closest('.gt-bar').hidden = true; } };
@@ -1060,6 +1060,8 @@
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
+    const gdTop = () => { const n = document.querySelector('.subnav:not([hidden])'); document.documentElement.style.setProperty('--gd-top', (n ? Math.round(n.getBoundingClientRect().height) : 0) + 'px'); };
+    gdTop(); window.addEventListener('resize', gdTop); document.addEventListener('vg:view', () => setTimeout(gdTop, 50));
     if ($('gd-open')) $('gd-open').addEventListener('click', () => { if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', 'gt', 'gtj'); setTimeout(() => { const t = $('gt-open'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
     if ($('gq-buy')) { $('gq-buy').addEventListener('click', () => qAdd('buy')); $('gq-sell').addEventListener('click', () => qAdd('sell')); ['input', 'change'].forEach((ev) => { $('gq-px').addEventListener(ev, qHint); $('gq-lot').addEventListener(ev, qHint); }); }
     if ($('ga-start')) { $('ga-start').value = +D.set.gaStart > 0 ? D.set.gaStart : 1000; $('ga-start').addEventListener('change', () => { const v = +$('ga-start').value; if (v > 0) { D.set.gaStart = v; save(); drawIf(); } else $('ga-start').value = D.set.gaStart || 1000; }); }
