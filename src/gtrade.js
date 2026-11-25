@@ -190,7 +190,7 @@
   const get = (u) => fetch(API + u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
   let heavyKey = '', heavyAt = 0; const barKey = () => bars.length + ':' + (bars.length ? bars[bars.length - 1].t : 0) + ':' + (form ? form.t : 0);
   let SR = null;
-  const after = () => { try { SR = autoSR(bars, I.atr.slice(0, bars.length)); } catch (e) { SR = null; } S = SS[strat()]; if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
+  const after = () => { SR = null; /* support/resistance removed 2026-11-25 (autoSR kept in CALC) */ S = SS[strat()]; if (bars.length) { const a = settle(), b = autoTrade(), c = b ? settle() : false; if (a || b || c) save(); } };
   const recalc = () => { heavyKey = barKey(); heavyAt = Date.now(); const all = form ? [...bars, form] : bars; I = ind(all); Object.keys(STRATS).forEach((k) => { SS[k] = test(bars, I, filt(STRATS[k].fn)); }); after(); };
   /* the same pass in a background worker, so the page never stalls when a bar closes; falls back to the page if workers are unavailable */
   let WK = null, wkId = 0, wkBusy = false, wkAgain = false;
@@ -504,7 +504,7 @@
     const sw = (cls, t) => { const sp = el('span'); sp.append(el('i', cls), t); out.push(sp); };
     sw('gt-tri up', 'สัญญาณซื้อ'); sw('gt-tri dn', 'สัญญาณขาย');
     if (L.ma) { sw('gt-ln e20', 'EMA 20'); sw('gt-ln e50', 'EMA 50'); }
-    if (L.zone) { sw('gt-box sup', 'แนวรับ'); sw('gt-box res', 'แนวต้าน'); if (k === 'brk') sw('gt-ln pd', 'กรอบ 20 ชม.'); }
+    if (L.zone && k === 'brk') sw('gt-ln pd', 'กรอบ 20 ชม.');
     sw('gt-ln le', 'ไม้ที่เปิดอยู่'); sw('gt-ln sl', 'SL'); sw('gt-ln tp', 'TP'); g.replaceChildren(...out); };
   /* support / resistance zones drawn as boxes on a canvas over the chart (green below price, red above, stronger = more solid) */
   const zoneDraw = () => {
@@ -716,7 +716,6 @@
       const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุดของท่า${STRATS[strat()].name}: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
     }
     box.append(card);
-    { const sb = $('gt-srbox'); if (sb) sb.replaceChildren(srPanel()); }
     /* the other strategies: say which one has a signal so nothing is missed */
     const oth = el('div', 'gt-oth'); oth.append(el('small', 'gt-ch', 'ท่าอื่นตอนนี้'));
     Object.keys(STRATS).filter((k) => k !== strat()).forEach((k) => { const L = SS[k] || [], q = L[L.length - 1], on1 = q && bars.length - 1 - q.i <= 2 && !q.out;
@@ -762,12 +761,15 @@
     const dist = Math.abs(entry - sl), R = Math.max(2, rules().minRR || 0), tp = b ? entry + R * dist : entry - R * dist, want = +$('gq-lot').value, lot = want > 0 ? want : sizeLot(dist);
     return { side, entry, sl: Math.round(sl * 100) / 100, tp: Math.round(tp * 100) / 100, dist, R, why, lot, risk: lot >= 0.01 ? dist * lot * (D.set.cs || 100) : null }; };
   const qPx = () => { const v = +$('gq-px').value; return v > 0 ? v : live != null ? Math.round((live + OFF()) * 100) / 100 : null; };
-  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); if (e) $('gq-px').placeholder = px(e);
-    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${px(q.sl)}\nTP ${px(q.tp)}${q.lot >= 0.01 ? `\n${q.lot} lot · เสียสุด $${f2(q.risk)}` : '\nSL ไกลเกินเงินที่ยอมเสีย'}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
-  const qAdd = (side) => { const e = qPx(), q = qPlan(side, e), m = $('gq-msg'); if (!q) { m.className = 'gq-msg neg'; m.textContent = 'ใส่ราคาที่เข้าก่อน'; return; }
+  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); $('gq-px').placeholder = live != null ? 'ตลาด' : '';
+    const mk0 = live != null ? live + OFF() : null; $('gq-sell-p').textContent = mk0 != null ? px(mk0 - SPD() / 2) : '–'; $('gq-buy-p').textContent = mk0 != null ? px(mk0 + SPD() / 2) : '–';
+    const o = openTx(), g = $('gd-open'); if (g) { const v = o.reduce((a, x) => a + (plOf(x, live) || 0), 0); g.textContent = o.length ? `ไม้เปิด ${o.length} · ${usd(v)}` : 'ยังไม่มีไม้เปิด'; g.className = 'gd-open ' + (o.length ? tone(v) : ''); }
+    const lt = $('gq-lot'); if (lt && !lt.value) { const q0 = qPlan('buy', e); lt.placeholder = q0 && q0.lot >= 0.01 ? `${q0.lot} อัตโนมัติ` : 'อัตโนมัติ'; }
+    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${px(q.sl)}\nTP ${px(q.tp)}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
+  const qAdd = (side) => { const typed = +$('gq-px').value, e = typed > 0 ? typed : live != null ? Math.round((live + OFF() + (side === 'buy' ? 1 : -1) * SPD() / 2) * 100) / 100 : null, q = qPlan(side, e), m = $('gq-msg'); if (!q) { m.className = 'gq-msg neg'; m.textContent = 'ใส่ราคาที่เข้าก่อน'; return; }
     if (!(q.lot >= 0.01)) { m.className = 'gq-msg neg'; m.textContent = `SL ห่าง $${f2(q.dist)} ไกลเกินเงินที่ยอมเสีย $${f2(rules().maxLoss)} ใส่ lot เองในช่อง lot ถ้ายังจะเข้า`; return; }
     D.tx.push({ id: uid(), side, at: Date.now(), entry: q.entry, lot: q.lot, sl: q.sl, sl0: q.sl, tp: q.tp, note: `SL ${q.why} · TP ${q.R}R (ตั้งอัตโนมัติ)`, setup: strat(), auto: 1 });
-    D.set.lot = q.lot; $('gq-px').value = ''; qLast = `จด ${side === 'buy' ? 'Buy' : 'Sell'} ${q.lot} lot ที่ ${px(q.entry)} · SL ${px(q.sl)} · TP ${px(q.tp)}`; drawAll(); saveNow(); };
+    D.set.lot = q.lot; $('gq-px').value = ''; $('gq-lot').value = ''; qLast = `จด ${side === 'buy' ? 'Buy' : 'Sell'} ${q.lot} lot ที่ ${px(q.entry)} · SL ${px(q.sl)} · TP ${px(q.tp)}`; drawAll(); saveNow(); };
   let qLast = '';
   const closeRow = (x, row) => {
     if (row.querySelector('.gt-close')) return;
@@ -1058,6 +1060,7 @@
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
+    if ($('gd-open')) $('gd-open').addEventListener('click', () => { if (window.VGNav && window.VGNav.open) window.VGNav.open('invest', 'gt', 'gtj'); setTimeout(() => { const t = $('gt-open'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); });
     if ($('gq-buy')) { $('gq-buy').addEventListener('click', () => qAdd('buy')); $('gq-sell').addEventListener('click', () => qAdd('sell')); ['input', 'change'].forEach((ev) => { $('gq-px').addEventListener(ev, qHint); $('gq-lot').addEventListener(ev, qHint); }); }
     if ($('ga-start')) { $('ga-start').value = +D.set.gaStart > 0 ? D.set.gaStart : 1000; $('ga-start').addEventListener('change', () => { const v = +$('ga-start').value; if (v > 0) { D.set.gaStart = v; save(); drawIf(); } else $('ga-start').value = D.set.gaStart || 1000; }); }
     document.querySelectorAll('#ga-span button').forEach((b) => b.addEventListener('click', () => { if (b.disabled) return; gaSpan = b.dataset.k; drawIf(); }));

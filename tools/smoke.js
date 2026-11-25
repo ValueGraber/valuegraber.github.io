@@ -27,7 +27,7 @@ const d3p = path.join(__dirname, 'node_modules/d3/dist/d3.min.js');
       for (const s of await p.$$eval('nav.subnav button[data-s]', (x) => x.map((y) => y.dataset.s))) {
         await p.evaluate((k) => document.querySelector(`nav.subnav button[data-s="${k}"]`).click(), s); await p.waitForTimeout(150);
         /* open every folded group on the page so its content renders too */
-        for (const h of await p.$$('.acc-h:not([hidden])[aria-expanded="false"]')) { await h.click(); await p.waitForTimeout(120); }
+        for (const h of await p.$$('.acc-h:not([hidden])[aria-expanded="false"]')) { await h.evaluate((e) => e.click()); await p.waitForTimeout(120); } /* DOM click: the fixed trade dock on เทรดทอง can sit over a header at the very bottom */
       }
     }
     await p.click('#fab'); await p.waitForTimeout(100); await p.click('#fab-menu button[data-q=out]'); await p.waitForTimeout(500);

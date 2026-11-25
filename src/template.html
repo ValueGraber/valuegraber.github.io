@@ -1165,9 +1165,33 @@ body.gt-noscroll { overflow: hidden; }
 .gt-chk { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); font-size: 13px; line-height: 1.6; }
 .gt-devs { font-size: 13px; margin: 6px 0 0; } .gt-devs .neg { color: var(--brick); } .gt-devs .pos { color: var(--jade); } .gt-devs .muted { color: var(--ink-3); }
 .gt-chk b { font-weight: 600; } .gt-chk .neg { color: var(--brick); } .gt-chk .pos { color: var(--jade); }
+/* trade dock: fixed under the chart while on เทรดทอง, so price, Sell and Buy are always in reach */
+.gt-dock { display: none; }
+body[data-page="gt"] .gt-dock { display: block; position: fixed; z-index: 40; left: 50%; transform: translateX(-50%); bottom: 14px; width: min(760px, calc(100% - 24px));
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 30px rgba(10, 18, 38, .22); padding: 8px 10px 6px; }
+body[data-page="gt"] .fab, body[data-page="gt"] .fab-menu { display: none; }
+body[data-page="gt"] main { padding-bottom: 190px; }
+html:has(body[data-page="gt"]) { scroll-padding-bottom: 200px; }
+@media (max-width: 640px) { html:has(body[data-page="gt"]) { scroll-padding-bottom: calc(290px + env(safe-area-inset-bottom)); } }
+.gd-top { display: flex; align-items: center; gap: 10px; min-height: 26px; }
+.gd-open { border: 0; background: none; font: 600 13px var(--num); color: var(--ink-2); padding: 2px 4px; cursor: pointer; white-space: nowrap; }
+.gd-open.pos { color: var(--jade); } .gd-open.neg { color: var(--brick); }
+.gt-dock .gq-msg { flex: 1; min-width: 0; min-height: 0; margin: 0; font-size: 12px; line-height: 1.35; text-align: right; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gd-row { display: grid; grid-template-columns: 1fr minmax(118px, 1.1fr) 1fr; gap: 8px; align-items: stretch; }
+.gd-row .gq-b { min-height: 76px; padding: 6px 4px; gap: 0; }
+.gd-px { font: 700 17px var(--num); letter-spacing: -.01em; }
+.gd-in { display: grid; gap: 4px; } .gd-in label { display: grid; gap: 1px; font-size: 11px; color: var(--ink-3); }
+.gd-in .inp { height: 34px; padding: 4px 8px; font: 15px var(--num); } .gd-in .inp::placeholder { font-size: 12px; }
+.gd-hint { margin: 4px 2px 0; font-size: 11px; color: var(--ink-3); text-align: center; }
+@media (max-width: 640px) {
+  body[data-page="gt"] .gt-dock { bottom: calc(74px + env(safe-area-inset-bottom)); width: calc(100% - 12px); border-radius: 16px; padding: 6px 8px 4px; }
+  body[data-page="gt"] { padding-bottom: calc(78px + 200px + env(safe-area-inset-bottom)); }
+  .gd-row { grid-template-columns: 1fr 112px 1fr; gap: 6px; } .gd-px { font-size: 16px; } .gd-hint { display: none; }
+  .gt-tools { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 8px -4px 6px; padding: 0 4px; } .gt-tools::-webkit-scrollbar { display: none; } .gt-tools > * { flex: none; }
+}
 .gq-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 6px; }
 .gq-b { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; border: 0; border-radius: var(--radius-lg); color: #fff; font: inherit; cursor: pointer; padding: 8px; }
-.gq-b small { white-space: pre-line; line-height: 1.5; } .gq-b b { font-size: 18px; letter-spacing: .02em; } .gq-b small { font: 12px var(--num); opacity: .92; text-align: center; }
+.gq-b small { white-space: pre-line; line-height: 1.35; font-size: 11px; opacity: .9; } .gq-b b { font-size: 18px; letter-spacing: .02em; } .gq-b small { font: 12px var(--num); opacity: .92; text-align: center; }
 .gq-b.buy { background: var(--jade); } .gq-b.sell { background: var(--brick); } .gq-b:disabled { opacity: .5; cursor: default; }
 .gq-b:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; } .gq-b:active { transform: translateY(1px); }
 .gq-msg { min-height: 1.4em; font-size: 14px; margin: 4px 0; } .gq-msg.pos { color: var(--jade); } .gq-msg.neg { color: var(--brick); }
@@ -1518,12 +1542,7 @@ details.how .sec-note { margin: 6px 0 0; }
   <section id="gtc" data-sub="gtc">
     <div class="sec-head"><h2>เทรดทอง XAUUSD</h2></div>
     <div class="gt-book real" id="gt-book" role="status"></div>
-    <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
     <div class="gt-bar gt-sbar"><div class="seg" id="gt-strat" role="group" aria-label="เทคนิค"><button type="button" data-k="dip" aria-pressed="true">ย่อในเทรนด์</button><button type="button" data-k="brk" aria-pressed="false">เบรก 20 ชม.</button></div></div>
-    <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
-    <div class="controls gt-off"><label class="mini">ราคาใน MT5 ตอนนี้ <input class="inp" id="gt-mt5" type="number" step="0.01" min="0" inputmode="decimal"></label><button class="btn-line sm" type="button" id="gt-mt5-set">ตั้ง</button><button class="btn-line sm" type="button" id="gt-mt5-clr">ล้าง</button></div>
-    <p class="pf-hint" id="gt-offmsg"></p>
-    <div id="gt-now"></div>
     <div class="gt-wrap" id="gt-wrap">
       <div class="gt-tools">
         <div class="seg" id="gt-mode" role="group" aria-label="แบบกราฟ"><button type="button" data-m="sys" aria-pressed="true">กราฟระบบ</button><button type="button" data-m="tv" aria-pressed="false">TradingView</button></div>
@@ -1538,6 +1557,11 @@ details.how .sec-note { margin: 6px 0 0; }
       <p class="pf-hint gt-read" id="gt-read"></p>
       <p class="gt-leg" id="gt-leg"></p>
     </div>
+    <p class="pf-hint" id="gt-status">กำลังโหลด…</p>
+    <div class="controls gt-off"><label class="mini">ราคาใน MT5 ตอนนี้ <input class="inp" id="gt-mt5" type="number" step="0.01" min="0" inputmode="decimal"></label><button class="btn-line sm" type="button" id="gt-mt5-set">ตั้ง</button><button class="btn-line sm" type="button" id="gt-mt5-clr">ล้าง</button></div>
+    <p class="pf-hint" id="gt-offmsg"></p>
+    <div id="gt-now"></div>
+    <p class="sec-note">กราฟแท่งละ 1 ชั่วโมง เส้น <b class="gt-k20">EMA 20</b> กับ <b class="gt-k50">EMA 50</b> และ RSI ระบบดูให้ว่าตอนนี้มี <b>สัญญาณซื้อหรือขาย</b> ไหม พร้อมจุดตัดขาดทุนและทำกำไร เลือกเทคนิคได้</p>
     <p class="pf-hint" id="gt-bt"></p>
     <details class="method"><summary>ระบบดูสัญญาณยังไง</summary><div class="body">
       <p>ทั้ง 3 ท่าเลือกจากการทดสอบกราฟจริง 3 ปี (ต.ค. 2566–พ.ย. 2569) หักค่า spread และ slippage ไม้ละ $0.40 แล้ว ท่าอื่นที่ลอง (Bollinger squeeze, Fair Value Gap, Inside bar) ผลไม่นิ่งหรือติดลบ จึงไม่ใส่</p>
@@ -1557,6 +1581,18 @@ details.how .sec-note { margin: 6px 0 0; }
       <li>ไม่ถึง TP หรือ SL ใน 48 ชม. ถือว่าปิดที่ราคาตอนนั้น · เว้นเสาร์-อาทิตย์</li>
       <li>ราคามาจาก PAXG (ทองโทเคน 1 ออนซ์) ซึ่งใกล้ XAUUSD แต่ต่างจากโบรกได้ไม่กี่ดอลลาร์ ตอนเข้าไม้ให้ใช้ราคาจริงใน MT5</li>
     </ul></div></details>
+    <div class="gt-dock" id="gt-dock" role="region" aria-label="เข้าไม้">
+      <div class="gd-top"><button type="button" class="gd-open" id="gd-open">ยังไม่มีไม้เปิด</button><span class="gq-msg" id="gq-msg" role="status" aria-live="polite"></span></div>
+      <div class="gd-row">
+        <button type="button" class="gq-b sell" id="gq-sell"><b>Sell</b><span class="gd-px" id="gq-sell-p">–</span><small id="gq-sell-t"></small></button>
+        <div class="gd-in">
+          <label>ราคาเข้า (MT5)<input class="inp" id="gq-px" type="number" step="any" min="0" inputmode="decimal" aria-describedby="gd-hint"></label>
+          <label>lot<input class="inp" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
+        </div>
+        <button type="button" class="gq-b buy" id="gq-buy"><b>Buy</b><span class="gd-px" id="gq-buy-p">–</span><small id="gq-buy-t"></small></button>
+      </div>
+      <p class="gd-hint" id="gd-hint">ว่างไว้ = ราคาตลาดตอนกด · SL 1.5 ATR · TP 2 เท่า · lot จากเงินที่ยอมเสีย</p>
+    </div>
     <div class="alert">สัญญาณเป็นการคำนวณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ผลย้อนหลังไม่รับประกันอนาคต XAUUSD มีเลเวอเรจ ขาดทุนได้เร็วกว่าซื้อทองจริง ตั้ง SL ทุกไม้</div>
   </section>
 
@@ -1565,14 +1601,7 @@ details.how .sec-note { margin: 6px 0 0; }
   </section>
 
   <section id="gtj" data-sub="gtj">
-    <section class="panel gt-quick">
-      <div class="ph"><h3>จดไม้ใหม่</h3></div>
-      <div class="pf-form f2 gq-in">
-        <label>ราคาที่เข้าใน MT5 <input class="inp" id="gq-px" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ขนาด (lot) ว่าง = คิดจากเงินที่ยอมเสีย <input class="inp" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
-      </div>
-      <div class="gq-btns"><button type="button" class="gq-b sell" id="gq-sell"><b>Sell</b><small id="gq-sell-t"></small></button><button type="button" class="gq-b buy" id="gq-buy"><b>Buy</b><small id="gq-buy-t"></small></button></div>
-      <p class="gq-msg" id="gq-msg" role="status" aria-live="polite"></p>
+    <section class="panel">
       <details class="gq-more"><summary>จดแบบละเอียด (ตั้ง SL/TP เอง ใส่เวลาเข้าย้อนหลัง)</summary>
       <div class="pf-form f2" id="gt-form">
         <label>ฝั่ง <select class="sel" id="gt-side"><option value="buy">ซื้อ (Buy)</option><option value="sell">ขาย (Sell)</option></select></label>
@@ -4053,7 +4082,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
       ['gold', 'ทองถือยาว', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
-      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gtsr', 'แนวรับแนวต้านอัตโนมัติ', 'โซนที่ราคาเคยกลับตัวบ่อย จากกราฟ 1 ชม. และ 4 ชม.', true], ['gtj', 'จดไม้ที่เข้า', 'ใส่ราคา กด Buy หรือ Sell ระบบตั้ง SL/TP ให้ และบันทึกขึ้นบัญชีทันที', true], ['gtd', 'ปฏิทินกำไรขาดทุน', 'กำไรขาดทุนรายวัน และอัตราชนะของไม้ที่จด', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'ขนาดไม้และเงินที่ยอมเสีย', 'เงินที่ยอมเสียต่อไม้ ใช้คำนวณ lot ตอนจดไม้และในหน้าถ้าเข้าทุกไม้', false]]],
+      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gtj', 'ไม้ของฉัน', 'ไม้ที่เปิดอยู่ ไม้ที่ปิดแล้ว และจดแบบละเอียด', true], ['gtd', 'ปฏิทินกำไรขาดทุน', 'กำไรขาดทุนรายวัน และอัตราชนะของไม้ที่จด', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'ขนาดไม้และเงินที่ยอมเสีย', 'เงินที่ยอมเสียต่อไม้ ใช้คำนวณ lot ตอนจดไม้และในหน้าถ้าเข้าทุกไม้', false]]],
       ['gtpp', 'ถ้าเข้าทุกไม้', 'scan', [['gtall'], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'โหลดข้อมูลหลายปี แล้วตัดสินว่าแต่ละท่าใช้ได้ไหม', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
