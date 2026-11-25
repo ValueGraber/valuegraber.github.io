@@ -1165,6 +1165,14 @@ body.gt-noscroll { overflow: hidden; }
 .gt-chk { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); font-size: 13px; line-height: 1.6; }
 .gt-devs { font-size: 13px; margin: 6px 0 0; } .gt-devs .neg { color: var(--brick); } .gt-devs .pos { color: var(--jade); } .gt-devs .muted { color: var(--ink-3); }
 .gt-chk b { font-weight: 600; } .gt-chk .neg { color: var(--brick); } .gt-chk .pos { color: var(--jade); }
+.gq-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 6px; }
+.gq-b { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; border: 0; border-radius: var(--radius-lg); color: #fff; font: inherit; cursor: pointer; padding: 8px; }
+.gq-b small { white-space: pre-line; line-height: 1.5; } .gq-b b { font-size: 18px; letter-spacing: .02em; } .gq-b small { font: 12px var(--num); opacity: .92; text-align: center; }
+.gq-b.buy { background: var(--jade); } .gq-b.sell { background: var(--brick); } .gq-b:disabled { opacity: .5; cursor: default; }
+.gq-b:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; } .gq-b:active { transform: translateY(1px); }
+.gq-msg { min-height: 1.4em; font-size: 14px; margin: 4px 0; } .gq-msg.pos { color: var(--jade); } .gq-msg.neg { color: var(--brick); }
+.gq-more { margin: 10px 0 4px; } .gq-more summary { cursor: pointer; color: var(--ink-2); font-size: 14px; padding: 6px 0; }
+#gtsr .gt-sr { margin-top: 0; }
 .gt-book { display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--ink); background: var(--surface); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 10px 14px; margin: 4px 0 10px; }
 body[data-page=gtpp] .gt-off, body[data-page=gtpp] #gt-offmsg { display: none; } /* MT5 price offset only matters for real trades */
 .gt-book b { display: block; font-size: 16px; } .gt-book span { font-size: 13px; color: var(--ink-2); }
@@ -1552,6 +1560,58 @@ details.how .sec-note { margin: 6px 0 0; }
     <div class="alert">สัญญาณเป็นการคำนวณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ผลย้อนหลังไม่รับประกันอนาคต XAUUSD มีเลเวอเรจ ขาดทุนได้เร็วกว่าซื้อทองจริง ตั้ง SL ทุกไม้</div>
   </section>
 
+  <section id="gtsr" data-sub="gtsr">
+    <div id="gt-srbox"></div>
+  </section>
+
+  <section id="gtj" data-sub="gtj">
+    <section class="panel gt-quick">
+      <div class="ph"><h3>จดไม้ใหม่</h3></div>
+      <div class="pf-form f2 gq-in">
+        <label>ราคาที่เข้าใน MT5 <input class="inp" id="gq-px" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ขนาด (lot) ว่าง = คิดจากเงินที่ยอมเสีย <input class="inp" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
+      </div>
+      <div class="gq-btns"><button type="button" class="gq-b sell" id="gq-sell"><b>Sell</b><small id="gq-sell-t"></small></button><button type="button" class="gq-b buy" id="gq-buy"><b>Buy</b><small id="gq-buy-t"></small></button></div>
+      <p class="gq-msg" id="gq-msg" role="status" aria-live="polite"></p>
+      <details class="gq-more"><summary>จดแบบละเอียด (ตั้ง SL/TP เอง ใส่เวลาเข้าย้อนหลัง)</summary>
+      <div class="pf-form f2" id="gt-form">
+        <label>ฝั่ง <select class="sel" id="gt-side"><option value="buy">ซื้อ (Buy)</option><option value="sell">ขาย (Sell)</option></select></label>
+        <label>เวลาเข้า (ว่าง = ตอนนี้) <input class="inp" id="gt-at" type="datetime-local"></label>
+        <label>ราคาเข้า (USD/ออนซ์) <input class="inp" id="gt-entry" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ขนาด (lot) <input class="inp" id="gt-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
+        <label>ตัดขาดทุน SL <input class="inp" id="gt-sl" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="dip">ย่อในเทรนด์ (RSI 2)</option><option value="brk">เบรกกรอบ 20 ชม.</option><option value="st">Supertrend กลับตัว</option><option value="man" selected>เข้าเอง</option></select></label>
+        <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
+      </div>
+      <p class="pf-hint" id="gt-size"></p>
+      <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
+      </details>
+      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-devs" class="gt-devs"></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
+    </section>
+    <section class="panel">
+      <div class="ph"><h3>ไม้ที่เปิดอยู่</h3></div>
+      <div id="gt-open"></div>
+    </section>
+    <section class="panel">
+      <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
+      <div id="gt-closed"></div>
+      <label class="mini gt-cs">1 lot = กี่ออนซ์ (โบรกส่วนใหญ่ 100) <input class="inp" id="gt-cs" type="number" step="any" min="0" inputmode="decimal"></label>
+    </section>
+  </section>
+
+  <section id="gtd" data-sub="gtd">
+    <div class="gt-bar gt-sbar" hidden><div class="seg" id="gt-src" role="group" aria-label="ดูไม้"><button type="button" data-k="real" aria-pressed="true">ไม้จริง</button><button type="button" data-k="paper" aria-pressed="false">กระดาษ</button></div></div>
+    <div class="strip" id="gt-strip"></div>
+    <div class="gt-mh"><button class="btn-line" type="button" id="gt-prev" aria-label="เดือนก่อน">‹</button><b id="gt-ym"></b><button class="btn-line" type="button" id="gt-next" aria-label="เดือนถัดไป">›</button></div>
+    <div id="gt-cal"></div>
+    <p class="pf-hint">นับกำไรขาดทุนเข้าวันที่ปิดไม้ (เวลาไทย) แตะวันเพื่อดูไม้ของวันนั้น ตัวเลขบาทคิดจากเรตวันนี้</p>
+    <div id="gt-day"></div>
+    <h3 class="gt-h3">สถิติและทบทวน</h3>
+    <div id="gt-stats"></div>
+  </section>
+
+
   <section id="gttm" data-sub="gttm">
     <p class="sec-note">ก่อนเข้าไม้ ให้ระบบเล่นอนาคตซ้ำ 10,000 รอบ โดยหยิบแท่ง 1 ชม. จริงของทองในชั่วโมงเดียวกันของวันก่อนๆ (ย้อนหลังราว 4 เดือน) มาต่อกันแบบสุ่ม ดูว่าไม้นี้ถึง TP หรือโดน SL ก่อนบ่อยแค่ไหน</p>
     <div class="pf-form f2">
@@ -1595,45 +1655,6 @@ details.how .sec-note { margin: 6px 0 0; }
       <div id="gp-closed"></div>
       <label class="mini gt-cs">เงินปลอมตั้งต้น (USD) <input class="inp" id="gp-start" type="number" step="any" min="1" inputmode="decimal"></label>
     </section>
-  </section>
-
-  <section id="gtj" data-sub="gtj">
-    <section class="panel">
-      <div class="ph"><h3>ไม้ที่เปิดอยู่</h3></div>
-      <div id="gt-open"></div>
-    </section>
-    <section class="panel">
-      <div class="ph"><h3>จดไม้ใหม่</h3></div>
-      <div class="pf-form f2" id="gt-form">
-        <label>ฝั่ง <select class="sel" id="gt-side"><option value="buy">ซื้อ (Buy)</option><option value="sell">ขาย (Sell)</option></select></label>
-        <label>เวลาเข้า (ว่าง = ตอนนี้) <input class="inp" id="gt-at" type="datetime-local"></label>
-        <label>ราคาเข้า (USD/ออนซ์) <input class="inp" id="gt-entry" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ขนาด (lot) <input class="inp" id="gt-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
-        <label>ตัดขาดทุน SL <input class="inp" id="gt-sl" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="dip">ย่อในเทรนด์ (RSI 2)</option><option value="brk">เบรกกรอบ 20 ชม.</option><option value="st">Supertrend กลับตัว</option><option value="man" selected>เข้าเอง</option></select></label>
-        <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
-      </div>
-      <p class="pf-hint" id="gt-size"></p>
-      <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
-      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-devs" class="gt-devs"></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
-    </section>
-    <section class="panel">
-      <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
-      <div id="gt-closed"></div>
-      <label class="mini gt-cs">1 lot = กี่ออนซ์ (โบรกส่วนใหญ่ 100) <input class="inp" id="gt-cs" type="number" step="any" min="0" inputmode="decimal"></label>
-    </section>
-  </section>
-
-  <section id="gtd" data-sub="gtd">
-    <div class="gt-bar gt-sbar"><div class="seg" id="gt-src" role="group" aria-label="ดูไม้"><button type="button" data-k="real" aria-pressed="true">ไม้จริง</button><button type="button" data-k="paper" aria-pressed="false">กระดาษ</button></div></div>
-    <div class="strip" id="gt-strip"></div>
-    <div class="gt-mh"><button class="btn-line" type="button" id="gt-prev" aria-label="เดือนก่อน">‹</button><b id="gt-ym"></b><button class="btn-line" type="button" id="gt-next" aria-label="เดือนถัดไป">›</button></div>
-    <div id="gt-cal"></div>
-    <p class="pf-hint">นับกำไรขาดทุนเข้าวันที่ปิดไม้ (เวลาไทย) แตะวันเพื่อดูไม้ของวันนั้น ตัวเลขบาทคิดจากเรตวันนี้</p>
-    <div id="gt-day"></div>
-    <h3 class="gt-h3">สถิติและทบทวน</h3>
-    <div id="gt-stats"></div>
   </section>
 
   <section id="gtall" data-sub="gtall">
@@ -4032,7 +4053,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
       ['gold', 'ทองถือยาว', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
-      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'ขนาดไม้และเงินที่ยอมเสีย', 'เงินที่ยอมเสียต่อไม้ ใช้คำนวณ lot ในการ์ดสัญญาณและหน้าถ้าเข้าทุกไม้', false]]],
+      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gtsr', 'แนวรับแนวต้านอัตโนมัติ', 'โซนที่ราคาเคยกลับตัวบ่อย จากกราฟ 1 ชม. และ 4 ชม.', true], ['gtj', 'จดไม้ที่เข้า', 'ใส่ราคา กด Buy หรือ Sell ระบบตั้ง SL/TP ให้ และบันทึกขึ้นบัญชีทันที', true], ['gtd', 'ปฏิทินกำไรขาดทุน', 'กำไรขาดทุนรายวัน และอัตราชนะของไม้ที่จด', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'ขนาดไม้และเงินที่ยอมเสีย', 'เงินที่ยอมเสียต่อไม้ ใช้คำนวณ lot ตอนจดไม้และในหน้าถ้าเข้าทุกไม้', false]]],
       ['gtpp', 'ถ้าเข้าทุกไม้', 'scan', [['gtall'], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'โหลดข้อมูลหลายปี แล้วตัดสินว่าแต่ละท่าใช้ได้ไหม', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
@@ -5292,8 +5313,11 @@ if (FB && window.VGPort) {
     const denied = (k) => `${STORES[k].label}ยังซิงค์ไม่ได้ ต้องอัปเดตกฎใน Firebase (ข้อมูลยังอยู่ในเครื่องนี้)`;
     /* the server sends our own save back once its timestamp is set; comparing with what we sent stops that echo from redrawing the page while someone types */
     const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
-    const push = (k = 'portfolios') => {
-      const s = st[k]; if (!s || !s.ref || !s.ok) return; clearTimeout(s.timer); status('กำลังบันทึก…');
+    const push = (k = 'portfolios', now = false) => {
+      const s = st[k]; if (!s || !s.ref || !s.ok) return Promise.resolve(false); clearTimeout(s.timer); status('กำลังบันทึก…');
+      if (now) { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
+        .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); return true; })
+        .catch((e) => { console.warn(e); s.fail = true; s.err = `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); throw e; }); }
       s.timer = setTimeout(() => { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
         .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
         .catch((e) => { console.warn(e); s.fail = true; s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); }); }, 600);

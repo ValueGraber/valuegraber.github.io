@@ -1165,6 +1165,14 @@ body.gt-noscroll { overflow: hidden; }
 .gt-chk { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); font-size: 13px; line-height: 1.6; }
 .gt-devs { font-size: 13px; margin: 6px 0 0; } .gt-devs .neg { color: var(--brick); } .gt-devs .pos { color: var(--jade); } .gt-devs .muted { color: var(--ink-3); }
 .gt-chk b { font-weight: 600; } .gt-chk .neg { color: var(--brick); } .gt-chk .pos { color: var(--jade); }
+.gq-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 6px; }
+.gq-b { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; border: 0; border-radius: var(--radius-lg); color: #fff; font: inherit; cursor: pointer; padding: 8px; }
+.gq-b small { white-space: pre-line; line-height: 1.5; } .gq-b b { font-size: 18px; letter-spacing: .02em; } .gq-b small { font: 12px var(--num); opacity: .92; text-align: center; }
+.gq-b.buy { background: var(--jade); } .gq-b.sell { background: var(--brick); } .gq-b:disabled { opacity: .5; cursor: default; }
+.gq-b:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; } .gq-b:active { transform: translateY(1px); }
+.gq-msg { min-height: 1.4em; font-size: 14px; margin: 4px 0; } .gq-msg.pos { color: var(--jade); } .gq-msg.neg { color: var(--brick); }
+.gq-more { margin: 10px 0 4px; } .gq-more summary { cursor: pointer; color: var(--ink-2); font-size: 14px; padding: 6px 0; }
+#gtsr .gt-sr { margin-top: 0; }
 .gt-book { display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--ink); background: var(--surface); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; padding: 10px 14px; margin: 4px 0 10px; }
 body[data-page=gtpp] .gt-off, body[data-page=gtpp] #gt-offmsg { display: none; } /* MT5 price offset only matters for real trades */
 .gt-book b { display: block; font-size: 16px; } .gt-book span { font-size: 13px; color: var(--ink-2); }
@@ -1552,6 +1560,58 @@ details.how .sec-note { margin: 6px 0 0; }
     <div class="alert">สัญญาณเป็นการคำนวณจากกราฟ ไม่ใช่คำแนะนำการลงทุน ผลย้อนหลังไม่รับประกันอนาคต XAUUSD มีเลเวอเรจ ขาดทุนได้เร็วกว่าซื้อทองจริง ตั้ง SL ทุกไม้</div>
   </section>
 
+  <section id="gtsr" data-sub="gtsr">
+    <div id="gt-srbox"></div>
+  </section>
+
+  <section id="gtj" data-sub="gtj">
+    <section class="panel gt-quick">
+      <div class="ph"><h3>จดไม้ใหม่</h3></div>
+      <div class="pf-form f2 gq-in">
+        <label>ราคาที่เข้าใน MT5 <input class="inp" id="gq-px" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ขนาด (lot) ว่าง = คิดจากเงินที่ยอมเสีย <input class="inp" id="gq-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
+      </div>
+      <div class="gq-btns"><button type="button" class="gq-b sell" id="gq-sell"><b>Sell</b><small id="gq-sell-t"></small></button><button type="button" class="gq-b buy" id="gq-buy"><b>Buy</b><small id="gq-buy-t"></small></button></div>
+      <p class="gq-msg" id="gq-msg" role="status" aria-live="polite"></p>
+      <details class="gq-more"><summary>จดแบบละเอียด (ตั้ง SL/TP เอง ใส่เวลาเข้าย้อนหลัง)</summary>
+      <div class="pf-form f2" id="gt-form">
+        <label>ฝั่ง <select class="sel" id="gt-side"><option value="buy">ซื้อ (Buy)</option><option value="sell">ขาย (Sell)</option></select></label>
+        <label>เวลาเข้า (ว่าง = ตอนนี้) <input class="inp" id="gt-at" type="datetime-local"></label>
+        <label>ราคาเข้า (USD/ออนซ์) <input class="inp" id="gt-entry" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ขนาด (lot) <input class="inp" id="gt-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
+        <label>ตัดขาดทุน SL <input class="inp" id="gt-sl" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="dip">ย่อในเทรนด์ (RSI 2)</option><option value="brk">เบรกกรอบ 20 ชม.</option><option value="st">Supertrend กลับตัว</option><option value="man" selected>เข้าเอง</option></select></label>
+        <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
+      </div>
+      <p class="pf-hint" id="gt-size"></p>
+      <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
+      </details>
+      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-devs" class="gt-devs"></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
+    </section>
+    <section class="panel">
+      <div class="ph"><h3>ไม้ที่เปิดอยู่</h3></div>
+      <div id="gt-open"></div>
+    </section>
+    <section class="panel">
+      <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
+      <div id="gt-closed"></div>
+      <label class="mini gt-cs">1 lot = กี่ออนซ์ (โบรกส่วนใหญ่ 100) <input class="inp" id="gt-cs" type="number" step="any" min="0" inputmode="decimal"></label>
+    </section>
+  </section>
+
+  <section id="gtd" data-sub="gtd">
+    <div class="gt-bar gt-sbar" hidden><div class="seg" id="gt-src" role="group" aria-label="ดูไม้"><button type="button" data-k="real" aria-pressed="true">ไม้จริง</button><button type="button" data-k="paper" aria-pressed="false">กระดาษ</button></div></div>
+    <div class="strip" id="gt-strip"></div>
+    <div class="gt-mh"><button class="btn-line" type="button" id="gt-prev" aria-label="เดือนก่อน">‹</button><b id="gt-ym"></b><button class="btn-line" type="button" id="gt-next" aria-label="เดือนถัดไป">›</button></div>
+    <div id="gt-cal"></div>
+    <p class="pf-hint">นับกำไรขาดทุนเข้าวันที่ปิดไม้ (เวลาไทย) แตะวันเพื่อดูไม้ของวันนั้น ตัวเลขบาทคิดจากเรตวันนี้</p>
+    <div id="gt-day"></div>
+    <h3 class="gt-h3">สถิติและทบทวน</h3>
+    <div id="gt-stats"></div>
+  </section>
+
+
   <section id="gttm" data-sub="gttm">
     <p class="sec-note">ก่อนเข้าไม้ ให้ระบบเล่นอนาคตซ้ำ 10,000 รอบ โดยหยิบแท่ง 1 ชม. จริงของทองในชั่วโมงเดียวกันของวันก่อนๆ (ย้อนหลังราว 4 เดือน) มาต่อกันแบบสุ่ม ดูว่าไม้นี้ถึง TP หรือโดน SL ก่อนบ่อยแค่ไหน</p>
     <div class="pf-form f2">
@@ -1595,45 +1655,6 @@ details.how .sec-note { margin: 6px 0 0; }
       <div id="gp-closed"></div>
       <label class="mini gt-cs">เงินปลอมตั้งต้น (USD) <input class="inp" id="gp-start" type="number" step="any" min="1" inputmode="decimal"></label>
     </section>
-  </section>
-
-  <section id="gtj" data-sub="gtj">
-    <section class="panel">
-      <div class="ph"><h3>ไม้ที่เปิดอยู่</h3></div>
-      <div id="gt-open"></div>
-    </section>
-    <section class="panel">
-      <div class="ph"><h3>จดไม้ใหม่</h3></div>
-      <div class="pf-form f2" id="gt-form">
-        <label>ฝั่ง <select class="sel" id="gt-side"><option value="buy">ซื้อ (Buy)</option><option value="sell">ขาย (Sell)</option></select></label>
-        <label>เวลาเข้า (ว่าง = ตอนนี้) <input class="inp" id="gt-at" type="datetime-local"></label>
-        <label>ราคาเข้า (USD/ออนซ์) <input class="inp" id="gt-entry" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ขนาด (lot) <input class="inp" id="gt-lot" type="number" step="0.01" min="0" inputmode="decimal"></label>
-        <label>ตัดขาดทุน SL <input class="inp" id="gt-sl" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ทำกำไร TP <input class="inp" id="gt-tp" type="number" step="any" min="0" inputmode="decimal"></label>
-        <label>ท่าที่ใช้ <select class="sel" id="gt-setup"><option value="dip">ย่อในเทรนด์ (RSI 2)</option><option value="brk">เบรกกรอบ 20 ชม.</option><option value="st">Supertrend กลับตัว</option><option value="man" selected>เข้าเอง</option></select></label>
-        <label class="wide">บันทึก / เหตุผล (ไม่ใส่ก็ได้) <input class="inp" id="gt-note" maxlength="300"></label>
-      </div>
-      <p class="pf-hint" id="gt-size"></p>
-      <div class="pf-actions"><button class="btn-solid" type="button" id="gt-add">บันทึกเข้าไม้</button><span class="pf-hint" id="gt-msg" role="status"></span></div>
-      <div class="gt-sync"><span id="gt-sync" class="pf-hint"></span><button class="btn-line sm" type="button" id="gt-pull">ตรวจและซิงค์ตอนนี้</button></div><div id="gt-devs" class="gt-devs"></div><div id="gt-chk" class="gt-chk" role="status" hidden></div>
-    </section>
-    <section class="panel">
-      <div class="ph"><h3>ไม้ที่ปิดแล้ว</h3><button class="btn-line" type="button" id="gt-csv">ดาวน์โหลด CSV</button></div>
-      <div id="gt-closed"></div>
-      <label class="mini gt-cs">1 lot = กี่ออนซ์ (โบรกส่วนใหญ่ 100) <input class="inp" id="gt-cs" type="number" step="any" min="0" inputmode="decimal"></label>
-    </section>
-  </section>
-
-  <section id="gtd" data-sub="gtd">
-    <div class="gt-bar gt-sbar"><div class="seg" id="gt-src" role="group" aria-label="ดูไม้"><button type="button" data-k="real" aria-pressed="true">ไม้จริง</button><button type="button" data-k="paper" aria-pressed="false">กระดาษ</button></div></div>
-    <div class="strip" id="gt-strip"></div>
-    <div class="gt-mh"><button class="btn-line" type="button" id="gt-prev" aria-label="เดือนก่อน">‹</button><b id="gt-ym"></b><button class="btn-line" type="button" id="gt-next" aria-label="เดือนถัดไป">›</button></div>
-    <div id="gt-cal"></div>
-    <p class="pf-hint">นับกำไรขาดทุนเข้าวันที่ปิดไม้ (เวลาไทย) แตะวันเพื่อดูไม้ของวันนั้น ตัวเลขบาทคิดจากเรตวันนี้</p>
-    <div id="gt-day"></div>
-    <h3 class="gt-h3">สถิติและทบทวน</h3>
-    <div id="gt-stats"></div>
   </section>
 
   <section id="gtall" data-sub="gtall">
@@ -4164,7 +4185,7 @@ dash.calc('sectors', {
       ['find', 'หาหุ้น', 'scan', [['picks'], ['track', 'ผลจริงของหุ้นที่ระบบเลือก', 'หุ้น "น่าซื้อสะสม" แต่ละวัน ทำผลเทียบ S&P 500 ได้แค่ไหน', true], ['all', 'หุ้นทั้งหมด', 'ค้นหาและกรองหุ้นทั้ง 500 ตัว', false], ['market', 'ภาพรวมตลาด', 'ตลาดตอนนี้ถูกหรือแพง', false]]],
       ['sxp', 'หุ้นเทรด', 'scan', [['sx']]],
       ['gold', 'ทองถือยาว', 'scan', [['swing'], ['tport'], ['swlog', 'ซื้อตามจังหวะช่วยได้แค่ไหน', 'เทียบกับซื้อเท่ากันทุกวันย้อนหลังราว 6 ปี', false]]],
-      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'ขนาดไม้และเงินที่ยอมเสีย', 'เงินที่ยอมเสียต่อไม้ ใช้คำนวณ lot ในการ์ดสัญญาณและหน้าถ้าเข้าทุกไม้', false]]],
+      ['gt', 'เทรดทอง', 'scan', [['gtc'], ['gtsr', 'แนวรับแนวต้านอัตโนมัติ', 'โซนที่ราคาเคยกลับตัวบ่อย จากกราฟ 1 ชม. และ 4 ชม.', true], ['gtj', 'จดไม้ที่เข้า', 'ใส่ราคา กด Buy หรือ Sell ระบบตั้ง SL/TP ให้ และบันทึกขึ้นบัญชีทันที', true], ['gtd', 'ปฏิทินกำไรขาดทุน', 'กำไรขาดทุนรายวัน และอัตราชนะของไม้ที่จด', true], ['gttm', 'ไทม์แมชชีน', 'เล่นอนาคตของไม้นี้ 10,000 รอบ ก่อนเข้าจริง', false], ['gtr', 'ขนาดไม้และเงินที่ยอมเสีย', 'เงินที่ยอมเสียต่อไม้ ใช้คำนวณ lot ตอนจดไม้และในหน้าถ้าเข้าทุกไม้', false]]],
       ['gtpp', 'ถ้าเข้าทุกไม้', 'scan', [['gtall'], ['gtbt', 'ทดสอบย้อนหลังหลายปี', 'โหลดข้อมูลหลายปี แล้วตัดสินว่าแต่ละท่าใช้ได้ไหม', false]]],
       ['opt', 'ออปชั่น', 'scan', [['opt'], ['optplan', 'วางแผนเทรด', 'เลือกสัญญา จุดทำกำไร จุดตัดขาดทุน และขนาดไม้', true], ['optpaper', 'เทรดจำลอง', 'ฝึกด้วยเงินปลอม ราคาจริง ระบบปิดให้ตามแผน', true], ['optlearn', 'หลักจุดเข้า-ออก', 'สรุปกฎที่ระบบใช้ตัดสิน', false]]],
       ['plan', 'แผน DCA', 'port', [['hold'], ['cal', 'ปฏิทินหุ้นของฉัน', 'วันประกาศงบและวันขึ้นเครื่องหมาย XD', false], ['grow', 'การเติบโตและเป้าหมาย', 'พอร์ตโตแค่ไหน เทียบกับซื้อ S&P 500', false]]],
@@ -5330,7 +5351,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '3b1ae55524'; window.VG_BUILD = BUILD;
+  const BUILD = 'b779a6ab9b'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -6484,6 +6505,12 @@ const SPC = (() => {
       paper: { ...(pNew ? { ...rp, ...lp } : { ...lp, ...rp }), su: Math.max(rp.su || 0, lp.su || 0), tx: pick(rp.tx, lp.tx) } }; };
   const sig = (d) => JSON.stringify([d.tx.map((x) => x.id + ':' + (x.u || 0)), d.paper.tx.map((x) => x.id + ':' + (x.u || 0)), d.del.length, d.su, d.paper.su || 0]);
   const save = (sync = true) => { stamp(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ } if (sync && window.VGSync) window.VGSync.push('portfolios'); };
+  /* journal actions (open, close, delete) go to the account at once, and say so when the account confirms */
+  const saveNow = () => { stamp(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* ignore */ }
+    const m = $('gq-msg'), Y = window.VGSync; if (!Y || !Y.on()) { if (m) { m.className = 'gq-msg neg'; m.textContent = 'บันทึกในเครื่องนี้แล้ว แต่ยังไม่ได้ล็อกอิน จึงยังไม่ขึ้นบัญชี (ล็อกอินที่หน้าแรก)'; } return; }
+    const pre = qLast ? qLast + ' · ' : ''; qLast = ''; if (m) { m.className = 'gq-msg'; m.textContent = pre + 'กำลังบันทึกขึ้นบัญชี…'; }
+    Y.push('portfolios', true).then((ok) => { if (m && ok) { m.className = 'gq-msg pos'; m.textContent = pre + `ขึ้นบัญชีแล้ว ${new Date().toLocaleTimeString('th-TH')} น. เครื่องอื่นที่เปิดอยู่จะเห็นภายในไม่กี่วินาที`; } })
+      .catch((e) => { if (m) { m.className = 'gq-msg neg'; m.textContent = pre + `บันทึกขึ้นบัญชีไม่สำเร็จ (${e.code || e.message}) ข้อมูลยังอยู่ในเครื่องนี้ ระบบจะลองใหม่เอง`; } }); };
 
   const fx = () => (window.VG && window.VG.fx) || 33;
   const f2 = (v) => Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -6666,7 +6693,7 @@ const SPC = (() => {
   /* price ticks: the heavy work (indicators + 4 strategy backtests, ~20 ms on a computer, several times that on a phone) only runs when a bar
      closes or once a minute; a tick just moves the last candle, checks open trades against the live price and refreshes the numbers every 3 s */
   /* numbers in place every 3 s (rows keep their buttons); the cards and lists are rebuilt at most every 30 s, never under a finger */
-  let listAt = 0, fullAt = 0; const softLite = () => { listAt = Date.now(); livePL(); if (Date.now() - fullAt > 30e3 && !busy()) { fullAt = Date.now(); drawNow(); drawOpen(); drawPaper(); } };
+  let listAt = 0, fullAt = 0; const softLite = () => { listAt = Date.now(); livePL(); qHint(); if (Date.now() - fullAt > 30e3 && !busy()) { fullAt = Date.now(); drawNow(); drawOpen(); drawPaper(); } };
   const lightChart = () => { if (!LW || mode === 'tv' || lwState !== 'ok') return; const d = tfData(); if (!d || !d.b.length) return; const L = d.b[d.b.length - 1];
     try { LW.cs.update({ time: ts(L.t), open: L.o, high: L.h, low: L.l, close: L.c }); LW.zq(); } catch (e) { drawChart(); } };
   const tick = () => { if (!I) { recalc(); autoDraw(); return; } if (barKey() !== heavyKey || Date.now() - heavyAt > 60e3) recalcBg();
@@ -6995,7 +7022,7 @@ const SPC = (() => {
       mk.push({ time: ts(b[j].t), position: sg.side === 'buy' ? 'belowBar' : 'aboveBar', color: sg.side === 'buy' ? LW.up : LW.dn, shape: sg.side === 'buy' ? 'arrowUp' : 'arrowDown', text: (sg.side === 'buy' ? 'Buy ' : 'Sell ') + (TAGS[strat()] || '') }); });
     LW.cs.setMarkers(mk);
     LW.pls.forEach((p) => LW.cs.removePriceLine(p)); LW.pls = [];
-    [].forEach((x) => /* journal removed: no open-trade lines */ [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
+    openTx().forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
     if (LW.key !== key) { LW.key = key; lwSpan(); }
     readOut(b, J, b.length - 1); drawLeg(); LW.zq();
   };
@@ -7024,7 +7051,7 @@ const SPC = (() => {
     if (!all.length || !I) { box.innerHTML = ''; return; }
     const W = Math.max(300, box.clientWidth || 600), R = 58, H1 = 250, H2 = 74, GAP = 22, H = H1 + GAP + H2 + 18;
     const n = Math.min(span, all.length), s0 = all.length - n, v = all.slice(s0);
-    const opens = [], LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
+    const opens = openTx(), LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
     let lo = Infinity, hi = -Infinity;
     v.forEach((b, k) => { lo = Math.min(lo, b.l, I.e50[s0 + k] ?? b.l); hi = Math.max(hi, b.h, I.e50[s0 + k] ?? b.h); });
     const rng0 = hi - lo; if (LV) v.forEach((b, k) => [LV[0][s0 + k], LV[1][s0 + k]].forEach((p) => { if (p != null && p > lo - rng0 * 0.5 && p < hi + rng0 * 0.5) { lo = Math.min(lo, p); hi = Math.max(hi, p); } }));
@@ -7146,7 +7173,7 @@ const SPC = (() => {
       const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุดของท่า${STRATS[strat()].name}: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
     }
     box.append(card);
-    box.append(srPanel());
+    { const sb = $('gt-srbox'); if (sb) sb.replaceChildren(srPanel()); }
     /* the other strategies: say which one has a signal so nothing is missed */
     const oth = el('div', 'gt-oth'); oth.append(el('small', 'gt-ch', 'ท่าอื่นตอนนี้'));
     Object.keys(STRATS).filter((k) => k !== strat()).forEach((k) => { const L = SS[k] || [], q = L[L.length - 1], on1 = q && bars.length - 1 - q.i <= 2 && !q.out;
@@ -7182,9 +7209,23 @@ const SPC = (() => {
     const at = $('gt-at').value ? new Date($('gt-at').value).getTime() : Date.now();
     const c = check({ side, entry, sl, tp, lot }, D.tx), x = { id: uid(), side, at, entry, lot, sl, sl0: sl, tp, note: $('gt-note').value.trim(), sig: $('gt-form').dataset.sig === '1', setup: $('gt-setup').value || 'man' };
     if (!c.ok) x.rule = c.bl; D.tx.push(x);
-    D.set.lot = lot; save(); $('gt-form').dataset.sig = ''; ['gt-entry', 'gt-sl', 'gt-tp', 'gt-at', 'gt-note'].forEach((k) => { $(k).value = ''; }); sizeHint();
+    D.set.lot = lot; saveNow(); $('gt-form').dataset.sig = ''; ['gt-entry', 'gt-sl', 'gt-tp', 'gt-at', 'gt-note'].forEach((k) => { $(k).value = ''; }); sizeHint();
     $('gt-msg').textContent = c.ok ? 'บันทึกแล้ว ผ่านกฎทุกข้อ' : 'บันทึกแล้ว แต่ไม้นี้ผิดกฎ: ' + c.bl.join(' · '); drawAll();
   };
+  /* SL: just past the nearest support (buy) / resistance (sell) if it is 0.6–3 ATR away, else 1.5 ATR; TP: 2× that distance (or the minimum TP:SL if higher); lot from risk per trade */
+  const qPlan = (side, entry) => { if (!(entry > 0) || !I || !bars.length) return null; const a = I.atr[bars.length - 1] || 5, o = OFF(), b = side === 'buy';
+    let sl = b ? entry - 1.5 * a : entry + 1.5 * a, why = '1.5 ATR';
+    if (SR) { const V = srSplit(SR, entry - o), z = b ? V.sup[0] : V.res[0]; if (z) { const lvl = b ? z.lo + o - 0.2 * a : z.hi + o + 0.2 * a, d = Math.abs(entry - lvl); if (d >= 0.6 * a && d <= 3 * a) { sl = lvl; why = b ? 'ใต้แนวรับ' : 'เหนือแนวต้าน'; } } }
+    const dist = Math.abs(entry - sl), R = Math.max(2, rules().minRR || 0), tp = b ? entry + R * dist : entry - R * dist, want = +$('gq-lot').value, lot = want > 0 ? want : sizeLot(dist);
+    return { side, entry, sl: Math.round(sl * 100) / 100, tp: Math.round(tp * 100) / 100, dist, R, why, lot, risk: lot >= 0.01 ? dist * lot * (D.set.cs || 100) : null }; };
+  const qPx = () => { const v = +$('gq-px').value; return v > 0 ? v : live != null ? Math.round((live + OFF()) * 100) / 100 : null; };
+  const qHint = () => { if (!$('gq-buy-t')) return; const e = qPx(); if (e) $('gq-px').placeholder = px(e);
+    ['buy', 'sell'].forEach((sd) => { const q = qPlan(sd, e), t = $(`gq-${sd}-t`); t.textContent = q ? `SL ${px(q.sl)}\nTP ${px(q.tp)}${q.lot >= 0.01 ? `\n${q.lot} lot · เสียสุด $${f2(q.risk)}` : '\nSL ไกลเกินเงินที่ยอมเสีย'}` : 'รอราคา'; $(`gq-${sd}`).disabled = !q; }); };
+  const qAdd = (side) => { const e = qPx(), q = qPlan(side, e), m = $('gq-msg'); if (!q) { m.className = 'gq-msg neg'; m.textContent = 'ใส่ราคาที่เข้าก่อน'; return; }
+    if (!(q.lot >= 0.01)) { m.className = 'gq-msg neg'; m.textContent = `SL ห่าง $${f2(q.dist)} ไกลเกินเงินที่ยอมเสีย $${f2(rules().maxLoss)} ใส่ lot เองในช่อง lot ถ้ายังจะเข้า`; return; }
+    D.tx.push({ id: uid(), side, at: Date.now(), entry: q.entry, lot: q.lot, sl: q.sl, sl0: q.sl, tp: q.tp, note: `SL ${q.why} · TP ${q.R}R (ตั้งอัตโนมัติ)`, setup: strat(), auto: 1 });
+    D.set.lot = q.lot; $('gq-px').value = ''; qLast = `จด ${side === 'buy' ? 'Buy' : 'Sell'} ${q.lot} lot ที่ ${px(q.entry)} · SL ${px(q.sl)} · TP ${px(q.tp)}`; drawAll(); saveNow(); };
+  let qLast = '';
   const closeRow = (x, row) => {
     if (row.querySelector('.gt-close')) return;
     const h = hit(x), f = el('div', 'gt-close pf-form f2');
@@ -7195,7 +7236,7 @@ const SPC = (() => {
     i1.addEventListener('input', upd); i2.addEventListener('input', upd); upd();
     const ok = el('button', 'btn-solid', 'ยืนยันปิดไม้'); ok.type = 'button';
     ok.addEventListener('click', () => { const p = +i1.value; if (!(p > 0)) return; x.exit = p; x.fee = +i2.value || 0; x.closedAt = i3.value ? new Date(i3.value).getTime() : Date.now();
-      x.out = x.tp && Math.abs(p - x.tp) < 0.01 ? 'tp' : x.sl && Math.abs(p - x.sl) < 0.01 ? 'sl' : 'man'; save(); drawAll(); });
+      x.out = x.tp && Math.abs(p - x.tp) < 0.01 ? 'tp' : x.sl && Math.abs(p - x.sl) < 0.01 ? 'sl' : 'man'; saveNow(); drawAll(); });
     const no = el('button', 'btn-line', 'ยกเลิก'); no.type = 'button'; no.addEventListener('click', () => { f.remove(); drawOpen(); });
     const act = el('div', 'pf-actions wide'); act.append(ok, no, pv); f.append(l1, l2, l3, act); row.append(f); i1.focus({ preventScroll: true });
   };
@@ -7396,10 +7437,10 @@ const SPC = (() => {
       el('span', null, PB ? `ฝึกกดเทรดและให้บอทลองท่า ไม่เกี่ยวกับเงินจริง · พอร์ตปลอม $${f2(P().start + stats(pClosed()).net)}` : 'จดไม้ที่เข้าใน MT5 กฎความเสี่ยงและด่านตรวจใช้กับหน้านี้'));
     e.append(t); const src = $('gt-src'); if (src) { dsrc = PB ? 'paper' : 'real'; src.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === dsrc))); src.closest('.gt-bar').hidden = true; } };
   document.addEventListener('vg:view', () => { if (!$('gt-book')) return; const k = book(); if (k === drawBook.k) return; drawBook.k = k; drawBook(); selDay = null; if (loaded) drawAll(); else { drawDash(); } });
-  const drawAll = () => { drawBook(); drawIf(); drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
+  const drawAll = () => { drawBook(); drawIf(); qHint(); drawChart(); drawNow(); drawOpen(); drawClosed(); drawPaper(); drawDash(); drawRules(); };
 
   /* ---------- wiring ---------- */
-  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtbt', 'gtr', 'gtall'];
+  const SUBS = ['gtc', 'gttm', 'gtp', 'gtj', 'gtd', 'gtbt', 'gtr', 'gtall', 'gtsr'];
   const visible = () => { const v = $('view-scan'); return v && !v.hidden && document.body.dataset.tab === 'invest' && SUBS.some((k) => { const s = $(k); return s && !s.classList.contains('sub-off'); }) && document.visibilityState === 'visible'; };
   const csv = () => {
     const rows = [['เข้า', 'ปิด', 'ฝั่ง', 'lot', 'ราคาเข้า', 'SL', 'TP', 'ราคาปิด', 'ค่าคอม USD', 'กำไร USD', 'บันทึก']];
@@ -7474,6 +7515,7 @@ const SPC = (() => {
     Object.keys(STRATS).forEach((k) => $('gp-a-' + k).addEventListener('change', (ev) => { P().auto[k] = ev.target.checked; if (ev.target.checked) P().since[k] = Date.now(); save(); drawPaper(); }));
     $('gp-be').addEventListener('change', (ev) => { P().be = ev.target.checked; save(); });
     $('gp-start').addEventListener('change', () => { const v = +$('gp-start').value; if (v > 0) { P().start = v; save(); drawPaper(); } else $('gp-start').value = P().start; });
+    if ($('gq-buy')) { $('gq-buy').addEventListener('click', () => qAdd('buy')); $('gq-sell').addEventListener('click', () => qAdd('sell')); ['input', 'change'].forEach((ev) => { $('gq-px').addEventListener(ev, qHint); $('gq-lot').addEventListener(ev, qHint); }); }
     if ($('ga-start')) { $('ga-start').value = +D.set.gaStart > 0 ? D.set.gaStart : 1000; $('ga-start').addEventListener('change', () => { const v = +$('ga-start').value; if (v > 0) { D.set.gaStart = v; save(); drawIf(); } else $('ga-start').value = D.set.gaStart || 1000; }); }
     document.querySelectorAll('#ga-span button').forEach((b) => b.addEventListener('click', () => { if (b.disabled) return; gaSpan = b.dataset.k; drawIf(); }));
     $('gp-reset').addEventListener('click', () => { if (!confirm('ลบไม้กระดาษทั้งหมดแล้วเริ่มใหม่?')) return; gone(P().tx.map((x) => x.id)); P().tx = []; Object.keys(P().auto).forEach((k) => { P().since[k] = Date.now(); }); save(); drawAll(); });
@@ -7571,8 +7613,11 @@ if (FB && window.VGPort) {
     const denied = (k) => `${STORES[k].label}ยังซิงค์ไม่ได้ ต้องอัปเดตกฎใน Firebase (ข้อมูลยังอยู่ในเครื่องนี้)`;
     /* the server sends our own save back once its timestamp is set; comparing with what we sent stops that echo from redrawing the page while someone types */
     const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
-    const push = (k = 'portfolios') => {
-      const s = st[k]; if (!s || !s.ref || !s.ok) return; clearTimeout(s.timer); status('กำลังบันทึก…');
+    const push = (k = 'portfolios', now = false) => {
+      const s = st[k]; if (!s || !s.ref || !s.ok) return Promise.resolve(false); clearTimeout(s.timer); status('กำลังบันทึก…');
+      if (now) { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
+        .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); return true; })
+        .catch((e) => { console.warn(e); s.fail = true; s.err = `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); throw e; }); }
       s.timer = setTimeout(() => { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
         .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
         .catch((e) => { console.warn(e); s.fail = true; s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); }); }, 600);
