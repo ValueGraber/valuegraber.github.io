@@ -559,7 +559,7 @@
       mk.push({ time: ts(b[j].t), position: sg.side === 'buy' ? 'belowBar' : 'aboveBar', color: sg.side === 'buy' ? LW.up : LW.dn, shape: sg.side === 'buy' ? 'arrowUp' : 'arrowDown', text: (sg.side === 'buy' ? 'Buy ' : 'Sell ') + (TAGS[strat()] || '') }); });
     LW.cs.setMarkers(mk);
     LW.pls.forEach((p) => LW.cs.removePriceLine(p)); LW.pls = [];
-    (book() === 'paper' ? pOpen() : openTx()).forEach((x) => [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
+    [].forEach((x) => /* journal removed: no open-trade lines */ [['entry', cssv('--ink'), x.src ? 'กระดาษ' : 'เข้า'], ['sl', LW.dn, 'SL'], ['tp', LW.up, 'TP']].forEach(([k, c, tl]) => { if (x[k]) LW.pls.push(LW.cs.createPriceLine({ price: x[k], color: c, lineWidth: 1, lineStyle: LW.L.LineStyle.Dashed, axisLabelVisible: true, title: tl })); }));
     if (LW.key !== key) { LW.key = key; lwSpan(); }
     readOut(b, J, b.length - 1); drawLeg(); LW.zq();
   };
@@ -588,7 +588,7 @@
     if (!all.length || !I) { box.innerHTML = ''; return; }
     const W = Math.max(300, box.clientWidth || 600), R = 58, H1 = 250, H2 = 74, GAP = 22, H = H1 + GAP + H2 + 18;
     const n = Math.min(span, all.length), s0 = all.length - n, v = all.slice(s0);
-    const opens = book() === 'paper' ? pOpen() : openTx(), LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
+    const opens = [], LV = STRATS[strat()].lines ? STRATS[strat()].lines(I) : null;
     let lo = Infinity, hi = -Infinity;
     v.forEach((b, k) => { lo = Math.min(lo, b.l, I.e50[s0 + k] ?? b.l); hi = Math.max(hi, b.h, I.e50[s0 + k] ?? b.h); });
     const rng0 = hi - lo; if (LV) v.forEach((b, k) => [LV[0][s0 + k], LV[1][s0 + k]].forEach((p) => { if (p != null && p > lo - rng0 * 0.5 && p < hi + rng0 * 0.5) { lo = Math.min(lo, p); hi = Math.max(hi, p); } }));
@@ -638,9 +638,7 @@
   const posture = () => {
     const PB = book() === 'paper', now = Date.now(), r = rules(), d = dayState(PB ? P().tx : D.tx), stop = [], care = [], i = bars.length - 1;
     if (wkend(now)) stop.push('ตลาดทองปิดเสาร์-อาทิตย์');
-    if (!PB) { breaker(D.tx).out.forEach((x) => stop.push(x.msg));
-      if (d.n >= r.maxTrades) stop.push(`เข้าครบ ${r.maxTrades} ไม้แล้ววันนี้`);
-      if (d.pl <= -r.maxDay) stop.push(`วันนี้เสียถึงเพดาน $${f2(r.maxDay)} แล้ว`); }
+    /* the trade journal was removed on 2026-11-25, so only the market decides here */
     if (nfpBlock(now) || nfpBlock(now + 3 * 3600e3)) care.push('ใกล้ช่วงข่าวจ้างงานสหรัฐ (NFP) ศุกร์แรกของเดือน');
     let vol = null; if (I && i > 500) { const A = I.atr.slice(i - 480, i).filter((v) => v != null).sort((p, q) => p - q), med = A[A.length >> 1]; vol = I.atr[i] / med;
       if (vol > 1.8) care.push(`ผันผวนสูงกว่าปกติ ${vol.toFixed(1)} เท่า SL จะกว้าง ลด lot`); }
@@ -649,10 +647,10 @@
   };
   const drawDay = (box) => {
     const P0 = posture(), w = el('div', 'gt-day ' + P0.st), top = el('div', 'gt-dayh');
-    top.append(el('span', 'gt-stamp', P0.st === 'stop' ? (P0.PB ? 'ตลาดปิด' : 'พักวันนี้') : P0.st === 'care' ? 'เทรดได้ แต่ระวัง' : 'เทรดได้'), el('span', 'gt-dayw', P0.why.length ? P0.why.join(' · ') : 'ไม่มีอะไรขวาง เข้าได้ตามสัญญาณและแผน'));
+    top.append(el('span', 'gt-stamp', P0.st === 'stop' ? 'ตลาดปิด' : P0.st === 'care' ? 'เทรดได้ แต่ระวัง' : 'เทรดได้'), el('span', 'gt-dayw', P0.why.length ? P0.why.join(' · ') : 'ไม่มีอะไรขวาง เข้าได้ตามสัญญาณและแผน'));
     const f = el('dl', 'gt-dayf'), it = (k, v, c) => { const x = el('div'); x.append(el('dt', null, k), el('dd', c || null, v)); f.append(x); };
     it('ช่วงตลาด', P0.sess, 'tx'); it('ความผันผวน', P0.vol == null ? '–' : P0.vol > 1.8 ? 'สูง' : P0.vol < 0.6 ? 'เงียบ' : 'ปกติ', P0.vol > 1.8 ? 'neg tx' : 'tx');
-    it(P0.PB ? 'ไม้กระดาษวันนี้' : 'ไม้จริงวันนี้', P0.PB ? String(P0.d.n) : `${P0.d.n}/${P0.r.maxTrades}`); it(P0.PB ? 'กำไรกระดาษวันนี้' : 'กำไรวันนี้', usd(P0.d.pl), tone(P0.d.pl));
+    if (I && bars.length) it('ATR (แกว่งต่อชั่วโมง)', '$' + f2(I.atr[bars.length - 1] || 0)); it('เงินที่ยอมเสียต่อไม้', '$' + f2(P0.r.maxLoss));
     w.append(top, f);
     const n = el('p', 'pf-hint gt-dayn'); n.append('ระบบรู้แค่ข่าว NFP ก่อนเข้าไม้เช็กข่าวใหญ่ (CPI, FOMC) ใน ');
     const a = el('a', null, 'ปฏิทินข่าว'); a.href = 'https://www.forexfactory.com/calendar'; a.target = '_blank'; a.rel = 'noopener'; n.append(a, ' · หยุด 30 นาทีก่อนและหลังข่าว'); w.append(n);
@@ -704,14 +702,12 @@
         if (!(lt >= 0.01) || !c.ok) { warn.hidden = false; warn.textContent = 'ไม่ผ่านด่านตรวจ: ' + (lt >= 0.01 ? c.bl : ['SL ไกลเกินเงินที่ยอมเสีย']).join(' · '); return; }
         const x = paperOpen(s.side, { sl: s.sl, tp: s.tp, lot: lt }); if (x) { save(); drawAll(); setTimeout(() => { const t = $('gp-open'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60); } });
       const b3 = el('button', 'btn-line', 'ไทม์แมชชีน'); b3.type = 'button'; b3.addEventListener('click', () => tmFill(s, strat()));
-      bx.append(PB ? b2 : b, b3); card.append(bx, warn);
+      bx.append(b3); card.append(bx);
     } else {
       card.append(el('b', null, 'ยังไม่มีสัญญาณ รอก่อน'));
       if (tr && tr.wk) card.append(el('p', null, 'วันเสาร์-อาทิตย์ ตลาดทองจริงปิด ราคา PAXG ยังขยับได้ แต่ระบบไม่ให้สัญญาณ'));
       else if (tr) card.append(el('p', null, STRATS[strat()].wait(I, bars.length - 1)));
       const prev = S[S.length - 1]; if (prev) card.append(el('p', 'pf-hint', `สัญญาณล่าสุดของท่า${STRATS[strat()].name}: ${prev.side === 'buy' ? 'ซื้อ' : 'ขาย'} ${hm(prev.t)} ที่ ${px(prev.entry)} → ${prev.out === 'tp' ? 'ถึง TP' : prev.out === 'sl' ? 'โดน SL' : prev.out === 'time' ? 'ปิดเพราะครบ 48 ชม.' : 'ยังไม่จบ'}`));
-      const b = el('button', 'btn-line', book() === 'paper' ? 'กดเทรดกระดาษเอง' : 'จดไม้เอง'); b.type = 'button';
-      b.addEventListener('click', () => { if (book() === 'paper') { const t = $('gp-buy'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' }); } else prefill(null); }); card.append(b);
     }
     box.append(card);
     box.append(srPanel());
