@@ -54,24 +54,8 @@ Owner: Mon (Thai). All UI text is Thai, plain and calm.
 - Import from the OwnLife .xlsx (needs the real file).
 - Track record of past "buy" picks vs SPY; a how-to page; offline mode.
 
-## Diet page (`/diet/`)
-- Separate weight-loss planner at https://valuegraber.github.io/diet/. Source `src/diet.html` (same body as Mon's Claude artifact), build with `python3 tools/build_diet.py` → `docs/diet/index.html`. Not part of `tools/build.py`.
-- Storage: localStorage `wl-profile`, `wl-day-YYYY-MM-DD`, `wl-week-<monday>`; signed in → Firestore `diet/{uid}` (profile), `diet/{uid}/days/{date}`, `diet/{uid}/weeks/{monday}`. Same Firebase project/auth as ValueGrab. First sign-in uploads local data if the account has no profile yet.
-- Features: exercise demos (`EX` steps + `POSES` stick figures, `openEx`), lift log (`profile.lifts`, `logLift`, `hintFor`), rest `Timer`, `profile.recent` foods + `copyMeal`, 7-day `renderSummary` + CSV `exportCsv`, waist/hip in `profile.weights`.
-- Needs rule: `match /diet/{uid}/{rest=**} { allow read, write: if request.auth != null && request.auth.uid == uid; }`
-
-## Durian orchard book (`/durian/`)
-- Thai per-tree record book for Mon's durian/mangosteen orchard at https://valuegraber.github.io/durian/. Self-contained `docs/durian/index.html` (same body as Mon's Claude artifact "สมุดสวนทุเรียน", ported to Firebase); no build step, edit it directly. Config in `docs/durian/firebase-config.js` (same `valuegrab` Firebase project).
-- Sign-in: Firebase Anonymous auth + "ชื่อสวน + รหัสสวน". Garden id = SHA-256 of `lower(trim(name)) + '|' + code`; data at `gardens/{gid}` and subcollections trees, works, flowers, sales, money, stock, chems, recipes, meta, photos (photos are JPEG data URLs ≤230 KB). Session in localStorage `durian-session-v1`; local-only mode uses `durian-book-v1`.
-- Home top: `todayHTML` tiles (stage/tasks/weather/pest), `pestCardHTML`, `gapsHTML` (dismiss in localStorage durian-gaps-off). Pest model `PESTS` (month base Jan..Dec, eastern) × orchard stage × weather in `pestRisk`; plan tab `pest` = `vPest`. Mix banner `mixBannerHTML` (localStorage durian-mixbanner-v1).
-- River/flood tab `rv` = `vRiver`: Open-Meteo Flood API (GloFAS) `fetchRv` (forecast past60+30d ensemble stats; history 1995→today reduced by `rvStats` to q2/q5/p90/yearly peaks + last 1500 days), cache localStorage `durian-rv-v1`; `rvAnalyze` levels `RL` 0–3, calibrated by meta/plan.floodDate (danger=0.9×Q on that date, `rvAround`); optional river point meta/plan.rlat/rlon. Home row in `homePlanHTML`, gap 'fld'.
-- Guide tab crop toggle `ui.guideCrop` (act gcrop): durian `GUIDE_HTML` vs mangosteen `MG_GUIDE_HTML` (old-tree calendar, eastern region).
-- Mangosteen split: `CROPS`, ledger rows carry `crop`+`mg` share (works: by picked trees `cropOfIds`; money.crop / sales.crop, default ทั้งสวน/ทุเรียน); `ledgerFor(crop)` splits shared rows by `mgShare()` (meta/plan.mgShare % or tree count). Money crop seg `ui.crop` (act mcrop), works filter `ui.wcrop`; mangosteen harvest via `bloomRounds(st,true)` + `MG_STEPS`.
-- Money tab `cost` = `vCost` (per-rai via meta/plan.rai; `CAPITAL` cats excluded from operating cost; `costYear`). Harvest plan `harvestHTML`/`HV_STEPS` atop `vFlower`; PLAN_END has 2 appended steps (-21 buyer, -10 book).
-- Tab `#plan` (แผนงาน/อากาศ/คู่มือ): mode pbz|nat in meta/plan.mode (PLAN_A vs PLAN_A_NAT; guide sections data-m="pbz|nat"); spray/fertilizer calendar from `PLAN_A` (offsets from post-harvest date H) and `PLAN_B`/`PLAN_END` (offsets from bloom rounds in flowers, or expected bloom B). State in `meta/plan` {lat,lon,canopy,H,B,done}. Weather from Open-Meteo (forecast + past_days=30, plus 3-model rain spread), cached in localStorage `durian-wx-v1`; `wxAnalyze` makes spray windows, stage alerts, water need. Guide text is `GUIDE_HTML`.
-- Plant doctor (2026-11-23, block before `const VIEWS`): plan tabs `diag`=`vDiag` (symptoms `DXS`, context `DXC`, causes `DXR`, scorer `dxRun`, state `ui.dx`, save → works note; tree sheet button act `dxtree`) and `soil`=`vSoil` (`SF` fields, `soilRead` durian thresholds, data meta/soil.tests). Lab tab `bio`=`vBio` (recipes `BIO`, calc `bioResHTML`, batches meta/bio.batches, state `ui.bio`). Safety: `BANNED`/`RESTRICT` (DOA type-4 list) `bannedOf`/`chemBan`/`chemNoPhi`/`safetyIssues`; shown in `safetyPanelHTML` atop chems, `banBadge` in vChems, mixer warns (ban:1), chem-save toast, home `drHomeHTML`. Actions in `drAct`.
-- Needs Anonymous enabled in Firebase Auth and this rule:
-  `match /gardens/{gid} { allow get, create, update: if request.auth != null; allow list, delete: if false; match /{coll}/{doc} { allow read, write: if request.auth != null; } }`
+## Other sites (own repos since 2026-11-26)
+- Diet `/diet/` → repo ValueGraber/diet, durian `/durian/` → repo ValueGraber/durian. Each has its own NOTES.md. Same Firebase project; all rules stay in `firestore.rules` here.
 
 ## Upgrades 2026-11-23 (stocks / gold spot / gold trading)
 - Gold trading `gtbt` group: long backtest (lbLoad/btRun/lbAnalyze) with spread+slip+comm, yearly, IS/OOS 70/30, SL×TP grid, verdict. Filters htf/nfp, auto-off bots (≥30 trades, mean R<0), expectancy calculator (calcGo) in gtr.
