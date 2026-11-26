@@ -4,9 +4,9 @@ Site: https://valuegraber.github.io (GitHub Pages, `/docs` on `main`). Repo: Val
 Owner: Mon (Thai). All UI text is Thai, plain and calm.
 
 ## Base backup (known-good point) — read this first when something breaks
-- Tag `base-2026-11-26` (commit 3a9e736): sync rewrite tested against REAL Firestore (anonymous test account in the built-in browser) + full crawl of every tab/sub-page desktop+mobile with seeded data, no errors.
-- When Mon reports a problem: diff against it first — `git fetch --depth=50 origin tag base-2026-11-26 && git diff base-2026-11-26 -- src/` — and say what changed since.
-- Roll back one file: `git checkout base-2026-11-26 -- src/template.html` then build, smoke, commit. Whole-site rollback only with Mon's OK.
+- Branch `base-2026-11-26` (frozen; tags cannot be pushed from Claude sessions) (commit 3a9e736): sync rewrite tested against REAL Firestore (anonymous test account in the built-in browser) + full crawl of every tab/sub-page desktop+mobile with seeded data, no errors.
+- When Mon reports a problem: diff against it first — `git fetch --depth=1 origin base-2026-11-26 && git diff FETCH_HEAD -- src/` — and say what changed since.
+- Roll back one file: `git checkout FETCH_HEAD -- src/template.html (after that fetch)` then build, smoke, commit. Whole-site rollback only with Mon's OK.
 - Mon set this point on purpose (2026-11-26). Move it only when Mon asks for a new base.
 
 ## Files
