@@ -4673,12 +4673,12 @@ dash.calc('sectors', {
       const tr = el('tr', t.id === editId ? 'editing' : null); const [tn, tc] = TYPE_TH(t); const cd = cashDelta(t);
       let cells;
       if (isTrade(t)) {
-        const feeTxt = t.cur === 'thb' ? `จ่ายเป็นบาท เรท ${t.rate} · ค่าธรรมเนียม ${(t.feeThb || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท` : t.cur === 'usd' ? `จ่ายเป็นดอลลาร์ · ค่าธรรมเนียม ${usd(t.fee || 0)}` : t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
+        const feeTxt = t.cur === 'thb' ? `จ่ายเป็นบาท เรท ${t.rate > 0 ? t.rate : 'ไม่ได้ระบุ'} · ค่าธรรมเนียม ${(t.feeThb || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 })} บาท` : t.cur === 'usd' ? `จ่ายเป็นดอลลาร์ · ค่าธรรมเนียม ${usd(t.fee || 0)}` : t.feeThb != null ? t.feeThb.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' บาท' : fx ? ((t.fee || 0) * fx > 0 ? '≈ ' + ((t.fee || 0) * fx).toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท' : '0 บาท') : usd(t.fee || 0);
         cells = [t.sym, qty(t.shares, 6) + (map[t.sym] && map[t.sym].crypto ? ' เหรียญ' : ' หุ้น'), usd(t.price), feeTxt];
       } else if (t.type === 'fx') cells = ['–', baht(t.thb), 'เรท ' + (t.thb / t.usd).toFixed(2), ''];
       else if (isSplit(t)) cells = [t.sym, `${qty(t.from, 4)} → ${qty(t.to, 4)}`, '', `จำนวนหุ้น ×${qty(ratioOf(t), 4)} ต้นทุนรวมเท่าเดิม`];
       else cells = [t.sym, '', '', t.tax ? 'ภาษี ' + usd(t.tax) : ''];
-      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], isTrade(t) && t.cur === 'thb' ? [(t.type === 'buy' ? '−' : '+') + baht(t.shares * t.price * t.rate + (t.type === 'buy' ? 1 : -1) * (t.feeThb || 0)), t.type === 'sell' ? 'pos' : ''] : (isSplit(t) ? ['–', ''] : [usdS(cd), cd >= 0 ? 'pos' : ''])].forEach(([v, c]) => tr.append(el('td', c || null, v)));
+      [[dTH(t.date), 'l'], [cells[0], 'l'], [tn, 'l ' + tc], [cells[1]], [cells[2]], [cells[3]], isTrade(t) && t.cur === 'thb' ? (t.rate > 0 ? [(t.type === 'buy' ? '−' : '+') + baht(t.shares * t.price * t.rate + (t.type === 'buy' ? 1 : -1) * (t.feeThb || 0)), t.type === 'sell' ? 'pos' : ''] : ['–', '']) : (isSplit(t) ? ['–', ''] : [usdS(cd), cd >= 0 ? 'pos' : ''])].forEach(([v, c]) => tr.append(el('td', c || null, v)));
       const e = el('button', 'edit', '✎'); e.type = 'button'; e.title = 'แก้ไข'; e.setAttribute('aria-label', 'แก้ไขรายการ'); e.addEventListener('click', () => startEdit(t));
       const d = el('button', 'del', '✕'); d.type = 'button'; d.title = 'ลบ'; d.setAttribute('aria-label', 'ลบรายการ');
       d.addEventListener('click', () => { if (confirm(`ลบรายการ${tn} ${t.sym || baht(t.thb)} วันที่ ${dTH(t.date)}?`)) { db.tx = db.tx.filter((y) => y.id !== t.id); if (editId === t.id) endEdit(); save(); render(); } });
@@ -5394,7 +5394,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '44958de00a'; window.VG_BUILD = BUILD;
+  const BUILD = '6c60ecec2a'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
