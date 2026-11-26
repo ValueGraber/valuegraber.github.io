@@ -3,6 +3,12 @@
 Site: https://valuegraber.github.io (GitHub Pages, `/docs` on `main`). Repo: ValueGraber/valuegraber.github.io.
 Owner: Mon (Thai). All UI text is Thai, plain and calm.
 
+## Base backup (known-good point) — read this first when something breaks
+- Tag `base-2026-11-26` (commit 3a9e736): sync rewrite tested against REAL Firestore (anonymous test account in the built-in browser) + full crawl of every tab/sub-page desktop+mobile with seeded data, no errors.
+- When Mon reports a problem: diff against it first — `git fetch --depth=50 origin tag base-2026-11-26 && git diff base-2026-11-26 -- src/` — and say what changed since.
+- Roll back one file: `git checkout base-2026-11-26 -- src/template.html` then build, smoke, commit. Whole-site rollback only with Mon's OK.
+- Mon set this point on purpose (2026-11-26). Move it only when Mon asks for a new base.
+
 ## Files
 - `src/template.html`: the source of truth for the page (~300 KB, one file: CSS, HTML, scripts). Do not read it whole; `grep -n` for anchors below.
 - `src/calcs.js`: VI scoring (`CALC.scan/market/sectors`), inlined at `/*CALCS*/`.
