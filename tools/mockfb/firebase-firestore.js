@@ -6,3 +6,5 @@ const snap = (r) => { const v = localStorage.getItem(K(r)); return { exists: () 
 export const getDoc = async (r) => snap(r);
 export const setDoc = async (r, d) => { localStorage.setItem(K(r), JSON.stringify(d)); window.__writes = (window.__writes || 0) + 1; };
 export const onSnapshot = (r, cb) => { const h = (e) => { if (e.key === K(r)) cb(snap(r)); }; window.addEventListener('storage', h); setTimeout(() => cb(snap(r)), 5); return () => window.removeEventListener('storage', h); };
+
+export const runTransaction = async (f, fn) => fn({ get: async (r) => snap(r), set: (r, d) => { localStorage.setItem(K(r), JSON.stringify(d)); window.__writes = (window.__writes || 0) + 1; } });

@@ -5386,7 +5386,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '62f73d97c1'; window.VG_BUILD = BUILD;
+  const BUILD = 'd8dfe3462e'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7630,6 +7630,29 @@ if (FB && window.VGPort) {
   const clean = (o) => JSON.parse(JSON.stringify(o));
   const hhmm = () => new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
   const byId = (a, b) => { const ids = new Set(a.map((x) => x.id)); return [...a, ...b.filter((x) => !ids.has(x.id))]; };
+  /* three-way merge: base = the account copy this device last saw, local = this device now, cloud = the account now.
+     Only what this device changed since base is laid over the cloud copy, so a stale device can no longer wipe another
+     device's new records, and a deletion stays deleted (it is "in base, gone locally"). Lists of {id} merge per record,
+     lists of plain values merge as sets, objects per key; anything else: the side that changed wins (local on a tie). */
+  const cj = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
+  const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+  const idList = (a) => Array.isArray(a) && a.every((x) => isObj(x) && x.id != null);
+  const prim = (a) => Array.isArray(a) && a.every((x) => x == null || typeof x !== 'object');
+  const merge3 = (b, l, c) => {
+    if (l === undefined) return c; if (c === undefined) return b !== undefined && cj(b) === cj(l) ? undefined : l;
+    if (cj(l) === cj(c) || cj(l) === cj(b)) return c; if (b !== undefined && cj(c) === cj(b)) return l;
+    if (idList(l) && idList(c) && (b === undefined || idList(b)) && (l.length || c.length)) {
+      const B = new Map((Array.isArray(b) ? b : []).filter(isObj).map((x) => [String(x.id), x])), L = new Map(l.map((x) => [String(x.id), x]));
+      const out = new Map(c.map((x) => [String(x.id), x]));
+      B.forEach((x, id) => { if (!L.has(id)) out.delete(id); });
+      L.forEach((x, id) => { const bx = B.get(id); if (!bx) { if (!out.has(id)) out.set(id, x); } else if (cj(bx) !== cj(x)) out.set(id, out.has(id) ? merge3(bx, x, out.get(id)) : x); });
+      return [...out.values()];
+    }
+    if (prim(l) && prim(c) && (b === undefined || prim(b))) { const bs = new Set((b || []).map(String)), ls = new Set(l.map(String));
+      const r = c.filter((x) => !(bs.has(String(x)) && !ls.has(String(x)))); const rs = new Set(r.map(String)); l.forEach((x) => { if (!bs.has(String(x)) && !rs.has(String(x))) { r.push(x); rs.add(String(x)); } }); return r; }
+    if (isObj(l) && isObj(c)) { const B = isObj(b) ? b : undefined, o = {}; new Set([...Object.keys(c), ...Object.keys(l)]).forEach((k) => { const v = merge3(B && B[k], l[k], c[k]); if (v !== undefined) o[k] = v; }); return o; }
+    return b === undefined ? c : l;
+  };
   /* what each synced document holds, how to read it from the page, and how to merge a device's local copy into the account the first time */
   /* each device writes a small note into the account (dev.<id>: name, app version, gold real-trade count, time), so one device can see
      whether the other is saving and on which version — the gold journal shows it under the save button */
@@ -7685,26 +7708,40 @@ if (FB && window.VGPort) {
     const denied = (k) => `${STORES[k].label}ยังซิงค์ไม่ได้ ต้องอัปเดตกฎใน Firebase (ข้อมูลยังอยู่ในเครื่องนี้)`;
     /* the server sends our own save back once its timestamp is set; comparing with what we sent stops that echo from redrawing the page while someone types */
     const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
+    /* base copy per store and account, kept on the device (see merge3) */
+    const bKey = (k) => `vg-base-${k}-${uidNow}`;
+    const baseOf = (k) => { try { return JSON.parse(localStorage.getItem(bKey(k)) || 'null') || undefined; } catch (e) { return undefined; } };
+    const setBase = (k, d) => { try { localStorage.setItem(bKey(k), cj(d)); } catch (e) { /* full storage: merge falls back to union */ } };
+    const strip = (d) => { const o = { ...(d || {}) }; delete o.updated; return o; };
+    /* cloud copy arrived: merge this device's changes in, show the result, remember cloud as the new base; save back if this device added something */
+    const take = (k, cloud) => { const c = strip(cloud), L = clean(STORES[k].payload()), m = merge3(baseOf(k), L, c);
+      setBase(k, c); if (cj(m) !== cj(L)) STORES[k].apply(m); return { m, more: cj(m) !== cj(c), extra: Math.max(0, cj(m).length - cj(c).length) }; };
+    const failMsg = (k, e) => e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`;
+    /* save = read the account copy, merge, write, all in one transaction, so two devices never overwrite each other */
+    const write = async (k) => { const s = st[k];
+      const m = await F.runTransaction(fs, async (tr) => { const x = await tr.get(s.ref); const L = clean(STORES[k].payload());
+        const m = x.exists() ? merge3(baseOf(k), L, strip(x.data())) : L; const kb = new Blob([cj(m)]).size / 1024;
+        if (kb > 950) throw Object.assign(new Error('big'), { code: `ข้อมูล${STORES[k].label}ใหญ่ ${Math.round(kb)} KB เกินที่บัญชีรับได้ (1 MB)` });
+        tr.set(s.ref, { ...m, updated: F.serverTimestamp() }); return m; });
+      s.last = canon(m); setBase(k, m); if (cj(m) !== cj(clean(STORES[k].payload()))) STORES[k].apply(m);
+      s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); return true; };
     const push = (k = 'portfolios', now = false) => {
       const s = st[k]; if (!s || !s.ref || !s.ok) return Promise.resolve(false); clearTimeout(s.timer); status('กำลังบันทึก…');
-      if (now) { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
-        .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); return true; })
-        .catch((e) => { console.warn(e); s.fail = true; s.err = `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); throw e; }); }
-      s.timer = setTimeout(() => { const pl = STORES[k].payload(); s.last = canon(pl); return F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() })
-        .then(() => { s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); })
-        .catch((e) => { console.warn(e); s.fail = true; s.err = e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`; status(''); }); }, 600);
+      if (now) return write(k).catch((e) => { console.warn(e); s.fail = true; s.err = failMsg(k, e); status(''); throw e; });
+      s.timer = setTimeout(() => write(k).catch((e) => { console.warn(e); s.fail = true; s.err = failMsg(k, e); status(''); }), 600);
+      return Promise.resolve(true);
     };
     /* fetch the account copy now and merge it in (gold trading merges per trade, see gtrade.js sync) */
     const pull = async (k = 'portfolios') => { const s = st[k]; if (!s || !s.ref || !s.ok) return false; const x = await F.getDoc(s.ref);
-      if (x.exists()) { const m = STORES[k].merge(x.data()); STORES[k].apply(m.changed ? m.doc : x.data()); if (m.changed) push(k); } status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
+      if (x.exists()) { if (take(k, x.data()).more) push(k); } else if (STORES[k].local().has) push(k); status('ดึงข้อมูลล่าสุดแล้ว ' + hhmm()); return true; };
     let uidNow = '';
     const check = async () => { const s = st.portfolios; if (!s || !s.ref || !s.ok) return { err: 'ยังไม่ได้ล็อกอิน หรือโหลดข้อมูลจากบัญชีไม่สำเร็จ' };
       const x = await F.getDoc(s.ref), c = x.exists() ? x.data() : {}, cg = (c.gt && c.gt.tx) || [], lg = window.VGGT ? window.VGGT.get().tx : [];
       const ci = new Set(cg.map((t) => t.id)), li = new Set(lg.map((t) => t.id)), up = c.updated && c.updated.toDate ? c.updated.toDate() : null;
       const r = { cloud: cg.length, local: lg.length, onlyHere: lg.filter((t) => !ci.has(t.id)).length, onlyCloud: cg.filter((t) => !li.has(t.id)).length, updated: up, kb: Math.round(JSON.stringify(c).length / 1024), id: uidNow.slice(-4).toUpperCase() };
-      const m = STORES.portfolios.merge(c); STORES.portfolios.apply(m.changed ? m.doc : c); clearTimeout(s.timer);
+      if (x.exists()) take('portfolios', c); clearTimeout(s.timer);
       const pl = STORES.portfolios.payload(); r.sendKb = Math.round(JSON.stringify(pl).length / 1024);
-      try { s.last = canon(pl); await F.setDoc(s.ref, { ...pl, updated: F.serverTimestamp() }); s.err = null; s.fail = false; r.saved = true; status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); }
+      try { await write('portfolios'); r.saved = true; }
       catch (e) { console.warn(e); r.saved = false; r.code = e.code || e.message || 'unknown'; s.fail = true; }
       r.after = window.VGGT ? window.VGGT.get().tx.length : 0; return r; };
     window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, check, id: () => uidNow.slice(-4).toUpperCase(), state: () => $('a-state').textContent };
@@ -7718,19 +7755,15 @@ if (FB && window.VGPort) {
     const attach = async (k, uid) => {
       const S = STORES[k], s = st[k]; s.ref = F.doc(fs, k, uid); s.ok = false; s.err = null;
       try {
-        const snap = await F.getDoc(s.ref); const loc = S.local(); let note = '';
-        if (!snap.exists()) { if (loc.has) { await F.setDoc(s.ref, { ...S.payload(), updated: F.serverTimestamp() }); note = `ย้าย${S.label}ในเครื่องนี้ (${loc.n} รายการ) ขึ้นบัญชีแล้ว`; } }
-        else {
-          const m = S.merge(snap.data());
-          if (m.changed) { S.apply(m.doc); await F.setDoc(s.ref, { ...m.doc, updated: F.serverTimestamp() }); if (m.extra) note = `รวม${S.label}ในเครื่องนี้อีก ${m.extra} รายการเข้ากับบัญชีแล้ว`; }
-          else S.apply(snap.data());
-        }
-        s.ok = true; let first = true; if (k === 'portfolios') setTimeout(() => push('portfolios'), 1500);
+        const snap = await F.getDoc(s.ref); const loc = S.local(); let note = ''; s.ok = true;
+        if (!snap.exists()) { if (loc.has) { await write(k); note = `ย้าย${S.label}ในเครื่องนี้ (${loc.n} รายการ) ขึ้นบัญชีแล้ว`; } }
+        else { const t = take(k, snap.data()); if (t.more) { await write(k); note = `รวมข้อมูล${S.label}ที่มีแค่ในเครื่องนี้เข้ากับบัญชีแล้ว`; } }
+        let first = true; if (k === 'portfolios') setTimeout(() => push('portfolios'), 1500);
         s.unsub = F.onSnapshot(s.ref, (x) => {
           if (first) { first = false; return; }
           if (x.metadata.hasPendingWrites || !x.exists()) return;
-          { const d = { ...x.data() }; delete d.updated; if (s.last && canon(d) === s.last) return; }
-          S.apply(x.data()); status('อัปเดตจากอีกเครื่องแล้ว ' + hhmm());
+          { const d = { ...x.data() }; delete d.updated; if (s.last && canon(d) === s.last) { setBase(k, d); return; } }
+          if (take(k, x.data()).more) push(k); status('อัปเดตจากอีกเครื่องแล้ว ' + hhmm());
         }, (e) => console.warn(e));
         return note;
       } catch (e) { console.warn(e); s.err = e.code === 'permission-denied' ? denied(k) : `โหลด${S.label}จากบัญชีไม่สำเร็จ ลองรีเฟรชหน้า`; return ''; }
