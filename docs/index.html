@@ -5386,7 +5386,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '793094750f'; window.VG_BUILD = BUILD;
+  const BUILD = 'c93ca06264'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7804,6 +7804,7 @@ if (FB && window.VGPort) {
       const on = Object.keys(STORES).filter((k) => st[k] && st[k].ok && st[k].ref);
       if (!on.length) return msg('ยังไม่ได้เชื่อมบัญชี ล็อกอินก่อน', true);
       const n = (k) => STORES[k].local().n;
+      if (!STORES.portfolios.local().has) return msg('เครื่องนี้ไม่มีข้อมูลพอร์ตเลย ไม่ให้ทับ เพราะจะทำให้ข้อมูลในบัญชีหายหมด', true);
       if (!confirm(`เอาข้อมูลในเครื่องนี้ขึ้นบัญชีแทนของเดิมทั้งหมด\n\n${on.map((k) => `• ${STORES[k].label} ${n(k)} รายการ`).join('\n')}\n\nเครื่องอื่น (เช่นมือถือ) จะถูกเปลี่ยนให้เหมือนเครื่องนี้ รายการที่มีแค่ในเครื่องอื่นจะหายไป ย้อนกลับไม่ได้\nแนะนำให้กดสำรองข้อมูลก่อน ทำต่อไหม?`)) return;
       const epoch = Date.now(); let bad = '';
       for (const k of on) { const s = st[k]; clearTimeout(s.timer);
@@ -7813,6 +7814,8 @@ if (FB && window.VGPort) {
       else { msg('เอาข้อมูลเครื่องนี้ขึ้นบัญชีแล้ว ' + hhmm() + ' · เปิดแอปในมือถือใหม่ ข้อมูลจะเปลี่ยนตามเครื่องนี้'); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); }
     });
     $('a-out').addEventListener('click', async () => {
+      if (!confirm('ออกจากระบบแล้วข้อมูลจะถูกล้างออกจากเครื่องนี้ (ยังอยู่ในบัญชี ล็อกอินกลับมาจะดึงคืน)\nรายการที่ยังบันทึกขึ้นบัญชีไม่ทันจะหาย ออกจากระบบไหม?')) return;
+      for (const k of Object.keys(st)) { if (st[k] && st[k].ok) { try { await write(k); } catch (e) { if (!confirm(`บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ ถ้าออกตอนนี้รายการล่าสุดอาจหาย ออกต่อไหม?`)) return; } } }
       Object.values(st).forEach((s) => clearTimeout(s.timer));
       await A.signOut(auth);
       Object.values(STORES).forEach((S) => S.empty());
