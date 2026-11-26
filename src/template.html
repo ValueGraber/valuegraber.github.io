@@ -336,6 +336,9 @@ tr.editing td { background: var(--jade-soft); }
 .acct-row { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; }
 .acct p { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
 .acct-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.a-rescue { margin-top: 12px; } .a-rescue summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+.a-rescue-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line, rgba(127,127,127,.25)); }
+.a-rescue-row p { margin: 2px 0 0; }
 .acct-mail { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
 .acct-mail .inp { flex: 1 1 200px; }
 .acct .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--jade); margin-right: 8px; vertical-align: middle; }
@@ -1307,6 +1310,9 @@ details.how .sec-note { margin: 6px 0 0; }
       <div class="acct-btns"><button class="btn-line" id="a-out" type="button">ออกจากระบบ</button><button class="btn-line" id="a-force" type="button">ใช้ข้อมูลเครื่องนี้ทับทุกเครื่อง</button></div>
     </div>
     <div class="pf-hint" id="a-msg" role="status"></div>
+    <details class="a-rescue" id="a-rescue" hidden><summary>กู้ข้อมูล · สำเนาที่เครื่องนี้เก็บไว้ <span id="a-rescue-n"></span></summary>
+      <p class="pf-hint">แอปเก็บสำเนาไว้ทุกครั้งที่การซิงค์จะทำให้รายการหายหลายรายการ กด "เอากลับมา" แล้วรายการในสำเนาจะถูกรวมกลับเข้ามา (รายการที่มีอยู่แล้วไม่ซ้ำ)</p>
+      <div id="a-rescue-list"></div></details>
   </section>
 <div id="view-home" hidden>
   <header class="home-head"><div><p class="stamp" id="h-stamp">กำลังโหลดข้อมูลล่าสุด</p><h1 class="h-title" id="h-verdict">ภาพรวมวันนี้</h1></div>
@@ -5014,7 +5020,7 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
   };
   $('bk-export').addEventListener('click', () => {
     const d = new Date(); const day = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-    const all = { app: 'ValueGrab-all', version: 1, saved: d.toISOString(), portfolio: { ...(window.VGPort ? window.VGPort.get() : {}), watch: window.VGWatch ? window.VGWatch.get() : [] },
+    const all = { app: 'ValueGrab-all', version: 1, saved: d.toISOString(), portfolio: { ...(window.VGPort ? window.VGPort.get() : {}), watch: window.VGWatch ? window.VGWatch.get() : [], ...(window.VGTrade ? { spot: window.VGTrade.trade() } : {}), ...(window.VGGT ? { gt: window.VGGT.get() } : {}) },
       business: window.VGBiz ? window.VGBiz.get() : {}, money: window.VGMoney ? window.VGMoney.get() : {}, prefs: window.VGPrefs ? window.VGPrefs.all() : {} };
     const a = el('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(all)], { type: 'application/json' })); a.download = `valuegrab-backup-${day}.json`; document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000); try { localStorage.setItem(BK, d.toISOString()); } catch (e) { /* ignore */ }
@@ -5028,9 +5034,11 @@ const dash = { calc: (id, o) => { CALC[id] = o; } };
       if (!confirm(`กู้คืนข้อมูลจากไฟล์ที่สำรองเมื่อ ${new Date(j.saved).toLocaleString('th-TH')}? ข้อมูลปัจจุบันในเครื่องนี้ (และในบัญชี ถ้าล็อกอินอยู่) จะถูกแทนที่ทั้งหมด`)) return;
       const p = j.portfolio; if (window.VGPort) window.VGPort.replace({ tx: Array.isArray(p.tx) ? p.tx : [], targets: p.targets || {}, band: p.band || 5 });
       if (window.VGWatch && Array.isArray(p.watch)) window.VGWatch.set(p.watch.filter((x) => typeof x === 'string'));
+      if (window.VGTrade && p.spot) window.VGTrade.replace(p.spot); if (window.VGGT && p.gt) window.VGGT.replace(p.gt);
       if (window.VGBiz) window.VGBiz.replace(j.business); if (window.VGMoney) window.VGMoney.replace(j.money); if (window.VGPrefs && j.prefs) window.VGPrefs.replaceAll(j.prefs);
-      if (window.VGSync) ['portfolios', 'business', 'money'].forEach((k) => window.VGSync.push(k));
-      $('bk-msg').textContent = 'กู้คืนข้อมูลเรียบร้อยแล้ว'; render();
+      let up = '';
+      if (window.VGSync && window.VGSync.on()) { for (const k of ['portfolios', 'business', 'money']) { try { if (window.VGSync.on(k)) await window.VGSync.force(k); } catch (er) { console.warn(er); up = ' แต่ส่งขึ้นบัญชีไม่สำเร็จ ลองกด "ใช้ข้อมูลเครื่องนี้ทับทุกเครื่อง" อีกครั้ง'; } } }
+      $('bk-msg').textContent = 'กู้คืนข้อมูลเรียบร้อยแล้ว' + (window.VGSync && window.VGSync.on() && !up ? ' และส่งขึ้นบัญชีแล้ว' : '') + up; render();
     } catch (e) { $('bk-msg').textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองทั้งหมดของ ValueGrab'; }
   });
   /* ---------- layout: each card is a widget the person can move, resize, hide and add back ---------- */
@@ -5316,6 +5324,18 @@ if (FB && window.VGPort) {
     if (isObj(l) && isObj(c)) { const B = isObj(b) ? b : undefined, o = {}; new Set([...Object.keys(c), ...Object.keys(l)]).forEach((k) => { const v = merge3(B && B[k], l[k], c[k]); if (v !== undefined) o[k] = v; }); return o; }
     return b === undefined ? c : l;
   };
+  /* safety net. nrec = number of records ({id} objects) anywhere in a store, device notes left out */
+  const nrec = (o, top = true) => Array.isArray(o) ? o.reduce((a, x) => a + (isObj(x) && x.id != null ? 1 : 0) + (x && typeof x === 'object' ? nrec(x, false) : 0), 0)
+    : isObj(o) ? Object.keys(o).reduce((a, k) => a + (top && k === 'dev' ? 0 : nrec(o[k], false)), 0) : 0;
+  /* a sync step that would take away 3+ records and more than 40% of them never happens silently */
+  const big = (before, after) => { const b = nrec(before), a = nrec(after); return b - a >= 3 && a < b * 0.6; };
+  /* rescue copies: kept on this device (localStorage vg-rescue), up to 3 per store, listed under the account box */
+  const RK = 'vg-rescue';
+  const rescues = () => { try { return JSON.parse(localStorage.getItem(RK) || '[]'); } catch (e) { return []; } };
+  const rescue = (k, label, data, why) => { const n = nrec(data); if (!n) return;
+    let a = [{ at: Date.now(), k, label, n, why, data }, ...rescues()]; const per = {}; a = a.filter((r) => (per[r.k] = (per[r.k] || 0) + 1) <= 3);
+    while (a.length) { try { localStorage.setItem(RK, JSON.stringify(a)); break; } catch (e) { a.pop(); } }
+    if (window.VGRescueDraw) window.VGRescueDraw(); };
   /* what each synced document holds, how to read it from the page, and how to merge a device's local copy into the account the first time */
   /* each device writes a small note into the account (dev.<id>: name, app version, gold real-trade count, time), so one device can see
      whether the other is saving and on which version — the gold journal shows it under the save button */
@@ -5382,21 +5402,44 @@ if (FB && window.VGPort) {
     /* cloud copy arrived: merge this device's changes in, show the result, remember cloud as the new base; save back if this device added something */
     /* "use this device's data everywhere": the account copy carries a new epoch; a device whose base has another epoch drops its own changes and takes the account copy as it is */
     const reset = (k, c) => c.epoch && c.epoch !== (baseOf(k) || {}).epoch;
-    const take = (k, cloud) => { const c0 = strip(cloud);
-      if (reset(k, c0)) { setBase(k, c0); STORES[k].apply(c0, true); return { m: c0, more: false, data: false }; }
-      const c = c0, L = clean(STORES[k].payload()), m = merge3(baseOf(k), L, c);
-      setBase(k, c); if (cj(m) !== cj(L)) STORES[k].apply(m); const nd = (o) => cj({ ...o, dev: 0 });
+    const take = (k, cloud) => { const c0 = strip(cloud), L = clean(STORES[k].payload()), lab = STORES[k].label;
+      /* this device has nothing yet (new device, or the store was emptied): show the account copy as it is, nothing to merge */
+      if (!STORES[k].local().has) { setBase(k, c0); STORES[k].apply(c0, true); return { m: c0, more: false, data: false }; }
+      const isReset = reset(k, c0), c = c0, m = isReset ? c0 : merge3(baseOf(k), L, c);
+      if (isReset && !big(L, m)) { if (nrec(merge3(undefined, L, c0)) > nrec(c0)) rescue(k, lab, L, 'ข้อมูลในเครื่องก่อนรับข้อมูลที่อีกเครื่องสั่งทับ');
+        setBase(k, c0); STORES[k].apply(c0, true); return { m: c0, more: false, data: false }; }
+      /* a loss another device chose on purpose (confirmed bulk delete, or "use this device everywhere") is taken without asking; a copy stays in rescue */
+      const B0 = baseOf(k) || {}, meant = (c.drop && (!B0.drop || c.drop.at !== B0.drop.at)) || (isReset && c.by && (!B0.by || c.by.at !== B0.by.at));
+      if (big(L, m) && meant) { const who = (c.drop || c.by).dev || 'อีกเครื่อง';
+        rescue(k, lab, L, `ข้อมูลในเครื่อง ก่อนรับการลบ/ทับจาก ${who}`); setBase(k, c); STORES[k].apply(m, true);
+        msg(`${who} ลบหรือทับ${lab}ไว้ เครื่องนี้เปลี่ยนตามแล้ว (สำเนาเดิมอยู่ในเมนู "กู้ข้อมูล")`); return { m, more: false, data: false }; }
+      if (big(L, m)) { rescue(k, lab, L, `ข้อมูลในเครื่อง ตอนบัญชีมีน้อยกว่า (บัญชี ${nrec(c)} / เครื่อง ${nrec(L)})`);
+        if (confirm(`${lab}ในบัญชีมี ${nrec(c)} รายการ แต่เครื่องนี้มี ${nrec(L)} รายการ\n\nOK = เอาข้อมูลเครื่องนี้ขึ้นบัญชี (เลือกข้อนี้ถ้าข้อมูลในบัญชีหายไป)\nCancel = ใช้ตามบัญชี (สำเนาของเครื่องนี้เก็บไว้ในเมนู "กู้ข้อมูล")`)) {
+          force(k).then(() => status('เอาข้อมูลเครื่องนี้ขึ้นบัญชีแล้ว ' + hhmm())).catch((e) => { console.warn(e); st[k].err = failMsg(k, e); });
+          return { m: L, more: false, data: false }; } }
+      setBase(k, c); if (cj(m) !== cj(L)) STORES[k].apply(m, isReset); const nd = (o) => cj({ ...o, dev: 0 });
       return { m, more: cj(m) !== cj(c), data: nd(m) !== nd(c) }; };
     const failMsg = (k, e) => e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`;
     /* save = read the account copy, merge, write, all in one transaction, so two devices never overwrite each other */
-    const write = async (k) => { const s = st[k];
-      let fresh = null;
+    /* write this device's copy as it is, with a new epoch (other devices then take it as it is); the account copy it replaces goes to rescue */
+    const force = async (k, epoch = Date.now()) => { const s = st[k]; clearTimeout(s.timer); const L = { ...clean(STORES[k].payload()), epoch, by: { dev: devName, at: epoch } };
+      try { const x = await F.getDoc(s.ref); if (x.exists()) rescue(k, STORES[k].label, strip(x.data()), 'ข้อมูลในบัญชีก่อนถูกเครื่องนี้ทับ'); } catch (e) { /* offline read: the write below fails too */ }
+      await F.setDoc(s.ref, { ...L, updated: F.serverTimestamp() }); s.last = canon(L); setBase(k, L); s.err = null; s.fail = false; s.at = Date.now(); };
+    const write = async (k, allowDrop = false) => { const s = st[k];
+      let fresh = null, guard = null;
       const m = await F.runTransaction(fs, async (tr) => { const x = await tr.get(s.ref); const L = clean(STORES[k].payload());
         if (x.exists() && reset(k, strip(x.data()))) { fresh = x.data(); return null; }
-        const m = x.exists() ? merge3(baseOf(k), L, strip(x.data())) : L; const kb = new Blob([cj(m)]).size / 1024;
+        const m = x.exists() ? merge3(baseOf(k), L, strip(x.data())) : L;
+        if (!allowDrop && x.exists() && big(strip(x.data()), m)) { guard = { c: strip(x.data()), m }; return null; }
+        if (allowDrop) m.drop = { dev: devName, at: Date.now() };
+        const kb = new Blob([cj(m)]).size / 1024;
         if (kb > 950) throw Object.assign(new Error('big'), { code: `ข้อมูล${STORES[k].label}ใหญ่ ${Math.round(kb)} KB เกินที่บัญชีรับได้ (1 MB)` });
         tr.set(s.ref, { ...m, updated: F.serverTimestamp() }); return m; });
       if (fresh) { take(k, fresh); s.err = null; s.fail = false; status('ใช้ข้อมูลจากเครื่องที่สั่งทับ ' + hhmm()); return true; }
+      if (guard) { const lab = STORES[k].label, gone = nrec(guard.c) - nrec(guard.m);
+        if (confirm(`การบันทึกนี้จะลบ${lab}ออกจากบัญชี ${gone} รายการ (เหลือ ${nrec(guard.m)}) ตั้งใจลบใช่ไหม?\n\nOK = ลบ (สำเนาเดิมเก็บไว้ในเมนู "กู้ข้อมูล")\nCancel = ไม่ลบ ดึงข้อมูลจากบัญชีกลับมา`)) {
+          rescue(k, lab, guard.c, 'ข้อมูลในบัญชีก่อนลบหลายรายการ'); return write(k, true); }
+        rescue(k, lab, clean(STORES[k].payload()), 'ข้อมูลในเครื่องตอนยกเลิกการลบ'); setBase(k, guard.c); STORES[k].apply(guard.c, true); status('ไม่ลบ ดึงข้อมูลจากบัญชีกลับมาแล้ว'); return true; }
       s.last = canon(m); setBase(k, m); if (cj(m) !== cj(clean(STORES[k].payload()))) STORES[k].apply(m);
       s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); return true; };
     const push = (k = 'portfolios', now = false) => {
@@ -5418,7 +5461,7 @@ if (FB && window.VGPort) {
       try { await write('portfolios'); r.saved = true; }
       catch (e) { console.warn(e); r.saved = false; r.code = e.code || e.message || 'unknown'; s.fail = true; }
       r.after = window.VGGT ? window.VGGT.get().tx.length : 0; return r; };
-    window.VGSync = { push, pull, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, check, id: () => uidNow.slice(-4).toUpperCase(), state: () => $('a-state').textContent };
+    window.VGSync = { push, pull, force, on: (k = 'portfolios') => !!(st[k] && st[k].ok), who: () => $('a-who').textContent, check, id: () => uidNow.slice(-4).toUpperCase(), state: () => $('a-state').textContent };
     /* a phone app comes back from the background with a sleeping listener, and a failed save stays only on the device:
        on return / reconnect, pull the account copy (merged, never replaced) and retry any failed save */
     let away = 0; const wake = () => { Object.keys(STORES).forEach((k) => { const s = st[k]; if (!s.ok) return; pull(k).catch((e) => console.warn(e)).then(() => { if (s.fail) push(k); }); }); };
@@ -5463,6 +5506,18 @@ if (FB && window.VGPort) {
       const [em] = creds(); if (!em) return msg('ใส่อีเมลก่อน แล้วกด "ลืมรหัสผ่าน" อีกครั้ง', true);
       A.sendPasswordResetEmail(auth, em).then(() => msg('ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว (ดูในจดหมายขยะด้วย)')).catch(say);
     });
+    window.VGRescueDraw = () => { const a = rescues(), box = $('a-rescue'); if (!box) return; box.hidden = !a.length; $('a-rescue-n').textContent = a.length ? `(${a.length})` : '';
+      const L = $('a-rescue-list'); L.replaceChildren(...a.map((r, i) => { const d = document.createElement('div'); d.className = 'a-rescue-row';
+        const t = document.createElement('div'); t.innerHTML = `<b></b><p class="pf-hint"></p>`; t.querySelector('b').textContent = `${r.label} ${r.n} รายการ`;
+        t.querySelector('p').textContent = `${new Date(r.at).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })} · ${r.why}`;
+        const b = document.createElement('button'); b.className = 'btn-line'; b.type = 'button'; b.textContent = 'เอากลับมา'; b.dataset.i = i; d.append(t, b); return d; })); };
+    $('a-rescue-list').addEventListener('click', async (e) => { const b = e.target.closest('button[data-i]'); if (!b) return; const r = rescues()[+b.dataset.i]; if (!r || !STORES[r.k]) return;
+      if (!confirm(`รวม${r.label} ${r.n} รายการจากสำเนานี้กลับเข้ามา? รายการที่มีอยู่แล้วจะไม่ซ้ำ`)) return;
+      const cur = clean(STORES[r.k].payload()), m = merge3(undefined, r.data, cur); const before = nrec(cur);
+      try { localStorage.removeItem(bKey(r.k)); } catch (er) { /* ignore */ }
+      STORES[r.k].apply(m, true); if (st[r.k] && st[r.k].ok) await push(r.k, true).catch(() => {});
+      msg(`กู้${r.label}แล้ว เพิ่มกลับมา ${Math.max(0, nrec(clean(STORES[r.k].payload())) - before)} รายการ`); });
+    window.VGRescueDraw();
     $('a-force').addEventListener('click', async () => {
       const on = Object.keys(STORES).filter((k) => st[k] && st[k].ok && st[k].ref);
       if (!on.length) return msg('ยังไม่ได้เชื่อมบัญชี ล็อกอินก่อน', true);
@@ -5471,18 +5526,19 @@ if (FB && window.VGPort) {
       if (!confirm(`เอาข้อมูลในเครื่องนี้ขึ้นบัญชีแทนของเดิมทั้งหมด\n\n${on.map((k) => `• ${STORES[k].label} ${n(k)} รายการ`).join('\n')}\n\nเครื่องอื่น (เช่นมือถือ) จะถูกเปลี่ยนให้เหมือนเครื่องนี้ รายการที่มีแค่ในเครื่องอื่นจะหายไป ย้อนกลับไม่ได้\nแนะนำให้กดสำรองข้อมูลก่อน ทำต่อไหม?`)) return;
       const epoch = Date.now(); let bad = '';
       for (const k of on) { const s = st[k]; clearTimeout(s.timer);
-        try { const L = { ...clean(STORES[k].payload()), epoch }; await F.setDoc(s.ref, { ...L, updated: F.serverTimestamp() }); s.last = canon(L); setBase(k, L); s.err = null; s.fail = false; }
+        try { await force(k, epoch); }
         catch (e) { console.warn(e); bad += ` ${STORES[k].label} (${e.code || e.message})`; } }
       if (bad) msg('ทับไม่สำเร็จ:' + bad + ' ลองใหม่อีกครั้ง', true);
       else { msg('เอาข้อมูลเครื่องนี้ขึ้นบัญชีแล้ว ' + hhmm() + ' · เปิดแอปในมือถือใหม่ ข้อมูลจะเปลี่ยนตามเครื่องนี้'); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); }
     });
     $('a-out').addEventListener('click', async () => {
-      if (!confirm('ออกจากระบบแล้วข้อมูลจะถูกล้างออกจากเครื่องนี้ (ยังอยู่ในบัญชี ล็อกอินกลับมาจะดึงคืน)\nรายการที่ยังบันทึกขึ้นบัญชีไม่ทันจะหาย ออกจากระบบไหม?')) return;
+      if (!confirm('ออกจากระบบไหม? ข้อมูลยังอยู่ทั้งในเครื่องนี้และในบัญชี')) return;
       for (const k of Object.keys(st)) { if (st[k] && st[k].ok) { try { await write(k); } catch (e) { if (!confirm(`บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ ถ้าออกตอนนี้รายการล่าสุดอาจหาย ออกต่อไหม?`)) return; } } }
       Object.values(st).forEach((s) => clearTimeout(s.timer));
+      /* data stays on the device; the base copies go, so the next sign-in only adds (never reads the device as "deleted everything") */
+      Object.keys(STORES).forEach((k) => { try { localStorage.removeItem(bKey(k)); } catch (e) { /* ignore */ } });
       await A.signOut(auth);
-      Object.values(STORES).forEach((S) => S.empty());
-      msg('ออกจากระบบแล้ว ล้างข้อมูลออกจากเครื่องนี้แล้ว ข้อมูลยังอยู่ในบัญชีครบ');
+      msg('ออกจากระบบแล้ว ข้อมูลยังอยู่ในเครื่องนี้และในบัญชี');
     });
   } catch (e) { console.warn(e); msg('โหลดระบบบัญชีไม่สำเร็จ ยังใช้แบบเก็บในเครื่องได้ตามปกติ', true); }
 }
