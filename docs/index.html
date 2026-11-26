@@ -5394,7 +5394,7 @@ dash.calc('sectors', {
 /* auto-update: GitHub Pages lets phones cache the page ~10 min. build.py writes docs/version.json and BUILD below;
    when they differ, reload once through a fresh URL so the new page shows without a manual refresh. */
 (() => {
-  const BUILD = '3b3aeb1e4f'; window.VG_BUILD = BUILD;
+  const BUILD = '44958de00a'; window.VG_BUILD = BUILD;
   try { const u = new URL(location.href); if (u.searchParams.has('v')) { u.searchParams.delete('v'); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (e) { /* ignore */ }
   const check = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.v || j.v === BUILD) return;
@@ -7763,8 +7763,8 @@ if (FB && window.VGPort) {
       try { const x = await F.getDoc(s.ref); if (x.exists()) rescue(k, STORES[k].label, strip(x.data()), 'ข้อมูลในบัญชีก่อนถูกเครื่องนี้ทับ'); } catch (e) { /* offline read: the write below fails too */ }
       await F.setDoc(s.ref, { ...L, updated: F.serverTimestamp() }); s.last = canon(L); setBase(k, L); s.err = null; s.fail = false; s.at = Date.now(); };
     const write = async (k, allowDrop = false) => { const s = st[k];
-      let fresh = null, guard = null;
-      const m = await F.runTransaction(fs, async (tr) => { const x = await tr.get(s.ref); const L = clean(STORES[k].payload());
+      let fresh = null, guard = null, L0 = null;
+      const m = await F.runTransaction(fs, async (tr) => { const x = await tr.get(s.ref); const L = clean(STORES[k].payload()); L0 = L;
         if (x.exists() && reset(k, strip(x.data()))) { fresh = x.data(); return null; }
         const m = x.exists() ? merge3(baseOf(k), L, strip(x.data())) : L;
         if (!allowDrop && x.exists() && big(strip(x.data()), m)) { guard = { c: strip(x.data()), m }; return null; }
@@ -7777,7 +7777,9 @@ if (FB && window.VGPort) {
         if (confirm(`การบันทึกนี้จะลบ${lab}ออกจากบัญชี ${gone} รายการ (เหลือ ${nrec(guard.m)}) ตั้งใจลบใช่ไหม?\n\nOK = ลบ (สำเนาเดิมเก็บไว้ในเมนู "กู้ข้อมูล")\nCancel = ไม่ลบ ดึงข้อมูลจากบัญชีกลับมา`)) {
           rescue(k, lab, guard.c, 'ข้อมูลในบัญชีก่อนลบหลายรายการ'); return write(k, true); }
         rescue(k, lab, clean(STORES[k].payload()), 'ข้อมูลในเครื่องตอนยกเลิกการลบ'); setBase(k, guard.c); STORES[k].apply(guard.c, true); status('ไม่ลบ ดึงข้อมูลจากบัญชีกลับมาแล้ว'); return true; }
-      s.last = canon(m); setBase(k, m); if (cj(m) !== cj(clean(STORES[k].payload()))) STORES[k].apply(m);
+      /* the save took a moment on the network: anything recorded meanwhile (local now vs L0) is kept, and saved next */
+      s.last = canon(m); setBase(k, m); const Ln = clean(STORES[k].payload()), fin = merge3(L0, Ln, m);
+      if (cj(fin) !== cj(Ln)) STORES[k].apply(fin); if (cj(fin) !== cj(m)) push(k);
       s.err = null; s.fail = false; s.at = Date.now(); status('บันทึกขึ้นบัญชีแล้ว ' + hhmm()); return true; };
     const push = (k = 'portfolios', now = false) => {
       const s = st[k]; if (!s || !s.ref || !s.ok) return Promise.resolve(false); clearTimeout(s.timer); status('กำลังบันทึก…');
@@ -7816,7 +7818,7 @@ if (FB && window.VGPort) {
         s.unsub = F.onSnapshot(s.ref, (x) => {
           if (first) { first = false; return; }
           if (x.metadata.hasPendingWrites || !x.exists()) return;
-          { const d = { ...x.data() }; delete d.updated; if (s.last && canon(d) === s.last) { setBase(k, d); return; } }
+          /* no "own echo" shortcut: an old note of what this device last wrote can match a later account copy while this device has moved on; take() merges an echo to a no-op anyway */
           if (take(k, x.data()).more) push(k); status('อัปเดตจากอีกเครื่องแล้ว ' + hhmm());
         }, (e) => console.warn(e));
         return note;
