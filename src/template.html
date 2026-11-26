@@ -5323,7 +5323,10 @@ if (FB && window.VGPort) {
   const devName = (() => { const u = navigator.userAgent, os = /iPhone|iPad/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac/.test(u) ? 'Mac' : 'เครื่องอื่น';
     const app = window.matchMedia && matchMedia('(display-mode: standalone)').matches ? 'แอพ' : /Edg\//.test(u) ? 'Edge' : /CriOS|Chrome\//.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'เบราว์เซอร์'; return os + ' ' + app; })();
   let devs = {}; window.VGDevs = () => ({ me: devId, all: devs });
-  const mine = () => ({ name: devName, ver: window.VG_BUILD || '', n: window.VGGT ? window.VGGT.get().tx.length : 0, at: Date.now() });
+  /* the time only moves when something in the note changes: a fresh time on every save made two open devices answer each other forever */
+  let mineLast = null;
+  const mine = () => { const v = { name: devName, ver: window.VG_BUILD || '', n: window.VGGT ? window.VGGT.get().tx.length : 0 };
+    if (!mineLast || mineLast.name !== v.name || mineLast.ver !== v.ver || mineLast.n !== v.n) mineLast = { ...v, at: Date.now() }; return mineLast; };
   const STORES = {
     portfolios: {
       label: 'พอร์ต',
@@ -5378,7 +5381,8 @@ if (FB && window.VGPort) {
     const strip = (d) => { const o = { ...(d || {}) }; delete o.updated; return o; };
     /* cloud copy arrived: merge this device's changes in, show the result, remember cloud as the new base; save back if this device added something */
     const take = (k, cloud) => { const c = strip(cloud), L = clean(STORES[k].payload()), m = merge3(baseOf(k), L, c);
-      setBase(k, c); if (cj(m) !== cj(L)) STORES[k].apply(m); return { m, more: cj(m) !== cj(c), extra: Math.max(0, cj(m).length - cj(c).length) }; };
+      setBase(k, c); if (cj(m) !== cj(L)) STORES[k].apply(m); const nd = (o) => cj({ ...o, dev: 0 });
+      return { m, more: cj(m) !== cj(c), data: nd(m) !== nd(c) }; };
     const failMsg = (k, e) => e.code === 'permission-denied' ? denied(k) : `บันทึก${STORES[k].label}ขึ้นบัญชีไม่สำเร็จ (${e.code || e.message || 'ไม่ทราบสาเหตุ'}) ข้อมูลยังอยู่ในเครื่องนี้ จะลองใหม่เอง`;
     /* save = read the account copy, merge, write, all in one transaction, so two devices never overwrite each other */
     const write = async (k) => { const s = st[k];
@@ -5420,7 +5424,7 @@ if (FB && window.VGPort) {
       try {
         const snap = await F.getDoc(s.ref); const loc = S.local(); let note = ''; s.ok = true;
         if (!snap.exists()) { if (loc.has) { await write(k); note = `ย้าย${S.label}ในเครื่องนี้ (${loc.n} รายการ) ขึ้นบัญชีแล้ว`; } }
-        else { const t = take(k, snap.data()); if (t.more) { await write(k); note = `รวมข้อมูล${S.label}ที่มีแค่ในเครื่องนี้เข้ากับบัญชีแล้ว`; } }
+        else { const t = take(k, snap.data()); if (t.more) { await write(k); if (t.data) note = `รวมข้อมูล${S.label}ที่มีแค่ในเครื่องนี้เข้ากับบัญชีแล้ว`; } }
         let first = true; if (k === 'portfolios') setTimeout(() => push('portfolios'), 1500);
         s.unsub = F.onSnapshot(s.ref, (x) => {
           if (first) { first = false; return; }
